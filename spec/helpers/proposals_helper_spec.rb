@@ -49,14 +49,17 @@ RSpec.describe ProposalsHelper, type: :helper do
     let(:proposal) { create :proposal }
     let(:subject_category) { create(:subject_category) }
     let(:subject) { create(:subject, subject_category_id: subject_category.id) }
-    let(:ams_subject) {
-      create(:ams_subject, code: 'code2',
-                           subject_category_ids: subject_category.id,
-                           subject_id: subject.id)
-    }
+    let(:ams_subject) do
+      create(:ams_subject,
+             subject_category_ids: subject_category.id,
+             subject_id: subject.id)
+    end
+    let(:proposal_ams_subject) do
+      create(:proposal_ams_subject, proposal: proposal, ams_subject: ams_subject, code: 'code2')
+    end
 
     before do
-      proposal.ams_subjects << ams_subject
+      proposal.proposal_ams_subjects << proposal_ams_subject
     end
 
     it 'returns id of proposal ams subject with provided code' do

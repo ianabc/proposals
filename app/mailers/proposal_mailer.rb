@@ -16,6 +16,15 @@ class ProposalMailer < ApplicationMailer
     @email_data = params[:email_data]
     email = params[:email]
     @organizer = params[:organizer]
-    mail(to: email, subject: @email_data.subject)
+
+    if params[:cc_email] && params[:bcc_email]
+      mail(to: email, subject: @email_data.subject, cc: params[:cc_email], bcc: params[:bcc_email])
+    elsif params[:cc_email]
+      mail(to: email, subject: @email_data.subject, cc: params[:cc_email])
+    elsif params[:bcc_email]
+      mail(to: email, subject: @email_data.subject, bcc: params[:bcc_email])
+    else
+      mail(to: email, subject: @email_data.subject)
+    end
   end
 end

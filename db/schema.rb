@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_08_16_081629) do
+ActiveRecord::Schema.define(version: 2021_08_17_065547) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -89,6 +89,15 @@ ActiveRecord::Schema.define(version: 2021_08_16_081629) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["person_id"], name: "index_demographic_data_on_person_id"
+  end
+
+  create_table "email_templates", force: :cascade do |t|
+    t.string "title"
+    t.string "subject"
+    t.text "body"
+    t.integer "email_type", default: 0
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "emails", force: :cascade do |t|
