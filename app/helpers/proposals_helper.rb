@@ -43,7 +43,7 @@ module ProposalsHelper
   end
 
   def proposal_ams_subjects_code(proposal, code)
-    proposal.ams_subjects.find_by(code: code)&.id
+    proposal.proposal_ams_subjects.find_by(code: code)&.ams_subject_id
   end
 
   # rubocop:disable Rails/OutputSafety
