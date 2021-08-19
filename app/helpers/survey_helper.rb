@@ -10,10 +10,9 @@ module SurveyHelper
                     %w[Guanajuato Guanajuato], ['Hong Kong', 'Hong Kong'], %w[Hungary Hungary],
                     %w[Iceland Iceland], %w[India India], %w[Indonesia Indonesia], %w[Iran Iran],
                     %w[Iraq Iraq], %w[Israel Israel], %w[Italy Italy], %w[Japan Japan],
-                    %w[London London], %w[Luxembourg Luxembourg], %w[Macau Macau],
-                    %w[Malaysia Malaysia], %w[Mexico Mexico], %w[Morocco Morocco],
-                    %w[Netherlands Netherlands], ['New Zealand', 'New Zealand'], %w[Norway Norway],
-                    %w[Perú Perú], %w[Philippines Philippines], %w[Poland Poland],
+                    %w[Luxembourg Luxembourg], %w[Macau Macau], %w[Malaysia Malaysia], %w[Mexico Mexico],
+                    %w[Morocco Morocco], %w[Netherlands Netherlands], ['New Zealand', 'New Zealand'],
+                    %w[Norway Norway], %w[Perú Perú], %w[Philippines Philippines], %w[Poland Poland],
                     %w[Portugal Portugal], %w[Romania Romania], %w[Russia Russia],
                     ['Saudi Arabia', 'Saudi Arabia'], ['Sierra Leone', 'Sierra Leo'], %w[Singapore Singapore],
                     %w[Slovakia Slovakia], %w[Slovenia Slovenia], ['South Korea', 'South Korea'],
@@ -26,35 +25,24 @@ module SurveyHelper
   end
 
   def ethnicity_options
-    ethnicity = [['African/Black (including African-American, African-Canadian, AfroCaribbean, etc.)',
-                  'African/Black (including African-American, African-Canadian, AfroCaribbean, etc.)'],
-                 %w[Arab Arab], ['East Asian', 'East Asian'], ['European/non-white', 'European/non-white'],
-                 ['European/white', 'European/white'], ['Filipina/Filipino', 'Filipina/Filipino'],
-                 ['Indigenous from within North America', 'Indigenous from within North America'],
-                 ['Indigenous from outside North America', 'Indigenous from outside North America'],
-                 ['Latin, South, or Central American', 'Latin, South, or Central American'],
-                 ['South Asian (including Indian sub-continent, Indo-Caribbean,
-                    Indo-African, Indo-Fijian, West-Indian)',
-                  'South Asian (including Indian sub-continent, Indo-Caribbean,
-                    Indo-African, Indo-Fijian, West-Indian)'],
-                 ['Southeast Asian (including Brunei, Burma, Cambodia, Timor-Leste, Indonesia, Laos, Malaysia,
-                    the Philippines, Singapore, Thailand and Vietnam)',
-                  'Southeast Asian (including Brunei, Burma, Cambodia, Timor-Leste, Indonesia, Laos, Malaysia,
-                    the Philippines, Singapore, Thailand and Vietnam)'],
-                 ['West Asian (including Afghanistan, Armenia, Azerbaijan, Bahrain, Cyprus, Gaza Strip, Georgia, Iran,
-                    Iraq, Israel, Jordan, Kuwait, Lebanon, Oman, Qatar, Saudi Arabia, Syrian Arab Republic, Turkey,
-                    United Arab Emirates, West Bank and Yemen)',
-                  'West Asian (including Afghanistan, Armenia, Azerbaijan, Bahrain, Cyprus, Gaza Strip, Georgia, Iran,
-                    Iraq, Israel, Jordan, Kuwait, Lebanon, Oman, Qatar, Saudi Arabia, Syrian Arab Republic, Turkey,
-                    United Arab Emirates, West Bank and Yemen)'],
-                 %w[Other Other], ['Prefer not to answer', 'Prefer not to answer']]
+    ethnicity = [%w[Arab Arab], %w[Black Black], %w[Chinese Chinese], %w[Filipino Filipino],
+                 ['Indigenous (within North America)', 'Indigenous (within North America)'],
+                 %w[Japanese Japanese], %w[Korean Korean], ['Latin American', 'Latin American'],
+                 ['South Asian (e.g., Indian, Pakistani, Sri Lankan)',
+                  'South Asian (e.g., Indian, Pakistani, Sri Lankan)'],
+                 ['Southeast Asian (e.g., Vietnamese, Cambodian, Laotian, Thai)',
+                  'Southeast Asian (e.g., Vietnamese, Cambodian, Laotian, Thai)'],
+                 ['West Asian (e.g., Iranian, Afghan)', 'West Asian (e.g., Iranian, Afghan)'],
+                 %w[White White], %w[Other Other],
+                 ['Prefer not to answer [Please note: If you choose this response, none of your other
+                  responses to this question will be considered in the data analysis.]', 'Prefer not to answer']]
     ethnicity.map { |disp, _value| disp }
   end
   # rubocop:enable Metrics/MethodLength
 
   def gender_options
-    gender = [%w[Female Female], %w[Male Male], ['Gender Fluid and/or non-Binary Person',
-                                                 'Gender Fluid and/or non-Binary Person'], %w[Other Other],
+    gender = [%w[Woman Woman], %w[Man Man], ['Gender Fluid and/or non-Binary Person',
+                                             'Gender Fluid and/or non-Binary Person'], %w[Other Other],
               ['Prefer not to answer', 'Prefer not to answer']]
     gender.map { |disp, _value| disp }
   end
