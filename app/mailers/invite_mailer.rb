@@ -1,11 +1,12 @@
 class InviteMailer < ApplicationMailer
   def invite_email
     @invite = params[:invite]
+    @lead_organizer = params[:lead_organizer]
 
     @proposal = @invite.proposal
     @person = @invite.person
 
-    mail(to: @person.email, subject: "BIRS Proposal: Invite for #{@invite.invited_as?}")
+    mail(to: @person.email, subject: "BIRS Proposal: Invite for #{@invite.invited_as?}", cc: @lead_organizer.email)
   end
 
   def invite_acceptance
