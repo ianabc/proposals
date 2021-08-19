@@ -90,7 +90,7 @@ class InvitesController < ApplicationController
 
   def send_invite_emails
     @inviters.each do |invite|
-      InviteMailer.with(invite: invite).invite_email.deliver_later
+      InviteMailer.with(invite: invite, lead_organizer: @proposal.lead_organizer).invite_email.deliver_later
     end
   end
 
