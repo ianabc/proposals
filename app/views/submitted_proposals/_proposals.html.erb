@@ -9,6 +9,7 @@
       <th>Preferred Location</th>
       <th>Status</th>
       <th width="125">Updated</th>
+      <th>Submitted to EditFlow</th>
       <th>Actions</th>
     </tr>
   </thead>
@@ -29,6 +30,7 @@
         <%= proposal.status&.split('_')&.map(&:capitalize)&.join(' ') %>
       </td>
       <td><%= proposal.updated_at.to_date %></td>
+      <td><%= proposal.edit_flow %></td>
       <td class="table-action">
         <%= link_to '<i class="align-middle fas fa-fw fa-print"></i>PDF'.html_safe, rendered_proposal_proposal_path(proposal.id, :format => :pdf), target: '_blank' %>
         <%= link_to '<i class="align-middle fas fa-fw fa-eye"></i>Show'.html_safe, submitted_proposal_url(proposal) %>

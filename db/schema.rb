@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_08_17_065547) do
+ActiveRecord::Schema.define(version: 2021_08_18_131030) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -346,6 +346,7 @@ ActiveRecord::Schema.define(version: 2021_08_17_065547) do
     t.boolean "no_latex", default: false
     t.text "preamble"
     t.text "bibliography"
+    t.datetime "edit_flow"
     t.index ["code"], name: "index_proposals_on_code", unique: true
     t.index ["proposal_form_id"], name: "index_proposals_on_proposal_form_id"
     t.index ["proposal_type_id"], name: "index_proposals_on_proposal_type_id"
