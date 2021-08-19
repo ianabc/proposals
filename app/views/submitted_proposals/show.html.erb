@@ -194,6 +194,7 @@
                       <div class="mb-3">
                         <%= label_tag :location, "Select your preferred location for this event:", class: 'form-label lead' %>
                         <%= select_tag "locations", options_for_select(proposal_type_locations(@proposal.proposal_type), location_in_answers(@proposal)), include_blank: '', data: {proposal_type: @proposal&.proposal_type&.id, 'submit-proposals-target': 'locationIds',action: 'change->submit-proposals#handleLocationChange'}, disabled: action, class: 'form-select w-50', multiple: true, name: 'location_ids[]' %>
+                        <div data-submit-proposals-target="dragLocations" class="ms-5"></div>
                       </div>
                       <div data-submit-proposals-target='locationSpecificQuestions'></div>
 

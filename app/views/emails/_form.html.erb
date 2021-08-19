@@ -1,4 +1,4 @@
-<div>
+<div data-controller="submitted-proposals">
   <%= form_with(url: send_emails_submitted_proposal_url(@proposal), method: :post) do |f| %>
     <div class="mb-3">
       <h2>Email Organizers</h2>
@@ -6,16 +6,33 @@
         The "Request proposal revision" option will indicate in the database that
         a revision has been requested.</p>
       <div class="mb-3">
+        <h4>Email Addresses of Organizers</h4>
+        <div class="mb-3">
+          <p><%= @proposal.lead_organizer.email %></p>
+          <p><%= organizers_email(@proposal) %></p>
+        </div>
+      </div>
+      <div class="mb-3">
+        <%= check_box_tag :cc %>
+        <label>CC</label>
+        <%= text_field_tag :cc_email %>
+      </div>
+      <div class="mb-3">
+        <%= check_box_tag :bcc %>
+        <label>BCC</label>
+        <%= text_field_tag :bcc_email %>
+      </div>
+      <div class="mb-3">
         <%= f.label :subject, class: 'form-label' %>
-        <%= f.text_field :subject, class: 'form-control' %>
+        <%= f.text_field :subject, class: 'form-control w-50', id: 'subject' %>
+      </div>
+      <div class="mb-3">
+        <label class='form-label'>Template</label>
+        <%= select_tag :templates, options_for_select(name_of_templates), include_blank: '', class: 'form-select w-25', data: {'action': 'click->submitted-proposals#emailTemplate', 'submitted-proposals-target': 'template'} %>
       </div>
       <div class="mb-3">
         <%= f.label :body, class: 'form-label' %>
-        <%= f.text_area(:body, required: true, size: '3x5', class:'form-control') %>
-      </div>
-      <div class="mb-3">
-        <%= f.check_box :revision %>
-        <%= f.label 'Request proposal revision', class: 'form-label' %>
+        <%= f.text_area(:body, required: true, size: '3x5', class:'form-control', id:'body') %>
       </div>
       <div class="text-end m-3">
         <%= f.submit "Submit", class:  'btn btn-primary' %>

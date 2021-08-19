@@ -1,0 +1,41 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Email Templates
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %> </a></li>
+          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Email Templates", email_templates_path %></li>
+          <li class="breadcrumb-item active" aria-current="page">Show</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h2>Template Title: <em><%= @email_template.title.capitalize %></em></h2>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <h4>Email Type: </h4>
+              <label class="form-control"> <%= @email_template.email_type.split('_').map(&:capitalize).join(' ') %> </label>
+            </div>
+
+            <div class="mb-3">
+              <h4>Subject: </h4>
+              <label class="form-control"> <%= @email_template.subject %> </label>
+            </div>
+
+            <div class="mb-3">
+              <h4>Body: </h4>
+              <label class="form-control"> <%= @email_template.body %> </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

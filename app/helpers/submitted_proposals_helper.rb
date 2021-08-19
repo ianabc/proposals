@@ -89,4 +89,8 @@ module SubmittedProposalsHelper
     data = submitted_stem_graph_data(proposals)
     data.values
   end
+
+  def organizers_email(proposal)
+    proposal.invites.where(invited_as: 'Organizer').map(&:person).map(&:email).join(', ')
+  end
 end

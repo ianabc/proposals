@@ -2,13 +2,7 @@ class Email < ApplicationRecord
   validates :subject, :body, presence: true
   belongs_to :proposal
 
-  def initialize(params)
-    super
-    self.proposal = Proposal.find(params[:proposal_id])
-    update_status if params[:revision].to_i == 1
-  end
-
-  def update_status
+  def update_status(proposal)
     proposal.update(status: 'revision_requested')
     version = Answer.maximum(:version).to_i
     answers = Answer.where(proposal_id: proposal.id, version: version)
@@ -20,20 +14,20 @@ class Email < ApplicationRecord
     end
   end
 
-  def email_organizers
+  def email_organizers(cc_email, bcc_email)
     proposal_mailer(proposal.lead_organizer.email,
-                    proposal.lead_organizer.fullname)
+                    proposal.lead_organizer.fullname, cc_email, bcc_email)
 
     proposal.invites.where(invited_as: 'Organizer')&.each do |organizer|
-      proposal_mailer(organizer.email, organizer.person.fullname)
+      proposal_mailer(organizer.email, organizer.person.fullname, cc_email, bcc_email)
     end
   end
 
   private
 
-  def proposal_mailer(email_address, organizer_name)
+  def proposal_mailer(email_address, organizer_name, cc_email, bcc_email)
     ProposalMailer.with(email_data: self, email: email_address,
-                        organizer: organizer_name)
+                        organizer: organizer_name, cc_email: cc_email, bcc_email: bcc_email)
                   .staff_send_emails.deliver_later
   end
 end

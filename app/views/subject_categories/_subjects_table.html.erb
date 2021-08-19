@@ -10,13 +10,14 @@
     <% subjects&.each do |subject| %>
       <tr>
         <td><%= subject.code %></td>
-        <td><%= subject.title %></td>
         <% if subject_area %>
+          <td><%= subject.title %></td>
           <td class="table-action">
             <%= link_to '<i class="align-middle fas fa-fw fa-pen"></i>Edit'.html_safe, edit_subject_category_subject_path(@subject_category,subject) %>
             <%= link_to '<i class="align-middle fas fa-fw fa-trash" data-toggle="tooltip" title="Delete" ></i>Delete'.html_safe, subject_category_subject_url(@subject_category,subject), method: :delete , data: {confirm: "Are you sure you want to delete this subject?"} %>
           </td>
         <% else %>
+          <td><%= ams_subject_title(subject) %></td>
           <td class="table-action">
             <%= link_to '<i class="align-middle fas fa-fw fa-pen"></i>Edit'.html_safe, edit_subject_category_ams_subject_path(@subject_category,subject) %>
             <%= link_to '<i class="align-middle fas fa-fw fa-trash" data-toggle="tooltip" title="Delete" ></i>Delete'.html_safe, subject_category_ams_subject_url(@subject_category,subject), method: :delete , data: {confirm: "Are you sure you want to delete this ams subject?"} %>

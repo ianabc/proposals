@@ -117,4 +117,12 @@ Rails.application.routes.draw do
     resources :subjects
     resources :ams_subjects
   end
+
+  resources :emails do
+    collection do
+      patch :email_template
+    end
+  end
+
+  resources :email_templates
 end

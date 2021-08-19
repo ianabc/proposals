@@ -38,8 +38,4 @@ module ApplicationHelper
   def faq_menu
     return 'active' if request.path.in?(['/faqs/new'])
   end
-
-  def subject_category_menu
-    return 'active' if request.path.in?(['/subject_categories/new'])
-  end
 end

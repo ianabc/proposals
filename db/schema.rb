@@ -91,6 +91,15 @@ ActiveRecord::Schema.define(version: 2021_08_18_131030) do
     t.index ["person_id"], name: "index_demographic_data_on_person_id"
   end
 
+  create_table "email_templates", force: :cascade do |t|
+    t.string "title"
+    t.string "subject"
+    t.text "body"
+    t.integer "email_type", default: 0
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "emails", force: :cascade do |t|
     t.string "subject"
     t.text "body"

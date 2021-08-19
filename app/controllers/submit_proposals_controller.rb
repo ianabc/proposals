@@ -6,7 +6,7 @@ class SubmitProposalsController < ApplicationController
 
   def create
     @proposal.update(proposal_params)
-    update_ams_subject_code
+    update_proposal_ams_subject_code
     submission = SubmitProposalService.new(@proposal, params)
     submission.save_answers
     session[:is_submission] = @proposal.is_submission = submission.is_final?
@@ -105,9 +105,9 @@ class SubmitProposalsController < ApplicationController
     [@code1, @code2]
   end
 
-  def update_ams_subject_code
-    @proposal.ams_subjects.where(id: @code1)&.update(code: 'code1')
-    @proposal.ams_subjects.where(id: @code2)&.update(code: 'code2')
+  def update_proposal_ams_subject_code
+    ProposalAmsSubject.create!(ams_subject_id: @code1, proposal: @proposal, code: 'code1')
+    ProposalAmsSubject.create!(ams_subject_id: @code2, proposal: @proposal, code: 'code2')
   end
 
   def invite_params(invite)
