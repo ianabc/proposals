@@ -42,8 +42,12 @@ class SubmittedProposalsController < ApplicationController
     return unless @ability.can?(:manage, Email)
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
+    @email.update_status(@proposal) if params[:templates].split(':').first == "Revision"
+    bcc_email = params[:bcc_email] if params[:bcc_email] && params[:bcc]
+    cc_email = params[:cc_email] if params[:cc_email] && params[:cc]
+
     if @email.save
-      @email.email_organizers
+      @email.email_organizers(cc_email, bcc_email)
       redirect_to submitted_proposal_url(@proposal),
                   notice: "Sent email to proposal organizers."
     else
