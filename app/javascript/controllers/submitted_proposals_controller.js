@@ -29,7 +29,7 @@ export default class extends Controller {
         url,
         type: "PATCH",
         data,
-        success: function(data){
+        success: (data) => {
           $('#subject').val(data.email_template.subject)
           $('#body').val(data.email_template.body)
         }
