@@ -1,7 +1,7 @@
 Dear <%= @person&.fullname %>:
 
 Thank you for indicating your interest in becoming a <%= @invite.invited_as?.downcase %> for the proposed workshop titled, "<%= @proposal.title %>", which is currently being organized by
-<%= @proposal.lead_organizer&.fullname %><%= @existing_co_organizers %>.
+<%= @proposal.lead_organizer&.fullname %><%= @existing_organizers %>.
 The organizing committee will be in touch regarding future steps if the proposal is successful.
 
 We also sent you an email with a link to confirm that we have your correct email address, and we ask that you answer some questions, which should take no more than 5 minutes to complete.

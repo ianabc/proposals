@@ -19,26 +19,8 @@
               
               <div class="row">
                 <div class="col-xs-6 col-md-3">
-                  <label class="form-label">First Name</label><br>
-                  <input type="search" class="form-control" name="firstname" placeholder="Enter First Name" value="<%= params[:firstname] %>">
-                </div>
-                <div class="col-xs-6 col-md-3">
-                  <label class="form-label">Last Name</label><br>
-                    <input type="search" class="form-control" name="lastname" placeholder="Enter Last Name" value="<%= params[:lastname] %>">
-                </div>
-                <div class="col-xs-6 col-md-3">
                   <label class="form-label">Keywords</label><br>
                   <input type="search" class="form-control" name="keywords" placeholder="Enter Keywords" value="<%= params[:keywords] %>">
-                </div>
-                <div class="col-xs-6 col-md-3">
-                  <label class="form-label">Workshop Year</label><br>
-                  <%= select_tag "workshop_year", options_for_select([[2021, 2021], [2022, 2022], [2023,2023], [2024, 2024], [2025, 2025], [2026, 2026], [2027, 2027], [2028, 2028], [2029, 2029]], params[:workshop_year]), { include_blank: '', class: 'form-control mb-3 p-1', style: 'width: 116px;'}%>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-xs-6 col-md-6">
-                  <label class="form-label">Subject Area</label><br>
-                  <%= select_tag "subject_area", options_for_select(subjects_area, params[:subject_area]), { include_blank: '', class: 'form-control p-1' }%>
                 </div>
                 <div class="col-xs-6 col-md-3">
                   <label class="form-label">Proposal Type</label><br>
@@ -48,9 +30,19 @@
                   <label class="form-label">Status</label><br>
                   <%= select_tag :status, options_for_select(all_statuses, params[:status]), { include_blank: '', class: 'form-control p-1' } %>
                 </div>
+                <div class="col-xs-6 col-md-3">
+                  <label class="form-label">Workshop Year</label><br>
+                  <%= select_tag "workshop_year", options_for_select([[2021, 2021], [2022, 2022], [2023,2023], [2024, 2024], [2025, 2025], [2026, 2026], [2027, 2027], [2028, 2028], [2029, 2029]], params[:workshop_year]), { include_blank: '', class: 'form-select mb-3 p-1', style: 'width: 116px;'}%>
+                </div>
               </div>
-              <div class="text-end m-4">
+              <div class="row">
+                <div class="col-xs-6 col-md-6">
+                  <label class="form-label">Subject Area</label><br>
+                  <%= select_tag "subject_area", options_for_select(subjects_area, params[:subject_area]), { include_blank: '', class: 'form-select p-1' }%>
+                </div>
+                <div class="text-end col-xs-6 col-md-6">
                   <button class="btn btn-primary">Search</button>
+                </div>
               </div>
             </form>
           </div>

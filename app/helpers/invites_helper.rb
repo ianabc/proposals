@@ -9,7 +9,8 @@ module InvitesHelper
 
   def max_invitations(proposal, invited_as)
     max_invitations = Proposal.no_of_participants(proposal.id, invited_as).count
-    max_invitations < proposal.proposal_type[invited_as.downcase.split.join('_')]
+    invited_as = invited_as == 'Participant' ? invited_as.downcase : 'co_organizer'
+    max_invitations < proposal.proposal_type[invited_as]
   end
 
   def invited_role(invited)

@@ -127,7 +127,7 @@
                             <%= organizer_intro(@proposal) %>
                             <% if @proposal.invites %>
                               <% @proposal.invites.each do |invite|%>
-                                <% if invite.invited_as == 'Co Organizer' %>
+                                <% if invite.invited_as == 'Organizer' %>
                                   <%= render partial: 'proposals/organizer', locals: { invite: invite } %>
                                 <% end %>
                               <% end %>
@@ -156,6 +156,24 @@
                       <div class="mb-3">
                         <p><%= @proposal.proposal_form.introduction2&.html_safe %></p>
                       </div>
+                      <div>
+                        <h3>LaTeX Preamble</h3>
+                        <p>If you have custom LaTeX macros, enter them here to add them to the document preamble.</p>
+                        <div class="form-group mb-2">
+                          <textarea cols="100" rows="5" class="form-control" name="preamble" disabled=true>
+                             <%= @proposal.preamble %>
+                           </textarea>
+                        </div>
+                      </div>
+                      <div class="form-group mb-3">
+                        <h3>Bibliography</h3>
+                        <p>If you have a LaTeX bibliography, please enter it in this field. It will be included when you click the "Print Proposal" button.</p>
+                        <div class="form-group mb-2">
+                          <textarea cols="100" rows="5" class="form-control" name="bibliography" disabled=true>
+                            <%= @proposal.bibliography %>
+                          </textarea>
+                        </div>
+                      </div>
                       <!-- <h4 class="tab-title">Common Fields</h4> -->
                       <%= render partial: 'proposal_forms/proposal_fields', locals: { proposal_fields: common_proposal_fields(@proposal) } %>
 
@@ -176,6 +194,7 @@
                       <div class="mb-3">
                         <%= label_tag :location, "Select your preferred location for this event:", class: 'form-label lead' %>
                         <%= select_tag "locations", options_for_select(proposal_type_locations(@proposal.proposal_type), location_in_answers(@proposal)), include_blank: '', data: {proposal_type: @proposal&.proposal_type&.id, 'submit-proposals-target': 'locationIds',action: 'change->submit-proposals#handleLocationChange'}, disabled: action, class: 'form-select w-50', multiple: true, name: 'location_ids[]' %>
+                        <div data-submit-proposals-target="dragLocations" class="ms-5"></div>
                       </div>
                       <div data-submit-proposals-target='locationSpecificQuestions'></div>
 

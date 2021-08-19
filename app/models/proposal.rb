@@ -81,13 +81,13 @@ class Proposal < ApplicationRecord
     locations.pluck(:name).join(', ')
   end
 
-  def list_of_co_organizers
-    invites.where(invites: { invited_as: 'Co Organizer' }).map(&:person)
+  def list_of_organizers
+    invites.where(invites: { invited_as: 'Organizer' }).map(&:person)
            .map(&:fullname).join(', ')
   end
 
   def supporting_organizers
-    invites.where(invited_as: 'Co Organizer').where(response: %w[yes maybe])
+    invites.where(invited_as: 'Organizer').where(response: %w[yes maybe])
   end
 
   def participants

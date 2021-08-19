@@ -6,4 +6,6 @@ class Role < ApplicationRecord
   has_many :users, through: :user_roles
   has_many :role_privileges, dependent: :destroy
   has_many :proposal_roles, dependent: :destroy
+
+  accepts_nested_attributes_for :role_privileges, reject_if: :all_blank, allow_destroy: true
 end

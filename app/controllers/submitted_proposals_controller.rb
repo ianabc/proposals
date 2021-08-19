@@ -42,8 +42,12 @@ class SubmittedProposalsController < ApplicationController
     return unless @ability.can?(:manage, Email)
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
+    @email.update_status(@proposal) if params[:templates].split(':').first == "Revision"
+    bcc_email = params[:bcc_email] if params[:bcc_email] && params[:bcc]
+    cc_email = params[:cc_email] if params[:cc_email] && params[:cc]
+
     if @email.save
-      @email.email_organizers
+      @email.email_organizers(cc_email, bcc_email)
       redirect_to submitted_proposal_url(@proposal),
                   notice: "Sent email to proposal organizers."
     else
@@ -103,7 +107,7 @@ class SubmittedProposalsController < ApplicationController
                                 inline: prop_pdf.to_s, formats: [:pdf]
 
     @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
-    File.open(@pdf_path, 'w:binary') do |file|
+    File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
   end
@@ -111,10 +115,10 @@ class SubmittedProposalsController < ApplicationController
   def post_to_editflow
     create_pdf_file
 
-    query = EditFlowService.new(@proposal).query
+    query_edit_flow = EditFlowService.new(@proposal).query
 
     response = RestClient.post ENV['EDITFLOW_API_URL'],
-                               { query: query, fileMain: File.open(@pdf_path) },
+                               { query: query_edit_flow, fileMain: File.open(@pdf_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
     puts response
 
@@ -125,6 +129,7 @@ class SubmittedProposalsController < ApplicationController
       flash[:alert] = "Error sending data!"
     else
       flash[:notice] = "Data sent to EditFlow!"
+      @proposal.update(edit_flow: Time.zone.now)
     end
   end
 

@@ -1,5 +1,5 @@
 namespace :birs do
-  task :default => 'birs:birs_subjects'
+  task default: 'birs:birs_subjects'
 
   desc "Add BIRS Subjects to database"
   task birs_subjects: :environment do
@@ -70,7 +70,6 @@ namespace :birs do
 
   desc "Add AMS Subjects to database"
   task ams_subjects: :environment do
-
     ams_subject_codes = [
       { code: "00-XX", title: "00 General" },
       { code: "01-XX", title: "01 History and biography" },
@@ -135,7 +134,7 @@ namespace :birs do
       { code: "93-XX", title: "93 Systems theory; control" },
       { code: "94-XX", title: "94 Information and communication, circuits" },
       { code: "97-XX", title: "97 Mathematics education" },
-      { code: "99-XX", title: "99 Other" },
+      { code: "99-XX", title: "99 Other" }
     ]
 
     ams_subject_codes.each do |ams_subject|
@@ -147,16 +146,37 @@ namespace :birs do
 
   desc "Add New Subjects to database"
   task new_subjects: :environment do
-
     new_subjects = [
       { code: "MML", title: "Mathematical Logic" },
       { code: "CE", title: "Commercialization and Entrepreneurship" }
     ]
-    
+
     category = SubjectCategory.find_or_create_by!(name: 'none')
     new_subjects.each do |subject|
       puts "Adding new subject: #{subject[:code]} => #{subject[:title]}"
       Subject.create(code: subject[:code], title: subject[:title], subject_category: category)
+    end
+  end
+
+  desc "Update Ams Subjects database"
+  task update_ams_subjects: :environment do
+    Proposal.all.each do |proposal|
+      next if proposal.ams_subjects.first.nil?
+
+      proposal.ams_subjects.each do |subject|
+        case subject.code
+        when 'code1'
+          first_code = subject.title.split.first
+          first_code += "-XX"
+          subject.update(code: first_code)
+          ProposalAmsSubject.create!(ams_subject: subject, proposal: proposal, code: 'code1')
+        when 'code2'
+          first_code = subject.title.split.first
+          first_code += "-XX"
+          subject.update(code: first_code)
+          ProposalAmsSubject.create!(ams_subject: subject, proposal: proposal, code: 'code2')
+        end
+      end
     end
   end
 end

@@ -4,16 +4,16 @@
       <label class="required" for="firstname">First Name</label>
       <input type="text" name="invites_attributes[NEW_RECORD][firstname]"
         class="form-control" 
-        id="<%=  invite_role(invited_as) %>_firstname"
-        data-role="<%= invite_role(invited_as) %>"
+        id="<%=  invited_as.downcase %>_firstname"
+        data-role="<%= invited_as.downcase %>"
         data-action="change->proposal-form#disableOtherInvites"
       >
     </div>
     <div class="mb-3 col-md-6">
       <label for="lastname" class="required">Last Name</label>
       <input type="text" name="invites_attributes[NEW_RECORD][lastname]" 
-        class="form-control" id="<%=  invite_role(invited_as) %>_lastname"
-        data-role="<%= invite_role(invited_as) %>"
+        class="form-control" id="<%=  invited_as.downcase %>_lastname"
+        data-role="<%= invited_as.downcase %>"
         data-action="change->proposal-form#disableOtherInvites"
       >
     </div>
@@ -23,15 +23,15 @@
     <div class="mb-3 col-md-6">
       <label for="email" class="required">Email</label>
       <input type="email" name="invites_attributes[NEW_RECORD][email]" 
-        class="form-control" id="<%=  invite_role(invited_as) %>_email"
-        data-role="<%= invite_role(invited_as) %>"
+        class="form-control" id="<%=  invited_as.downcase %>_email"
+        data-role="<%= invited_as.downcase %>"
         data-action="change->proposal-form#disableOtherInvites"
       >
     </div>
     <div class="mb-3 col-md-6">
       <label for="deadline" class="required">Deadline for reply</label>
       <input type="date" name="invites_attributes[NEW_RECORD][deadline_date]" 
-        class="form-control" id="<%= invite_role(invited_as) %>_deadline"
+        class="form-control" id="<%= invited_as.downcase %>_deadline"
         value="<%= date %>"
         data-action="click->proposal-form#presentDate"
       >
@@ -39,8 +39,8 @@
   </div>
 
   <input type="hidden" name="invites_attributes[NEW_RECORD][invited_as]" 
-    value="<%= invited_as %>" id="<%= invite_role(invited_as) %>_invited_as"
-    data-role="<%= invite_role(invited_as) %>"
+    value="<%= invited_as %>" id="<%= invited_as.downcase %>_invited_as"
+    data-role="<%= invited_as.downcase %>"
     data-action="change->proposal-form#disableOtherInvites"
   >
 </div>

@@ -5,7 +5,7 @@
   <body>
     <p>Dear <%= @person&.fullname %>:</p>
     <p>
-      This is a friendly reminder to indicate your interest in being a supporting organizer for a proposed <%= @proposal.proposal_type.name %> titled “<%= @proposal.title %>”, which is currently being organized by <%= @proposal.lead_organizer&.fullname %><%= @existing_co_organizers %>. If successful, the program would take place at some time during the 2023 calendar year.
+      This is a friendly reminder to indicate your interest in being a supporting organizer for a proposed <%= @proposal.proposal_type.name %> titled “<%= @proposal.title %>”, which is currently being organized by <%= @proposal.lead_organizer&.fullname %><%= @existing_organizers %>. If successful, the program would take place at some time during the 2023 calendar year.
     </p>
     <p>
       Please click through on the following link to indicate your interest by <%= @invite.deadline_date.to_date %>.

@@ -43,7 +43,7 @@ module ProposalsHelper
   end
 
   def proposal_ams_subjects_code(proposal, code)
-    proposal.ams_subjects.find_by(code: code)&.id
+    proposal.proposal_ams_subjects.find_by(code: code)&.ams_subject_id
   end
 
   # rubocop:disable Rails/OutputSafety
@@ -63,10 +63,10 @@ module ProposalsHelper
   end
   # rubocop:enable Rails/OutputSafety
 
-  def existing_co_organizers(invite)
-    co_organizers = invite.proposal.list_of_co_organizers.remove(invite.person&.fullname)
-    co_organizers.prepend(" and ") if co_organizers.present?
-    co_organizers.strip.delete_suffix(",")
+  def existing_organizers(invite)
+    organizers = invite.proposal.list_of_organizers.remove(invite.person&.fullname)
+    organizers.prepend(" and ") if organizers.present?
+    organizers.strip.delete_suffix(",")
   end
 
   def invite_status(response, status)
@@ -195,9 +195,5 @@ module ProposalsHelper
   def stem_values(proposal)
     data = stem_graph_data(proposal)
     data.values
-  end
-
-  def invite_role(invited_as)
-    invited_as == 'Co Organizer' ? 'organizer' : 'participant'
   end
 end

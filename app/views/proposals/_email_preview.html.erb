@@ -5,7 +5,8 @@
         <h5 class="modal-title"><%= "BIRS Proposal: Invite for " %><span id="invited_as_title"></span></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body m-3">
+      <div class="modal-body">
+        <p>CC: <%= @proposal.lead_organizer.email %></p>
         <h1>Dear < Firstname Lastname></h1>
           <p>
           <%= @proposal.lead_organizer&.fullname %> is putting together a proposal for a <%= @proposal.proposal_type.name %> titled "<%= @proposal.title %>" for submission to the Banff International Research Station. If successful, the program would take place at some time during the 2023 calendar year.
@@ -22,7 +23,7 @@
             and the organizing committee.</p>
       </div>
       <div class="modal-footer" data-controller="nested-invites">
-        <button data-action="click->nested-invites#sendInvite" data-id="<%= @proposal.id %>" class="btn btn-secondary" data-organizer="<%= no_of_participants(@proposal.id, 'Co Organizer').last&.id %>"
+        <button data-action="click->nested-invites#sendInvite" data-id="<%= @proposal.id %>" class="btn btn-secondary" data-organizer="<%= no_of_participants(@proposal.id, 'Organizer').last&.id %>"
         data-participant="<%= no_of_participants(@proposal.id, 'Participant').last&.id %>">Send Invitation</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>

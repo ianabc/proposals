@@ -1,20 +1,21 @@
 class InviteMailer < ApplicationMailer
   def invite_email
     @invite = params[:invite]
+    @lead_organizer = params[:lead_organizer]
 
     @proposal = @invite.proposal
     @person = @invite.person
 
-    mail(to: @person.email, subject: "BIRS Proposal: Invite for #{@invite.invited_as?}")
+    mail(to: @person.email, subject: "BIRS Proposal: Invite for #{@invite.invited_as?}", cc: @lead_organizer.email)
   end
 
   def invite_acceptance
     @invite = params[:invite]
-    @existing_co_organizers = params[:co_organizers]
+    @existing_organizers = params[:organizers]
 
-    @existing_co_organizers.prepend(", ") if @existing_co_organizers.present?
-    @existing_co_organizers = @existing_co_organizers.strip.delete_suffix(",")
-    @existing_co_organizers = @existing_co_organizers.sub(/.*\K,/, ' and') if @existing_co_organizers.present?
+    @existing_organizers.prepend(", ") if @existing_organizers.present?
+    @existing_organizers = @existing_organizers.strip.delete_suffix(",")
+    @existing_organizers = @existing_organizers.sub(/.*\K,/, ' and') if @existing_organizers.present?
     @proposal = @invite.proposal
     @person = @invite.person
 
@@ -31,10 +32,10 @@ class InviteMailer < ApplicationMailer
 
   def invite_reminder
     @invite = params[:invite]
-    @existing_co_organizers = params[:co_organizers]
+    @existing_organizers = params[:organizers]
 
-    @existing_co_organizers.prepend(", ") if @existing_co_organizers.present?
-    @existing_co_organizers = @existing_co_organizers.sub(/.*\K,/, ' and') if @existing_co_organizers.present?
+    @existing_organizers.prepend(", ") if @existing_organizers.present?
+    @existing_organizers = @existing_organizers.sub(/.*\K,/, ' and') if @existing_organizers.present?
     @proposal = @invite.proposal
     @person = @invite.person
 

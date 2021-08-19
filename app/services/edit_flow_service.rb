@@ -7,9 +7,10 @@ class EditFlowService
 
   def query
     @country_code = Country.find_country_by_name(proposal.lead_organizer.country)
-    @co_organizers = proposal.invites.where(invited_as: 'Co Organizer')
-    @country_code_organizers = Country.find_country_by_name(@co_organizers.first.person.country)
+    @organizers = proposal.invites.where(invited_as: 'Organizer')
+    @country_code_organizers = Country.find_country_by_name(@organizers.first.person.country)
     query = call_query
+    return query
   end
 
   private
@@ -26,10 +27,10 @@ class EditFlowService
                   institution: "#{proposal.lead_organizer.affiliation}"
                   countryCode: "#{@country_code.alpha2}"
                 }, {
-                  email: "#{@co_organizers.first.email}"
-                  givenName: "#{@co_organizers.first.firstname}"
-                  familyName: "#{@co_organizers.first.lastname}"
-                  institution: "#{@co_organizers.first.person.affiliation}"
+                  email: "#{@organizers.first.email}"
+                  givenName: "#{@organizers.first.firstname}"
+                  familyName: "#{@organizers.first.lastname}"
+                  institution: "#{@organizers.first.person.affiliation}"
                   countryCode: "#{@country_code_organizers.alpha2}"
                   mrAuthorID: 12345
                 }]

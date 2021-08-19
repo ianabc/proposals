@@ -1,4 +1,6 @@
 class Invite < ApplicationRecord
+  attr_accessor :skip_deadline_validation
+
   before_validation :assign_person
   validates :firstname, :lastname, :email, :invited_as, :deadline_date, presence: true
   validate :proposal_title
@@ -33,13 +35,15 @@ class Invite < ApplicationRecord
   end
 
   def deadline_not_in_past
+    return if skip_deadline_validation
+
     return if deadline_date.nil?
 
     errors.add('Deadline', "can't be in past") if deadline_date < Date.current
   end
 
   def invited_as?
-    invited_as == 'Co Organizer' ? 'Supporting Organizer' : 'Participant'
+    invited_as == 'Organizer' ? 'Supporting Organizer' : 'Participant'
   end
 
   def assign_person

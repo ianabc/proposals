@@ -40,7 +40,7 @@ class SurveyController < ApplicationController
 
   def person
     if @invite
-      @redirect_path = thanks_proposal_invites_path(@invite.proposal)
+      @redirect_path = new_password_path(@invite.person.user)
       @invite.person
     else
       @redirect_path = new_proposal_path

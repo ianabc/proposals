@@ -104,9 +104,9 @@ export default class extends Controller {
 
   hidePreamble() {
     if($('#no_latex').is(':checked')) {
-      this.latexPreambleTarget.classList.add("hidden")
-    } else {
       this.latexPreambleTarget.classList.remove("hidden")
+    } else {
+      this.latexPreambleTarget.classList.add("hidden")
     }
   }
 }

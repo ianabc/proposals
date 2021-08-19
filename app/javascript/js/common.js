@@ -22,5 +22,4 @@ $(document).ready(function() {
   })
 
   $('#add-more-participant, #add-more-organizer').click();
-  $('#add-more-permissions').click();
 });

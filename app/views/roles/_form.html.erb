@@ -1,0 +1,59 @@
+<main class="content" data-controller="proposal-types">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Roles
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </li>
+          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Roles", roles_path %></li>
+          <li class="breadcrumb-item active" aria-current="page"><%= @role.new_record? ? 'New' : 'Edit' %></li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h2>Add Permissions</h2>
+          </div>
+          <div class="card-body">
+            <div data-controller="nested-roles-permission">
+              <%= form_for @role do |f| %>
+                <div class="mb-3">
+                  <%= f.text_field :name, class: 'form-control', required: true, placeholder: "Enter role name" %>
+                </div>
+
+                <div class="mb-3">
+                  <h4>Give Permission</h4>
+                </div>
+
+                <div class="mb-3">
+                  <template data-nested-roles-permission-target="templateOne">
+                    <%= f.fields_for :role_privileges, RolePrivilege.new, child_index: 'NEW_RECORD' do |role| %>
+                      <%= render partial: 'permission', locals: { f: role } %>
+                    <% end %>
+                  </template>
+                  <%= f.fields_for :role_privileges do |role| %>
+                    <% unless role.object.id.nil? %>
+                      <%= render partial: 'permission', locals: { f: role } %>
+                    <% end %>
+                  <% end %>
+                  <div data-nested-roles-permission-target="targetOne"></div>
+                  <button type="button" class="btn btn-primary" data-action="nested-roles-permission#addPermissions" id="add-more-permissions">
+                    Add Privilege
+                  </button>
+                </div>
+
+                <div class="float-end">
+                  <%= f.submit "Save", class:  'btn btn-primary' %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

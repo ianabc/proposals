@@ -15,7 +15,7 @@ export default class extends Controller {
     this.wrapperSelector = this.wrapperSelectorValue || '.nested-invites-wrapper'
   }
 
-  addCoOrganizers (e) {
+  addOrganizers (e) {
     e.preventDefault()
 
     let content = this.templateTarget.innerHTML.replace(/NEW_RECORD/g, new Date().getTime().toString())
@@ -23,7 +23,7 @@ export default class extends Controller {
       this.targetTarget.insertAdjacentHTML('beforebegin', content)
       this.organizerValue += 1
     } else {
-      toastr.error("You can't add more because the maximum number of Co Organizer invitations has been sent.")
+      toastr.error("You can't add more because the maximum number of Organizer invitations has been sent.")
     }
   }
 
@@ -91,7 +91,7 @@ export default class extends Controller {
       invitedAs = 'Participant'
       inviteId = event.currentTarget.dataset.participant || 0
     } else {
-      invitedAs = 'Co Organizer'
+      invitedAs = 'Organizer'
       inviteId = event.currentTarget.dataset.organizer || 0
     }
     $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`, function() {
