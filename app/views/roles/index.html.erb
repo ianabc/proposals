@@ -33,13 +33,14 @@
                   <td><%= role.name&.split('_')&.map(&:capitalize)&.join(' ') %></td>
                   <td>
                     <% if role.system_generated %>
-                      <p>System Generated Role</p>
+                      <p>System Generated Roles(Read Only)</p>
                     <% else %>
                       <p>User Generated Role</p>
                     <% end %>
                   </td>
                   <td class="table-action">
                     <%= link_to '<i class="align-middle fas fa-fw fa-eye" data-toggle="tooltip" title="Show"></i>Show'.html_safe, role_path(role) %>
+                    <%= link_to '<i class="align-middle fas fa-fw fa-pen"></i>Edit'.html_safe, edit_role_path(role) %>
                   </td>
                 </tr>
               <% end %>
