@@ -3,8 +3,15 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
   </head>
   <body>
-    <p><%= @feedback.user.fullname %> has submitted a feedback!</p>
-    <p> Feedback: </p>
-    <p><%= @feedback.content %></p>
+    <p>Feedback from: </p>
+    <p>"<%= @person.fullname %>"< <%= @person.email %> ></p>
+    <p>(<%= @person.affiliation %>)</p>
+    <p> </p>
+    <p>Is now Confirmed for event:</p>
+    <p><%= @proposal&.code %>: <%= @proposal&.title %></p>
+    <p> </p>
+    <p>Question: How was your RSVP experience?</p>
+    <p>Reply from <%= @person.lastname %>:</p>
+    <p>"<%= @feedback.content %>"</p>
   </body>
 </html>

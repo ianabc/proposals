@@ -32,6 +32,10 @@ class Person < ApplicationRecord
     "Region"
   end
 
+  def person_proposal
+    proposals.where(status: "submitted")&.first
+  end
+
   # rubocop:disable Metrics/AbcSize
   def common_fields
     return if skip_person_validation
