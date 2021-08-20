@@ -18,6 +18,16 @@
   </div>
   <div class="mb-3">
     <%= f.label :position , class: 'form-label'%>
+    <% if @proposal_form.highest_field_position >= 1 %>
+      <% if @proposal_form.highest_field_position == 1 %>
+        <p>(Position is 1)</p>
+      <% else %>
+        <p>(Positions are 1 - <%= @proposal_form.highest_field_position %>)</p>
+      <% end %>
+    <% end %>
+    <% unless @proposal_form.highest_field_position >= 1%>
+      <p>(Position should be greater than 0)</p> 
+    <% end %>
     <%= f.number_field :position, required: true, class:'form-control' %>
   </div>
 
