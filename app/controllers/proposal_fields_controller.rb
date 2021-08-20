@@ -16,7 +16,7 @@ class ProposalFieldsController < ApplicationController
     if %w[Date Radio Text SingleChoice MultiChoice PreferredImpossibleDate].include?(params[:type])
       @fieldable = "ProposalFields::#{params[:type]}".safe_constantize.new(date_field_params)
     end
-    get_positions
+    positions
     if check_position?
       @proposal_field = @proposal_form.proposal_fields.new(proposal_field_params)
       @proposal_field.fieldable = @fieldable
@@ -39,7 +39,7 @@ class ProposalFieldsController < ApplicationController
   end
 
   def update
-    get_positions
+    positions
     if check_position?
       if @proposal_field.update(proposal_field_params) && @proposal_field.fieldable.update(date_field_params)
         @proposal_form.update(updated_by: current_user)
@@ -78,7 +78,7 @@ class ProposalFieldsController < ApplicationController
                  :preferred_dates_5, :impossible_dates_1, :impossible_dates_2)
   end
 
-  def get_positions
+  def positions
     @position = @proposal_form.highest_field_position
     @field = params[:proposal_field]
     @field_position = @field[:position].to_i
