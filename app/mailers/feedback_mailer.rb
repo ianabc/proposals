@@ -4,7 +4,7 @@ class FeedbackMailer < ApplicationMailer
     @person = @feedback.user.person
     @proposal = @person.person_proposal
     email = "birs@birs.ca"
-    if @proposal.code
+    if @proposal&.code
       mail(to: email, subject: "[#{@proposal&.code}] Proposals feedback")
     else
       mail(to: email, subject: "Proposals feedback")
