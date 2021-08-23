@@ -1,4 +1,5 @@
-import { Controller } from "stimulus" 
+import { Controller } from "stimulus"
+import toastr from 'toastr'
 
 export default class extends Controller {
   static targets = [ 'proposalFieldsPanel', 'proposalField', 'addOption', 'optionRow', 'contentOfButton',
@@ -112,7 +113,7 @@ export default class extends Controller {
     }
     else {
       document.getElementById('submitButton').disabled = true;
-      if(highest == 0) {
+      if(highest === 0) {
         toastr.error("Postion should be greater than 0 and equal to 1")
       }
       else {
