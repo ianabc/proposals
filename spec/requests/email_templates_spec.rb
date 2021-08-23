@@ -34,10 +34,7 @@ RSpec.describe "/email_templates", type: :request do
   describe "POST /create" do
     context "with valid parameters" do
       let(:email_template_params) do
-        { title: 'Quick response',
-          subject: 'Mathematics',
-          body: 'Testing body',
-          email_type: 'reject_type' }
+        { title: 'Quick response', subject: 'Mathematics', body: 'Testing body', email_type: 'reject_type' }
       end
       it "creates a new email_template" do
         expect do
@@ -48,12 +45,8 @@ RSpec.describe "/email_templates", type: :request do
 
     context "with invalid parameters" do
       let(:email_template_params) do
-        { title: '',
-          subject: 'Mathematics',
-          body: 'Testing body',
-          email_type: 'reject_type' }
+        { title: '', subject: 'Mathematics', body: 'Testing body', email_type: 'reject_type' }
       end
-
       it "does not create a new email_template" do
         expect do
           post email_templates_url, params: { email_template: email_template_params }
@@ -79,12 +72,8 @@ RSpec.describe "/email_templates", type: :request do
   describe "PATCH /update" do
     context "with valid parameters" do
       let(:email_template_params) do
-        { title: 'Quick response',
-          subject: 'Mathematics',
-          body: 'Testing body',
-          email_type: 'reject_type' }
+        { title: 'Quick response', subject: 'Mathematics', body: 'Testing body', email_type: 'reject_type' }
       end
-
       before do
         patch email_template_url(email_template), params: { email_template: email_template_params }
       end
@@ -95,12 +84,8 @@ RSpec.describe "/email_templates", type: :request do
 
     context "with invalid parameters" do
       let(:email_template_params) do
-        { title: 'Quick response',
-          subject: '',
-          body: 'Testing body',
-          email_type: 'reject_type' }
+        { title: 'Quick response', subject: '', body: 'Testing body', email_type: 'reject_type' }
       end
-
       before do
         patch email_template_url(email_template), params: { email_template: email_template_params }
       end
