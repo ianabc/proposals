@@ -45,7 +45,9 @@ class SubmittedProposalsController < ApplicationController
     @email.update_status(@proposal) if params[:templates].split(':').first == "Revision"
     @email.cc_email = nil unless params[:cc]
     @email.bcc_email = nil unless params[:bcc]
-
+    params[:files]&.each do |file|
+      @email.files.attach(file)
+    end
     if @email.save
       @email.email_organizers
       redirect_to submitted_proposal_url(@proposal),

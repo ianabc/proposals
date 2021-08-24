@@ -10,4 +10,8 @@ class ProposalForm < ApplicationRecord
 
   scope :active_form, ->(id) { where(proposal_type_id: id, status: :active)&.last }
   default_scope { order(created_at: :desc) }
+
+  def highest_field_position
+    proposal_fields.maximum(:position).to_i
+  end
 end

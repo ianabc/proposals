@@ -2,6 +2,8 @@ class Email < ApplicationRecord
   validates :subject, :body, presence: true
   belongs_to :proposal
 
+  has_many_attached :files
+
   def update_status(proposal)
     proposal.update(status: 'revision_requested')
     version = Answer.maximum(:version).to_i

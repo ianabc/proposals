@@ -16,6 +16,14 @@ class ProposalMailer < ApplicationMailer
     @email = params[:email_data]
     email_address = params[:email]
     @organizer = params[:organizer]
+    if @email&.files&.attached?
+      @email.files.each do |file|
+        attachments[file.blob.filename.to_s] = {
+          mime_type: file.blob.content_type,
+          content: file.blob.download
+        }
+      end
+    end
     if @email.cc_email.present? && @email.bcc_email.present?
       mail(to: email_address, subject: @email.subject, cc: @email.all_emails(@email.cc_email),
            bcc: @email.all_emails(@email.bcc_email))
