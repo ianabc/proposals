@@ -15,12 +15,14 @@
       <div class="mb-3">
         <%= check_box_tag :cc %>
         <label>CC</label>
-        <%= text_field_tag :cc_email %>
+        <%= f.text_field :cc_email, class: 'form-control' %>
+        <small>This text field supports a list of cc emails i.e. birs@example.com, noreply@example.com..</small>
       </div>
       <div class="mb-3">
         <%= check_box_tag :bcc %>
         <label>BCC</label>
-        <%= text_field_tag :bcc_email %>
+        <%= f.text_field :bcc_email, class: 'form-control' %>
+        <small>This text field supports a list of bcc emails i.e. birs@example.com, noreply@example.com..</small>
       </div>
       <div class="mb-3">
         <%= f.label :subject, class: 'form-label' %>
