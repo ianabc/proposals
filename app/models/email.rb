@@ -14,20 +14,24 @@ class Email < ApplicationRecord
     end
   end
 
-  def email_organizers(cc_email, bcc_email)
+  def email_organizers
     proposal_mailer(proposal.lead_organizer.email,
-                    proposal.lead_organizer.fullname, cc_email, bcc_email)
+                    proposal.lead_organizer.fullname)
 
     proposal.invites.where(invited_as: 'Organizer')&.each do |organizer|
-      proposal_mailer(organizer.email, organizer.person.fullname, cc_email, bcc_email)
+      proposal_mailer(organizer.email, organizer.person.fullname)
     end
+  end
+
+  def all_emails(email)
+    email&.split(', ')&.map { |val| val }
   end
 
   private
 
-  def proposal_mailer(email_address, organizer_name, cc_email, bcc_email)
+  def proposal_mailer(email_address, organizer_name)
     ProposalMailer.with(email_data: self, email: email_address,
-                        organizer: organizer_name, cc_email: cc_email, bcc_email: bcc_email)
+                        organizer: organizer_name)
                   .staff_send_emails.deliver_later
   end
 end
