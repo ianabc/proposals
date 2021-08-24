@@ -1,9 +1,10 @@
-import { Controller } from "stimulus" 
+import { Controller } from "stimulus"
+import toastr from 'toastr'
 
 export default class extends Controller {
   static targets = [ 'proposalFieldsPanel', 'proposalField', 'addOption', 'optionRow', 'contentOfButton',
-                     'textField', 'proposalId' ]
-  static values = { visible: Boolean, field: String }
+                     'textField', 'proposalId', 'position' ]
+  static values = { visible: Boolean, field: String, highestPosition: Number }
 
   connect () {}
 
@@ -100,6 +101,23 @@ export default class extends Controller {
         $.post("/proposals/" + data.propid + "/latex",
           { latex: textField.value },
           function(data, status) {});
+      }
+    }
+  }
+
+  checkPosition() {
+    let highest = this.highestPositionValue
+    let position = this.positionTarget.value
+    if(position > 0 && position <= highest + 1) {
+      document.getElementById('submitButton').disabled = false;
+    }
+    else {
+      document.getElementById('submitButton').disabled = true;
+      if(highest === 0) {
+        toastr.error("Postion should be greater than 0 and equal to 1")
+      }
+      else {
+        toastr.error(`Postion should be greater than 0 and smaller or equal to ${highest + 1}`)
       }
     }
   }

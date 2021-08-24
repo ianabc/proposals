@@ -60,7 +60,7 @@ RSpec.describe "/proposal_forms/:id/proposal_fields", type: :request do
   describe "PATCH /update" do
     let(:proposal_field) { create(:proposal_field, :radio_field) }
     context "with valid parameters" do
-      let(:params) { { description: 'updates description' } }
+      let(:params) { { description: 'updates description', position: 1 } }
 
       before do
         put proposal_type_proposal_form_proposal_field_path(proposal_type, proposal_form, id: proposal_field.id),
