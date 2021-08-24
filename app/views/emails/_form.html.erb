@@ -49,11 +49,12 @@
   <h2> BIRS Emails </h2>
   <% @proposal.emails&.each do |email| %>
     <div class="mb-3 row border m-1 p-1">
-      <div class="col-md-6">
+      <div class="mb-3 col-md-6">
         <p> Subject: <%= email.subject %></p>
         <p> Body: <%= email.body %></p>
       </div>
-      <div class="col-md-6">
+      <div class="mb-3 col-md-6">
+        <p> Sent at: <%= email.created_at %></p>
         <% if email&.files&.attached? %>
           <p class="file-uploads">Attached files:</p>
           <ul>
