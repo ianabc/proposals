@@ -59,8 +59,7 @@ class Proposal < ApplicationRecord
   }
 
   scope :submitted_type, lambda { |type|
-    where(status: 1)
-      .joins(:proposal_type).where(name: type)
+    joins(:proposal_type).where(proposal_type: { name: type })
   }
 
   def demographics_data
