@@ -28,7 +28,7 @@
       </div>
       <div class="mb-3">
         <label class='form-label'>Template</label>
-        <%= select_tag :templates, options_for_select(name_of_templates), include_blank: '', class: 'form-select w-25', data: {'action': 'click->submitted-proposals#emailTemplate', 'submitted-proposals-target': 'template'} %>
+        <%= select_tag :templates, options_for_select(name_of_templates), include_blank: '', class: 'form-select w-25', data: {'action': 'click->submitted-proposals#emailTemplate', 'submitted-proposals-target': 'template'}, required: true %>
       </div>
       <div class="mb-3">
         <%= f.label :body, class: 'form-label' %>

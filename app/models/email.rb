@@ -2,15 +2,15 @@ class Email < ApplicationRecord
   validates :subject, :body, presence: true
   belongs_to :proposal
 
-  def update_status(proposal)
-    proposal.update(status: 'revision_requested')
-    version = Answer.maximum(:version).to_i
-    answers = Answer.where(proposal_id: proposal.id, version: version)
-    answers.each do |answer|
-      answer = answer.dup
-      answer.save
-      version = answer.version + 1
-      answer.update(version: version)
+  def update_status(proposal, status)
+    case status
+    when 'Revision'
+      proposal.update(status: 'revision_requested')
+      update_version
+    when 'Approval'
+      proposal.update(status: 'approved')
+    when 'Decision'
+      proposal.update(status: 'decision_email_sent')
     end
   end
 
@@ -29,5 +29,16 @@ class Email < ApplicationRecord
     ProposalMailer.with(email_data: self, email: email_address,
                         organizer: organizer_name, cc_email: cc_email, bcc_email: bcc_email)
                   .staff_send_emails.deliver_later
+  end
+
+  def update_version
+    version = Answer.maximum(:version).to_i
+    answers = Answer.where(proposal_id: proposal.id, version: version)
+    answers.each do |answer|
+      answer = answer.dup
+      answer.save
+      version = answer.version + 1
+      answer.update(version: version)
+    end
   end
 end
