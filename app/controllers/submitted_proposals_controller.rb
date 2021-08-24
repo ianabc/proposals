@@ -42,7 +42,7 @@ class SubmittedProposalsController < ApplicationController
     return unless @ability.can?(:manage, Email)
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
-    @email.update_status(@proposal) if params[:templates].split(':').first == "Revision"
+    change_status
     @email.cc_email = nil unless params[:cc]
     @email.bcc_email = nil unless params[:bcc]
     params[:files]&.each do |file|
@@ -94,6 +94,12 @@ class SubmittedProposalsController < ApplicationController
   def set_proposals
     @proposals = Proposal.order(:created_at)
     @proposals = ProposalFiltersQuery.new(@proposals).find(params) if query_params?
+  end
+
+  def change_status
+    @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
+    @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
+    @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
   end
 
   def latex_temp_file
