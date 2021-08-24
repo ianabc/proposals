@@ -1,4 +1,4 @@
-<%= form_for field, data: { controller: 'nested-form', nested_form_wrapper_selector_value: '.nested-form-wrapper' }, url: 'proposal_fields?type=File' do |f| %>
+<%= form_for field, data: { controller: 'nested-form proposal-form', nested_form_wrapper_selector_value: '.nested-form-wrapper', 'proposal-form-highest-position-value': "#{@proposal_form.highest_field_position}" }, url: 'proposal_fields?type=File' do |f| %>
   <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
   <div class="mb-3">
     <%= f.label :statement, class: 'form-label' %>
@@ -18,7 +18,17 @@
   </div>
   <div class="mb-3">
     <%= f.label :position , class: 'form-label'%>
-    <%= f.number_field :position, required: true, class:'form-control' %>
+    <% if @proposal_form.highest_field_position >= 1 %>
+      <% if @proposal_form.highest_field_position == 1 %>
+        <p>(Position is 1)</p>
+      <% else %>
+        <p>(Positions are 1 - <%= @proposal_form.highest_field_position %>)</p>
+      <% end %>
+    <% end %>
+    <% unless @proposal_form.highest_field_position >= 1%>
+      <p>(Position should be greater than 0)</p> 
+    <% end %>
+    <%= f.number_field :position, required: true, class:'form-control', data: {'action': 'change->proposal-form#checkPosition', 'proposal-form-target': 'position'} %>
   </div>
   <div>
     <template data-nested-form-target="template">
@@ -35,6 +45,6 @@
     </button>
   </div>
   <div class="mb-3">
-    <%= f.submit 'submit', class: 'btn  btn-primary' %>
+    <button disabled="true" id="submitButton" class="btn btn-primary">Submit</button>
   </div>
 <% end %>

@@ -109,6 +109,10 @@
                             <%= render partial: 'lead_organizer' %>
                             <div>
                               <h3 class="form-section">Add Supporting Organizers:</h3>
+                              <h5>
+                                For recommendations regarding the composition of the organizing committee, please 
+                                <%= link_to "see here", "/guidelines#organizing_committee", target: "_blank" %>.
+                              </h5>
                               <%= organizer_intro(@proposal) %>
                               <% if @proposal.invites %>
                                 <% @proposal.invites.each do |invite|%>
@@ -143,6 +147,7 @@
                             <div class="mt-4">
                               <div class="mb-3">
                                 <h3 class="form-section">Add Participants:</h3>
+                                <h5>Please note that a full 5 Day workshop can host up to 42 participants on-site and up to 300 participants online.</h5>
                                 <% if @proposal.invites %>
                                   <% @proposal.invites.each do |invite|%>
                                     <% if invite.invited_as == 'Participant' %>

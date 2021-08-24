@@ -45,6 +45,9 @@ class SubmittedProposalsController < ApplicationController
     change_status
     bcc_email = params[:bcc_email] if params[:bcc_email] && params[:bcc]
     cc_email = params[:cc_email] if params[:cc_email] && params[:cc]
+    params[:files]&.each do |file|
+      @email.files.attach(file)
+    end
 
     if @email.save
       @email.email_organizers(cc_email, bcc_email)
