@@ -43,14 +43,13 @@ class SubmittedProposalsController < ApplicationController
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
     change_status
-    bcc_email = params[:bcc_email] if params[:bcc_email] && params[:bcc]
-    cc_email = params[:cc_email] if params[:cc_email] && params[:cc]
+    @email.cc_email = nil unless params[:cc]
+    @email.bcc_email = nil unless params[:bcc]
     params[:files]&.each do |file|
       @email.files.attach(file)
     end
-
     if @email.save
-      @email.email_organizers(cc_email, bcc_email)
+      @email.email_organizers
       redirect_to submitted_proposal_url(@proposal),
                   notice: "Sent email to proposal organizers."
     else
@@ -89,7 +88,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def email_params
-    params.permit(:subject, :body, :revision)
+    params.permit(:subject, :body, :cc_email, :bcc_email)
   end
 
   def set_proposals

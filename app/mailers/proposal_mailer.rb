@@ -13,26 +13,26 @@ class ProposalMailer < ApplicationMailer
   end
 
   def staff_send_emails
-    @email_data = params[:email_data]
-    email = params[:email]
+    @email = params[:email_data]
+    email_address = params[:email]
     @organizer = params[:organizer]
-    if @email_data&.files&.attached?
-      @email_data.files.each do |file|
+    if @email&.files&.attached?
+      @email.files.each do |file|
         attachments[file.blob.filename.to_s] = {
           mime_type: file.blob.content_type,
           content: file.blob.download
         }
       end
     end
-
-    if params[:cc_email] && params[:bcc_email]
-      mail(to: email, subject: @email_data.subject, cc: params[:cc_email], bcc: params[:bcc_email])
-    elsif params[:cc_email]
-      mail(to: email, subject: @email_data.subject, cc: params[:cc_email])
-    elsif params[:bcc_email]
-      mail(to: email, subject: @email_data.subject, bcc: params[:bcc_email])
+    if @email.cc_email.present? && @email.bcc_email.present?
+      mail(to: email_address, subject: @email.subject, cc: @email.all_emails(@email.cc_email),
+           bcc: @email.all_emails(@email.bcc_email))
+    elsif @email.cc_email.present?
+      mail(to: email_address, subject: @email.subject, cc: @email.all_emails(@email.cc_email))
+    elsif @email.bcc_email.present?
+      mail(to: email_address, subject: @email.subject, bcc: @email.all_emails(@email.bcc_email))
     else
-      mail(to: email, subject: @email_data.subject)
+      mail(to: email_address, subject: @email.subject)
     end
   end
 end
