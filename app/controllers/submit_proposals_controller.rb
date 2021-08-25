@@ -67,11 +67,11 @@ class SubmitProposalsController < ApplicationController
 
   def generate_proposal_pdf
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
-    ProposalPdfService.new(@proposal.id, temp_file, 'all').pdf
-    fh = File.open("#{Rails.root}/tmp/#{temp_file}")
+    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
+                                      .generate_latex_file.to_s
 
     begin
-      render_to_string(layout: "application", inline: fh.read.to_s,
+      render_to_string(layout: "application", inline: @latex_infile,
                        formats: [:pdf])
     rescue ActionView::Template::Error
       error_message = "We were unable to compile your proposal with LaTeX.
@@ -106,8 +106,8 @@ class SubmitProposalsController < ApplicationController
   end
 
   def update_proposal_ams_subject_code
-    ProposalAmsSubject.create!(ams_subject_id: @code1, proposal: @proposal, code: 'code1')
-    ProposalAmsSubject.create!(ams_subject_id: @code2, proposal: @proposal, code: 'code2')
+    ProposalAmsSubject.create(ams_subject_id: @code1, proposal: @proposal, code: 'code1')
+    ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal, code: 'code2')
   end
 
   def invite_params(invite)
