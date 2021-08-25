@@ -69,9 +69,14 @@ class SubmitProposalsController < ApplicationController
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
     ProposalPdfService.new(@proposal.id, temp_file, 'all').pdf
     fh = File.open("#{Rails.root}/tmp/#{temp_file}")
+    @latex_infile = fh.read
+    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
+
+    latex = @proposal.macros + "\n\\begin{document}\n" + @latex_infile.to_s
+
 
     begin
-      render_to_string(layout: "application", inline: fh.read.to_s,
+      render_to_string(layout: "application", inline: latex,
                        formats: [:pdf])
     rescue ActionView::Template::Error
       error_message = "We were unable to compile your proposal with LaTeX.
