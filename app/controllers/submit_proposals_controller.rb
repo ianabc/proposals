@@ -67,13 +67,11 @@ class SubmitProposalsController < ApplicationController
 
   def generate_proposal_pdf
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
-    ProposalPdfService.new(@proposal.id, temp_file, 'all').pdf
-    fh = File.open("#{Rails.root}/tmp/#{temp_file}")
-    @latex_infile = fh.read
+    ProposalPdfService.new(@proposal.id, temp_file, 'all').generate_latex_file
+    @latex_infile = File.read("#{Rails.root}/tmp/#{temp_file}")
     @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
 
     latex = "#{@proposal.macros}\n\n\begin{document}\n\n#{@latex_infile.to_s}\n"
-
 
     begin
       render_to_string(layout: "application", inline: latex,

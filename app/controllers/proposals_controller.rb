@@ -47,7 +47,8 @@ class ProposalsController < ApplicationController
     session[:proposal_id] = proposal_id
 
     input = latex_params[:latex]
-    ProposalPdfService.new(proposal_id, latex_temp_file, input).pdf
+    ProposalPdfService.new(proposal_id, latex_temp_file, input)
+                      .generate_latex_file
 
     head :ok
   end
@@ -55,18 +56,16 @@ class ProposalsController < ApplicationController
   # GET /proposals/:id/rendered_proposal.pdf
   def latex_output
     proposal_id = params[:id]
-    ProposalPdfService.new(proposal_id, latex_temp_file, 'all').pdf
+    ProposalPdfService.new(proposal_id, latex_temp_file, 'all')
+                      .generate_latex_file
 
     @proposal = Proposal.find_by(id: proposal_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
-
-    fh = File.open("#{Rails.root}/tmp/#{latex_temp_file}")
-    @latex_infile = fh.read
+    @latex_infile = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
 
     render_latex
   end
 
-  # rubocop:disable Metrics/AbcSize
   # GET /proposals/:id/rendered_field.pdf
   def latex_field
     prop_id = params[:id]
@@ -74,14 +73,11 @@ class ProposalsController < ApplicationController
 
     @proposal = Proposal.find_by(id: prop_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
-
-    fh = File.open("#{Rails.root}/tmp/#{latex_temp_file}")
-    @latex_infile = fh.read
+    @latex_infile = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
     @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
 
     render_latex
   end
-  # rubocop:enable Metrics/AbcSize
 
   def destroy
     @proposal.destroy

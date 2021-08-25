@@ -7,7 +7,7 @@ class ProposalPdfService
     @input = input
   end
 
-  def pdf
+  def generate_latex_file
     input = @input.presence || 'Please enter some text.'
     input = all_proposal_fields if @input == 'all'
 

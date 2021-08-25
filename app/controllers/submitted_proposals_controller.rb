@@ -108,7 +108,7 @@ class SubmittedProposalsController < ApplicationController
 
   def create_pdf_file
     prop_pdf = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
-    prop_pdf.pdf
+                                 .generate_latex_file
 
     @year = @proposal&.year || Date.current.year.to_i + 2
     pdf_file = render_to_string layout: "application",
