@@ -156,8 +156,7 @@ class ProposalsController < ApplicationController
   end
 
   def render_latex
-    # rubocop:disable all
-    latex = @proposal.macros + "\n\\begin{document}\n" + @latex_infile.to_s
+    latex = "#{@proposal.macros}\n\n\\begin{document}\n\n#{@latex_infile}\n"
     render layout: "application", inline: latex, formats: [:pdf]
   rescue ActionView::Template::Error => e
     flash[:alert] = "There are errors in your LaTeX code. Please see the
@@ -165,7 +164,6 @@ class ProposalsController < ApplicationController
                         below".squish
     error_output = ProposalPdfService.format_errors(e)
     render layout: "latex_errors", inline: error_output.to_s, formats: [:html]
-    # rubocop:enable all
   end
 
   def set_careers

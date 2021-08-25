@@ -21,9 +21,9 @@ class ProposalPdfService
   end
 
   def to_s
-    fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
-    latex_infile = fh.read
-    @proposal.macros + "\n\\begin{document}\n" + latex_infile.to_s
+    latex_infile = File.read("#{Rails.root}/tmp/#{@temp_file}")
+    latex_infile = LatexToPdf.escape_latex(latex_infile) if @proposal.no_latex
+    "#{@proposal.macros}\n\n\\begin{document}\n\n#{latex_infile}\n"
   end
 
   def self.format_errors(error)
