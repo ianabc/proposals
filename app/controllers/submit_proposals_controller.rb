@@ -66,6 +66,7 @@ class SubmitProposalsController < ApplicationController
   end
 
   def generate_proposal_pdf
+    # rubocop:disable all
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
     ProposalPdfService.new(@proposal.id, temp_file, 'all').pdf
     fh = File.open("#{Rails.root}/tmp/#{temp_file}")
