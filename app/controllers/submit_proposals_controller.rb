@@ -72,7 +72,7 @@ class SubmitProposalsController < ApplicationController
     @latex_infile = fh.read
     @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
 
-    latex = "#{@proposal.macros} \n\n\begin{document}\n#{@latex_infile.to_s}"
+    latex = "#{@proposal.macros}\n\n\begin{document}\n\n#{@latex_infile.to_s}\n"
 
 
     begin
