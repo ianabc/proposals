@@ -15,12 +15,14 @@
       <div class="mb-3">
         <%= check_box_tag :cc %>
         <label>CC</label>
-        <%= text_field_tag :cc_email %>
+        <%= f.text_field :cc_email, class: 'form-control' %>
+        <small>This text field supports a list of cc emails i.e. birs@example.com, noreply@example.com..</small>
       </div>
       <div class="mb-3">
         <%= check_box_tag :bcc %>
         <label>BCC</label>
-        <%= text_field_tag :bcc_email %>
+        <%= f.text_field :bcc_email, class: 'form-control' %>
+        <small>This text field supports a list of bcc emails i.e. birs@example.com, noreply@example.com..</small>
       </div>
       <div class="mb-3">
         <%= f.label :subject, class: 'form-label' %>
@@ -28,9 +30,13 @@
       </div>
       <div class="mb-3">
         <label class='form-label'>Template</label>
-        <%= select_tag :templates, options_for_select(name_of_templates), include_blank: '', class: 'form-select w-25', data: {'action': 'click->submitted-proposals#emailTemplate', 'submitted-proposals-target': 'template'} %>
+        <%= select_tag :templates, options_for_select(name_of_templates), include_blank: '', class: 'form-select w-25', data: {'action': 'click->submitted-proposals#emailTemplate', 'submitted-proposals-target': 'template'}, required: true %>
       </div>
       <div class="mb-3">
+        <p>Attachments</p>
+        <%= f.file_field :files, multiple: true %>
+      </div>
+      <div>
         <%= f.label :body, class: 'form-label' %>
         <%= f.text_area(:body, required: true, size: '3x5', class:'form-control', id:'body') %>
       </div>
@@ -42,11 +48,26 @@
 </div>
 <br />
 <div class="mt-4 mb-3">
-  <h2> BIRS Emails </h2>
+  <h2> Email Correspondence </h2>
   <% @proposal.emails&.each do |email| %>
     <div class="mb-3 row border m-1 p-1">
-      <p> Subject: <%= email.subject %></p>
-      <p> Body: <%= email.body %></p>
+      <div class="mb-3 col-md-6">
+        <p> Subject: <%= email.subject %></p>
+        <p> Body: <%= email.body %></p>
+      </div>
+      <div class="mb-3 col-md-6">
+        <p> Sent at: <%= email.created_at %></p>
+        <% if email&.files&.attached? %>
+          <p class="file-uploads">Attached files:</p>
+          <ul>
+            <% email.files.each do |file| %>
+              <li>
+                <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      </div>
     </div>
   <% end %>
 </div>

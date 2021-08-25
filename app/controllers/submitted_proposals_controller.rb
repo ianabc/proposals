@@ -42,12 +42,14 @@ class SubmittedProposalsController < ApplicationController
     return unless @ability.can?(:manage, Email)
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
-    @email.update_status(@proposal) if params[:templates].split(':').first == "Revision"
-    bcc_email = params[:bcc_email] if params[:bcc_email] && params[:bcc]
-    cc_email = params[:cc_email] if params[:cc_email] && params[:cc]
-
+    change_status
+    @email.cc_email = nil unless params[:cc]
+    @email.bcc_email = nil unless params[:bcc]
+    params[:files]&.each do |file|
+      @email.files.attach(file)
+    end
     if @email.save
-      @email.email_organizers(cc_email, bcc_email)
+      @email.email_organizers
       redirect_to submitted_proposal_url(@proposal),
                   notice: "Sent email to proposal organizers."
     else
@@ -86,7 +88,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def email_params
-    params.permit(:subject, :body, :revision)
+    params.permit(:subject, :body, :cc_email, :bcc_email)
   end
 
   def set_proposals
@@ -94,17 +96,23 @@ class SubmittedProposalsController < ApplicationController
     @proposals = ProposalFiltersQuery.new(@proposals).find(params) if query_params?
   end
 
+  def change_status
+    @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
+    @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
+    @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
+  end
+
   def latex_temp_file
     "propfile-#{current_user.id}-#{@proposal.id}.tex"
   end
 
   def create_pdf_file
-    prop_pdf = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
-    prop_pdf.pdf
+    prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
+                                   .generate_latex_file
 
     @year = @proposal&.year || Date.current.year.to_i + 2
     pdf_file = render_to_string layout: "application",
-                                inline: prop_pdf.to_s, formats: [:pdf]
+                                inline: prop_latex.to_s, formats: [:pdf]
 
     @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
     File.open(@pdf_path, "w:UTF-8") do |file|
