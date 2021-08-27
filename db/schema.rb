@@ -105,10 +105,10 @@ ActiveRecord::Schema.define(version: 2021_08_25_094801) do
     t.text "body"
     t.boolean "revision", default: false
     t.bigint "proposal_id", null: false
-    t.string "cc_email"
-    t.string "bcc_email"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "cc_email"
+    t.string "bcc_email"
     t.index ["proposal_id"], name: "index_emails_on_proposal_id"
   end
 
