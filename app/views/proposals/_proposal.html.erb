@@ -139,7 +139,7 @@
                                       </button>
                                   </div>
                                   <div class="mb-3">
-                                    <button data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Organizer(s)</button>
+                                    <button id="organizer" data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Organizer(s)</button>
                                   </div>
                                 <% end %>
                               </div>
@@ -173,7 +173,7 @@
                                         </button>
                                     </div>
                                     <div class="mb-3">
-                                      <button data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Participant(s)</button>
+                                      <button id="participant" data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Participant(s)</button>
                                     </div>
                                   <% end %>
                                 </div>
