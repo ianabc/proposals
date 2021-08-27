@@ -100,7 +100,7 @@
                             </div>
 
                             <div class="mb-3">
-                              <label>AMS Subject Code 2</label>
+                              <label class="required">AMS Subject Code 2</label>
                               <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code2]', data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
                             </div>
                           </div>
@@ -139,7 +139,7 @@
                                       </button>
                                   </div>
                                   <div class="mb-3">
-                                    <button data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Organizer(s)</button>
+                                    <button id="organizer" data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Organizer(s)</button>
                                   </div>
                                 <% end %>
                               </div>
@@ -173,7 +173,7 @@
                                         </button>
                                     </div>
                                     <div class="mb-3">
-                                      <button data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Participant(s)</button>
+                                      <button id="participant" data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Participant(s)</button>
                                     </div>
                                   <% end %>
                                 </div>
@@ -271,7 +271,7 @@
                         </div>
                         <!-- <h4 class="tab-title">Common Fields</h4> -->
                         <div class="form-group mb-3">
-                          <input type="checkbox" name="no_latex" data-action="focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur click->submit-proposals#hidePreamble" id="no_latex" data-value="<%= @proposal.no_latex %>" <%= @proposal.no_latex ? 'checked' : '' %>, disabled="action">
+                          <input type="checkbox" name="no_latex" data-action="focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur click->submit-proposals#hidePreamble" id="no_latex" data-value="<%= @proposal.no_latex %>" <%= @proposal.no_latex ? 'checked' : '' %>>
                           <%= f.label :no_latex, "No LaTeX", class: "form-label" %>
                   			</div>
                         <div class="form-group mb-3" name="latexPreamble" id="latexPreamble" data-submit-proposals-target="latexPreamble">
@@ -319,7 +319,7 @@
                           <%= link_to "Print Proposal", rendered_proposal_proposal_path(@proposal.id, :format => :pdf), target: '_blank', class: 'p-2 mx-2 btn btn-primary' %>
                           <div class="float-end">
                             <button id="changeTab" class="p-2 mx-2 btn btn-primary" data-action='click->submit-proposals#previousTab'>Back</button>
-                            <%= f.submit 'Submit Proposal', data: {confirm: "This step is final and cannot be reversed. You cannot edit your proposal after submission. Proceed?"}, class:'btn btn-primary p-2' %>
+                            <%= f.submit 'Submit Proposal', data: {confirm: "This step is final and cannot be reversed. You cannot edit your proposal after submission. Proceed?"}, disabled: action, class:'btn btn-primary p-2' %>
                           </div>
                         </div>
                       </div>
