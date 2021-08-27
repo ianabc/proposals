@@ -100,7 +100,7 @@
                             </div>
 
                             <div class="mb-3">
-                              <label>AMS Subject Code 2</label>
+                              <label class="required">AMS Subject Code 2</label>
                               <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code2]', data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
                             </div>
                           </div>
