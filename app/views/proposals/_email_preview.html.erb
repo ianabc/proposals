@@ -6,8 +6,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p>CC: <%= @proposal.lead_organizer.email %></p>
-        <h1>Dear < Firstname Lastname></h1>
+        <p>To: <%= @invite&.person&.email %></p>
+        <p>Cc: <%= @proposal.lead_organizer.email %></p>
+        <p>Dear <%= @invite&.person&.fullname %></p>
           <p>
           <%= @proposal.lead_organizer&.fullname %> is putting together a proposal for a <%= @proposal.proposal_type.name %> titled "<%= @proposal.title %>" for submission to the Banff International Research Station. If successful, the program would take place at some time during the 2023 calendar year.
         </p>
@@ -15,9 +16,9 @@
           This invitation is intended to gauge your interest in being a <span id="invited_as_pre"></span> for this proposed workshop, provided that it is accepted and that the dates work with your schedule. Your response would help the organizing committee and the BIRS review committee determine the appeal of this proposed workshop to the wider mathematical community.
         </p>
         <p>
-          Kindly indicate your response at the link below:
+          Kindly indicate your response by <%= @invite&.deadline_date&.to_date %> by following the link below:
         </p>
-        <p><%= link_to 'Click here', '#' %></p>
+        <p><%= link_to invite_url(code: 'a1b2c3...'), '#' %></p>
         <p>Thank you for considering this request!</p>
         <p>Banff International Research Station,<br>
             and the organizing committee.</p>

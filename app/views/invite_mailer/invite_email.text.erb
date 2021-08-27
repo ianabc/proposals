@@ -4,9 +4,9 @@ Dear <%= @person&.fullname %>:
 
 This invitation is intended to gauge your interest in being a <%= @invite.invited_as?.downcase %> for this proposed workshop, provided that it is accepted and that the dates work with your schedule. Your response would help the organizing committee and the BIRS review committee determine the appeal of this proposed workshop to the wider mathematical community.
 
-Kindly indicate your response at the link below:
+Kindly indicate your response by <%= @invite&.deadline_date&.to_date %> by following the link below:
 
-<%= link_to 'Click here', proposal_invite_url(@proposal, @invite, code: @invite.code) %>
+<%= invite_url(code: @invite.code) %>
 
 Thank you for considering this request!
 

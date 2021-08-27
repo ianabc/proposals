@@ -35,6 +35,7 @@ class ProposalsController < ApplicationController
 
   def edit
     @proposal.invites.build
+    @invite = @proposal.invites.first
   end
 
   def locations
