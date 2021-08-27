@@ -9,6 +9,7 @@ class SubmitProposalsController < ApplicationController
     update_proposal_ams_subject_code
     submission = SubmitProposalService.new(@proposal, params)
     submission.save_answers
+    @proposal.skip_submission_validation = true unless @proposal.draft?
     session[:is_submission] = @proposal.is_submission = submission.is_final?
 
     create_invite and return if params[:create_invite]
@@ -38,7 +39,7 @@ class SubmitProposalsController < ApplicationController
     count = save_invites
 
     if count >= 1
-      render json: { invited_as: @proposal.invites.last.invited_as.downcase }, status: :ok
+      head :ok
     else
       render json: @invite.errors.full_messages, status: :unprocessable_entity
     end
