@@ -48,7 +48,7 @@ class ProposalsController < ApplicationController
 
     input = latex_params[:latex]
     @data = ProposalPdfService.new(proposal_id, latex_temp_file, input)
-                      .generate_latex_file
+                              .generate_latex_file
 
     head :ok
   end
@@ -57,7 +57,7 @@ class ProposalsController < ApplicationController
   def latex_output
     proposal_id = params[:id]
     @data = ProposalPdfService.new(proposal_id, latex_temp_file, 'all')
-                      .generate_latex_file
+                              .generate_latex_file
 
     @proposal = Proposal.find_by(id: proposal_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
@@ -174,15 +174,15 @@ class ProposalsController < ApplicationController
   end
 
   def check_file
-    unless File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
-      if params[:action] == "latex_field"
-        input = latex_params[:latex]
-        @data = ProposalPdfService.new(@proposal.id, latex_temp_file, input)
-                        .generate_latex_file
-      end
-      File.new("#{Rails.root}/tmp/#{latex_temp_file}", 'w') do |io|
-        io.write(@data)
-      end
+    return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
+
+    if params[:action] == "latex_field"
+      input = latex_params[:latex]
+      @data = ProposalPdfService.new(@proposal.id, latex_temp_file, input)
+                                .generate_latex_file
+    end
+    File.new("#{Rails.root}/tmp/#{latex_temp_file}", 'w') do |io|
+      io.write(@data)
     end
   end
 end

@@ -147,9 +147,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def check_file
-    unless File.exist?(@pdf_path)
-      @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
-      File.new(@pdf_path, 'w')
-    end
+    return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
+
+    @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
+    File.new(@pdf_path, 'w')
   end
 end

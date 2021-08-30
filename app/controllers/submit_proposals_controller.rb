@@ -118,12 +118,12 @@ class SubmitProposalsController < ApplicationController
 
   def check_file
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
-    unless File.exist?("#{Rails.root}/tmp/#{temp_file}")
-      @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
+    return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
+
+    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
                                       .generate_latex_file.to_s
-      File.new("#{Rails.root}/tmp/#{temp_file}", 'w') do |io|
-        io.write(@latex_infile)
-      end
+    File.new("#{Rails.root}/tmp/#{temp_file}", 'w') do |io|
+      io.write(@latex_infile)
     end
   end
 end
