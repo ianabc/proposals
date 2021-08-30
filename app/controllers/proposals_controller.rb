@@ -48,8 +48,8 @@ class ProposalsController < ApplicationController
     session[:proposal_id] = proposal_id
 
     input = latex_params[:latex]
-    ProposalPdfService.new(proposal_id, latex_temp_file, input)
-                      .generate_latex_file
+    @data = ProposalPdfService.new(proposal_id, latex_temp_file, input)
+                              .generate_latex_file
 
     head :ok
   end
@@ -57,11 +57,12 @@ class ProposalsController < ApplicationController
   # GET /proposals/:id/rendered_proposal.pdf
   def latex_output
     proposal_id = params[:id]
-    ProposalPdfService.new(proposal_id, latex_temp_file, 'all')
-                      .generate_latex_file
+    @data = ProposalPdfService.new(proposal_id, latex_temp_file, 'all')
+                              .generate_latex_file
 
     @proposal = Proposal.find_by(id: proposal_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
+    check_file
     @latex_infile = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
 
     render_latex
@@ -74,8 +75,9 @@ class ProposalsController < ApplicationController
 
     @proposal = Proposal.find_by(id: prop_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
+    check_file
     @latex_infile = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
-    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
+    @latex_infile = LatexToPdf.escape_latex(@latex_infile) unless @proposal.no_latex
 
     render_latex
   end
@@ -170,5 +172,18 @@ class ProposalsController < ApplicationController
   def set_careers
     @careers = Person.where(id: @proposal.participants.pluck(:person_id))
                      .pluck(:academic_status)
+  end
+
+  def check_file
+    return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
+
+    if params[:action] == "latex_field"
+      input = latex_params[:latex]
+      @data = ProposalPdfService.new(@proposal.id, latex_temp_file, input)
+                                .generate_latex_file
+    end
+    File.new("#{Rails.root}/tmp/#{latex_temp_file}", 'w') do |io|
+      io.write(@data)
+    end
   end
 end

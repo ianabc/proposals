@@ -5,7 +5,7 @@ import Rails from '@rails/ujs'
 export default class extends Controller {
 
   static targets = [ 'proposalType', 'locationSpecificQuestions', 'locationIds', 'text', 'tabs', 
-                    'dragLocations', 'latexPreamble' ]
+                    'dragLocations', 'latexPreamble', 'latexBibliography' ]
   static values = { proposalTypeId: Number, proposal: Number }
 
   connect() {
@@ -104,9 +104,11 @@ export default class extends Controller {
 
   hidePreamble() {
     if($('#no_latex').is(':checked')) {
-      this.latexPreambleTarget.classList.remove("hidden")
-    } else {
       this.latexPreambleTarget.classList.add("hidden")
+      this.latexBibliographyTarget.classList.add("hidden")
+    } else {
+      this.latexPreambleTarget.classList.remove("hidden")
+      this.latexBibliographyTarget.classList.remove("hidden")
     }
   }
 }

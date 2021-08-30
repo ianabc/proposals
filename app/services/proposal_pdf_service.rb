@@ -8,22 +8,27 @@ class ProposalPdfService
   end
 
   def generate_latex_file
-    input = @input.presence || 'Please enter some text.'
-    input = all_proposal_fields if @input == 'all'
+    @input = @input.presence || 'Please enter some text.'
+    @input = all_proposal_fields if @input == 'all'
 
     if @proposal.is_submission
       LatexToPdf.config[:arguments].delete('-halt-on-error')
     end
 
     File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-      io.write(input)
+      io.write(@input)
     end
     self
   end
 
   def to_s
+    unless File.exist?("#{Rails.root}/tmp/#{@temp_file}")
+      File.new("#{Rails.root}/tmp/#{@temp_file}", 'w') do |io|
+        io.write(@input)
+      end
+    end
     latex_infile = File.read("#{Rails.root}/tmp/#{@temp_file}")
-    latex_infile = LatexToPdf.escape_latex(latex_infile) if @proposal.no_latex
+    latex_infile = LatexToPdf.escape_latex(latex_infile) unless @proposal.no_latex
     "#{@proposal.macros}\n\n\\begin{document}\n\n#{latex_infile}\n"
   end
 
@@ -63,7 +68,7 @@ class ProposalPdfService
     proposal_organizers
     proposal_locations
     proposal_subjects
-    proposal_bibliography
+    proposal_bibliography unless proposal.no_latex
     user_defined_fields
     proposal_participants
     @text
@@ -116,8 +121,10 @@ class ProposalPdfService
   end
 
   def proposal_bibliography
-    @text << "\\subsection*{Bibliography}\n\n"
-    @text << "\\noindent #{LatexToPdf.escape_latex(proposal.bibliography)}\n\n"
+    if proposal.bibliography.present?
+      @text << "\\subsection*{Bibliography}\n\n"
+      @text << "\\noindent #{LatexToPdf.escape_latex(proposal.bibliography)}\n\n"
+    end
   end
 
   def user_defined_fields
