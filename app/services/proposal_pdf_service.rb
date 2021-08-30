@@ -23,7 +23,7 @@ class ProposalPdfService
 
   def to_s
     latex_infile = File.read("#{Rails.root}/tmp/#{@temp_file}")
-    latex_infile = LatexToPdf.escape_latex(latex_infile) if @proposal.no_latex
+    latex_infile = LatexToPdf.escape_latex(latex_infile) unless @proposal.no_latex
     "#{@proposal.macros}\n\n\\begin{document}\n\n#{latex_infile}\n"
   end
 
@@ -63,7 +63,7 @@ class ProposalPdfService
     proposal_organizers
     proposal_locations
     proposal_subjects
-    proposal_bibliography
+    proposal_bibliography unless proposal.no_latex
     user_defined_fields
     proposal_participants
     @text

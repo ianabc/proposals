@@ -74,7 +74,7 @@ class ProposalsController < ApplicationController
     @proposal = Proposal.find_by(id: prop_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
     @latex_infile = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
-    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
+    @latex_infile = LatexToPdf.escape_latex(@latex_infile) unless @proposal.no_latex
 
     render_latex
   end
