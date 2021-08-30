@@ -35,7 +35,6 @@ class ProposalsController < ApplicationController
 
   def edit
     @proposal.invites.build
-    @invite = @proposal.invites.first
   end
 
   def locations
@@ -46,10 +45,9 @@ class ProposalsController < ApplicationController
   def latex_input
     proposal_id = latex_params[:proposal_id]
     session[:proposal_id] = proposal_id
-
-    input = latex_params[:latex]
-    @data = ProposalPdfService.new(proposal_id, latex_temp_file, input)
-                              .generate_latex_file
+    @latex_field = latex_params[:latex]
+    ProposalPdfService.new(proposal_id, latex_temp_file, @latex_field)
+                      .generate_latex_file
 
     head :ok
   end
@@ -57,13 +55,10 @@ class ProposalsController < ApplicationController
   # GET /proposals/:id/rendered_proposal.pdf
   def latex_output
     proposal_id = params[:id]
-    @data = ProposalPdfService.new(proposal_id, latex_temp_file, 'all')
-                              .generate_latex_file
-
     @proposal = Proposal.find_by(id: proposal_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
-    check_file
-    @latex_infile = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
+    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
+                                      .generate_latex_file.to_s
 
     render_latex
   end
@@ -75,10 +70,11 @@ class ProposalsController < ApplicationController
 
     @proposal = Proposal.find_by(id: prop_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
-    check_file
-    @latex_infile = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
-    @latex_infile = LatexToPdf.escape_latex(@latex_infile) unless @proposal.no_latex
 
+    field_input = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
+    field_input = LatexToPdf.escape_latex(field_input) if @proposal.no_latex
+    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, field_input)
+                                      .generate_latex_file.to_s
     render_latex
   end
 
@@ -159,8 +155,7 @@ class ProposalsController < ApplicationController
   end
 
   def render_latex
-    latex = "#{@proposal.macros}\n\n\\begin{document}\n\n#{@latex_infile}\n"
-    render layout: "application", inline: latex, formats: [:pdf]
+    render layout: "application", inline: @latex_infile, formats: [:pdf]
   rescue ActionView::Template::Error => e
     flash[:alert] = "There are errors in your LaTeX code. Please see the
                         output from the compiler, and the LaTeX document,
@@ -172,18 +167,5 @@ class ProposalsController < ApplicationController
   def set_careers
     @careers = Person.where(id: @proposal.participants.pluck(:person_id))
                      .pluck(:academic_status)
-  end
-
-  def check_file
-    return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
-
-    if params[:action] == "latex_field"
-      input = latex_params[:latex]
-      @data = ProposalPdfService.new(@proposal.id, latex_temp_file, input)
-                                .generate_latex_file
-    end
-    File.new("#{Rails.root}/tmp/#{latex_temp_file}", 'w') do |io|
-      io.write(@data)
-    end
   end
 end
