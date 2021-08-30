@@ -14,14 +14,14 @@ class SubmitProposalsController < ApplicationController
 
     create_invite and return if params[:create_invite]
 
-    unless @proposal.is_submission
-      redirect_to edit_proposal_path(@proposal), notice: 'Draft saved.'
-      return
-    end
-
     if submission.has_errors?
       redirect_to edit_proposal_path(@proposal), alert: "Your submission has
           errors: #{submission.error_messages}.".squish
+      return
+    end
+
+    unless @proposal.is_submission
+      redirect_to edit_proposal_path(@proposal), notice: 'Draft saved.'
       return
     end
 
@@ -118,7 +118,7 @@ class SubmitProposalsController < ApplicationController
 
   def check_file
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
-    return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
+    return if File.exist?("#{Rails.root}/tmp/#{temp_file}")
 
     @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
                                       .generate_latex_file.to_s
