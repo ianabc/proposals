@@ -8,20 +8,25 @@ class ProposalPdfService
   end
 
   def generate_latex_file
-    input = @input.presence || 'Please enter some text.'
-    input = all_proposal_fields if @input == 'all'
+    @input = @input.presence || 'Please enter some text.'
+    @input = all_proposal_fields if @input == 'all'
 
     if @proposal.is_submission
       LatexToPdf.config[:arguments].delete('-halt-on-error')
     end
 
     File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-      io.write(input)
+      io.write(@input)
     end
     self
   end
 
   def to_s
+    unless File.exist?("#{Rails.root}/tmp/#{@temp_file}")
+      File.new("#{Rails.root}/tmp/#{@temp_file}", 'w') do |io|
+        io.write(@input)
+      end
+    end
     latex_infile = File.read("#{Rails.root}/tmp/#{@temp_file}")
     latex_infile = LatexToPdf.escape_latex(latex_infile) unless @proposal.no_latex
     "#{@proposal.macros}\n\n\\begin{document}\n\n#{latex_infile}\n"

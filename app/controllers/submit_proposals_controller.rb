@@ -55,6 +55,7 @@ class SubmitProposalsController < ApplicationController
   end
 
   def confirm_submission(attachment)
+    check_file
     @proposal.update(status: :submitted)
     session[:is_submission] = nil
 
@@ -113,5 +114,16 @@ class SubmitProposalsController < ApplicationController
 
   def invite_params(invite)
     invite.permit(:firstname, :lastname, :email, :deadline_date, :invited_as)
+  end
+
+  def check_file
+    temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
+    unless File.exist?("#{Rails.root}/tmp/#{temp_file}")
+      @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
+                                      .generate_latex_file.to_s
+      File.new("#{Rails.root}/tmp/#{temp_file}", 'w') do |io|
+        io.write(@latex_infile)
+      end
+    end
   end
 end

@@ -115,6 +115,7 @@ class SubmittedProposalsController < ApplicationController
                                 inline: prop_latex.to_s, formats: [:pdf]
 
     @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
+    check_file
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
@@ -143,5 +144,12 @@ class SubmittedProposalsController < ApplicationController
 
   def set_proposal
     @proposal = Proposal.find_by(id: params[:id])
+  end
+
+  def check_file
+    unless File.exist?(@pdf_path)
+      @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
+      File.new(@pdf_path, 'w')
+    end
   end
 end
