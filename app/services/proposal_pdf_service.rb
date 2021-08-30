@@ -8,22 +8,23 @@ class ProposalPdfService
   end
 
   def generate_latex_file
-    input = @input.presence || 'Please enter some text.'
-    input = all_proposal_fields if @input == 'all'
+    @input = @input.presence || 'Please enter some text.'
+    @input = all_proposal_fields if @input == 'all'
 
     if @proposal.is_submission
       LatexToPdf.config[:arguments].delete('-halt-on-error')
     end
 
     File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-      io.write(input)
+      io.write(@input)
     end
     self
   end
 
   def to_s
+    generate_latex_file unless File.exist?("#{Rails.root}/tmp/#{@temp_file}")
+
     latex_infile = File.read("#{Rails.root}/tmp/#{@temp_file}")
-    latex_infile = LatexToPdf.escape_latex(latex_infile) if @proposal.no_latex
     "#{@proposal.macros}\n\n\\begin{document}\n\n#{latex_infile}\n"
   end
 
@@ -63,8 +64,8 @@ class ProposalPdfService
     proposal_organizers
     proposal_locations
     proposal_subjects
-    proposal_bibliography
     user_defined_fields
+    proposal_bibliography unless proposal.no_latex
     proposal_participants
     @text
   end
@@ -76,10 +77,7 @@ class ProposalPdfService
     @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
 
     @text << "\\subsection*{Lead Organiser}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname}  \\\\ \n\n"
-    # unless proposal.lead_organizer&.address.blank?
-    #   @text << "#{proposal.lead_organizer.address}  \\\\ \n\n"
-    # end
+    @text << "#{proposal.lead_organizer&.fullname} (#{LatexToPdf.escape_latex(proposal.lead_organizer&.affiliation)}) \\\\ \n\n"
     @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
   end
 
@@ -88,7 +86,7 @@ class ProposalPdfService
 
     @text << "\\subsection*{Supporting Organisers}\n\n"
     proposal.supporting_organizers.each do |organiser|
-      @text << "\\noindent #{organiser.firstname} #{organiser.lastname}\n\n"
+      @text << "\\noindent #{organiser&.person&.firstname} #{organiser&.person&.lastname} (#{LatexToPdf.escape_latex(organiser&.person&.affiliation)})\n\n"
     end
   end
 
@@ -116,8 +114,9 @@ class ProposalPdfService
   end
 
   def proposal_bibliography
+    return unless proposal.bibliography.present?
     @text << "\\subsection*{Bibliography}\n\n"
-    @text << "\\noindent #{LatexToPdf.escape_latex(proposal.bibliography)}\n\n"
+    @text << "\\noindent #{proposal.bibliography}\n\n"
   end
 
   def user_defined_fields
