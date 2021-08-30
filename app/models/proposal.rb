@@ -62,6 +62,10 @@ class Proposal < ApplicationRecord
     joins(:proposal_type).where(proposal_type: { name: type })
   }
 
+  def editable?
+    draft? || revision_requested?
+  end
+
   def demographics_data
     DemographicData.where(person_id: invites.where(invited_as: 'Participant')
                    .pluck(:person_id))

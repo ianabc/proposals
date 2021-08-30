@@ -34,7 +34,7 @@
                 <div class="mb-3 d-flex flex-row-reverse">
                   <% if params[:action] == 'edit' %>
                     <% if lead_organizer?(@proposal.proposal_roles) %> 
-                      <% if @proposal.draft? %>
+                      <% unless @proposal.editable? %>
                         <div class="float-end">
                           <%= f.submit 'Save as draft', class:'btn btn-primary' %>
                         </div>
