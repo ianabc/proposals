@@ -102,7 +102,16 @@ export default class extends Controller {
     }
   }
 
-  hidePreamble() {
+  saveProposal (id) {
+   $.post(`/submit_proposals?proposal=${id}`,
+      $('form#submit_proposal').serialize(), function(data) {
+    })
+  }
+
+  hideAndSave() {
+    let id = $('#proposal_id').val()
+    this.saveProposal(id)
+
     if($('#no_latex').is(':checked')) {
       this.latexPreambleTarget.classList.add("hidden")
       this.latexBibliographyTarget.classList.add("hidden")
