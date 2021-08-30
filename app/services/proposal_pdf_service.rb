@@ -116,8 +116,10 @@ class ProposalPdfService
   end
 
   def proposal_bibliography
-    @text << "\\subsection*{Bibliography}\n\n"
-    @text << "\\noindent #{LatexToPdf.escape_latex(proposal.bibliography)}\n\n"
+    if proposal.bibliography.present?
+      @text << "\\subsection*{Bibliography}\n\n"
+      @text << "\\noindent #{LatexToPdf.escape_latex(proposal.bibliography)}\n\n"
+    end
   end
 
   def user_defined_fields
