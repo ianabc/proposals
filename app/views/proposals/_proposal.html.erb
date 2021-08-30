@@ -32,14 +32,10 @@
                 data-nested-invites-participant-value="<%= confirmed_participants(@proposal.id, 'Participant').count %>"
                 >
                 <div class="mb-3 d-flex flex-row-reverse">
-                  <% if params[:action] == 'edit' %>
-                    <% if lead_organizer?(@proposal.proposal_roles) %> 
-                      <% unless @proposal.editable? %>
-                        <div class="float-end">
-                          <%= f.submit 'Save as draft', class:'btn btn-primary' %>
-                        </div>
-                      <% end %>
-                    <% end %>
+                  <% if show_edit_button?(@proposal) %>
+                    <div class="float-end">
+                      <%= f.submit 'Save as Draft', class:'btn btn-primary' %>
+                    </div>
                   <% end %>
                 </div>
                 <div class="col-12 col-lg-12">
