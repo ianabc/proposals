@@ -32,14 +32,10 @@
                 data-nested-invites-participant-value="<%= confirmed_participants(@proposal.id, 'Participant').count %>"
                 >
                 <div class="mb-3 d-flex flex-row-reverse">
-                  <% if params[:action] == 'edit' %>
-                    <% if lead_organizer?(@proposal.proposal_roles) %> 
-                      <% if @proposal.draft? %>
-                        <div class="float-end">
-                          <%= f.submit 'Save as draft', class:'btn btn-primary' %>
-                        </div>
-                      <% end %>
-                    <% end %>
+                  <% if show_edit_button?(@proposal) %>
+                    <div class="float-end">
+                      <%= f.submit 'Save as Draft', class:'btn btn-primary' %>
+                    </div>
                   <% end %>
                 </div>
                 <div class="col-12 col-lg-12">
@@ -269,10 +265,11 @@
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction2&.html_safe %></p>
                         </div>
+                        <input type="hidden" id="proposal_id" name="proposal_id" value="<%= @proposal.id %>">
+
                         <!-- <h4 class="tab-title">Common Fields</h4> -->
                         <div class="form-group mb-3">
-                          <input type="checkbox" name="no_latex" data-action="focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur click->submit-proposals#hidePreamble" id="no_latex" data-value="<%= @proposal.no_latex %>" <%= @proposal.no_latex ? 'checked' : '' %>
-                          <%= 'checked=checked' if @proposal.no_latex %>>
+                          <input type="checkbox" name="no_latex" data-action="click->submit-proposals#hideAndSave" id="no_latex" data-value="<%= @proposal.no_latex %>" <%= 'checked=checked' if @proposal.no_latex %>>
                           <%= f.label :no_latex, "No LaTeX", class: "form-label" %>
                   			</div>
                         <div class="form-group mb-3 <%= 'hidden' if @proposal.no_latex %>" name="latexPreamble" id="latexPreamble" data-submit-proposals-target="latexPreamble">
