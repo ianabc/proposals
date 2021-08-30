@@ -28,8 +28,8 @@
                 data-submit-proposals-proposal-value="<%= @proposal.id %>"data-nested-invites-wrapper-selector-value=".nested-invites-wrapper"
                 data-nested-invites-max-participant-value="<%= @proposal.proposal_type.participant %>"
                 data-nested-invites-max-organizer-value="<%= @proposal.proposal_type.co_organizer %>"
-                data-nested-invites-organizer-value="<%= Proposal.no_of_participants(@proposal.id, 'Organizer').count %>"
-                data-nested-invites-participant-value="<%= Proposal.no_of_participants(@proposal.id, 'Participant').count %>"
+                data-nested-invites-organizer-value="<%= confirmed_participants(@proposal.id, 'Organizer').count %>"
+                data-nested-invites-participant-value="<%= confirmed_participants(@proposal.id, 'Participant').count %>"
                 >
                 <div class="mb-3 d-flex flex-row-reverse">
                   <% if params[:action] == 'edit' %>
@@ -271,17 +271,18 @@
                         </div>
                         <!-- <h4 class="tab-title">Common Fields</h4> -->
                         <div class="form-group mb-3">
-                          <input type="checkbox" name="no_latex" data-action="focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur click->submit-proposals#hidePreamble" id="no_latex" data-value="<%= @proposal.no_latex %>" <%= @proposal.no_latex ? 'checked' : '' %>>
+                          <input type="checkbox" name="no_latex" data-action="focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur click->submit-proposals#hidePreamble" id="no_latex" data-value="<%= @proposal.no_latex %>" <%= @proposal.no_latex ? 'checked' : '' %>
+                          <%= 'checked=checked' if @proposal.no_latex %>>
                           <%= f.label :no_latex, "No LaTeX", class: "form-label" %>
                   			</div>
-                        <div class="form-group mb-3" name="latexPreamble" id="latexPreamble" data-submit-proposals-target="latexPreamble">
+                        <div class="form-group mb-3 <%= 'hidden' if @proposal.no_latex %>" name="latexPreamble" id="latexPreamble" data-submit-proposals-target="latexPreamble">
                           <h3>LaTeX Preamble</h3>
                           <p>If you have custom LaTeX macros, enter them here to add them to the document preamble.</p>
                           <div class="form-group mb-2">
                             <%= f.text_area(:preamble, size: '5x5', class:'form-control', value: @proposal.preamble, disabled: action)%>
                           </div>
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 <%= 'hidden' if @proposal.no_latex %>" name="latexBibliography" id="latexBibliography" data-submit-proposals-target="latexBibliography">
                           <h3>Bibliography</h3>
                           <p>If you have a LaTeX bibliography, please enter it in this field. It will be included when you click the "Print Proposal" button.</p>
                           <div class="form-group mb-2">
