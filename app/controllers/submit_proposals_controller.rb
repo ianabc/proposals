@@ -36,23 +36,20 @@ class SubmitProposalsController < ApplicationController
   def create_invite
     return unless request.xhr?
 
-    count = save_invites
+    errors = []
+    params[:invites_attributes].each_value do |invite|
+      invite = @proposal.invites.new(invite_params(invite))
+      invite.save
+      errors << invite.errors.full_messages unless invite.errors.empty?
+    end
 
-    if count >= 1
+    if errors.empty?
       head :ok
     else
-      render json: @invite.errors.full_messages, status: :unprocessable_entity
+      render json: errors.join(', '), status: :unprocessable_entity
     end
   end
 
-  def save_invites
-    count = 0
-    params[:invites_attributes].each_value do |invite|
-      @invite = @proposal.invites.new(invite_params(invite))
-      count += 1 if @invite.save
-    end
-    count
-  end
 
   def confirm_submission(attachment)
     check_file
@@ -88,7 +85,8 @@ class SubmitProposalsController < ApplicationController
   end
 
   def proposal_params
-    params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids, :no_latex, :preamble, :bibliography)
+    params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
+                  :no_latex, :preamble, :bibliography)
           .merge(ams_subject_ids: proposal_ams_subjects)
           .merge(no_latex: params[:no_latex] == 'on')
   end
@@ -108,8 +106,10 @@ class SubmitProposalsController < ApplicationController
   end
 
   def update_proposal_ams_subject_code
-    ProposalAmsSubject.create(ams_subject_id: @code1, proposal: @proposal, code: 'code1')
-    ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal, code: 'code2')
+    ProposalAmsSubject.create(ams_subject_id: @code1, proposal: @proposal,
+                              code: 'code1')
+    ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
+                              code: 'code2')
   end
 
   def invite_params(invite)
