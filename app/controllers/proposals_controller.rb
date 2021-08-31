@@ -45,8 +45,7 @@ class ProposalsController < ApplicationController
   def latex_input
     proposal_id = latex_params[:proposal_id]
     session[:proposal_id] = proposal_id
-    @latex_field = latex_params[:latex]
-    ProposalPdfService.new(proposal_id, latex_temp_file, @latex_field)
+    ProposalPdfService.new(proposal_id, latex_temp_file, latex_params[:latex])
                       .generate_latex_file
 
     head :ok
@@ -59,7 +58,6 @@ class ProposalsController < ApplicationController
     @year = @proposal&.year || Date.current.year.to_i + 2
     @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
                                       .generate_latex_file.to_s
-
     render_latex
   end
 
