@@ -14,7 +14,7 @@
       Learn More
     </a></p>
   <% end %>
-  <%= select_tag "Option", options_for_select(proposal_field_options(field), answer(field, @proposal)), class: 'form-select', disabled: action, name: field.id, data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+  <%= select_tag "Option", options_for_select(proposal_field_options(field), answer(field, @proposal)), class: 'form-select', disabled: action, name: field.id, data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
 
   <% if @submission %>
     <% validations(field, @proposal).each do |val| %>

@@ -16,7 +16,7 @@
   <% end %>
   <% proposal_field_options(field).each do |text,value| %>
     <div>
-      <input type="radio" name="<%= field.id %>" <%= action ? 'disabled' : '' %> value="<%= value %>" <%= answer(field, @proposal) == value ? 'checked' : '' %>  data-action="focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur">
+      <input type="radio" name="<%= field.id %>" <%= action ? 'disabled' : '' %> value="<%= value %>" <%= answer(field, @proposal) == value ? 'checked' : '' %>  data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur">
       <span><%= text %></span>
     </div>
   <% end %>

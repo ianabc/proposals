@@ -62,7 +62,7 @@
                         </div>
                         <div class="mb-3">
                           <%= f.label :title, class: "required" %>
-                          <%= f.text_field :title, class: 'form-control', disabled: action, value: @proposal.title, data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                          <%= f.text_field :title, class: 'form-control', disabled: action, value: @proposal.title, data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                           <% if @submission && @proposal.title.blank? %>
                             <p class="field-validation">Title is required</p>
                           <% end %>
@@ -75,13 +75,13 @@
 
                         <div class="mb-3">
                           <%= f.label :year %>
-                          <%= f.select :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), {}, disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                          <%= f.select :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), {}, disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                         </div>
                         <div class="mb-3 row">
                           <h3 class="form-section">Subject Areas</h4>
                           <div class="col-6 mt-2">
                             <label class="required">Subject Area</label>
-                            <%= f.select :subject_id, options_for_select(subjects_area, @proposal.subject&.id), { include_blank: '' }, disabled: action, class: "form-select", data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                            <%= f.select :subject_id, options_for_select(subjects_area, @proposal.subject&.id), { include_blank: '' }, disabled: action, class: "form-select", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                             <% if @submission && @proposal.subject&.id.nil? %>
                               <p class="field-validation">Subject is required</p>
                             <% end %>
@@ -89,7 +89,7 @@
                           <div class="col-6 mt-2">
                             <div class="mb-3">
                               <label class="required">AMS Subject Code 1</label>
-                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code1')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code1]', data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code1')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code1]', data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                               <% if @submission && proposal_ams_subjects_code(@proposal, 'code1').blank? %>
                                 <p class="field-validation">AMS Subject Code 1 is required</p>
                               <% end %>
@@ -97,7 +97,7 @@
 
                             <div class="mb-3">
                               <label class="required">AMS Subject Code 2</label>
-                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code2]', data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code2]', data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                             </div>
                           </div>
                           <div>
