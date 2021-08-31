@@ -64,7 +64,7 @@ class Invite < ApplicationRecord
     return if proposal.nil? || proposal.invites.where(email: email.downcase)
                                        .where.not(status: 'cancelled').empty?
 
-    errors.add('Uniqueness: ', "Same email cannot be used to invite already
-                                invited organizers or participants.".squish)
+    errors.add('Duplicate:', "Same email cannot be used to invite already
+                              invited organizers or participants.".squish)
   end
 end

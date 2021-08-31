@@ -46,7 +46,7 @@ class SubmitProposalsController < ApplicationController
     if errors.empty?
       head :ok
     else
-      render json: errors.join(', '), status: :unprocessable_entity
+      render json: errors.flatten.to_json, status: :unprocessable_entity
     end
   end
 
