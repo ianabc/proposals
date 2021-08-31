@@ -91,17 +91,18 @@ module ProposalFieldsHelper
     "#{loc} - Based question"
   end
 
-  def active_tab(proposal, tab)
-    tab_errors(proposal).eql?(tab) ? 'active' : ''
+  def active_tab(proposal, tab, param_tab)
+    tab_errors(proposal, param_tab).eql?(tab) ? 'active' : ''
   end
 
-  def tab_errors(proposal)
+  def tab_errors(proposal, param_tab)
+    return 'two' if param_tab == "tab-2"
     return 'one' unless session[:is_submission]
     return 'one' if params[:action] == 'show'
 
     if tab_one(proposal)
       'one'
-    elsif tab_two(proposal)
+    elsif tab_two(proposal) || param_tab.present?
       'two'
     elsif tab_three(proposal)
       'three'

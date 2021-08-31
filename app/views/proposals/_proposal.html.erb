@@ -42,20 +42,20 @@
                   <div class="tab">
                     <ul id="tabs" class="nav nav-tabs row" role="tablist">
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
-                        <a class="nav-link <%= active_tab(@proposal, 'one') %>" href="#tab-1" data-bs-toggle="tab" role="tab" data-target='submit-proposals.tabs'>Step 1</a>
+                        <a class="nav-link <%= active_tab(@proposal, 'one', params[:tab]) %>" href="#tab-1" data-bs-toggle="tab" role="tab" data-target='submit-proposals.tabs'>Step 1</a>
                       </li>
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
-                        <a class="nav-link <%= active_tab(@proposal, 'two') %>" href="#tab-2" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 2</a>
+                        <a class="nav-link <%= active_tab(@proposal, 'two', params[:tab]) %>" href="#tab-2" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 2</a>
                       </li>
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
-                        <a class="nav-link <%= active_tab(@proposal, 'three') %>" href="#tab-3" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 3</a>
+                        <a class="nav-link <%= active_tab(@proposal, 'three', params[:tab]) %>" href="#tab-3" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 3</a>
                       </li>
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
                         <a class="nav-link" href="#tab-4" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Demographic Charts</a>
                       </li>
                     </ul>
                     <div class="tab-content">
-                      <div class="tab-pane <%= active_tab(@proposal, 'one') %>" id="tab-1" role="tabpanel">
+                      <div class="tab-pane <%= active_tab(@proposal, 'one', params[:tab]) %>" id="tab-1" role="tabpanel">
                         <h4 class="tab-title"></h4>
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
@@ -261,7 +261,7 @@
                         </div>
                       </div>
 
-                      <div class="tab-pane <%= active_tab(@proposal, 'two') %> overflow-hidden" id="tab-2" role="tabpanel">
+                      <div class="tab-pane <%= active_tab(@proposal, 'two', params[:tab]) %> overflow-hidden" id="tab-2" role="tabpanel">
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction2&.html_safe %></p>
                         </div>
@@ -298,7 +298,7 @@
                       </div>
                     </div>
 
-                    <div class="tab-pane <%= active_tab(@proposal, 'three') %>" id="tab-3" role="tabpanel">
+                    <div class="tab-pane <%= active_tab(@proposal, 'three', params[:tab]) %>" id="tab-3" role="tabpanel">
                       <div class="mb-3">
                         <p><%= @proposal.proposal_form.introduction3&.html_safe %></p>
                       </div>
