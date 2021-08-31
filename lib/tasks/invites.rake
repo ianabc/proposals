@@ -1,14 +1,10 @@
 namespace :birs do
   desc "Change Co Organizer to Organizer"
   task rename_co_organizer: :environment do
-    organizer = "Organizer"
 
     Invite.all.each do |invite|
-      case invite.invited_as
-      when 'Co Organizer'
-        invite = Invite.find_by(id: invite.id)
-        invite.skip_deadline_validation = true
-        invite.update(invited_as: organizer)
+      if invite.invited_as == 'Co Organizer'
+        invite.update_columns(invited_as: 'Organizer')
       end
     end
   end
