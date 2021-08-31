@@ -72,11 +72,15 @@ class ProposalPdfService
 
   def proposal_details
     code = proposal.code.blank? ? '' : "#{proposal.code}: "
+    confirmed_participants = proposal.invites.where(status: "confirmed", invited_as: "Participant")
+    confirmed_organizers = proposal.invites.where(status: "confirmed", invited_as: "Organizer")
     @text = "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal.title)} }\n\n"
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
+    @text << "\\noindent #{confirmed_participants.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
+    @text << "\\noindent #{confirmed_organizers.count} confirmed / #{proposal.proposal_type&.co_organizer} maximum organizers\n\n"
+    @text << "\\noindent 1 confirmed / lead organizer\n\n"
 
-    @text << "\\subsection*{Lead Organiser}\n\n"
+    @text << "\\subsection*{Lead Organizer}\n\n"
     @text << "#{proposal.lead_organizer&.fullname} (#{LatexToPdf.escape_latex(proposal.lead_organizer&.affiliation)}) \\\\ \n\n"
     @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
   end
@@ -84,9 +88,9 @@ class ProposalPdfService
   def proposal_organizers
     return if proposal.supporting_organizers.count.zero?
 
-    @text << "\\subsection*{Supporting Organisers}\n\n"
-    proposal.supporting_organizers.each do |organiser|
-      @text << "\\noindent #{organiser&.person&.firstname} #{organiser&.person&.lastname} (#{LatexToPdf.escape_latex(organiser&.person&.affiliation)})\n\n"
+    @text << "\\subsection*{Supporting Organizers}\n\n"
+    proposal.supporting_organizers.each do |organizer|
+      @text << "\\noindent #{organizer&.person&.firstname} #{organizer&.person&.lastname} (#{LatexToPdf.escape_latex(organizer&.person&.affiliation)})\n\n"
     end
   end
 
