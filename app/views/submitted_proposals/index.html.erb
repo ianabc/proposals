@@ -24,11 +24,11 @@
                 </div>
                 <div class="col-xs-6 col-md-3">
                   <label class="form-label">Proposal Type</label><br>
-                  <%= select_tag "proposal_type", options_for_select(all_proposal_types, params[:proposal_type]), { include_blank: '', class: 'form-control p-1' }%>
+                  <%= select_tag "proposal_type", options_for_select(all_proposal_types, params[:proposal_type]), { include_blank: '', class: 'form-select p-1' }%>
                 </div>
                 <div class="col-xs-6 col-md-3">
                   <label class="form-label">Status</label><br>
-                  <%= select_tag :status, options_for_select(all_statuses, params[:status]), { include_blank: '', class: 'form-control p-1' } %>
+                  <%= select_tag :status, options_for_select(all_statuses, params[:status]), { include_blank: '', class: 'form-select p-1' } %>
                 </div>
                 <div class="col-xs-6 col-md-3">
                   <label class="form-label">Workshop Year</label><br>
