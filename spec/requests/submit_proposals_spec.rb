@@ -9,41 +9,7 @@ RSpec.describe "/submit_proposals", type: :request do
     it { expect(response).to have_http_status(:ok) }
   end
 
-  describe "POST /create with valid parameters" do
-    let(:proposal) { create(:proposal) }
-    let(:subject_category) { create(:subject_category) }
-    let(:subject) { create(:subject, subject_category_id: subject_category.id) }
-    let(:ams_subject_code1) do
-      create(:ams_subject, subject_category_ids:
-                           subject_category.id, subject_id: subject.id)
-    end
-    let(:ams_subject_code2) do
-      create(:ams_subject, subject_category_ids:
-                           subject_category.id, subject_id: subject.id)
-    end
-    let(:location) { create(:location) }
-    let(:invites_attributes) do
-      { '0' => { firstname: 'First', lastname: 'organizer',
-                 email: 'organizer@gmail.com', deadline_date: DateTime.now,
-                 invited_as: 'Organizer' } }
-    end
-    let(:params) do
-      { proposal: proposal.id, title: 'Test proposal', year: '2023',
-        subject_id: subject.id, ams_subjects: { code1: ams_subject_code1.id, code2: ams_subject_code2.id },
-        invites_attributes: invites_attributes,
-        location_ids: location.id, no_latex: false, create_invite: true }
-    end
-
-    before do
-      post submit_proposals_url, params: params, xhr: true
-    end
-
-    it "updates the requested proposal" do
-      expect(proposal.invites.count).to eq(1)
-    end
-  end
-
-  describe "POST /create" do
+  describe "POST /create without invite" do
     let(:proposal) { create(:proposal) }
     let(:subject_category) { create(:subject_category) }
     let(:subject) { create(:subject, subject_category_id: subject_category.id) }
@@ -73,6 +39,57 @@ RSpec.describe "/submit_proposals", type: :request do
 
     it "updates the proposal but will not create invite" do
       expect(proposal.invites.count).to eq(0)
+    end
+  end
+
+  describe "POST /create with invite parameters" do
+    let(:proposal) { create(:proposal) }
+    let(:subject_category) { create(:subject_category) }
+    let(:subject) { create(:subject, subject_category_id: subject_category.id) }
+    let(:ams_subject_code1) do
+      create(:ams_subject, subject_category_ids:
+                           subject_category.id, subject_id: subject.id)
+    end
+    let(:ams_subject_code2) do
+      create(:ams_subject, subject_category_ids:
+                           subject_category.id, subject_id: subject.id)
+    end
+    let(:location) { create(:location) }
+    let(:invites_attributes) do
+      { '0' => { firstname: 'First', lastname: 'Organizer',
+                 email: 'organizer@gmail.com', deadline_date: DateTime.now,
+                 invited_as: 'Organizer' } }
+    end
+    let(:params) do
+      { proposal: proposal.id, title: 'Test proposal', year: '2023',
+        subject_id: subject.id, ams_subjects: { code1: ams_subject_code1.id, code2: ams_subject_code2.id },
+        invites_attributes: invites_attributes,
+        location_ids: location.id, no_latex: false, create_invite: true }
+    end
+
+    context 'with valid invite params' do
+      before do
+        post submit_proposals_url, params: params, xhr: true
+      end
+
+      it "updates the proposal invites count" do
+        expect(proposal.invites.count).to eq(1)
+      end
+    end
+
+    context 'with invalid invite params' do
+      before do
+        proposal.invites.new(invites_attributes['0']).save
+        expect(proposal.invites.count).to eq(1)
+
+        post submit_proposals_url, params: params, xhr: true
+      end
+
+      it { expect(response).to have_http_status(:unprocessable_entity) }
+
+      it "does not update the proposal invites count" do
+        expect(proposal.invites.count).to eq(1)
+      end
     end
   end
 
