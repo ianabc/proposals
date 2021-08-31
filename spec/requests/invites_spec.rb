@@ -4,6 +4,19 @@ RSpec.describe "/proposals/:proposal_id/invites", type: :request do
   let(:proposal_type) { create(:proposal_type) }
   let(:proposal) { create(:proposal, proposal_type: proposal_type) }
   let(:invite) { create(:invite, proposal: proposal) }
+  let(:person) { create(:person) }
+  let(:role) { create(:role, name: 'Staff') }
+  let(:user) { create(:user, person: person) }
+  let(:role_privilege) do
+    create(:role_privilege,
+           permission_type: "Manage", privilege_name: "Invite", role_id: role.id)
+  end
+
+  before do
+    role_privilege
+    user.roles << role
+    sign_in user
+  end
 
   describe "POST /inviter_response" do
     before do

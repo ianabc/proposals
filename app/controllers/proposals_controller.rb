@@ -8,7 +8,8 @@ class ProposalsController < ApplicationController
   end
 
   def ranking
-    @proposal_locations = @proposal.proposal_locations.find_by(location_id: params[:location_id])
+    @proposal_locations = @proposal.proposal_locations
+                                   .find_by(location_id: params[:location_id])
     @proposal_locations.update(position: params[:position].to_i)
     head :ok
   end
@@ -44,9 +45,8 @@ class ProposalsController < ApplicationController
   def latex_input
     proposal_id = latex_params[:proposal_id]
     session[:proposal_id] = proposal_id
-
-    input = latex_params[:latex]
-    ProposalPdfService.new(proposal_id, latex_temp_file, input).pdf
+    ProposalPdfService.new(proposal_id, latex_temp_file, latex_params[:latex])
+                      .generate_latex_file
 
     head :ok
   end
@@ -54,18 +54,13 @@ class ProposalsController < ApplicationController
   # GET /proposals/:id/rendered_proposal.pdf
   def latex_output
     proposal_id = params[:id]
-    ProposalPdfService.new(proposal_id, latex_temp_file, 'all').pdf
-
     @proposal = Proposal.find_by(id: proposal_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
-
-    fh = File.open("#{Rails.root}/tmp/#{latex_temp_file}")
-    @latex_input = fh.read
-
+    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
+                                      .generate_latex_file.to_s
     render_latex
   end
 
-  # rubocop:disable Metrics/AbcSize
   # GET /proposals/:id/rendered_field.pdf
   def latex_field
     prop_id = params[:id]
@@ -74,18 +69,19 @@ class ProposalsController < ApplicationController
     @proposal = Proposal.find_by(id: prop_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
 
-    fh = File.open("#{Rails.root}/tmp/#{latex_temp_file}")
-    @latex_input = fh.read
-    @latex_input = LatexToPdf.escape_latex(@latex_input) if @proposal.no_latex
-
+    field_input = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
+    field_input = LatexToPdf.escape_latex(field_input) if @proposal.no_latex
+    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, field_input)
+                                      .generate_latex_file.to_s
     render_latex
   end
-  # rubocop:enable Metrics/AbcSize
 
   def destroy
     @proposal.destroy
     respond_to do |format|
-      format.html { redirect_to proposals_url, notice: "Proposal was successfully destroyed." }
+      format.html do
+        redirect_to proposals_url, notice: "Proposal was successfully deleted."
+      end
       format.json { head :no_content }
     end
   end
@@ -157,18 +153,17 @@ class ProposalsController < ApplicationController
   end
 
   def render_latex
-    # rubocop:disable all
-    render layout: "application", inline: @latex_input.to_s, formats: [:pdf]
+    render layout: "application", inline: @latex_infile, formats: [:pdf]
   rescue ActionView::Template::Error => e
     flash[:alert] = "There are errors in your LaTeX code. Please see the
                         output from the compiler, and the LaTeX document,
                         below".squish
     error_output = ProposalPdfService.format_errors(e)
     render layout: "latex_errors", inline: error_output.to_s, formats: [:html]
-    # rubocop:enable all
   end
 
   def set_careers
-    @careers = Person.where(id: @proposal.participants.pluck(:person_id)).pluck(:academic_status)
+    @careers = Person.where(id: @proposal.participants.pluck(:person_id))
+                     .pluck(:academic_status)
   end
 end

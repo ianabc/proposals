@@ -68,7 +68,8 @@ services:
       - IASM_EMAIL=iasm@example.com
       - UBCO_COORD='UBCO Program Coordinator'
       - UBCO_EMAIL=ubco@example.com
-
+      - EDITFLOW_API_TOKEN=
+      - EDITFLOW_API_URL=
 
 
 volumes:

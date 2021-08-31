@@ -2,7 +2,23 @@ require 'rails_helper'
 
 RSpec.describe "/proposal_forms", type: :request do
   let(:proposal_type) { create(:proposal_type) }
-  let(:proposal_form) { create(:proposal_form, status: 'draft', proposal_type: proposal_type) }
+  let(:proposal_form) {
+    create(:proposal_form, status: 'draft', proposal_type: proposal_type)
+  }
+  let(:person) { create(:person) }
+  let(:role) { create(:role, name: 'Staff') }
+  let(:user) { create(:user, person: person) }
+  let(:role_privilege) {
+    create(:role_privilege,
+           permission_type: "Manage", privilege_name: "ProposalForm",
+           role_id: role.id)
+  }
+
+  before do
+    role_privilege
+    user.roles << role
+    sign_in user
+  end
 
   describe "GET /index" do
     it "renders a successful response" do

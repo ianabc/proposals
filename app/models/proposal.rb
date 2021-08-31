@@ -1,19 +1,26 @@
 class Proposal < ApplicationRecord
   include PgSearch::Model
-  pg_search_scope :search_proposals, against: %i[year title status subject_id proposal_type_id],
+  pg_search_scope :search_proposals, against: %i[title],
                                      associated_against: {
                                        people: %i[firstname lastname]
                                      }
 
-  attr_accessor :is_submission
+  pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
+  pg_search_scope :search_proposal_status, against: %i[status]
+  pg_search_scope :search_proposal_subject, against: %i[subject_id]
+  pg_search_scope :search_proposal_year, against: %i[year]
+
+  attr_accessor :is_submission, :skip_submission_validation
 
   has_many_attached :files
   has_many :proposal_locations, dependent: :destroy
-  has_many :locations, -> { order 'proposal_locations.position' }, through: :proposal_locations
+  has_many :locations, -> { order 'proposal_locations.position' },
+                          through: :proposal_locations
   belongs_to :proposal_type
   has_many :proposal_roles, dependent: :destroy
   has_many :people, through: :proposal_roles
-  has_many(:answers, -> { order 'answers.proposal_field_id' }, inverse_of: :proposal, dependent: :destroy)
+  has_many(:answers, -> { order 'answers.proposal_field_id' },
+                        inverse_of: :proposal, dependent: :destroy)
   has_many :invites, dependent: :destroy
   belongs_to :proposal_form
   has_many :proposal_ams_subjects, dependent: :destroy
@@ -37,7 +44,9 @@ class Proposal < ApplicationRecord
     revision_submitted: 4,
     in_progress: 5,
     decision_pending: 6,
-    decision_email_sent: 7
+    decision_email_sent: 7,
+    approved: 8,
+    declined: 9
   }
 
   scope :active_proposals, lambda {
@@ -49,13 +58,17 @@ class Proposal < ApplicationRecord
       AND invites.proposal_id = ?', invited_as, id)
   }
 
-  scope :submitted, lambda { |type|
-    where(status: 1)
-      .joins(:proposal_type).where(name: type)
+  scope :submitted_type, lambda { |type|
+    joins(:proposal_type).where(proposal_type: { name: type })
   }
 
+  def editable?
+    draft? || revision_requested?
+  end
+
   def demographics_data
-    DemographicData.where(person_id: invites.where(invited_as: 'Participant').pluck(:person_id))
+    DemographicData.where(person_id: invites.where(invited_as: 'Participant')
+                   .pluck(:person_id))
   end
 
   def create_organizer_role(person, organizer)
@@ -71,12 +84,13 @@ class Proposal < ApplicationRecord
     locations.pluck(:name).join(', ')
   end
 
-  def list_of_co_organizers
-    invites.where(invites: { invited_as: 'Co Organizer' }).map(&:person).map(&:fullname).join(', ')
+  def list_of_organizers
+    invites.where(invites: { invited_as: 'Organizer' }).map(&:person)
+           .map(&:fullname).join(', ')
   end
 
   def supporting_organizers
-    invites.where(invited_as: 'Co Organizer').where(response: %w[yes maybe])
+    invites.where(invited_as: 'Organizer').where(response: %w[yes maybe])
   end
 
   def participants
@@ -89,13 +103,15 @@ class Proposal < ApplicationRecord
   end
 
   def self.to_csv
-    attributes = ["Code", "Proposal Title", "Proposal Type", "Lead Organizer", "Preffered Locations", "Status",
+    attributes = ["Code", "Proposal Title", "Proposal Type", "Lead Organizer",
+                  "Preffered Locations", "Status",
                   "Updated"]
     CSV.generate(headers: true) do |csv|
       csv << attributes
       all.find_each do |proposal|
-        csv << [proposal.code, proposal.title, proposal.proposal_type.name, proposal.lead_organizer.fullname,
-                proposal.the_locations, proposal.status, proposal.updated_at.to_date]
+        csv << [proposal.code, proposal.title, proposal.proposal_type.name,
+                proposal.lead_organizer.fullname, proposal.the_locations,
+                proposal.status, proposal.updated_at.to_date]
       end
     end
   end
@@ -104,30 +120,37 @@ class Proposal < ApplicationRecord
     file.content_type.in?(%w[application/pdf])
   end
 
+  def macros
+    preamble || ''
+  end
+
   private
 
   def not_before_opening
+    return if skip_submission_validation
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
     errors.add("Late submission - ", "proposal submissions are not allowed
-        because of due date #{proposal_type.closed_date.to_date}".squish)
+               because of due date #{proposal_type.closed_date.to_date}".squish)
   end
 
   def minimum_organizers
     return unless invites.where(status: 'confirmed').count < 1
 
     errors.add('Supporting Organizers: ', 'At least one supporting organizer
-      must confirm their participation by following the link in the email
-      that was sent to them.'.squish)
+               must confirm their participation by following the link in the
+               email that was sent to them.'.squish)
   end
 
   def subjects
     errors.add('Subject Area:', "please select a subject area") if subject.nil?
-    errors.add('AMS Subjects:', 'please select 2 AMS Subjects') unless ams_subjects.pluck(:code).count == 2
+    unless ams_subjects.pluck(:code).count == 2
+      errors.add('AMS Subjects:', 'please select 2 AMS Subjects')
+    end
   end
 
   def next_number
-    codes = Proposal.submitted(proposal_type.name).pluck(:code)
+    codes = Proposal.submitted_type(proposal_type.name).pluck(:code)
     last_code = codes.reject { |c| c.to_s.empty? }.max
 
     return '001' if last_code.blank?
@@ -143,6 +166,9 @@ class Proposal < ApplicationRecord
   end
 
   def preferred_locations
-    errors.add('Preferred Locations:', "Please select at least one preferred location") if locations.empty?
+    if locations.empty?
+      errors.add('Preferred Locations:', "Please select at least one preferred
+                 location".squish)
+    end
   end
 end

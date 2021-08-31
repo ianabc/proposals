@@ -1,7 +1,18 @@
 require 'rails_helper'
 
 RSpec.feature "Locations index", type: :feature do
+  let(:person) { create(:person) }
+  let(:role) { create(:role, name: 'Staff') }
+  let(:user) { create(:user, person: person) }
+  let(:role_privilege) do
+    create(:role_privilege,
+           permission_type: "Manage", privilege_name: "Location", role_id: role.id)
+  end
+
   before do
+    role_privilege
+    user.roles << role
+    login_as(user)
     3.times { create(:location) }
     visit locations_path
   end

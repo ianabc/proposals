@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_07_28_061859) do
+ActiveRecord::Schema.define(version: 2021_08_25_094801) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -54,6 +54,15 @@ ActiveRecord::Schema.define(version: 2021_07_28_061859) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "ams_subject_categories", force: :cascade do |t|
+    t.bigint "subject_category_id", null: false
+    t.bigint "ams_subject_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["ams_subject_id"], name: "index_ams_subject_categories_on_ams_subject_id"
+    t.index ["subject_category_id"], name: "index_ams_subject_categories_on_subject_category_id"
+  end
+
   create_table "ams_subjects", force: :cascade do |t|
     t.string "code"
     t.string "title"
@@ -82,6 +91,15 @@ ActiveRecord::Schema.define(version: 2021_07_28_061859) do
     t.index ["person_id"], name: "index_demographic_data_on_person_id"
   end
 
+  create_table "email_templates", force: :cascade do |t|
+    t.string "title"
+    t.string "subject"
+    t.text "body"
+    t.integer "email_type", default: 0
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "emails", force: :cascade do |t|
     t.string "subject"
     t.text "body"
@@ -89,6 +107,8 @@ ActiveRecord::Schema.define(version: 2021_07_28_061859) do
     t.bigint "proposal_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "cc_email"
+    t.string "bcc_email"
     t.index ["proposal_id"], name: "index_emails_on_proposal_id"
   end
 
@@ -326,6 +346,9 @@ ActiveRecord::Schema.define(version: 2021_07_28_061859) do
     t.bigint "subject_id"
     t.string "code"
     t.boolean "no_latex", default: false
+    t.text "preamble"
+    t.text "bibliography"
+    t.datetime "edit_flow"
     t.index ["code"], name: "index_proposals_on_code", unique: true
     t.index ["proposal_form_id"], name: "index_proposals_on_proposal_form_id"
     t.index ["proposal_type_id"], name: "index_proposals_on_proposal_type_id"
@@ -345,6 +368,8 @@ ActiveRecord::Schema.define(version: 2021_07_28_061859) do
     t.string "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "system_generated", default: false
+    t.integer "role_type", default: 0
   end
 
   create_table "staff_discussions", force: :cascade do |t|
@@ -355,10 +380,20 @@ ActiveRecord::Schema.define(version: 2021_07_28_061859) do
     t.index ["proposal_id"], name: "index_staff_discussions_on_proposal_id"
   end
 
+  create_table "subject_area_categories", force: :cascade do |t|
+    t.bigint "subject_category_id", null: false
+    t.bigint "subject_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["subject_category_id"], name: "index_subject_area_categories_on_subject_category_id"
+    t.index ["subject_id"], name: "index_subject_area_categories_on_subject_id"
+  end
+
   create_table "subject_categories", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "code"
   end
 
   create_table "subjects", force: :cascade do |t|
@@ -438,6 +473,8 @@ ActiveRecord::Schema.define(version: 2021_07_28_061859) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "ams_subject_categories", "ams_subjects"
+  add_foreign_key "ams_subject_categories", "subject_categories"
   add_foreign_key "ams_subjects", "subjects"
   add_foreign_key "answers", "proposal_fields"
   add_foreign_key "answers", "proposals"
@@ -462,6 +499,8 @@ ActiveRecord::Schema.define(version: 2021_07_28_061859) do
   add_foreign_key "proposals", "subjects"
   add_foreign_key "role_privileges", "roles"
   add_foreign_key "staff_discussions", "proposals"
+  add_foreign_key "subject_area_categories", "subject_categories"
+  add_foreign_key "subject_area_categories", "subjects"
   add_foreign_key "subjects", "subject_categories"
   add_foreign_key "survey_answers", "people"
   add_foreign_key "survey_answers", "survey_questions"

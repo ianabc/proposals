@@ -1,4 +1,5 @@
 class FaqsController < ApplicationController
+  load_and_authorize_resource
   before_action :set_faq, only: %i[edit update destroy move]
   before_action :require_staff_member
 

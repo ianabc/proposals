@@ -10,9 +10,9 @@
 <br />
 <div class="mt-4">
   <h2> Discussions </h2>
-  <% StaffDiscussion.all&.each do |staff| %>
-    <div class="mt-4">
-      <p class="form-control"><%= staff.discussion %></p>
+  <% @proposal.staff_discussions&.each do |staff| %>
+    <div class="mb-3 row border m-1 p-1">
+      <p><%= staff.discussion %></p>
     </div>
   <% end %>
 </div>

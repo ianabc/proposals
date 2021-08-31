@@ -17,20 +17,25 @@ class FeedbacksController < ApplicationController
       FeedbackMailer.with(feedback: @feedback).new_feedback_email.deliver_later
       redirect_to feedbacks_path, notice: 'Your feedback has been submitted.'
     else
-      render :new, alert: 'There is error while saving feedback'
+      render :new, alert: "Error: #{@feedback.errors.full_messages}"
     end
   end
 
   def update
-    @feedback.toggle!(:reviewed) # rubocop:disable Rails/SkipsModelValidations
+    return unless can? :manage, @feedback
+
+    @feedback.toggle!(:reviewed)
     redirect_to feedback_path
   end
 
   def add_reply
+    return unless can? :manage, @feedback
+
     if @feedback.update(reply: params[:feedback_reply])
       render json: {}, status: :ok
     else
-      render json: { erros: @feedback.errors.full_messages }, status: :internal_server_error
+      render json: { error: @feedback.errors.full_messages },
+                   status: :internal_server_error
     end
   end
 

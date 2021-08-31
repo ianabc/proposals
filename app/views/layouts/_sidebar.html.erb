@@ -35,19 +35,37 @@
             <li class="sidebar-item <%= active_menu(submitted_proposals_path) %>">
               <%= link_to submitted_proposals_path, class: "sidebar-link" do %>
                 <i class="fas fa-book"></i>
-                <span class="nav-link-text">Submitted Proposals</span>
+                <span class="nav-link-text">Proposal Applications</span>
               <% end %>
             </li>
-            <li class="sidebar-item <%= active_menu(proposal_types_path) %>">
-              <%= link_to proposal_types_path, class: "sidebar-link" do %>
-                <i class="fas fa-share-alt-square"></i>
-                <span class="nav-link-text">Proposal Types</span>
-              <% end %>
-            </li>
+              <li class="sidebar-item <%= active_menu(proposal_types_path) %>">
+                <%= link_to proposal_types_path, class: "sidebar-link" do %>
+                  <i class="fas fa-share-alt-square"></i>
+                  <span class="nav-link-text">Proposal Types</span>
+                <% end %>
+              </li>
             <li class="sidebar-item <%= active_menu(feedbacks_path) %>">
               <%= link_to feedbacks_path, class: "sidebar-link" do %>
+                <i class="far fa-envelope"></i>
+                <span class="nav-link-text">Message Staff</span>
+              <% end %>
+            </li>
+            <li class="sidebar-item <%= active_menu(roles_path) %>">
+              <%= link_to roles_path, class: "sidebar-link" do %>
                 <i class="far fa-file-alt"></i>
-                <span class="nav-link-text">Feedback</span>
+                <span class="nav-link-text">User Roles</span>
+              <% end %>
+            </li>
+            <li class="sidebar-item <%= active_menu(subject_categories_path) %>">
+              <%= link_to subject_categories_path , class: "sidebar-link" do %>
+                <i class="fas fa-fw fa-book-open"></i>
+                <span class="nav-link-text">Subject Categories</span>
+              <% end %>
+            </li>
+            <li class="sidebar-item <%= active_menu(email_templates_path) %>">
+              <%= link_to email_templates_path , class: "sidebar-link" do %>
+                <i class="align-middle me-2 fas fa-fw fa-envelope"></i>
+                <span class="nav-link-text">Email Templates</span>
               <% end %>
             </li>
           </ul>
@@ -71,6 +89,7 @@
           </ul>
         </li>
       <% end %>
+
       <li class="sidebar-item <%= pages_list %>">
         <a data-bs-target="#pages" data-bs-toggle="collapse" class="sidebar-link collapsed">
         <i class="align-middle me-2 fas fa-fw fa-file"></i> <span class="align-middle">Pages</span>

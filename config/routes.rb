@@ -18,10 +18,13 @@ Rails.application.routes.draw do
   resources :submitted_proposals do
     collection do
       get :download_csv
+      post :edit_flow
     end
     member do
       post :staff_discussion
       post :send_emails
+      post :approve_status
+      post :decline_status
     end
   end
 
@@ -101,4 +104,25 @@ Rails.application.routes.draw do
   get 'profile/' => 'profile#edit'
   patch 'update' => 'profile#update'
   post 'demographic_data' => 'profile#demographic_data'
+
+  resources :roles do
+    member do
+      post :new_user
+      post :new_role
+      post :remove_role
+    end
+  end
+
+  resources :subject_categories do
+    resources :subjects
+    resources :ams_subjects
+  end
+
+  resources :emails do
+    collection do
+      patch :email_template
+    end
+  end
+
+  resources :email_templates
 end

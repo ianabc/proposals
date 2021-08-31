@@ -20,6 +20,7 @@ module Users
 
       person = Person.find_by(email: email)
       if person.present?
+        person.skip_person_validation = true
         person.assign_attributes(sign_up_params['person_attributes'])
         resource.person = person
       end

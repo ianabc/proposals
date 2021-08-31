@@ -10,7 +10,7 @@ class ProfileController < ApplicationController
     if @person.update(person_params)
       redirect_to profile_path, notice: "Your Personal data is updated!"
     else
-      redirect_to profile_path
+      redirect_to profile_path, alert: @person.errors.full_messages
     end
   end
 
@@ -27,7 +27,8 @@ class ProfileController < ApplicationController
   private
 
   def person_params
-    params.require(:person).permit(:affiliation, :department, :academic_status,
+    params.require(:person).permit(:firstname, :lastname, :email, :affiliation,
+                                   :department, :academic_status,
                                    :title, :first_phd_year, :country, :region,
                                    :city, :street_1, :street_2, :postal_code,
                                    :other_academic_status, :province, :state)

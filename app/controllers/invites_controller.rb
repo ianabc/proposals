@@ -28,7 +28,7 @@ class InvitesController < ApplicationController
     @invite.update(response: response_params, status: 'confirmed')
     unless @invite.no?
       proposal_role
-      create_user if @invite.invited_as == 'Co Organizer' && !@invite.person.user
+      create_user if @invite.invited_as == 'Organizer' && !@invite.person.user
     end
 
     send_email_on_response
@@ -36,8 +36,8 @@ class InvitesController < ApplicationController
 
   def invite_reminder
     if @invite.pending?
-      @co_organizers = @invite.proposal.list_of_co_organizers
-      InviteMailer.with(invite: @invite, co_organizers: @co_organizers).invite_reminder.deliver_later
+      @organizers = @invite.proposal.list_of_organizers
+      InviteMailer.with(invite: @invite, organizers: @organizers).invite_reminder.deliver_later
       redirect_to edit_proposal_path(@proposal), notice: "Invite reminder has been sent to #{@invite.person.fullname}!"
     else
       redirect_to edit_proposal_path(@proposal), notice: "You have already responded to the invite."
@@ -53,6 +53,7 @@ class InvitesController < ApplicationController
   end
 
   def cancel
+    @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
     @invite.update(status: 'cancelled')
     redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
   end
@@ -69,7 +70,7 @@ class InvitesController < ApplicationController
 
   def create_user
     user = User.new(email: @invite.person.email,
-                    password: SecureRandom.urlsafe_base64(20))
+                    password: SecureRandom.urlsafe_base64(20), confirmed_at: Time.zone.now)
     user.person = @invite.person
     user.save
   end
@@ -89,7 +90,7 @@ class InvitesController < ApplicationController
 
   def send_invite_emails
     @inviters.each do |invite|
-      InviteMailer.with(invite: invite).invite_email.deliver_later
+      InviteMailer.with(invite: invite, lead_organizer: @proposal.lead_organizer).invite_email.deliver_later
     end
   end
 
@@ -100,13 +101,13 @@ class InvitesController < ApplicationController
 
   # rubocop:disable Metrics/AbcSize
   def send_email_on_response
-    @co_organizers = @invite.proposal.list_of_co_organizers.remove(@invite.person&.fullname)
+    @organizers = @invite.proposal.list_of_organizers.remove(@invite.person&.fullname)
 
     if @invite.no?
       InviteMailer.with(invite: @invite).invite_decline.deliver_later
       redirect_to thanks_proposal_invites_path(@invite.proposal)
     else
-      InviteMailer.with(invite: @invite, token: @token, co_organizers: @co_organizers).invite_acceptance
+      InviteMailer.with(invite: @invite, token: @token, organizers: @organizers).invite_acceptance
                   .deliver_later
       redirect_to new_person_path(code: @invite.code)
     end

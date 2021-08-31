@@ -11,17 +11,25 @@ RSpec.describe "/submit_proposals", type: :request do
 
   describe "POST /create with valid parameters" do
     let(:proposal) { create(:proposal) }
-    let(:subject) { create(:subject) }
-    let(:ams_subject) { create(:ams_subject) }
+    let(:subject_category) { create(:subject_category) }
+    let(:subject) { create(:subject, subject_category_id: subject_category.id) }
+    let(:ams_subject_code1) do
+      create(:ams_subject, subject_category_ids:
+                           subject_category.id, subject_id: subject.id)
+    end
+    let(:ams_subject_code2) do
+      create(:ams_subject, subject_category_ids:
+                           subject_category.id, subject_id: subject.id)
+    end
     let(:location) { create(:location) }
     let(:invites_attributes) do
       { '0' => { firstname: 'First', lastname: 'organizer',
                  email: 'organizer@gmail.com', deadline_date: DateTime.now,
-                 invited_as: 'Co Organizer' } }
+                 invited_as: 'Organizer' } }
     end
     let(:params) do
       { proposal: proposal.id, title: 'Test proposal', year: '2023',
-        subject_id: subject.id, ams_subject_ids: ams_subject.id,
+        subject_id: subject.id, ams_subjects: { code1: ams_subject_code1.id, code2: ams_subject_code2.id },
         invites_attributes: invites_attributes,
         location_ids: location.id, no_latex: false, create_invite: true }
     end
@@ -37,12 +45,18 @@ RSpec.describe "/submit_proposals", type: :request do
 
   describe "POST /create" do
     let(:proposal) { create(:proposal) }
-    let(:subject) { create(:subject) }
-    let(:ams_subjects) { create_list(:ams_subject, 2) }
+    let(:subject_category) { create(:subject_category) }
+    let(:subject) { create(:subject, subject_category_id: subject_category.id) }
+    let(:ams_subjects) do
+      create_list(:ams_subject, 2, subject_category_ids: subject_category.id,
+                                   subject_id: subject.id)
+    end
     let(:location) { create(:location) }
     let(:invites_attributes) do
-      { '0' => { firstname: 'First', lastname: 'organizer',
-                 deadline_date: DateTime.now, invited_as: 'Co Organizer' } }
+      {
+        '0' => { firstname: 'First', lastname: 'Organizer',
+                 deadline_date: DateTime.now, invited_as: 'Organizer' }
+      }
     end
     let(:params) do
       { proposal: proposal.id, title: 'Test proposal', year: '2023',

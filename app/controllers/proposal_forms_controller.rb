@@ -1,4 +1,5 @@
 class ProposalFormsController < ApplicationController
+  load_and_authorize_resource
   before_action :set_proposal_type
   before_action :set_proposal_form, only: %i[edit update show clone
                                              proposal_field]
