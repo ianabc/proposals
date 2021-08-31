@@ -1,7 +1,7 @@
 <div class="form-group mb-4">
   <div>
     <span><%= location_name(field) %></span><br>
-    <label for="statement"><h2><%= field.statement %></h2></label>
+    <label for="statement"><h2><%= field.position %>. <%= field.statement %></h2></label>
     <%= mandatory_field?(field) %>
     <% if current_user&.staff_member? && @proposal_form&.draft? && params[:action] == 'edit' %>
       <span data-action="click->proposal-form#editField" data-field-id="<%= field.id %>" data-proposal-form-id="<%= @proposal_form&.id %>" style="color: #3b7ddd" class="mx-1" data-type-id="<%= @proposal_type&.id %>">Edit</span>
