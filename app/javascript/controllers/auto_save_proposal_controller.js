@@ -25,7 +25,7 @@ export default class extends Controller {
     }) 
   }
 
-  onFoucs () {
+  onFocus () {
     this.autoSaveProposal();
   }
 

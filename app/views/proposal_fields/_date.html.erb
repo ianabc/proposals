@@ -16,7 +16,7 @@
   </a></p>
 <% end %>
 <div class="mb-3">
-  <input name="<%= field.id %>" <%= action ? 'disabled' : '' %> class="form-control" type="date" value='<%= answer(field, @proposal) %>'  data-action="focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur" />
+  <input name="<%= field.id %>" <%= action ? 'disabled' : '' %> class="form-control" type="date" value='<%= answer(field, @proposal) %>'  data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur" />
 </div>
 <% if @submission %>
   <ul>
