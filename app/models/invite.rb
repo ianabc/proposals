@@ -10,7 +10,8 @@ class Invite < ApplicationRecord
   validates :firstname, :lastname, :email, :invited_as,
             :deadline_date, :person_id, presence: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
-  validate :deadline_not_in_past, :one_invite_per_person, :proposal_title
+  validate :deadline_not_in_past, :proposal_title
+  validate :one_invite_per_person, on: :create
 
   enum status: { pending: 0, confirmed: 1, cancelled: 2 }
   enum response: { yes: 0, maybe: 1, no: 2 }
