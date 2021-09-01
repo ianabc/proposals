@@ -20,8 +20,7 @@ class ProposalFieldValidationsService
     validations.each do |val|
       case val.validation_type
       when 'mandatory'
-        @errors << val.error_message if @answer == ""
-        @errors << val.error_message unless @answer
+        @errors << val.error_message if @answer.blank?
       when 'less than (integer matcher)'
         @errors << val.error_message unless @answer.to_i < val.value.to_i
       when 'less than (float matcher)'
