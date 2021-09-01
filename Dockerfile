@@ -9,11 +9,11 @@ ENV HOME /root
 CMD ["/sbin/my_init"]
 
 # Yarn package
-RUN curl -sS https://raw.githubusercontent.com/yarnpkg/releases/gh-pages/debian/pubkey.gpg | apt-key COPY -
+RUN curl -sS https://raw.githubusercontent.com/yarnpkg/releases/gh-pages/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
 # Postgres
-RUN curl -sS https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key COPY -
+RUN curl -sS https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 # Needed packages
 RUN apt-get update -qq
