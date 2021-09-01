@@ -75,7 +75,7 @@ export default class extends Controller {
     }
     if(table !== '') {
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
-        function(data, status) {
+        function() {
           document.getElementById("booklet").click();
           window.location.reload()
       })

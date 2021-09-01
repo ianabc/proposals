@@ -189,7 +189,7 @@ class SubmittedProposalsController < ApplicationController
       file.write(pdf_file)
     end
   end
-  
+
   def check_file
     return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
 
