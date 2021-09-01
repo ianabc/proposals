@@ -5,11 +5,11 @@ import Rails from '@rails/ujs'
 export default class extends Controller {
 
   static targets = [ 'proposalType', 'locationSpecificQuestions', 'locationIds', 'text', 'tabs', 
-                    'dragLocations' ]
+                    'dragLocations', 'latexPreamble', 'latexBibliography' ]
   static values = { proposalTypeId: Number, proposal: Number }
 
   connect() {
-    if(this.hasLocationIdsTarget) {
+    if(this.hasLocationIdsTarget || $('#no_latex').is(':checked')) {
       this.handleLocationChange(Object.values(this.locationIdsTarget.selectedOptions).map((x) => x.value))
       this.showSelectedLocations()
     }
@@ -102,18 +102,22 @@ export default class extends Controller {
     }
   }
 
-  uploadFile() {
-    var data = new FormData()
-    if(event.target.files[0])
-    {
-      data.append('file',event.target.files[0])
-      data.append("field_id", event.target.dataset.fieldId)
-      let url = "/submit_proposals/" + event.target.dataset.proposalFormId + "/upload_file"
-      Rails.ajax({
-        url,
-        type: "POST",
-        data
-      })
-    }  
+  saveProposal (id) {
+   $.post(`/submit_proposals?proposal=${id}`,
+      $('form#submit_proposal').serialize(), function(data) {
+    })
+  }
+
+  hideAndSave() {
+    let id = $('#proposal_id').val()
+    this.saveProposal(id)
+
+    if($('#no_latex').is(':checked')) {
+      this.latexPreambleTarget.classList.add("hidden")
+      this.latexBibliographyTarget.classList.add("hidden")
+    } else {
+      this.latexPreambleTarget.classList.remove("hidden")
+      this.latexBibliographyTarget.classList.remove("hidden")
+    }
   }
 }

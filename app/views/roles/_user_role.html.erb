@@ -1,0 +1,35 @@
+<div class="modal fade" id="user-window" tabindex="-1" aria-labelledby="user-windowLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body m-3">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users_without_role(@role)&.each do |user| %>
+              <tr>
+                <td><%= user.fullname %></td>
+                <td><%= user.email %></td>
+                <td class="table-action">
+                  <%= link_to "Add in #{@role.name}", new_role_role_path(@role, user_id: user.id), class: 'btn btn-light', method: :post %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

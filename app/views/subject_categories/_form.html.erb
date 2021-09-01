@@ -1,0 +1,63 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Subject Categories
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %> </a></li>
+          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Subject Categories", subject_categories_path %></li>
+          <% if @subject_category.new_record? %>
+            <li class="breadcrumb-item active" aria-current="page">New</li>
+          <% else %>
+             <li class="breadcrumb-item active" aria-current="page">Edit</li>
+          <% end %>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+          </div>
+          <div class="card-body">
+            <%= form_for @subject_category do |f| %>
+            <div class="mb-3">
+              <h2><%= @subject_category.new_record? ? 'New' : 'Edit' %> Subject Category</h2>
+              <div class="mb-3">
+                <%= f.label :code, class: 'form-label'%>
+                <%=f.text_field(:code, required: true, class:'form-control', value: @subject_category.code)%>
+              </div>
+              <div class="mb-3">
+                <%= f.label :title, class: 'form-label'%>
+                <%=f.text_field(:name, required: true, class:'form-control', value: @subject_category.name)%>
+              </div>
+            </div>
+
+            <% unless @subject_category.new_record? %>
+              <div class="mb-3 row">
+                <h3 class="form-section">BIRS Subjects</h3>
+                <div class="col-6 mt-2 mb-3">
+                  <label class="required">Subject Area</label>
+                  <%= f.select :subject_ids, options_for_select(subjects_area, @subject_category.subject_ids), {}, multiple: true, class: 'form-select' %>
+                </div>
+
+                <h3 class="form-section">AMS Subjects</h3>
+                <div class="col-6 mt-2">
+                  <div class="mb-3">
+                    <label class="required">AMS Subject Code</label>
+                    <%= f.select :ams_subject_ids, options_for_select(ams_subjects_code, @subject_category.ams_subject_ids), {}, class: "form-select",  multiple: true %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <%= f.submit "Submit", class:  'btn btn-primary' %>
+          <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

@@ -65,6 +65,6 @@ RUN echo 'export PATH=./bin:$PATH:/usr/local/rvm/rubies/ruby-2.7.2/bin' >> /root
 RUN echo 'export PATH=./bin:$PATH:/usr/local/rvm/rubies/ruby-2.7.2/bin' >> /home/app/.bashrc
 RUN echo 'alias rspec="bundle exec rspec"' >> /root/.bashrc
 RUN echo 'alias rspec="bundle exec rspec"' >> /home/app/.bashrc
-RUN echo 'alias restart="passenger-config restart-app /home/app/proposals"' >> /root/.bashrc
-RUN echo 'alias restart="passenger-config restart-app /home/app/proposals"' >> /home/app/.bashrc
+RUN echo 'alias restart="passenger-config restart-app /home/app/proposals & tail -f log/production.log"' >> /root/.bashrc
+RUN echo 'alias restart="passenger-config restart-app /home/app/proposals & tail -f log/production.log"' >> /home/app/.bashrc
 ENTRYPOINT ["/sbin/entrypoint.sh"]

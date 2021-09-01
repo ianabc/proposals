@@ -1,5 +1,7 @@
 class FaqsController < ApplicationController
+  load_and_authorize_resource
   before_action :set_faq, only: %i[edit update destroy move]
+  before_action :require_staff_member
 
   def index
     @faqs = Faq.all
@@ -47,5 +49,9 @@ class FaqsController < ApplicationController
 
   def faq_params
     params.require(:faq).permit(:question, :answer)
+  end
+
+  def require_staff_member
+    redirect_to root_path unless current_user.staff_member?
   end
 end

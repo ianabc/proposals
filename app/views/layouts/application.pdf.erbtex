@@ -64,8 +64,9 @@
   }%
   \item[]}{\end{list}}
 
-\begin{document}
 \pagestyle{fancy}
+
+% \begin{document}
 
 <%= yield %>
 

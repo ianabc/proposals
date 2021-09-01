@@ -4,21 +4,20 @@ class SubmitProposalsController < ApplicationController
     @proposals = ProposalForm.new
   end
 
+<<<<<<< HEAD
   # rubocop:disable Metrics/AbcSize
   # rubocop:disable Metrics/MethodLength
+=======
+>>>>>>> development
   def create
     @proposal.update(proposal_params)
-    update_ams_subject_code
+    update_proposal_ams_subject_code
     submission = SubmitProposalService.new(@proposal, params)
     submission.save_answers
+    @proposal.skip_submission_validation = true unless @proposal.draft?
     session[:is_submission] = @proposal.is_submission = submission.is_final?
 
-    create_invite and return
-
-    unless @proposal.is_submission
-      redirect_to edit_proposal_path(@proposal), notice: 'Draft saved.'
-      return
-    end
+    create_invite and return if params[:create_invite]
 
     if submission.has_errors?
       redirect_to edit_proposal_path(@proposal), alert: "Your submission has
@@ -26,43 +25,44 @@ class SubmitProposalsController < ApplicationController
       return
     end
 
+    unless @proposal.is_submission
+      redirect_to edit_proposal_path(@proposal), notice: 'Draft saved.'
+      return
+    end
+
     attachment = generate_proposal_pdf || return
     confirm_submission(attachment)
   end
+<<<<<<< HEAD
   # rubocop:enable Metrics/MethodLength
   # rubocop:enable Metrics/AbcSize
+=======
+>>>>>>> development
 
   def thanks; end
-
-  def upload_file
-    @answer = Answer.find_or_create_by!(proposal_field_id: params[:field_id], proposal_id: params[:id])
-    @answer.file.attach(params[:file])
-  end
 
   private
 
   def create_invite
     return unless request.xhr?
 
-    count = save_invites
-
-    if count >= 1
-      render json: { invited_as: @proposal.invites.last.invited_as.downcase }, status: :ok
-    else
-      render json: @invite.errors.full_messages, status: :unprocessable_entity
-    end
-  end
-
-  def save_invites
-    count = 0
+    errors = []
     params[:invites_attributes].each_value do |invite|
-      @invite = @proposal.invites.new(invite_params(invite))
-      count += 1 if @invite.save
+      invite = @proposal.invites.new(invite_params(invite))
+      invite.save
+      errors << invite.errors.full_messages unless invite.errors.empty?
     end
-    count
+
+    if errors.empty?
+      head :ok
+    else
+      render json: errors.flatten.to_json, status: :unprocessable_entity
+    end
   end
+
 
   def confirm_submission(attachment)
+    check_file
     @proposal.update(status: :submitted)
     session[:is_submission] = nil
 
@@ -74,33 +74,41 @@ class SubmitProposalsController < ApplicationController
         you.'.squish
   end
 
+<<<<<<< HEAD
   # rubocop:disable Metrics/AbcSize
   # rubocop:disable Metrics/MethodLength
+=======
+>>>>>>> development
   def generate_proposal_pdf
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
-    ProposalPdfService.new(@proposal.id, temp_file, 'all').pdf
-    fh = File.open("#{Rails.root}/tmp/#{temp_file}")
+    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
+                                      .generate_latex_file.to_s
 
     begin
-      render_to_string(layout: "application", inline: fh.read.to_s,
+      render_to_string(layout: "application", inline: @latex_infile,
                        formats: [:pdf])
-    rescue ActionView::Template::Error => e
-      flash[:alert] = "We were unable to compile your proposal with LaTeX.
+    rescue ActionView::Template::Error
+      error_message = "We were unable to compile your proposal with LaTeX.
                       Please see the error messages, and generated LaTeX
                       docmument, then edit your submission to fix the
                       errors".squish
 
-      error_output = ProposalPdfService.format_errors(e)
-      render layout: "latex_errors", inline: error_output.to_s, formats: [:html]
+      redirect_to rendered_proposal_proposal_path(@proposal, format: :pdf),
+                  alert: error_message
       nil
     end
   end
+<<<<<<< HEAD
   # rubocop:enable Metrics/MethodLength
   # rubocop:enable Metrics/AbcSize
+=======
+>>>>>>> development
 
   def proposal_params
-    params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids, :no_latex)
+    params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
+                  :no_latex, :preamble, :bibliography)
           .merge(ams_subject_ids: proposal_ams_subjects)
+          .merge(no_latex: params[:no_latex] == 'on')
   end
 
   def proposal_id_param
@@ -117,12 +125,25 @@ class SubmitProposalsController < ApplicationController
     [@code1, @code2]
   end
 
-  def update_ams_subject_code
-    @proposal.ams_subjects.where(id: @code1)&.update(code: 'code1')
-    @proposal.ams_subjects.where(id: @code2)&.update(code: 'code2')
+  def update_proposal_ams_subject_code
+    ProposalAmsSubject.create(ams_subject_id: @code1, proposal: @proposal,
+                              code: 'code1')
+    ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
+                              code: 'code2')
   end
 
   def invite_params(invite)
     invite.permit(:firstname, :lastname, :email, :deadline_date, :invited_as)
+  end
+
+  def check_file
+    temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
+    return if File.exist?("#{Rails.root}/tmp/#{temp_file}")
+
+    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
+                                      .generate_latex_file.to_s
+    File.new("#{Rails.root}/tmp/#{temp_file}", 'w') do |io|
+      io.write(@latex_infile)
+    end
   end
 end

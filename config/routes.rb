@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   end
 
   get :guidelines, to: 'pages#guidelines'
-  resources :feedbacks, path: :feedback do 
+  resources :feedbacks, path: :feedback do
     member do
       patch :add_reply
     end
@@ -18,6 +18,13 @@ Rails.application.routes.draw do
   resources :submitted_proposals do
     collection do
       get :download_csv
+      post :edit_flow
+    end
+    member do
+      post :staff_discussion
+      post :send_emails
+      post :approve_status
+      post :decline_status
     end
   end
 
@@ -27,14 +34,16 @@ Rails.application.routes.draw do
 
   resources :proposals do
     post :latex, to: 'proposals#latex_input'
-    member do 
+    member do
       get :rendered_proposal, to: 'proposals#latex_output'
       get :rendered_field, to: 'proposals#latex_field'
       patch :ranking
       get :locations
+      post :upload_file
+      post :remove_file
     end
 
-    resources :invites, :except => [:show] do
+    resources :invites, except: [:show] do
       member do
         post :inviter_response
         post :invite_reminder
@@ -49,7 +58,7 @@ Rails.application.routes.draw do
   resources :survey do
     collection do
       get :survey_questionnaire
-      get :faq
+      get :faqs
       post :submit_survey
     end
   end
@@ -57,11 +66,8 @@ Rails.application.routes.draw do
   resources :people, path: :person
 
   resources :submit_proposals do
-    collection do 
+    collection do
       get :thanks
-    end
-    member do
-      post :upload_file
     end
   end
   resources :proposal_types do
@@ -98,4 +104,25 @@ Rails.application.routes.draw do
   get 'profile/' => 'profile#edit'
   patch 'update' => 'profile#update'
   post 'demographic_data' => 'profile#demographic_data'
+
+  resources :roles do
+    member do
+      post :new_user
+      post :new_role
+      post :remove_role
+    end
+  end
+
+  resources :subject_categories do
+    resources :subjects
+    resources :ams_subjects
+  end
+
+  resources :emails do
+    collection do
+      patch :email_template
+    end
+  end
+
+  resources :email_templates
 end

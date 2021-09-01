@@ -1,5 +1,5 @@
 class Person < ApplicationRecord
-  attr_accessor :is_lead_organizer, :province, :state
+  attr_accessor :is_lead_organizer, :province, :state, :skip_person_validation
 
   validates :firstname, :lastname, presence: true
   validates :email, presence: true, uniqueness: true
@@ -32,11 +32,17 @@ class Person < ApplicationRecord
     "Region"
   end
 
+  def person_proposal
+    proposals.where(status: "submitted")&.first
+  end
+
   # rubocop:disable Metrics/AbcSize
   # rubocop:disable Metrics/CyclomaticComplexity
   # rubocop:disable Metrics/MethodLength
   # rubocop:disable Metrics/PerceivedComplexity
   def common_fields
+    return if skip_person_validation
+
     errors.add('Main Affiliation/Institution', "can't be blank") if affiliation.blank?
     errors.add('Academic Status', "can't be blank") if academic_status.blank?
     errors.add('Year of', "PhD can't be blank") if first_phd_year.blank?
@@ -50,8 +56,17 @@ class Person < ApplicationRecord
 
     return unless country == 'Canada' || country == 'United States of America'
 
-    self.region = province if province.present?
-    self.region = state if state.blank?
+    # if (country == 'Canada')
+    #   self.region = province if province.present?
+    # elsif (country == 'United States of America')
+    #   self.region = state if state.present?
+    # end
+    case country
+    when "Canada"
+      self.region = province if province.present?
+    when "United States of America"
+      self.region = state if state.present?
+    end
     errors.add("Missing data: ", "You must select a #{region_type}") if region.blank?
   end
   # rubocop:enable Metrics/PerceivedComplexity

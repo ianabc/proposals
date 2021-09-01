@@ -13,41 +13,35 @@
     </div>
     <div class="row">
       <div class="col-12">
-        <div class="card">
+        <div class="card" data-controller="submitted-proposals">
           <div class="card-header">
             <form class="form-inline">
               
               <div class="row">
                 <div class="col-xs-6 col-md-3">
-                  <label>First Name</label><br>
-                  <input type="search" name="firstname" placeholder="Enter First Name" value="<%= params[:firstname] %>">
+                  <label class="form-label">Keywords</label><br>
+                  <input type="search" class="form-control" name="keywords" placeholder="Enter Keywords" value="<%= params[:keywords] %>">
                 </div>
                 <div class="col-xs-6 col-md-3">
-                  <label>Last Name</label><br>
-                    <input type="search" name="lastname" placeholder="Enter Last Name" value="<%= params[:lastname] %>">
+                  <label class="form-label">Proposal Type</label><br>
+                  <%= select_tag "proposal_type", options_for_select(all_proposal_types, params[:proposal_type]), { include_blank: '', class: 'form-select p-1' }%>
                 </div>
                 <div class="col-xs-6 col-md-3">
-                  <label>Keywords</label><br>
-                  <input type="search" name="keywords" placeholder="Enter Keywords" value="<%= params[:keywords] %>">
+                  <label class="form-label">Status</label><br>
+                  <%= select_tag :status, options_for_select(all_statuses, params[:status]), { include_blank: '', class: 'form-select p-1' } %>
                 </div>
                 <div class="col-xs-6 col-md-3">
-                  <label>Workshop Year</label><br>
-                  <%= select_tag "workshop_year", options_for_select([[2021, 2021], [2022, 2022], [2023,2023], [2024, 2024], [2025, 2025], [2026, 2026], [2027, 2027], [2028, 2028], [2029, 2029]], params[:workshop_year]), { include_blank: '', class: 'mb-3 p-1', style: 'width: 116px;'}%>
+                  <label class="form-label">Workshop Year</label><br>
+                  <%= select_tag "workshop_year", options_for_select([[2021, 2021], [2022, 2022], [2023,2023], [2024, 2024], [2025, 2025], [2026, 2026], [2027, 2027], [2028, 2028], [2029, 2029]], params[:workshop_year]), { include_blank: '', class: 'form-select mb-3 p-1', style: 'width: 116px;'}%>
                 </div>
               </div>
               <div class="row">
                 <div class="col-xs-6 col-md-6">
-                  <label>Subject Area</label><br>
-                  <%= select_tag "subject_area", options_for_select(subjects_area, params[:subject_area]), { include_blank: '', class: 'p-1' }%>
+                  <label class="form-label">Subject Area</label><br>
+                  <%= select_tag "subject_area", options_for_select(subjects_area, params[:subject_area]), { include_blank: '', class: 'form-select p-1' }%>
                 </div>
-                <div class="col-xs-6 col-md-3">
-                  <label>Proposal Type</label><br>
-                  <%= select_tag "proposal_type", options_for_select(all_proposal_types, params[:proposal_type]), { include_blank: '', class: 'p-1' }%>
-                </div>
-                <div class="col-xs-6 col-md-3">
-                  <div class="float-end">
-                    <button class="btn btn-primary">Search</button>
-                  </div>
+                <div class="text-end col-xs-6 col-md-6">
+                  <button class="btn btn-primary">Search</button>
                 </div>
               </div>
             </form>
@@ -65,6 +59,7 @@
                 <div class="tab-content">
                   <div class="tab-pane active" id="tab-1" role="tabpanel">
                     <div class="text-end m-3">
+                      <span data-action="click->submitted-proposals#editFlow" class="btn btn-primary">Send to EditFlow</span>
                       <%= link_to "Download CSV", download_csv_submitted_proposals_url( {:format => :csv}.merge(params.permit!)), class: "btn btn-primary" %>
                     </div>
                     <%= render partial: "proposals" %>

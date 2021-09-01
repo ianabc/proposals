@@ -40,6 +40,10 @@ class ProposalFieldValidationsService
         @errors << val.error_message unless @answer.to_i == val.value.to_i
       when 'equal (float matcher)'
         @errors << val.error_message unless @answer.to_f == val.value.to_f
+      when 'words limit'
+        texcount = %x{echo "#{@answer}" | texcount -total -}
+        word_count = texcount.match(/Words in text: (\d+)/)[1]
+        @errors << val.error_message unless word_count.to_i <= val.value.to_i
       when '5-day workshop preferred/Impossible dates'
         preferred_impossible_dates_validation
       end

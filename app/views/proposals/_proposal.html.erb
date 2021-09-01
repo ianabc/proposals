@@ -28,48 +28,46 @@
                 data-submit-proposals-proposal-value="<%= @proposal.id %>"data-nested-invites-wrapper-selector-value=".nested-invites-wrapper"
                 data-nested-invites-max-participant-value="<%= @proposal.proposal_type.participant %>"
                 data-nested-invites-max-organizer-value="<%= @proposal.proposal_type.co_organizer %>"
-                data-nested-invites-organizer-value="<%= Proposal.no_of_participants(@proposal.id, 'Co Organizer').count %>"
-                data-nested-invites-participant-value="<%= Proposal.no_of_participants(@proposal.id, 'Participant').count %>"
+                data-nested-invites-organizer-value="<%= confirmed_participants(@proposal.id, 'Organizer').count %>"
+                data-nested-invites-participant-value="<%= confirmed_participants(@proposal.id, 'Participant').count %>"
                 >
                 <div class="mb-3 d-flex flex-row-reverse">
-                  <% if params[:action] == 'edit' %>
-                    <% if lead_organizer?(@proposal.proposal_roles) %> 
-                      <% if @proposal.draft? %>
-                        <div class="float-end">
-                          <%= f.submit 'Save as draft', class:'btn btn-primary' %>
-                        </div>
-                      <% end %>
-                    <% end %>
+                  <% if show_edit_button?(@proposal) %>
+                    <div class="float-end">
+                      <%= f.submit 'Save as Draft', class:'btn btn-primary' %>
+                    </div>
                   <% end %>
                 </div>
                 <div class="col-12 col-lg-12">
                   <div class="tab">
                     <ul id="tabs" class="nav nav-tabs row" role="tablist">
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
-                        <a class="nav-link <%= active_tab(@proposal, 'one') %>" href="#tab-1" data-bs-toggle="tab" role="tab" data-target='submit-proposals.tabs'>Step 1</a>
+                        <a class="nav-link <%= active_tab(@proposal, 'one', params[:tab]) %>" href="#tab-1" data-bs-toggle="tab" role="tab" data-target='submit-proposals.tabs'>Step 1</a>
                       </li>
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
-                        <a class="nav-link <%= active_tab(@proposal, 'two') %>" href="#tab-2" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 2</a>
+                        <a class="nav-link <%= active_tab(@proposal, 'two', params[:tab]) %>" href="#tab-2" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 2</a>
                       </li>
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
-                        <a class="nav-link <%= active_tab(@proposal, 'three') %>" href="#tab-3" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 3</a>
+                        <a class="nav-link <%= active_tab(@proposal, 'three', params[:tab]) %>" href="#tab-3" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 3</a>
                       </li>
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
                         <a class="nav-link" href="#tab-4" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Demographic Charts</a>
                       </li>
                     </ul>
                     <div class="tab-content">
-                      <div class="tab-pane <%= active_tab(@proposal, 'one') %>" id="tab-1" role="tabpanel">
+                      <div class="tab-pane <%= active_tab(@proposal, 'one', params[:tab]) %>" id="tab-1" role="tabpanel">
                         <h4 class="tab-title"></h4>
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 row">
                           <%= f.label :title, class: "required" %>
-                          <%= f.text_field :title, class: 'form-control', disabled: action, value: @proposal.title, data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
-                          <% if @submission && @proposal.title.blank? %>
-                            <p class="field-validation">Title is required</p>
-                          <% end %>
+                          <div class="col-6 mt-2">
+                            <%= f.text_field :title, class: 'form-control w-100', disabled: action, value: @proposal.title, data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <% if @submission && @proposal.title.blank? %>
+                              <p class="field-validation">Title is required</p>
+                            <% end %>
+                          </div>
                         </div>
 
                         <div class="mb-3">
@@ -79,13 +77,13 @@
 
                         <div class="mb-3">
                           <%= f.label :year %>
-                          <%= f.select :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), {}, disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                          <%= f.select :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), {}, disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                         </div>
                         <div class="mb-3 row">
-                          <h4>Subject Areas</h4>
+                          <h3 class="form-section">Subject Areas</h4>
                           <div class="col-6 mt-2">
                             <label class="required">Subject Area</label>
-                            <%= f.select :subject_id, options_for_select(subjects_area, @proposal.subject&.id), { include_blank: '' }, disabled: action, class: "form-select", data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                            <%= f.select :subject_id, options_for_select(subjects_area, @proposal.subject&.id), { include_blank: '' }, disabled: action, class: "form-select", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                             <% if @submission && @proposal.subject&.id.nil? %>
                               <p class="field-validation">Subject is required</p>
                             <% end %>
@@ -93,56 +91,61 @@
                           <div class="col-6 mt-2">
                             <div class="mb-3">
                               <label class="required">AMS Subject Code 1</label>
-                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code1')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code1]', data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code1')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code1]', data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                               <% if @submission && proposal_ams_subjects_code(@proposal, 'code1').blank? %>
                                 <p class="field-validation">AMS Subject Code 1 is required</p>
                               <% end %>
                             </div>
 
                             <div class="mb-3">
-                              <label>AMS Subject Code 2</label>
-                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code2]', data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                              <label class="required">AMS Subject Code 2</label>
+                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code2]', data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                             </div>
                           </div>
                           <div>
                             <% if params[:action] == 'edit' %>
                             <%= render partial: 'lead_organizer' %>
                             <div>
-                              <h3>Add Supporting Organizers:</h3>
+                              <h3 class="form-section">Add Supporting Organizers:</h3>
+                              <h5>
+                                For recommendations regarding the composition of the organizing committee, please 
+                                <%= link_to "see here", "/guidelines#organizing_committee", target: "_blank" %>.
+                              </h5>
                               <%= organizer_intro(@proposal) %>
                               <% if @proposal.invites %>
                                 <% @proposal.invites.each do |invite|%>
-                                  <% if invite.invited_as == 'Co Organizer' %>
+                                  <% if invite.invited_as == 'Organizer' %>
                                     <%= render partial: 'organizer', locals: { invite: invite } %>
                                   <% end %>
                                 <% end %>
                               <% end %>
                               <div>
-                                <% if max_invitations(@proposal, 'Co Organizer') %>
-                                  <% date = @proposal.invites.where(invited_as: 'Co Organizer').first&.deadline_date&.to_date %>
+                                <% if max_invitations(@proposal, 'Organizer') %>
+                                  <% date = @proposal.invites.where(invited_as: 'Organizer').first&.deadline_date&.to_date %>
                                     <% unless date.nil? %>
-                                      <% date = date  < DateTime.current.to_date ? DateTime.current.to_date : @proposal.invites.where(invited_as: 'Co Organizer').first&.deadline_date&.to_date %>
+                                      <% date = date  < DateTime.current.to_date ? DateTime.current.to_date : @proposal.invites.where(invited_as: 'Organizer').first&.deadline_date&.to_date %>
                                     <% end %>
                                   <div class="mb-3">
                                     <template data-nested-invites-target="template">
                                       <%= f.fields_for :invites, Invite.new, child_index: 'NEW_RECORD' do |invite| %>
-                                        <%= render partial: 'invite', locals: { f: invite, invited_as: 'Co Organizer', date: date } %>
+                                        <%= render partial: 'invite', locals: { f: invite, invited_as: 'Organizer', date: date } %>
                                       <% end %>
                                     </template>
                                     <div data-nested-invites-target="target"></div>
-                                      <button type="button" class="btn btn-primary" data-action="nested-invites#addCoOrganizers" id="add-more-organizer">
-                                        Add More
+                                      <button type="button" class="btn btn-light" data-action="nested-invites#addOrganizers" id="add-more-organizer">
+                                        Add More Organizers
                                       </button>
                                   </div>
                                   <div class="mb-3">
-                                    <button data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite</button>
+                                    <button id="organizer" data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Organizer(s)</button>
                                   </div>
                                 <% end %>
                               </div>
                             </div>
                             <div class="mt-4">
                               <div class="mb-3">
-                                <h3>Add Participants:</h3>
+                                <h3 class="form-section">Add Participants:</h3>
+                                <h5>Please note that a full 5 Day workshop can host up to 42 participants on-site and up to 300 participants online.</h5>
                                 <% if @proposal.invites %>
                                   <% @proposal.invites.each do |invite|%>
                                     <% if invite.invited_as == 'Participant' %>
@@ -163,12 +166,12 @@
                                         <% end %>
                                       </template>
                                       <div data-nested-invites-target="targetOne"></div>
-                                        <button type="button" class="btn btn-primary" data-action="nested-invites#addParticipants" id="add-more-participant">
-                                          Add More
+                                        <button type="button" class="btn btn-light" data-action="nested-invites#addParticipants" id="add-more-participant">
+                                          Add More Participants
                                         </button>
                                     </div>
                                     <div class="mb-3">
-                                      <button data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite</button>
+                                      <button id="participant" data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Participant(s)</button>
                                     </div>
                                   <% end %>
                                 </div>
@@ -177,8 +180,8 @@
                             <% end %>
                             <div class="mt-4">
                               <div class="mb-3">
-                                <% if @careers %>
-                                  <h3>Confirmed Participants:</h3>
+                                <% unless @careers.blank? %>
+                                  <h3 class="form-section">Confirmed Participants:</h3>
                                   <% @careers.uniq.each do |career| %>
                                     <h4><%= career %></h4>
                                       <%= render partial: 'confirm_participant', locals: { confirmed_participants: @proposal.participants_career(career) } %>
@@ -186,16 +189,16 @@
                                 <% end %>
                               </div>
                             </div>
-                          </div>
-                          <div>
+
                             <% if params[:action] == 'show' %>
+                            <div>
                               <%= render partial: 'lead_organizer' %>
                               <div>
-                                <h3>Supporting Organizers:</h3>
+                                <h3 class="form-section">Supporting Organizers:</h3>
                                 <%= organizer_intro(@proposal) %>
                                 <% if @proposal.invites %>
                                   <% @proposal.invites.each do |invite|%>
-                                    <% if invite.invited_as == 'Co Organizer' %>
+                                    <% if invite.invited_as == 'Organizer' %>
                                       <%= render partial: 'organizer', locals: { invite: invite } %>
                                     <% end %>
                                   <% end %>
@@ -203,7 +206,7 @@
                               </div>
                               <div class="mt-4">
                                 <div class="mb-3">
-                                  <h3>Participants:</h3>
+                                  <h3 class="form-section">Participants:</h3>
                                   <% if @proposal.invites %>
                                     <% @proposal.invites.each do |invite|%>
                                       <% if invite.invited_as == 'Participant' %>
@@ -216,7 +219,7 @@
                               <div class="mt-4">
                                 <div class="mb-3">
                                   <% if @careers %>
-                                    <h3>Confirmed Participants:</h3>
+                                    <h3 class="form-section">Confirmed Participants:</h3>
                                     <% @careers.uniq.each do |career| %>
                                       <h4><%= career %></h4>
                                         <%= render partial: 'confirm_participant', locals: { confirmed_participants: @proposal.participants_career(career) } %>
@@ -224,22 +227,66 @@
                                   <% end %>
                                 </div>
                               </div>
+                            </div>
                             <% end %>
+
+                          <div class="mt-4" data-controller="multi-upload">
+                              <h3 class="form-section">Supplementary Files:</h3>
+                              <p>
+                                You may upload PDF files by clicking the button below. Uploaded files are considered supplementary documentation, and not part of the main body of the proposal.
+                                <br>
+                                Supported file types: *.pdf
+                              </p>
+                              <div>
+                                <input type="file" multiple accept="application/pdf" name="file", data-action="multi-upload#uploadFile" data-proposal-form-id="<%= @proposal&.id %>">
+                              </div>
+
+                              <% if @proposal&.files&.attached? %>
+                                <h4 class="file-uploads">Attached files:</h4>
+                                <ul class="list-group list-group-flush">
+                                  <% @proposal.files.each do |file| %>
+                                    <li class="list-group-item">
+                                      <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
+                                      <span data-proposal-id="<%= @proposal.id %>" data-attachment-id="<%= file.id %>" data-action="click->multi-upload#removeFile" class="btn btn-sm btn-light m-3">
+                                        Remove file
+                                      </span>
+                                    </li>
+                                  <% end %>
+                                </ul>
+                              <% end %>
+                            </div>
                           </div>
+
                           <div class="d-flex flex-row-reverse">
                             <button id="changeTab" class="p-2 btn btn-primary" data-action='click->submit-proposals#nextTab'>Next</button>
                           </div>
                         </div>
                       </div>
 
-                      <div class="tab-pane <%= active_tab(@proposal, 'two') %> overflow-hidden" id="tab-2" role="tabpanel">
+                      <div class="tab-pane <%= active_tab(@proposal, 'two', params[:tab]) %> overflow-hidden" id="tab-2" role="tabpanel">
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction2&.html_safe %></p>
                         </div>
+                        <input type="hidden" id="proposal_id" name="proposal_id" value="<%= @proposal.id %>">
+
                         <!-- <h4 class="tab-title">Common Fields</h4> -->
-                        <div class="form-group">
-                          <%= f.check_box :no_latex, data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                        <div class="form-group mb-3">
+                          <input type="checkbox" name="no_latex" data-action="click->submit-proposals#hideAndSave" id="no_latex" data-value="<%= @proposal.no_latex %>" <%= 'checked=checked' if @proposal.no_latex %>>
                           <%= f.label :no_latex, "No LaTeX", class: "form-label" %>
+                  			</div>
+                        <div class="form-group mb-3 <%= 'hidden' if @proposal.no_latex %>" name="latexPreamble" id="latexPreamble" data-submit-proposals-target="latexPreamble">
+                          <h3>LaTeX Preamble</h3>
+                          <p>If you have custom LaTeX macros, enter them here to add them to the document preamble.</p>
+                          <div class="form-group mb-2">
+                            <%= f.text_area(:preamble, size: '5x5', class:'form-control', value: @proposal.preamble, disabled: action)%>
+                          </div>
+                        </div>
+                        <div class="form-group mb-3 <%= 'hidden' if @proposal.no_latex %>" name="latexBibliography" id="latexBibliography" data-submit-proposals-target="latexBibliography">
+                          <h3>Bibliography</h3>
+                          <p>If you have a LaTeX bibliography, please enter it in this field. It will be included when you click the "Print Proposal" button.</p>
+                          <div class="form-group mb-2">
+                            <%= f.text_area(:bibliography, size: '5x5', class:'form-control', value: @proposal.bibliography, disabled: action)%>
+                          </div>
                         </div>
                         <%= render partial: 'proposal_forms/proposal_fields', locals: { proposal_fields: common_proposal_fields(@proposal) } %>
 
@@ -252,8 +299,8 @@
                         </div>
                       </div>
                     </div>
-                    
-                    <div class="tab-pane <%= active_tab(@proposal, 'three') %>" id="tab-3" role="tabpanel">
+
+                    <div class="tab-pane <%= active_tab(@proposal, 'three', params[:tab]) %>" id="tab-3" role="tabpanel">
                       <div class="mb-3">
                         <p><%= @proposal.proposal_form.introduction3&.html_safe %></p>
                       </div>
@@ -272,7 +319,7 @@
                           <%= link_to "Print Proposal", rendered_proposal_proposal_path(@proposal.id, :format => :pdf), target: '_blank', class: 'p-2 mx-2 btn btn-primary' %>
                           <div class="float-end">
                             <button id="changeTab" class="p-2 mx-2 btn btn-primary" data-action='click->submit-proposals#previousTab'>Back</button>
-                            <%= f.submit 'Submit Proposal', data: {confirm: "This step is final and cannot be reversed. You cannot edit your proposal after submission. Proceed?"}, class:'btn btn-primary p-2' %>
+                            <%= f.submit 'Submit Proposal', data: {confirm: "This step is final and cannot be reversed. You cannot edit your proposal after submission. Proceed?"}, disabled: action, class:'btn btn-primary p-2' %>
                           </div>
                         </div>
                       </div>
@@ -299,7 +346,7 @@
                                   <% nationality_data(@proposal).each do |key, value| %>
                                   <tr>
                                     <td><%= key %></td>
-                                    <td><%=  value %></td>
+                                    <td><%= value %></td>
                                   </tr>
                                   <% end %>
                                 </tbody>
@@ -324,7 +371,7 @@
                                   <% ethnicity_data(@proposal).each do |key, value| %>
                                   <tr>
                                     <td><%= key %></td>
-                                    <td><%=  value %></td>
+                                    <td><%= value %></td>
                                   </tr>
                                   <% end %>
                                 </tbody>
@@ -384,7 +431,7 @@
                     </div>
                   </div>
                 </div>
-              </div> 
+              </div>
             </div>
           </div>
         </div>

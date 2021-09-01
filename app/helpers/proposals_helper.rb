@@ -11,6 +11,10 @@ module ProposalsHelper
     Invite.where('invited_as = ? AND proposal_id = ?', invited_as, id)
   end
 
+  def confirmed_participants(id, invited_as)
+    Invite.where('invited_as = ? AND proposal_id = ?', invited_as, id).where.not(status: 'cancelled')
+  end
+
   def proposal_type_year(proposal_type)
     return [Date.current.year + 2] if proposal_type.year.blank?
 
@@ -23,6 +27,10 @@ module ProposalsHelper
 
   def all_proposal_types
     ProposalType.all.map { |pt| [pt.name, pt.id] }
+  end
+
+  def all_statuses
+    Proposal.statuses.map { |k, v| [k.humanize.capitalize, v] }
   end
 
   def common_proposal_fields(proposal)
@@ -38,11 +46,17 @@ module ProposalsHelper
                                       'lead_organizer').present?
   end
 
-  def proposal_ams_subjects_code(proposal, code)
-    proposal.ams_subjects.find_by(code: code)&.id
+  def show_edit_button?(proposal)
+    return unless params[:action] == 'edit'
+    return unless proposal.editable?
+    lead_organizer?(proposal.proposal_roles)
   end
 
-  # rubocop:disable Metrics/MethodLength
+  def proposal_ams_subjects_code(proposal, code)
+    proposal.proposal_ams_subjects.find_by(code: code)&.ams_subject_id
+  end
+
+  # rubocop:disable Rails/OutputSafety
   def organizer_intro(proposal)
     types_with_intro = ['5 Day Workshop', 'Summer School']
     return '' unless types_with_intro.include? proposal.proposal_type.name
@@ -57,12 +71,12 @@ module ProposalsHelper
      two members of the organizing committee must be from an under-represented
      community in STEM disciplines.</p>".html_safe
   end
-  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Rails/OutputSafety
 
-  def existing_co_organizers(invite)
-    co_organizers = invite.proposal.list_of_co_organizers.remove(invite.person&.fullname)
-    co_organizers.prepend(" and ") if co_organizers.present?
-    co_organizers.strip.delete_suffix(",")
+  def existing_organizers(invite)
+    organizers = invite.proposal.list_of_organizers.remove(invite.person&.fullname)
+    organizers.prepend(" and ") if organizers.present?
+    organizers.strip.delete_suffix(",")
   end
 
   def invite_status(response, status)
@@ -80,7 +94,15 @@ module ProposalsHelper
 
   # rubocop:disable Metrics/MethodLength
   def proposal_status(status)
+    return "submitted" if %w[approved declined].include?(status)
+
+    status&.split('_')&.map(&:capitalize)&.join(' ')
+  end
+
+  def proposal_status_class(status)
     proposals = {
+      "approved" => "text-approved",
+      "declined" => "text-declined",
       "draft" => "text-muted",
       "submitted" => "text-proposal-submitted",
       "initial_review" => "text-warning",
@@ -185,9 +207,5 @@ module ProposalsHelper
   def stem_values(proposal)
     data = stem_graph_data(proposal)
     data.values
-  end
-
-  def invite_role(invited_as)
-    invited_as == 'Co Organizer' ? 'organizer' : 'participant'
   end
 end

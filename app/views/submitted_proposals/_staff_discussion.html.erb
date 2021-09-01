@@ -1,0 +1,18 @@
+<div>
+  <%= form_with(url: staff_discussion_submitted_proposal_path(@proposal), method: :post) do |f| %>
+    <div class="mb-3">
+      <h4>Discussion:</h4>
+      <%=f.text_area(:discussion, required: true, size: '3x5', class:'form-control')%>
+    </div>
+    <button class="btn btn-primary">Submit</button>
+  <% end %>
+</div>
+<br />
+<div class="mt-4">
+  <h2> Discussions </h2>
+  <% @proposal.staff_discussions&.each do |staff| %>
+    <div class="mb-3 row border m-1 p-1">
+      <p><%= staff.discussion %></p>
+    </div>
+  <% end %>
+</div>

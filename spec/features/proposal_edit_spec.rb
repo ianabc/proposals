@@ -3,7 +3,8 @@ require 'rails_helper'
 RSpec.feature "Proposal edit", type: :feature do
   before do
     person = create(:person, :with_proposals)
-    @subjects = create_list(:subject, 4)
+    @subject_category = create(:subject_category)
+    @subjects = create_list(:subject, 4, subject_category_id: @subject_category.id)
     @proposal = person.proposals.first
     authenticate_user(person)
     visit edit_proposal_path(@proposal)

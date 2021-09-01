@@ -10,7 +10,7 @@
   flex-wrap: wrap;
   position: absolute;
   top: 130%;
-  z-index: 1002; 
+  z-index: 1002;
 }
 
 .hidden {
@@ -22,9 +22,9 @@
 }
 
 .collapsed {
-  overflow: hidden; text-overflow: ellipsis; display: -webkit-box; 
-  -webkit-line-clamp: 2; 
-  -webkit-box-orient: vertical;   
+  overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .sidebar-nav .sidebar-item .proposal-item {
@@ -43,4 +43,16 @@
 
 .table-padding {
   padding: 10px
+}
+
+label h2 {
+  margin-top: 1.2em;
+}
+
+h3.form-section {
+  margin-top: 2em;
+}
+
+h4.file-uploads {
+  margin: 2em 0 0 0;
 }
