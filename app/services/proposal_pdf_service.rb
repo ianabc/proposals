@@ -14,7 +14,7 @@ class ProposalPdfService
     LatexToPdf.config[:arguments].delete('-halt-on-error') if @proposal.is_submission
 
     File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-      io.write(input)
+      io.write(@input)
     end
   end
 
@@ -64,7 +64,7 @@ class ProposalPdfService
                      data-bs-toggle="collapse" data-bs-target="#latex-error"
                      aria-expanded="false" aria-controls="latex-error">
               Show full error log
-      </button>'
+      </button>']
     error_output << "<pre class=\"collapse\" id=\"latex-error\">\n"
     error_output << "#{error_object.log}\n</pre>\n\n"
 
