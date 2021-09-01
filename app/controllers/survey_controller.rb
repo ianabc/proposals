@@ -47,7 +47,7 @@ class SurveyController < ApplicationController
         see the proposal being drafted, please setup an account by entering
         your e-mail address, and following the link we send.'.squish
       if @invite.person_id.blank? || @invite.person.user.nil?
-        redirect_to user_registration_path, notice: message
+        redirect_to new_user_registration_path, notice: message
       else
         redirect_to new_password_path(@invite.person.user), notice: message
       end
