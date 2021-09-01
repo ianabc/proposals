@@ -10,7 +10,7 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposal_subject, against: %i[subject_id]
   pg_search_scope :search_proposal_year, against: %i[year]
 
-  attr_accessor :is_submission
+  attr_accessor :is_submission, :skip_submission_validation
 
   has_many_attached :files
   has_many :proposal_locations, dependent: :destroy
@@ -59,9 +59,12 @@ class Proposal < ApplicationRecord
   }
 
   scope :submitted_type, lambda { |type|
-    where(status: 1)
-      .joins(:proposal_type).where(name: type)
+    joins(:proposal_type).where(proposal_type: { name: type })
   }
+
+  def editable?
+    draft? || revision_requested?
+  end
 
   def demographics_data
     DemographicData.where(person_id: invites.where(invited_as: 'Participant')
@@ -124,6 +127,7 @@ class Proposal < ApplicationRecord
   private
 
   def not_before_opening
+    return if skip_submission_validation
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
     errors.add("Late submission - ", "proposal submissions are not allowed

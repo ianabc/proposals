@@ -1,7 +1,7 @@
 <div class="form-group mb-3">
   <div>
     <span><%= location_name(field) %></span><br>
-    <label for="statement"><h2><%= field.statement %></h2></label><%= mandatory_field?(field) %>
+    <label for="statement"><h2><%= field.position %>. <%= field.statement %></h2></label><%= mandatory_field?(field) %>
     <% if current_user&.staff_member? && @proposal_form&.draft? && params[:action] == 'edit' %>
       <span data-action="click->proposal-form#editField" data-field-id="<%= field.id %>" data-proposal-form-id="<%= @proposal_form&.id %>" style="color: #3b7ddd" class="m-1" data-type-id="<%= @proposal_type&.id %>">Edit</span>
       <%= link_to 'Delete', proposal_field_proposal_type_proposal_form_url(@proposal_type, @proposal_form, field_id: field.id), method: :delete ,
@@ -14,7 +14,7 @@
       Learn More
     </a></p>
   <% end %>
-  <%= select_tag "Option", options_for_select(proposal_field_options(field), answer(field, @proposal)), class: 'form-select', disabled: action, name: field.id, data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+  <%= select_tag "Option", options_for_select(proposal_field_options(field), answer(field, @proposal)), class: 'form-select', disabled: action, name: field.id, data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
 
   <% if @submission %>
     <% validations(field, @proposal).each do |val| %>

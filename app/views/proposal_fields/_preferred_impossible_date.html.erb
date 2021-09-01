@@ -1,7 +1,7 @@
 <div class="form-group mb-4">
   <div>
     <span><%= location_name(field) %></span><br>
-    <label for="statement"><h2><%= field.statement %></h2></label>
+    <label for="statement"><h2><%= field.position %>. <%= field.statement %></h2></label>
     <%= mandatory_field?(field) %>
     <% if current_user&.staff_member? && @proposal_form&.draft? && params[:action] == 'edit' %>
       <span data-action="click->proposal-form#editField" data-field-id="<%= field.id %>" data-proposal-form-id="<%= @proposal_form&.id %>" style="color: #3b7ddd" class="mx-1">Edit</span>
@@ -18,16 +18,16 @@
   <div class="row">
     <div class="col-6">
       <h4>Preferred Dates</h4>
-      <%= select_tag "preferred_dates_1", options_for_select(preferred_impossible_dates(field, 'preferred_dates_1'), dates_answer(field, @proposal, '0')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'}} %>
-      <%= select_tag "preferred_dates_2", options_for_select(preferred_impossible_dates(field, 'preferred_dates_2'), dates_answer(field, @proposal, '1')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'}} %>
-      <%= select_tag "preferred_dates_3", options_for_select(preferred_impossible_dates(field, 'preferred_dates_3'), dates_answer(field, @proposal, '2')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'}} %>
-      <%= select_tag "preferred_dates_4", options_for_select(preferred_impossible_dates(field, 'preferred_dates_4'), dates_answer(field, @proposal, '3')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'}} %>
-      <%= select_tag "preferred_dates_5", options_for_select(preferred_impossible_dates(field, 'preferred_dates_5'), dates_answer(field, @proposal, '4')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'}} %>
+      <%= select_tag "preferred_dates_1", options_for_select(preferred_impossible_dates(field, 'preferred_dates_1'), dates_answer(field, @proposal, '0')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'}} %>
+      <%= select_tag "preferred_dates_2", options_for_select(preferred_impossible_dates(field, 'preferred_dates_2'), dates_answer(field, @proposal, '1')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'}} %>
+      <%= select_tag "preferred_dates_3", options_for_select(preferred_impossible_dates(field, 'preferred_dates_3'), dates_answer(field, @proposal, '2')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'}} %>
+      <%= select_tag "preferred_dates_4", options_for_select(preferred_impossible_dates(field, 'preferred_dates_4'), dates_answer(field, @proposal, '3')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'}} %>
+      <%= select_tag "preferred_dates_5", options_for_select(preferred_impossible_dates(field, 'preferred_dates_5'), dates_answer(field, @proposal, '4')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'}} %>
     </div>
     <div class="col-6">
       <h4>Impossible Dates</h4>
-      <%= select_tag "impossible_dates_1", options_for_select(preferred_impossible_dates(field, 'impossible_dates_1'), dates_answer(field, @proposal, '5')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'}} %>
-      <%= select_tag "impossible_dates_2", options_for_select(preferred_impossible_dates(field, 'impossible_dates_2'), dates_answer(field, @proposal, '6')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'}} %>
+      <%= select_tag "impossible_dates_1", options_for_select(preferred_impossible_dates(field, 'impossible_dates_1'), dates_answer(field, @proposal, '5')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'}} %>
+      <%= select_tag "impossible_dates_2", options_for_select(preferred_impossible_dates(field, 'impossible_dates_2'), dates_answer(field, @proposal, '6')), {class:'form-select mb-2', include_blank: true, name: "#{field.id}[]", disabled: action,  data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'}} %>
     </div>
   </div>
 

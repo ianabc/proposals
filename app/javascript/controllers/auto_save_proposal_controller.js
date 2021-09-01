@@ -25,12 +25,12 @@ export default class extends Controller {
     }) 
   }
 
-  onFoucs () {
+  onFocus () {
     this.autoSaveProposal();
   }
 
   onBlur () {
-    let id = window.location.href.split('/').slice(-3)[1]
+    let id = $('#proposal_id').val()
     this.submitProposal(id)
   }
 

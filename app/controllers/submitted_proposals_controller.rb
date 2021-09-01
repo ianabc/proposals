@@ -129,14 +129,15 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_pdf_file
-    prop_pdf = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
-    prop_pdf.pdf
+    prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
+                                   .generate_latex_file
 
     @year = @proposal&.year || Date.current.year.to_i + 2
     pdf_file = render_to_string layout: "application",
-                                inline: prop_pdf.to_s, formats: [:pdf]
+                                inline: prop_latex.to_s, formats: [:pdf]
 
     @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
+    check_file
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
@@ -187,5 +188,12 @@ class SubmittedProposalsController < ApplicationController
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
+  end
+  
+  def check_file
+    return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
+
+    @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
+    File.new(@pdf_path, 'w')
   end
 end

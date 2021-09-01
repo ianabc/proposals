@@ -42,6 +42,6 @@ class ProposalFiltersQuery
   def filter_by_status(status)
     return @result if status.blank?
 
-    @result.search_proposal_status(status)
+    @result.search_proposal_status(status).sort_by { |p| p.code || '' }
   end
 end

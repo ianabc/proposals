@@ -15,9 +15,9 @@ class SurveyController < ApplicationController
   def submit_survey
     demographic_data = DemographicData.new
     demographic_data.result = questionnaire_answers
-    demographic_data.person = person
+    demographic_data.person = current_user&.person || @invite&.person
     if demographic_data.save
-      redirect_to @redirect_path, notice: 'Questionnaire was successfully submitted'
+      post_demographic_form_path
     else
       redirect_to survey_questionnaire_survey_index_path(id: @invite.id),
                   alert: demographic_data.errors.full_messages.join(', ')
@@ -38,13 +38,19 @@ class SurveyController < ApplicationController
     params.permit([:code])&.[](:code)
   end
 
-  def person
-    if @invite
-      @redirect_path = new_password_path(@invite.person.user)
-      @invite.person
+  def post_demographic_form_path
+    if @invite.blank?
+      message = 'Thank you for filling out our form!'
+      redirect_to new_proposal_path, notice: message
     else
-      @redirect_path = new_proposal_path
-      current_user.person
+      message = 'Thank you for filling out our form. If you wish to login to
+        see the proposal being drafted, please setup an account by entering
+        your e-mail address, and following the link we send.'.squish
+      if @invite.person_id.blank?
+        redirect_to user_registration_path, notice: message
+      else
+        redirect_to new_password_path(@invite&.person&.user), notice: message
+      end
     end
   end
 end

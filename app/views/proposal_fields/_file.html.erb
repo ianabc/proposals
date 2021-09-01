@@ -1,6 +1,6 @@
 <div>
   <span><%= location_name(field) %></span><br>
-  <label for="statement"><h2><%= field.statement %></h2></label><%= mandatory_field?(field) %>
+  <label for="statement"><h2><%= field.position %>. <%= field.statement %></h2></label><%= mandatory_field?(field) %>
   <% if current_user&.staff_member? && @proposal_form&.draft? && params[:action] == 'edit' %>
     <span data-action="click->proposal-form#editField" data-field-id="<%= field.id %>" data-proposal-form-id="<%= @proposal_form&.id %>" style="color: #3b7ddd" class="mx-1" data-type-id="<%= @proposal_type&.id %>">Edit</span>
     <%= link_to 'Delete', proposal_field_proposal_type_proposal_form_url(@proposal_type, @proposal_form, field_id: field.id), method: :delete ,
