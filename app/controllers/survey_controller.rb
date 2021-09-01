@@ -49,7 +49,7 @@ class SurveyController < ApplicationController
       if @invite.person_id.blank? || @invite.person.user.nil?
         redirect_to user_registration_path, notice: message
       else
-        redirect_to new_password_path(@invite&.person&.user), notice: message
+        redirect_to new_password_path(@invite.person.user), notice: message
       end
     end
   end
