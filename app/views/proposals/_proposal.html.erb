@@ -60,12 +60,14 @@
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 row">
                           <%= f.label :title, class: "required" %>
-                          <%= f.text_field :title, class: 'form-control', disabled: action, value: @proposal.title, data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
-                          <% if @submission && @proposal.title.blank? %>
-                            <p class="field-validation">Title is required</p>
-                          <% end %>
+                          <div class="col-6 mt-2">
+                            <%= f.text_field :title, class: 'form-control w-100', disabled: action, value: @proposal.title, data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <% if @submission && @proposal.title.blank? %>
+                              <p class="field-validation">Title is required</p>
+                            <% end %>
+                          </div>
                         </div>
 
                         <div class="mb-3">

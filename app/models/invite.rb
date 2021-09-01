@@ -10,7 +10,8 @@ class Invite < ApplicationRecord
   validates :firstname, :lastname, :email, :invited_as,
             :deadline_date, :person_id, presence: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
-  validate :deadline_not_in_past, :one_invite_per_person, :proposal_title
+  validate :deadline_not_in_past, :proposal_title
+  validate :one_invite_per_person, on: :create
 
   enum status: { pending: 0, confirmed: 1, cancelled: 2 }
   enum response: { yes: 0, maybe: 1, no: 2 }
@@ -64,7 +65,7 @@ class Invite < ApplicationRecord
     return if proposal.nil? || proposal.invites.where(email: email.downcase)
                                        .where.not(status: 'cancelled').empty?
 
-    errors.add('Uniqueness: ', "Same email cannot be used to invite already
-                                invited organizers or participants.".squish)
+    errors.add('Duplicate:', "Same email cannot be used to invite already
+                              invited organizers or participants.".squish)
   end
 end
