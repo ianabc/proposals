@@ -1,42 +1,34 @@
 module ProposalFieldsHelper
   def proposal_type_locations(proposal_type)
-    proposal_type.locations.map { |loc| [loc.name, loc.id] }
+    proposal_type.locations.map { |loc| ["#{loc.name} (#{loc.city}, #{loc.country})", loc.id] }
   end
 
   def proposal_field_options(field)
-    if field.options == "{}"
-      []
-    else
-      options = []
-      field.options.each do |option|
-        options.push([option.last["text"], option.last["value"]])
-      end
-      options
+    options = []
+    field.options.each do |option|
+      options.push([option.text, option.value])
     end
+    options
   end
 
   def options(field)
-    if field.options == "{}"
-      []
-    else
-      opt = []
-      field.options.each do |option|
-        opt.push(option.last['text'])
-      end
-      opt
+    opt = []
+    field.options.each do |option|
+      opt.push(option.text)
     end
+    opt
   end
 
   def options_for_field(field)
-    if field.fieldable_type.in?(%w[ProposalFields::SingleChoice ProposalFields::MultiChoice ProposalFields::Radio])
-      options(field.fieldable)
-    end
+    return unless field.fieldable_type.in?(%w[ProposalFields::SingleChoice ProposalFields::MultiChoice
+                                              ProposalFields::Radio])
+
+    options(field)
   end
 
   def answer(field, proposal)
     return unless proposal
 
-    proposal_field = ProposalField.find field.id
     Answer.find_by(proposal_field_id: field.id, proposal_id: proposal.id)&.answer
   end
 
@@ -56,10 +48,95 @@ module ProposalFieldsHelper
   end
 
   def validations(field, proposal)
+    return [] if field.location_id && proposal.locations.exclude?(field.location)
+
     ProposalFieldValidationsService.new(field, proposal).validations
   end
-  
+
   def proposal_field_partial(field)
     "proposal_fields/#{field.fieldable_type.split('::').last.underscore}"
+  end
+
+  def preferred_impossible_dates(field, attr)
+    field.fieldable[attr].split(",").map { |date| [date, date] }
+  end
+
+  def dates_answer(field, proposal, attr)
+    ans = answer(field, proposal)
+    if ans
+      JSON.parse(ans)[attr.to_i]
+    else
+      ans
+    end
+  end
+
+  def action
+    params[:action] == 'show' || (params[:action] == 'location_based_fields' && request.referer.exclude?('edit'))
+  end
+
+  def mandatory_field?(field)
+    return print_validation if field.validations.where(validation_type: 'mandatory').present?
+
+    ''
+  end
+
+  def print_validation
+    '<span class="required"></span>'.html_safe
+  end
+
+  def location_name(field)
+    return unless field.location_id
+
+    loc = "#{field.location&.name} (#{field.location&.city}, #{field.location&.country})"
+    "#{loc} - Based question"
+  end
+
+  def active_tab(proposal, tab, param_tab)
+    tab_errors(proposal, param_tab).eql?(tab) ? 'active' : ''
+  end
+
+  def tab_errors(proposal, param_tab)
+    return 'two' if param_tab == "tab-2"
+    return 'one' unless session[:is_submission] || params[:action] == 'edit'
+    return 'one' if tab_one(proposal)
+    return 'two' if tab_two(proposal)
+    return 'three' if tab_three(proposal)
+
+    'one'
+  end
+
+  def tab_one(proposal)
+    proposal.title.blank? || proposal.subject.blank? ||
+      !proposal.ams_subjects.count.eql?(2) ||
+      proposal.invites.count do |i|
+        i.status == 'confirmed'
+      end.zero?
+  end
+
+  def tab_two(proposal)
+    errors = []
+    proposal.proposal_form.proposal_fields.where(location_id: nil).each do |field|
+      errors << ProposalFieldValidationsService.new(field, proposal).validations
+
+      return true if errors.flatten.count == 1
+    end
+    false
+  end
+
+  def tab_three(proposal)
+    return true if proposal.locations.empty?
+
+    errors = []
+    proposal.proposal_form.proposal_fields.where(location_id: proposal.location_ids).each do |field|
+      errors << ProposalFieldValidationsService.new(field, proposal).validations
+      return true if errors.flatten.count == 1
+    end
+    false
+  end
+
+  def answer_obj(field, proposal)
+    return unless proposal
+
+    Answer.find_by(proposal_field_id: field.id, proposal_id: proposal.id)
   end
 end

@@ -1,30 +1,36 @@
 class ProposalFieldsController < ApplicationController
+  load_and_authorize_resource
   before_action :set_proposal_form, only: %i[new create edit update]
   before_action :set_proposal_field, only: %i[edit update]
 
   def new
-    type = "ProposalFields::#{params[:field_type]}".safe_constantize.new
+    if %w[Date Radio Text SingleChoice MultiChoice PreferredImpossibleDate].include?(params[:field_type])
+      type = "ProposalFields::#{params[:field_type]}".safe_constantize.new
+    end
     @proposal_field = @proposal_form.proposal_fields.new(fieldable: type)
     render partial: 'proposal_fields/fields_form',
            locals: { proposal_field: @proposal_field, proposal_form: @proposal_form }
   end
 
   def create
-    @fieldable = "ProposalFields::#{params[:type]}".safe_constantize.new
-    options if params[:type].in?(%w[SingleChoice MultiChoice Radio])
-    @proposal_field = @proposal_form.proposal_fields.new(proposal_field_params)
-    @proposal_field.fieldable = @fieldable
-    if @proposal_field.insert_at(@proposal_field.position)
-      proposal_field_validations
-      @proposal_form.update(updated_by: current_user)
-      redirect_to edit_proposal_form_path(@proposal_form), notice: "Field was successfully created."
-    else
-      redirect_to edit_proposal_form_path(@proposal_form), alert: @proposal_form.errors
+    if %w[Date Radio Text SingleChoice MultiChoice PreferredImpossibleDate].include?(params[:type])
+      @fieldable = "ProposalFields::#{params[:type]}".safe_constantize.new(date_field_params)
     end
-  end
-
-  def latex_text
-    session[:latex_text] = params[:text]
+    positions
+    if check_position?
+      @proposal_field = @proposal_form.proposal_fields.new(proposal_field_params)
+      @proposal_field.fieldable = @fieldable
+      if @proposal_field.insert_at(@proposal_field.position)
+        @proposal_form.update(updated_by: current_user)
+        redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
+                    notice: "Field was successfully created."
+      else
+        redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
+                    alert: @proposal_form.errors
+      end
+    else
+      redirect
+    end
   end
 
   def edit
@@ -33,35 +39,62 @@ class ProposalFieldsController < ApplicationController
   end
 
   def update
-    if @proposal_field.update(proposal_field_params)
-      @proposal_form.update(updated_by: current_user)
-      redirect_to edit_proposal_form_path(@proposal_form), notice: "Field was successfully updated."
+    positions
+    if check_position?
+      if @proposal_field.update(proposal_field_params) && @proposal_field.fieldable.update(date_field_params)
+        @proposal_form.update(updated_by: current_user)
+        redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
+                    notice: "Field was successfully updated."
+      else
+        redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
+                    alert: @proposal_form.errors
+      end
     else
-      redirect_to edit_proposal_form_path(@proposal_form), alert: @proposal_form.errors
+      redirect
     end
   end
 
   private
 
   def proposal_field_params
-    params.require(:proposal_field).permit(:position, :description, :location_id, :statement, :guideline_link)
+    params.require(:proposal_field).permit(:position, :description, :location_id, :statement, :guideline_link,
+                                           validations_attributes: %i[id _destroy validation_type value error_message],
+                                           options_attributes: %i[id index value text _destroy])
   end
 
   def set_proposal_form
-    @proposal_form = ProposalForm.find(params[:proposal_form_id])
+    @proposal_form = ProposalForm.find_by(id: params[:proposal_form_id])
   end
 
   def set_proposal_field
     @proposal_field = ProposalField.find_by(id: params[:id])
   end
 
-  def options
-    @fieldable.options = params[:proposal_field][:options]
+  def date_field_params
+    param = params.require(:proposal_field)[:proposal_fields_preferred_impossible_date]
+    return {} unless param
+
+    param.permit(:preferred_dates_1, :preferred_dates_2, :preferred_dates_3, :preferred_dates_4,
+                 :preferred_dates_5, :impossible_dates_1, :impossible_dates_2)
   end
 
-  def proposal_field_validations
-    params[:proposal_field][:validations]&.each do |key, val|
-      @proposal_field.validations.create(validation_type: val[:type], value: val[:value], error_message: val[:error_message])
+  def positions
+    @position = @proposal_form.highest_field_position
+    @field = params[:proposal_field]
+    @field_position = @field[:position].to_i
+  end
+
+  def check_position?
+    ((@position + 1) == @field_position) || (@field_position.positive? && @field_position <= @position)
+  end
+
+  def redirect
+    if (@position + 1) == 1
+      redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
+                  alert: "Postion should be greater than 0"
+    else
+      redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
+                  alert: "Postion should be greater than 0 and smaller or equal to #{@position + 1}"
     end
   end
 end

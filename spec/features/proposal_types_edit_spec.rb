@@ -31,7 +31,7 @@ RSpec.feature "Proposal Type edit", type: :feature do
     expect(updated_proposal_type.locations.first.name).to eq(Location.first.name)
   end
 
-  scenario "there is a back button " do 
+  scenario "there is a back button " do
     expect(page).to have_link(href: proposal_types_path)
   end
 end

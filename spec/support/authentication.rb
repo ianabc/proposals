@@ -9,9 +9,9 @@ def authenticate_user(person = nil, role = 'Staff')
   @user
 end
 
-def authenticate_for_controllers
-  @person = FactoryBot.create(:person)
-  @user = FactoryBot.create(:user, person: @person, email: @person.email)
+def authenticate_for_controllers(person = nil)
+  @person = person || FactoryBot.create(:person)
+  @user = person&.user || FactoryBot.create(:user, person: @person, email: @person.email)
   @user.roles << @user.staff_role
   @user.save
 

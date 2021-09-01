@@ -1,3 +1,3 @@
 class Option < ApplicationRecord
-  belongs_to :optionable, polymorphic: true
+  belongs_to :proposal_field
 end

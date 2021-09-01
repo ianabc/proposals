@@ -1,9 +1,9 @@
 class SubmitProposalService
-  attr_reader :params, :proposal, :proposal_form
+  attr_reader :params, :proposal, :proposal_form, :errors
 
   def initialize(proposal, params)
     @proposal = proposal
-    @proposal_form = proposal.proposal_type.proposal_forms&.where(status: :active)&.last
+    @proposal_form = proposal.proposal_form
     @params = params
     @errors = []
   end
@@ -16,14 +16,29 @@ class SubmitProposalService
       create_or_update(id, value)
     end
     proposal_locations
-    proposal.update(status: :active) if @errors.flatten.count.zero? && params[:commit] == 'Publish'
   end
 
-  def create_or_update(id, value)
-    if @errors.flatten.count.zero?
-      field = ProposalField.find(id)
-      @errors << ProposalFieldValidationsService.new(field, proposal).validations
+  def has_errors?
+    unless @proposal.valid?
+      @errors << @proposal.errors.full_messages
     end
+
+    !errors.flatten.empty?
+  end
+
+  def error_messages
+    errors.uniq.flatten.join(', ')
+  end
+
+  def is_final?
+    params[:commit] == 'Submit Proposal'
+  end
+
+
+  private
+
+  def create_or_update(id, value)
+    check_field_validations(id)
 
     answer = Answer.find_by(proposal_field_id: id, proposal: proposal)
     if answer
@@ -35,5 +50,16 @@ class SubmitProposalService
 
   def proposal_locations
     proposal.locations = Location.where(id: params[:location_ids])
+  end
+
+  def check_field_validations(id)
+    if @errors.flatten.count.zero?
+      field = ProposalField.find(id)
+      if field.location_id
+        return unless @proposal.locations.include?(field.location)
+      end
+
+      @errors << ProposalFieldValidationsService.new(field, proposal).validations
+    end
   end
 end

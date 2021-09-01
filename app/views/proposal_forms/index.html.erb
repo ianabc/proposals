@@ -6,54 +6,59 @@
       </h1>
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </a></li>
+          <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %></li>
+          <li class="breadcrumb-item"><%= link_to "Proposal Types", proposal_types_path %> </li>
+          <li class="breadcrumb-item active" aria-current="page"> <%= @proposal_type.name %></li>
           <li class="breadcrumb-item active" aria-current="page">Proposal Forms</li>
         </ol>
       </nav>
     </div>
     <div class="row">
       <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            </h6>
+        <div class="card" style="background: #f4f7fc">
+          <div class="card-body">
+            <div class="me-3" data-controller="proposal-types">
+              <div class="mb-3 d-flex flex-row-reverse">
+                <div class="float-end">
+                  <a data-toggle="tooltip" title="Clone" data-bs-toggle="modal" data-bs-target="#cloneProposalForm<%= @proposal_type.id %>" href="#" class="btn btn-pill btn-primary text-white">
+                    <i class="align-middle fas fa-fw fa-copy cursor-pointer "></i>Clone
+                  </a>
+                  <%= link_to 'Create Proposal form',  new_proposal_type_proposal_form_path, class: 'btn btn-pill btn-primary text-white', data: (active_or_draft_form?(@proposal_type.id) ? {confirm: 'You already have form for this proposal type in draft/active state, if you continue system will make them inactive. Do you want to continue?'} : '') %>
+                  <%= render partial: 'proposal_forms/clone_proposal_form', locals: { proposal_type_id: @proposal_type.id } %>
+                </div>
+              </div>
+              <div class="col-12 col-lg-12">
+                <div class="tab">
+                  <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item col-4"><a class="nav-link active" href="#tab-1" data-bs-toggle="tab" role="tab">Draft</a></li>
+                    <li class="nav-item col-4"><a class="nav-link" href="#tab-2" data-bs-toggle="tab" role="tab">Active</a></li>
+                    <li class="nav-item col-4"><a class="nav-link" href="#tab-3" data-bs-toggle="tab" role="tab">Inactive</a></li>
+                  </ul>
+
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="tab-1" role="tabpanel">
+                      <div>
+                        <%= render partial: 'table', locals: {proposal_forms: proposal_forms(@proposal_type, 'draft')} %>
+                      </div>
+                    </div>
+                    
+                    <div class="tab-pane" id="tab-2" role="tabpanel">
+                      <div>
+                        <%= render partial: 'table', locals: {proposal_forms: proposal_forms(@proposal_type, 'active')} %>
+                      </div>
+                    </div>
+                    
+                    <div class="tab-pane" id="tab-3" role="tabpanel">
+                      <div>
+                        <%= render partial: 'table', locals: {proposal_forms: proposal_forms(@proposal_type, 'inactive')} %>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
           </div>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Proposal Type</th>
-                <th>Location </th>
-                <th>Status</th>
-                <th>Created at</th>
-                <th>Created by</th>
-                <th>Updated by</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% @proposal_forms.each do |proposal_form| %>
-              <tr>
-                <td><%= proposal_form.proposal_type.name %></td>
-                <td>
-                  <% proposal_form.proposal_type.locations.each do |loc| %>
-                   <%= loc.name %><br>
-                  <% end %>
-                </td>
-                <td><%= proposal_form.status %></td>
-                <td><%= proposal_form.created_at.to_date %></td>
-                <td><%= proposal_form.created_by&.email %></td>
-                <td><%= proposal_form.updated_by&.email %></td>
-                <td class="table-action">
-                  <%= link_to '<i class="align-middle fas fa-fw fa-eye" data-toggle="tooltip" title="Show"></i>Show'.html_safe, proposal_form_path(proposal_form) %>
-                  <% if proposal_form.draft? %>
-                   <%= link_to '<i class="align-middle fas fa-fw fa-pen" data-toggle="tooltip" title="Edit"></i>Edit'.html_safe, edit_proposal_form_path(proposal_form) %>
-                  <% end %>
-                  <%= link_to '<i class="align-middle fas fa-fw fa-trash" data-toggle="tooltip" title="Delete"></i>Delete'.html_safe, proposal_form_path(proposal_form), method: :delete ,
-                    data: {confirm: "Are you sure you want to delete #{proposal_form.proposal_type.name}?"} %>
-                </td>
-              </tr>
-              <% end %>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>

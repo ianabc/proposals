@@ -13,7 +13,15 @@
   <body class="theme-blue">
     <div class="wrapper">
       <%= render 'layouts/sidebar' %>
-      <%= yield %>
+      <div class="main">
+        <nav class="navbar navbar-expand navbar-theme">
+          <a class="sidebar-toggle d-flex mt-4 me-2">
+            <i class="hamburger align-self-center"></i>
+          </a>
+        </nav>
+
+        <%= yield %>
+      </div>
     </div>
     <%= render partial: 'layouts/toastr' %>
   </body>

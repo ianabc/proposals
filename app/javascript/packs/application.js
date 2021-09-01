@@ -5,23 +5,27 @@
 // that code so it'll be compiled.
 
 import Rails from "@rails/ujs"
-import { Turbo } from "@hotwired/turbo-rails"
-import "@hotwired/turbo-rails"
 import * as ActiveStorage from "@rails/activestorage"
 import "channels"
 import "controllers"
 import "bootstrap"
 import "jquery"
 import "@fortawesome/fontawesome-free/css/all"
-global.toastr = require("toastr")
+
 import "spark"; // vendor/assets/javascripts
 
 import "../stylesheets/application"
 import "../js/common";
-import "../js/proposal_form";
 
-window.Turbo = Turbo
+// Toastr flash messages
+global.toastr = require("toastr")
+toastr.options.closeButton = true;
+toastr.options.preventDuplicates = true;
+toastr.options.timeOut = 30000;
+toastr.options.extendedTimeOut = 60000;
+
 Rails.start();
 ActiveStorage.start();
 
-
+require("trix")
+require("@rails/actiontext")

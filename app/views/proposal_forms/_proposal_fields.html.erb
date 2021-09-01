@@ -1,7 +1,6 @@
-<fieldset>
-  <legend>Proposal fields</legend>
-    <% proposal_fields&.each do |field| %>
-      <%= render partial: proposal_field_partial(field), locals: { field: field } %>
-    <% end %>
-</fieldset>
+<div>
+  <% proposal_fields&.each do |field| %>
+    <%= render partial: proposal_field_partial(field).html_safe, locals: { field: field } %>
+  <% end %>
+</div>
  

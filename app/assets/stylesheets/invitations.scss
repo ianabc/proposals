@@ -1,0 +1,21 @@
+
+.invitations {
+  .invitation-box {
+    box-shadow: 0 29px 147.5px 102.5px rgba(0, 0, 0, 0.05), 0 29px 95px;
+    max-width: 800px;
+    padding: 0;
+    margin: 0;
+  }
+
+  .jumbotron {
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+    background-color: #e9ecef;
+    border-radius: .3rem;
+  }
+
+  .answers {
+    border: 1px solid lightgrey;
+
+  }
+}

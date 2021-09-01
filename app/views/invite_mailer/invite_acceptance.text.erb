@@ -1,0 +1,10 @@
+Dear <%= @person&.fullname %>:
+
+Thank you for indicating your interest in becoming a <%= @invite.invited_as?.downcase %> for the proposed workshop titled, "<%= @proposal.title %>", which is currently being organized by
+<%= @proposal.lead_organizer&.fullname %><%= @existing_organizers %>.
+The organizing committee will be in touch regarding future steps if the proposal is successful.
+
+Sincerely,
+
+Banff International Research Station,
+and the Organizing Committee.

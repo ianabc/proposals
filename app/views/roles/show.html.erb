@@ -1,0 +1,76 @@
+<main class="content" data-controller="proposal-types">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Role
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </li>
+          <li class="breadcrumb-item"> <%= link_to "Roles", roles_path %> </li>
+          <li class="breadcrumb-item active" aria-current="page"><%= @role.name&.split('_')&.map(&:capitalize)&.join(' ') %></li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div data-controller="nested-roles-permission">
+            <div class="card-header">
+              <h2>Permissions for <%= @role.name&.split('_')&.map(&:capitalize)&.join(' ') %></h2>
+            </div>
+            <div class="mb-3">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Permission Type</th>
+                    <th>Privilege Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @role.role_privileges.each do |privilege| %>
+                    <tr>
+                      <td><%= privilege.permission_type %></td>
+                      <td><%= privilege.privilege_name %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+            <div class="card-header">
+              <h2>Users</h2>
+              <div class="float-end">
+                <button data-action="click->nested-roles-permission#usersPreview" data-id="<%= @role.id %>" class="btn btn-primary">Add New User(s)</button>
+                <%= render 'user_role' %>
+              </div>
+            </div>
+            <div class="mb-3">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @role.users&.each do |user|%>
+                    <tr>
+                      <td><%= user.fullname %></td>
+                      <td><%= user.email %></td>
+                      <% if current_user.email != user.email %>
+                        <td class="table-action">
+                          <%= link_to '<i class="align-middle fas fa-fw fa-trash" data-toggle="tooltip" title="Delete"></i>Remove Role'.html_safe, remove_role_role_path(@role, user_id: user.id), method: :post, data: {confirm: "Are you sure you want to delete #{user.fullname} from this #{@role.name} role?"} %>
+                        </td>
+                      <% end %>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

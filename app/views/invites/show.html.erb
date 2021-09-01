@@ -1,0 +1,36 @@
+<div class="row container invitations position-absolute top-50 start-50 translate-middle">
+
+  <%= form_with url: inviter_response_proposal_invite_path(@proposal, @invite, code: @invite.code) do  |f| %>
+  <div class="card invitation-box">
+    <div class="card-body">
+      <div class="row">
+        <div class='text-center'>
+            <h1>Welcome, <%= @invite.person&.fullname %>!<br>
+              <small>Thank you for responding to the invitation.</small></h1>
+        </div>
+      </div>
+      <div class="row">
+        <p class='lead text-center'>You have been invited by <%= @invite.proposal.lead_organizer&.fullname %> to <%= invited_role(@invite) %> a proposed workshop facilitated by the Banff International Research Station entitled: <br>
+        <strong><%= @invite.proposal.title %></strong>
+        </p>
+        <p class='lead text-center'>If the proposal is selected by the peer review process in the last quarter of this year, it will be scheduled to take place in <%= @invite.proposal.year %>. Assuming that your schedule allows for it, are you interested in attending?</p>
+      </div>
+
+      <div class="jumbotron answers">
+        <div class="d-flex justify-content-evenly">
+          <div>
+            <%= f.submit 'YES', class: "btn btn-lg btn-block btn-success" %>
+          </div>
+          <div>
+            <%= f.submit 'MAYBE', class: "btn btn-lg btn-block btn-warning" %>
+          </div>
+          <div>
+            <%= f.submit 'NO', class: "btn btn-lg btn-block btn-danger" %>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <% end %>
+</div>

@@ -1,25 +1,24 @@
 <div class="form-group mb-3">
   <div>
-    <label for="statement"><%= field.statement %></label>
+    <span><%= location_name(field) %></span><br>
+    <label for="statement"><h2><%= field.position %>. <%= field.statement %></h2></label><%= mandatory_field?(field) %>
     <% if current_user&.staff_member? && @proposal_form&.draft? && params[:action] == 'edit' %>
-      <span data-action="click->proposal-form#editField" data-field-id="<%= field.id %>" data-proposal-form-id="<%= @proposal_form&.id %>" style="color: #3b7ddd" class="m-1">Edit</span>
-      <%= link_to 'Delete', proposal_field_proposal_form_url(@proposal_form, field_id: field.id), method: :delete ,
-      data: {confirm: "Are you sure you want to delete this field?"} %>
+      <span data-action="click->proposal-form#editField" data-field-id="<%= field.id %>" data-proposal-form-id="<%= @proposal_form&.id %>" style="color: #3b7ddd" class="m-1" data-type-id="<%= @proposal_type&.id %>">Edit</span>
+      <%= link_to 'Delete', proposal_field_proposal_type_proposal_form_url(@proposal_type, @proposal_form, field_id: field.id), method: :delete ,
+    data: {confirm: "Are you sure you want to delete this field?"} %>
 	  <% end %>
   </div>
-  <p class="comment" style="font-style: italic;">
-    <%= field.description %> 
-    <% if field.description.length > 140 %>
-      <a href="<%= field.guideline_link %>" target="_blank">
-        Learn More
-      </a>
-    <% end %>
-  </p>
-  <%= select_tag "Option", options_for_select(proposal_field_options(field.fieldable), answer(field, @proposal)), class: 'form-control', name: field.id %>
+  <span><%= field.description.html_safe %></span>
+  <% if field.guideline_link.present? %>
+    <p><a href="<%= field.guideline_link %>" target="_blank"> 
+      Learn More
+    </a></p>
+  <% end %>
+  <%= select_tag "Option", options_for_select(proposal_field_options(field), answer(field, @proposal)), class: 'form-select', disabled: action, name: field.id, data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
 
-  <% if @publish %>
+  <% if @submission %>
     <% validations(field, @proposal).each do |val| %>
-      <p style="color: red"><%= val %></p>
+      <p class="field-validation"><%= val %></p>
     <% end %>
   <% end %>
 </div>

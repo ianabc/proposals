@@ -2,26 +2,90 @@
   <div class="container-fluid">
     <div class="header">
       <h1 class="header-title">
-        Feedbacks
+        Feedback
       </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </a></li>
+          <li class="breadcrumb-item active" aria-current="page">Feedback</li>
+        </ol>
+      </nav>
     </div>
     <div class="col-12">
       <div class="card">
         <div class="card-header">
-          <h5 class="card-title">User Feedbacks</h5>
-        </div>
-        <div class="card-body">
-          <% @feedbacks.each do |feedback| %>  
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title mb-0"><%= feedback.user&.fullname%></h5>
-              </div>
-              <div class="card-body">
-                <p class="card-text"><%= feedback.content %></p> 
+          <% if !current_user&.staff_member? %>
+            <div class="mb-3 d-flex justify-content-between">
+              <h3>Your Feedback</h3>
+              <div class="float-end">
+                <%= link_to "Add Feedback", new_feedback_url, class: "btn btn-lg btn-primary" %>
               </div>
             </div>
+          <% else %>
+           <h3>Applicant Feedback</h3>
           <% end %>
         </div>
+        <% if !current_user&.staff_member? %>
+          <% current_user.feedback.each do |feedback| %>  
+            <div class="card-body cursor-pointer">
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title mb-0"><%= feedback.user&.fullname%></h3>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text"><%= feedback.content %></p>
+                    <% if feedback.reply %>
+                      <div class="bg-light rounded-pill p-3"><%= feedback.reply %></div>
+                    <% else %>
+                      <h5 class="text-danger">No reply yet</h5>
+                    <% end %>
+                  </div>
+                </div>
+            </div>
+          <% end %>
+        <% else %>
+          <% @feedback.each do |feedback| %>  
+            <div class="card-body cursor-pointer"  data-controller="feedback">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="text-end">
+                      <input type="checkbox" name="reviewed" data-action="click->feedback#update" data-value="<%= feedback.id %>" <%= feedback.reviewed ? 'checked' : '' %>>
+                    </div>
+                    <h3 class="card-title mb-0"><%= feedback.user&.fullname%></h3>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text"><%= feedback.content %></p> 
+                    <% if !feedback.reply %>
+                      <div data-feedback-target="container">
+                        <div class="text-end m-2">
+                          <button class="btn btn-primary" type="button" data-action="click->feedback#showCollapsable" data-id="<%= feedback.id %>">
+                            Add Reply
+                          </button>
+                        </div>
+                        <div class="collapse" id="<%= feedback.id %>">
+                          <textarea class="form-control" data-feedback-target="reply"></textarea>
+                          <div class="text-end">
+                            <button class= "btn btn-primary m-2" type="button" data-action="click->feedback#addReply" data-id="<%= feedback.id %>">Send</button>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+            </div>
+          <% end %>
+        <% end %>
+
+        <% if !current_user&.staff_member? && current_user.feedback.empty? %>
+          <div class="card-body">
+            <h4>You have not added any feedback yet</h4>
+          </div>
+        <% end %>
+        <% if current_user&.staff_member? && @feedback.empty? %>
+          <div class="card-body">
+            <h4>No applicant has added any feedback yet</h4>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>

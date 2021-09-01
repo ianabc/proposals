@@ -15,7 +15,7 @@
     <%= yield %>
 
     <%= render partial: 'layouts/toastr' %>
-    <% if resource.errors.any? %>
+    <% if defined?(resource) and resource&.errors&.any? %>
       <%= render 'layouts/errors', errors: resource.errors %>
     <% end %>
   </body>

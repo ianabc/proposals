@@ -38,36 +38,24 @@ set :keep_releases, 5
 # Uncomment the following to require manually verifying the host key before first deploy.
 # set :ssh_options, verify_host_key: :secure
 
-
+# Custom task
 namespace :deploy do
-  desc "deploy the app"
-  task :copyfiles do
-    on roles(:app) do
-      execute "cp #{shared_path}/root/* #{release_path}/"
-      execute "cp -R #{shared_path}/public/* #{release_path}/"
-      # execute "rsync -aLv #{shared_path}/lib/ #{release_path}/lib/"
-      # execute "rsync -aLv #{shared_path}/app/ #{release_path}/app/"
+  desc "Build & run new Docker container"
+  task :deploy_new_container do
+    on roles(:all) do
+      execute("cp #{shared_path}/root/* #{release_path}/")
+      execute("cp -R #{shared_path}/public/* #{release_path}/")
+
+      execute("docker stop proposals && sleep 5")
+      execute("docker rm proposals && sleep 2")
+
+      execute("docker start proposals_db")
+      execute("docker pull birs/proposals:latest")
+      execute("cd #{release_path} && docker-compose up -d")
     end
   end
 
-  task :cleanup do
-    on roles(:app), :on_error => :continue do
-      execute "docker stop proposals && sleep 5"
-      execute "docker rm proposals && sleep 2"
-    end
-  end
-
-  task :run do
-    on roles(:app) do
-      execute "docker start proposals_db"
-      execute "docker pull birs/proposals:latest"
-      execute "cd #{release_path} && docker-compose up -d"
-    end
-  end
-
-  after :publishing, 'deploy:copyfiles'
-  #after :publishing, 'deploy:cleanup'
-  after :publishing, 'deploy:run'
+  after :published, 'deploy:deploy_new_container'
 end
 
 

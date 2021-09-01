@@ -1,6 +1,73 @@
-\documentclass{article}
+\documentclass[12pt,table]{report}
+<% @latex_config = { :recipe => [
+  {:command => 'pdflatex'},
+  {:command => 'bibtex', :arguments =>[]},
+  {:command => 'pdflatex', :runs => 2}
+]}
+%>
+
+\setlength{\textwidth}{6.0in}
+\setlength{\textheight}{9in}
+\setlength{\oddsidemargin}{0.3in}
+\setlength{\evensidemargin}{0in}
+\setlength{\topmargin}{-0.25in}
+\pagestyle{myheadings}
+\bibliographystyle{amsref}
+
+\usepackage{amsmath,amssymb,amsbsy,amsfonts,amsthm,latexsym,
+            amsopn,amstext,amsxtra,euscript,amscd,amsthm}
+\usepackage{mathrsfs}
+%\usepackage{epsfig}
+%\usepackage{graphics}
+\usepackage[pdftex]{graphicx}
+\usepackage{times}
+\usepackage{color}
+\usepackage{hyphenat}
+\usepackage{fancyhdr}
+\usepackage{here}
+\usepackage{multirow}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\begin{document}
+\usepackage{hyperref}
+\hypersetup{pdfborder={0 0 0 [0 0]}}
+\usepackage{comment}
+
+
+\DeclareMathOperator{\Gal}{Gal}
+\DeclareMathOperator{\SL}{SL}
+\DeclareMathOperator\ed{\mathrm{ed}}
+\DeclareMathOperator\ho{\mathrm{H}}
+\DeclareMathOperator{\Diff}{Diff}
+\DeclareMathOperator{\Homeo}{Homeo}
+
+\newcommand{\writeblack}{\special{ps: gsave 0 setgray}}
+\newcommand{\writeblue}{\color[rgb]{0,0.106,0.576}}
+\newcommand{\writegrey}{\color[gray]{0.4}}
+
+% commonly used math environments
+% from http://www.maths.tcd.ie/~dwilkins/LaTeXPrimer/Theorems.html
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\fancyhf{}
+\fancyhead[CO,CE]{\bfseries Banff International Research Station <%= @year %> Proposal Submission}
+
+\newenvironment{changemargin}[2]{%
+  \begin{list}{}{%
+    \setlength{\topsep}{0pt}%
+    \setlength{\leftmargin}{#1}%
+    \setlength{\rightmargin}{#2}%
+    \setlength{\listparindent}{\parindent}%
+    \setlength{\itemindent}{\parindent}%
+    \setlength{\parsep}{\parskip}%
+  }%
+  \item[]}{\end{list}}
+
+\pagestyle{fancy}
+
+% \begin{document}
+
 <%= yield %>
+
 \end{document}

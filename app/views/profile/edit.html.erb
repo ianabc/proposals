@@ -1,0 +1,32 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card" style="background: #f4f7fc">
+          <div class="card-body">
+            <div class="col-12 col-lg-12">
+              
+              <div class="tab">
+                <ul class="nav nav-tabs" role="tablist">
+                  <li class="nav-item col-6"><a class="nav-link active" href="#tab-1" data-bs-toggle="tab" role="tab">Personal Data</a></li>
+                  <li class="nav-item col-6"><a class="nav-link" href="#tab-2" data-bs-toggle="tab" role="tab">Demographic Form</a></li>
+                </ul>
+
+                <div class="tab-content">
+                  <div class="tab-pane active" id="tab-1" role="tabpanel">
+                    <%= render partial: "person_data" %>
+                  </div>
+                  
+                  <div class="tab-pane" id="tab-2" role="tabpanel">
+                    <%= render partial: "demographic_data" %>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

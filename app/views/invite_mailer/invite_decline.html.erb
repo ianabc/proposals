@@ -1,0 +1,16 @@
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <p>Dear <%= @person&.fullname %>:</p>
+    <p>
+      Thank you for letting us know that you will not be able to participate in the
+      proposed workshop, "<%= @proposal.title %>"", currently being organized by
+      <%= @proposal.lead_organizer&.fullname %>. We hope you can join us for
+      another event in the future.
+    </p>
+    <p>Sincerely,</p>
+    <p>Banff International Research Station</p>
+  </body>
+</html>

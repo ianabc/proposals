@@ -1,0 +1,10 @@
+Feedback from: 
+"<%= @person.fullname %>"< <%= @person.email %> >
+(<%= @person.affiliation %>)
+ 
+Is now Confirmed for event:
+<%= @proposal&.code %>: <%= @proposal&.title %>
+ 
+Question: How was your RSVP experience?
+Reply from <%= @person.lastname %>:
+"<%= @feedback.content %>"

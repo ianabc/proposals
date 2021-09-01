@@ -1,23 +1,41 @@
-import { Controller } from "stimulus" 
+import { Controller } from "stimulus"
+import toastr from 'toastr'
 
 export default class extends Controller {
-  static targets = ['hiddenField','proposalFieldsPanel', 'proposalField', 'addOption', 'optionRow','contentOfButton', 'addValidation', 'validationRow']
-  static values = { visible: Boolean, field: String, index: Number  , validation: Number}
+  static targets = [ 'proposalFieldsPanel', 'proposalField', 'addOption', 'optionRow', 'contentOfButton',
+                     'textField', 'proposalId', 'position' ]
+  static values = { visible: Boolean, field: String, highestPosition: Number }
 
-  handleValidationChange(event){
-    let value = event.target.dataset.value
-    let selected_target = '' 
-    for (var i = 0; i < this.hiddenFieldTargets.length; i++) {
-      if (this.hiddenFieldTargets[i].dataset.value === value){
-        selected_target= this.hiddenFieldTargets[i]
-      }
+  connect () {
+    if(this.hasPositionTarget) {
+      this.checkPosition(this.positionTarget.value)
     }
-    if(event.target.value != "mandatory"){
-      selected_target.hidden = false
-    }
-    else{
-      selected_target.hidden = true
-    }
+  }
+
+  disableOtherInvites () {
+    let DisableRole = 'participant'
+    let role = event.target.dataset.role
+    if( role === 'participant' ) { DisableRole = 'organizer' }
+    let disable_value = true
+    let RoleValues = []
+
+    $.each(['firstname', 'lastname', 'email', 'invited_as', 'deadline'], function(index, element) {
+      let length = $('#' + role + '_' + element)[0].value.length
+      RoleValues.push(length)
+    })
+    if( RoleValues.every( (e) => e === 0 ) ) { disable_value = false }
+
+    $.each(['firstname', 'lastname', 'email', 'deadline', 'invited_as'],
+      function(index, element) {
+        $('#' + DisableRole + '_' + element).prop("disabled", disable_value);
+    })
+
+    $('#' + DisableRole).prop("hidden", disable_value);
+  }
+
+  presentDate () {
+    var today = new Date().toISOString().split('T')[0];
+    event.currentTarget.setAttribute('min', today);
   }
 
   toggleProposalFieldsPanel () {
@@ -30,80 +48,83 @@ export default class extends Controller {
     this.visibleValue = !this.visibleValue
     this.proposalFieldsPanelTarget.classList.toggle("hidden", !this.visibleValue)
     var dataset = event.currentTarget.dataset
-    if( dataset.field )
+    if( dataset.field ) {
       this.updateText()
+    }
+  }
+
+  handleValidationChange (event) {
+    let id = event.currentTarget.id.split('_')[4]
+    let node = document.getElementById(`proposal_field_validations_attributes_${id}_value`)
+    if(event.currentTarget.value === 'mandatory' || event.currentTarget.value === '5-day workshop preferred/Impossible dates') {
+      node.style.display = 'none'
+      node.previousElementSibling.style.display = 'none'
+    } else {
+      node.parentElement.classList.remove('hidden')
+      node.style.display = 'block'
+      node.previousElementSibling.style.display = 'block'
+    }
   }
 
   updateText () {
-    if( this.contentOfButtonTarget.innerText === 'Add Form Field' )
+    if( this.contentOfButtonTarget.innerText === 'Add Form Field' ) {
       this.contentOfButtonTarget.innerText = 'Back'
-    else 
+    }
+    else {
       this.contentOfButtonTarget.innerText = 'Add Form Field'
+    }
   }
 
   fetchField(evt) {
     var dataset = evt.currentTarget.dataset
-    fetch(`/proposal_forms/${dataset.id}/proposal_fields/new?field_type=${dataset.field}`)
-      .then(response => response.text())
-      .then(data => {
+    fetch(`/proposal_types/${dataset.typeId}/proposal_forms/${dataset.id}/proposal_fields/new?field_type=${dataset.field}`)
+      .then((response) => response.text())
+      .then((data) => {
         this.proposalFieldTarget.innerHTML = data
       })
   }
 
   editField(evt) {
     var dataset = evt.currentTarget.dataset
-    fetch(`/proposal_forms/${dataset.proposalFormId}/proposal_fields/${dataset.fieldId}/edit`)
-      .then(response => response.text())
-      .then(data => {
+    fetch(`/proposal_types/${dataset.typeId}/proposal_forms/${dataset.proposalFormId}/proposal_fields/${dataset.fieldId}/edit`)
+      .then((response) => response.text())
+      .then((data) => {
         this.proposalFieldTarget.innerHTML = data
         let action = document.getElementsByClassName('edit_proposal_field')[0].action.split('?')
         document.getElementsByClassName('edit_proposal_field')[0].action = `proposal_fields/${dataset.fieldId}?${action[1]}`
       })
   }
 
-  handleAddOptions (event) {
-    this.indexValue += 1
-    let clonedOption = this.optionRowTarget.cloneNode(true)
-    let child = clonedOption.childNodes[1]
-    child.childNodes[1].childNodes[3].name = `proposal_field[options][${this.indexValue}][index]`
-    child.childNodes[3].childNodes[3].name = `proposal_field[options][${this.indexValue}][text]`
-    child.childNodes[5].childNodes[3].name = `proposal_field[options][${this.indexValue}][value]`
-    this.addOptionTarget.append(clonedOption)
-    this.clearOptionValues(child)
+  latex () {
+    let data = event.target.dataset
+    let _this = this
+    let textField
+    for (var i = 0; i < this.textFieldTargets.length; i++) {
+      textField = this.textFieldTargets [`${i}`]
+      if(textField.dataset.value === data.value) {
+        $.post("/proposals/" + data.propid + "/latex",
+          { latex: textField.value },
+          function(data, status) {});
+      }
+    }
   }
 
-  handleAddValidations (event) {
-    
-    this.validationValue += 1
-    let clonedValidation = this.validationRowTarget.cloneNode(true)
-    let child = clonedValidation.childNodes[1]
-    child.childNodes[1].childNodes[3].name = `proposal_field[validations][${this.validationValue}][type]`
-    child.childNodes[3].childNodes[3].name = `proposal_field[validations][${this.validationValue}][value]`
-    child.childNodes[5].childNodes[3].name = `proposal_field[validations][${this.validationValue}][error_message]`
-    child.childNodes[1].childNodes[3].dataset.value = `proposal_field[validations][${this.validationValue}][type]`
-    child.childNodes[3].dataset.value = `proposal_field[validations][${this.validationValue}][type]`
-
-    this.addValidationTarget.append(clonedValidation)
-    this.clearValidationValues(child)
-  }
-
-  clearValidationValues (node) {
-    node.childNodes[1].childNodes[3].value = ''
-    node.childNodes[3].childNodes[3].value =  ''
-    node.childNodes[5].childNodes[3].value = ''
-  }
-
-  clearOptionValues (node) {
-    node.childNodes[1].childNodes[3].value = ''
-    node.childNodes[3].childNodes[3].value =  ''
-    node.childNodes[5].childNodes[3].value = ''
-  }
-
-  deleteOption (event) {
-    event.currentTarget.parentElement.parentElement.remove()
-  }
-
-  deleteValidation (event) {
-    event.currentTarget.parentElement.parentElement.remove()
+  checkPosition(targetPosition) {
+    let highest = this.highestPositionValue
+    let position = this.positionTarget.value
+    if (position !== "") {
+      if((targetPosition > 0 && targetPosition <= highest + 1) || (position > 0 && position <= highest + 1)) {
+        document.getElementById('submitButton').disabled = false;
+      }
+      else {
+        document.getElementById('submitButton').disabled = true;
+        if(highest === 0) {
+          toastr.error("Postion should be greater than 0 and equal to 1")
+        }
+        else {
+          toastr.error(`Postion should be greater than 0 and smaller or equal to ${highest + 1}`)
+        }
+      }
+    }
   }
 }

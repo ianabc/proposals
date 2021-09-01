@@ -15,21 +15,24 @@
           <div class="card">
             <div class="card-body">
               <div class="m-sm-4">
-                <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: {'data-turbo':'false'}) do |f| %>
-                <div class="mb-3">
-                  <label>Given Name</label>
-                  <%= text_field_tag :firstname, nil, autofocus: true, class:'form-control', placeholder: 'Enter your first name' %>
+                <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: {'data-turbo':'false', 'role': 'form', 'class': 'has-validation'}) do |f| %>
+
+                <%= f.fields_for :person, resource.person do |p| %>
+                <div class="form-group mb-3">
+                  <%= p.label :firstname, "Given Name" %>
+                  <%= p.text_field :firstname, autofocus: true, class:'form-control form-control-lg', placeholder: 'Enter your first name' %>
                 </div>
-                <div class="mb-3">
-                  <label>Family Name</label>
-                  <%= text_field_tag :lastname, nil, class:'form-control', placeholder: 'Enter your last name' %>
+                <div class="form-group mb-3">
+                  <%= p.label :lastname, "Family Name" %>
+                  <%= p.text_field :lastname, class:'form-control form-control-lg', placeholder: 'Enter your last name' %>
                 </div>
-                <div class="mb-3">
-                  <label>E-mail</label>
-                  <%= f.email_field :email, class:"form-control form-control-lg", placeholder:"Enter your e-mail address", autocomplete: "email" %>
+                <div class="form-group mb-3">
+                  <%= p.label :email, "E-mail" %>
+                  <%= p.email_field :email, class:"form-control form-control-lg", placeholder:"Enter your e-mail address", autocomplete: "email" %>
                 </div>
-                <div class="mb-3">
-                  <label>Password</label>
+                <% end %>
+                <div class="form-group mb-3">
+                  <%= f.label :password, "Password" %>
                   <%= f.password_field :password, class:"form-control form-control-lg", placeholder:"Enter a new password", autocomplete: "new-password" %>
                   <% if @minimum_password_length %>
                   <div class="text-muted font-italic">
@@ -38,8 +41,8 @@
                   </div>
                   <% end %>
                 </div>
-                <div class="mb-3">
-                  <label>Confirm Password</label>
+                <div class="form-group mb-3">
+                  <%= f.label :password_confirmation, "Confirm Password" %>
                   <%= f.password_field :password_confirmation, class:"form-control form-control-lg", placeholder:"Re-enter the password", autocomplete: "new-password" %>
                 </div>
                 <div class="text-center mt-3">
@@ -54,3 +57,4 @@
     </div>
   </div>
 </main>
+

@@ -1,0 +1,49 @@
+<div class="mb-3 row border m-1">
+  <div class="col-6 mt-2">
+    <div class="mb-3">
+      <label for="firstname">First Name: </label>
+      <label for="firstname"><%= invite.firstname %></label>
+    </div>
+    <div class="mb-3">
+      <label for="lastname">Last Name: </label>
+      <label for="lastname"><%= invite.lastname %></label>
+    </div>
+    <div class="mb-3">
+      <label for="email">Email: </label>
+      <label for="email"><%= invite.email %></label>
+    </div>
+    <% if invite.person.affiliation.present? %>
+      <div class="mb-3">
+        <label>Affiliation: </label>
+        <label><%= invite.person.affiliation %></label>
+      </div>
+    <% end %>
+    <% if invite.invited_as == 'Participant' && invite.person.academic_status.present? %>
+      <div class="mb-3">
+        <label>Academic Status: </label>
+        <label><%= invite.person.academic_status %></label>
+      </div>
+    <% end %>
+  </div>
+  <div class="col-6 mt-2">
+    <div class="mb-3">
+      <label for="status">Status: </label>
+      <label for="status" class=<%= invite_response_color(invite.response) %> ><%= invite_status(invite.response, invite.status) %></label>
+    </div>
+    <div class="mb-3">
+      <label for="created_at">Invitation Date: </label>
+      <label for="created_at"><%= invite.created_at.to_date %></label>
+    </div>
+    <div class="mb-3 <%= invite_deadline_date_color(invite) %>">
+      <label for="deadline_date">Deadline Date: </label>
+      <label for="deadline_date"><%= invite.deadline_date.to_date %></label>
+    </div>
+    <div class="float-end mb-3">
+      <% if invite.pending? %>
+        <%= link_to 'Cancel Invite', cancel_url(code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
+        <%= link_to 'Invite Reminder', invite_reminder_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
+      <% end %>
+    </div>
+  </div>
+</div>
+

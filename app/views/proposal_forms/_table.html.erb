@@ -1,0 +1,39 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Versions</th>
+      <th>Location </th>
+      <th>Created at</th>
+      <th>Created by</th>
+      <th>Updated by</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if proposal_forms %>
+      <% proposal_forms.each do |proposal_form| %>
+        <tr>
+          <td><%= proposal_form.title %></td>
+          <td><%= proposal_form.version %></td>
+          <td>
+            <% proposal_form.proposal_type.locations.each do |loc| %>
+             <%= loc.name %><br>
+            <% end %>
+          </td>
+          <td><%= proposal_form.created_at.to_date %></td>
+          <td><%= proposal_form.created_by&.email %></td>
+          <td><%= proposal_form.updated_by&.email %></td>
+          <td class="table-action">
+            <%= link_to '<i class="align-middle fas fa-fw fa-eye" data-toggle="tooltip" title="Show"></i>Show'.html_safe, proposal_type_proposal_form_url(@proposal_type, proposal_form) %>
+            <% if proposal_form.draft? || proposal_form.active? %>
+             <%= link_to '<i class="align-middle fas fa-fw fa-pen" data-toggle="tooltip" title="Edit"></i>Edit'.html_safe, edit_proposal_type_proposal_form_url(@proposal_type, proposal_form), data: {
+              confirm: 'Are you sure ?'
+             } %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>

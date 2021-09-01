@@ -35,7 +35,7 @@ RSpec.describe "/feedbacks", type: :request do
 
     context "with invalid parameters" do
       let(:feedback_params) do
-        { content: ''}
+        { content: '' }
       end
       it "does not create a new Feedback" do
         expect do

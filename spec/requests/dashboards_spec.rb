@@ -5,6 +5,6 @@ RSpec.describe "/dashboards", type: :request do
     before do
       get dashboards_url
     end
-    it { expect(response).to have_http_status(:ok) }
+    it { expect(response).to have_http_status(:redirect) }
   end
 end

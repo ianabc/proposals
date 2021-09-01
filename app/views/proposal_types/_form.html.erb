@@ -29,6 +29,37 @@
           </div>
 
           <div class="mb-3">
+            <%= f.label :code, class: 'form-label' %><br>
+            <%= f.text_field :code %>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :year, class: 'form-label' %><br>
+            <%= f.text_field :year, class: 'form-control' %>
+            <small>This text field supports a list of years i.e. 2021, 2022..</small>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :'Open Date', class: 'form-label' %>
+            <%= f.text_field :open_date, class: 'form-control', type: 'date', value: @proposal_type.open_date&.to_date %>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :'Closed Date', class: 'form-label' %>
+            <%= f.text_field :closed_date, class: 'form-control', type: 'date', value: @proposal_type.closed_date&.to_date %>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :'Maximum number of Co-organizers' , class: 'form-label' %><br>
+            <%= f.number_field :co_organizer %>
+          </div>
+
+          <div class="mb-3">
+            <%= f.label :'Maximum number of onsite Participants', class: 'form-label' %><br>
+            <%= f.number_field :participant %>
+          </div>
+
+          <div class="mb-3">
             <%= f.label :Location , class: 'form-label' %><br>
             <%= f.select :location_ids, locations, {}, class: 'form-control', multiple: true %>
           </div>

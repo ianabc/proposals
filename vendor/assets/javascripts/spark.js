@@ -13,7 +13,7 @@ import "./modules/toastr";
 // import "./modules/dragula";
 
 // Charts
-// import "./modules/chartjs";
+import "./modules/chartjs";
 // import "./modules/apexcharts";
 
 // Forms
@@ -21,7 +21,7 @@ import "./modules/toastr";
 // import "./modules/datetimepicker";
 // import "./modules/mask";
 // import "./modules/quill";
-import "./modules/select2";
+// import "./modules/select2";
 import "./modules/validation";
 // import "./modules/wizard";
 

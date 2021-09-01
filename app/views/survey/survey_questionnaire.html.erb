@@ -1,0 +1,132 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="m-sm-4">
+              <div data-controller="survey">
+                <%= form_for :survey, url: submit_survey_survey_index_path(code: params[:code]), method: :post do |f| %>
+                  <div class="col-lg-8">
+                    <div class="mb-3"> 
+                      <div>
+                        <label>1. What is your country of citizenship?</label>
+                        <%= f.select "citizenships", options_for_select(citizenship_options), {}, data: {'survey-target': 'citizenship',action: 'click->survey#handleCitizenshipOptions'}, class: "form-control", multiple: true, required: true %>
+                      </div>
+                      <div class="hidden" data-survey-target="otherCitizenship">
+                        <%= f.label 'Other: ', class: ' mt-3'%>
+                        <%= f.text_field :citizenships_other, id: 'citizenship_other', class: 'form-control' %>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <div>
+                        <label>2. Do you identify as an Indigenous person?</label>
+                        <%= f.select "indigenous_person", options_for_select(indigenous_person_options),{ include_blank: '' }, data: {'survey-target': 'indigenous',action: 'click->survey#handleIndigenousOptions'}, class: "form-select", required: true %>
+                        <div class="hidden mt-3" data-survey-target="indigenousYes">
+                          <%= f.select "indigenous_person_yes", options_for_select(indigenouse_person_yes_options), {}, class: "form-control", id: 'indigenous_person_yes', multiple: true %>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <div>
+                        <label>3. How do you describe your ethnicity?</label>
+                        <div>
+                          <label>If you identify as biracial or multiracial, please select all that apply by holding down Ctrl/⌘ while you select.</label>
+                        </div>
+                        <%= f.select "ethnicity", options_for_select(ethnicity_options),{ include_blank: '' }, data: {'survey-target': 'ethnicity',action: 'click->survey#handleEthnicityOptions'}, class: "form-control overflow-scroll", multiple: true, required: true %>
+                      </div>
+                      <div class="hidden" data-survey-target="otherEthnicity">
+                        <%= f.label 'Other: ', class: ' mt-3 '%>
+                        <%= f.text_field :ethnicity_other, id: 'ethnicity_other', class: 'form-control' %>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <div>
+                        <label>4. How do you describe your gender?</label>
+                        <%= f.select "gender", options_for_select(gender_options),{ include_blank: '' }, data: {'survey-target': 'gender',action: 'click->survey#handleGenderOptions'}, class: "form-select", required: true %>
+                      </div>
+                      <div class="hidden" data-survey-target="otherGender">
+                        <%= f.label 'Other: ', class: ' mt-3 '%>
+                        <%= f.text_field :gender_other, id: 'gender_other', class: 'form-control' %>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <div>
+                        <label>5. Do you identify as a member of the 2SLGBTQIA+ community?</label>
+                        <%= f.select(:community, options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']]),{ include_blank: '' }, {class: "form-select", required: true}) %>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <div>
+                        <label>6. Do you have a disability, impairment, or ongoing medical condition that impacts your participation in everyday life?</label>
+                        <div>
+                          <label>
+                            <em>For more information about under-represented minorities, please look at our 
+                            <%= link_to "FAQs", faqs_survey_index_path, target: "_blank" %>.
+                            </em>
+                          </label>
+                        </div>
+                        <%= f.select "disability", options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']]),{ include_blank: '' }, data:{'survey-target': 'disability', action: 'click->survey#handleDisabilityOptions'}, class: "form-select", required: true %>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <div>
+                        <label>7. Do you consider yourself to be part of an under-represented minority in the country of your current affiliation?</label>
+                        <div>
+                          <label>
+                            <em>For more information about under-represented minorities, please look at our 
+                            <%= link_to "FAQs", faqs_survey_index_path, target: "_blank" %>.
+                            </em>
+                          </label>
+                        </div>
+                        <%= f.select(:minorities, options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']]),{ include_blank: '' }, {class: "form-select", required: true}) %>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <div>
+                        <label>8. Do you consider yourself to be part of an under-represented minority in STEM?</label>
+                        <div>
+                          <label>
+                            <em>For more information about under-represented minorities, please look at our 
+                            <%= link_to "FAQs", faqs_survey_index_path, target: "_blank" %>.
+                            </em>
+                          </label>
+                        </div>
+                        <%= f.select(:stem, options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']]),{ include_blank: '' }, {class: "form-select", required: true}) %>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <div>
+                        <label>9. Do you consider yourself to be part of an under-represented minority in your research area?</label>
+                        <div>
+                          <label>
+                            <em>For more information about under-represented minorities, please look at our 
+                            <%= link_to "FAQs", faqs_survey_index_path, target: "_blank" %>.
+                            </em>
+                          </label>
+                        </div>
+                        <%= f.select(:underRepresented, options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']]),{ include_blank: '' }, {class: "form-select", required: true}) %>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <%= f.submit :Submit, class: "btn btn-primary" %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

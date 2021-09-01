@@ -1,5 +1,5 @@
 <nav id="sidebar" class="sidebar">
-  <a class="sidebar-brand" href="index.html">
+  <a class="sidebar-brand" href="/dashboards">
     <svg>
       <use xlink:href="#ion-ios-pulse-strong"></use>
     </svg>
@@ -9,8 +9,13 @@
     <div class="sidebar-user">
 
       <div class="fw-bold"></div>
-      <small><%= current_user&.fullname %></small>
+      <small><%= current_user&.fullname %>
+        <% unless current_user&.staff_member? %>
+          <%= link_to '<i class="align-middle fas fa-fw fa-pen"></i>'.html_safe, profile_url %>
+        <% end %>
+      </small>
     </div>
+    
     <ul class="sidebar-nav">
       <li class="sidebar-header">
         Main
@@ -27,22 +32,40 @@
                 <span class="nav-link-text">Locations</span>
               <% end %>
             </li>
-            <li class="sidebar-item <%= active_menu(proposal_types_path) %>">
-              <%= link_to proposal_types_path, class: "sidebar-link" do %>
-                <i class="fas fa-share-alt-square"></i>
-                <span class="nav-link-text">Proposal Types</span>
+            <li class="sidebar-item <%= active_menu(submitted_proposals_path) %>">
+              <%= link_to submitted_proposals_path, class: "sidebar-link" do %>
+                <i class="fas fa-book"></i>
+                <span class="nav-link-text">Proposal Applications</span>
               <% end %>
             </li>
-            <li class="sidebar-item <%= active_menu(proposal_forms_path) %>">
-              <%= link_to proposal_forms_path, class: "sidebar-link" do %>
-                <i class="far fa-file-alt"></i>
-                <span class="nav-link-text">Proposal Forms</span>
-              <% end %>
-            </li>
+              <li class="sidebar-item <%= active_menu(proposal_types_path) %>">
+                <%= link_to proposal_types_path, class: "sidebar-link" do %>
+                  <i class="fas fa-share-alt-square"></i>
+                  <span class="nav-link-text">Proposal Types</span>
+                <% end %>
+              </li>
             <li class="sidebar-item <%= active_menu(feedbacks_path) %>">
               <%= link_to feedbacks_path, class: "sidebar-link" do %>
+                <i class="far fa-envelope"></i>
+                <span class="nav-link-text">Message Staff</span>
+              <% end %>
+            </li>
+            <li class="sidebar-item <%= active_menu(roles_path) %>">
+              <%= link_to roles_path, class: "sidebar-link" do %>
                 <i class="far fa-file-alt"></i>
-                <span class="nav-link-text">Feedbacks</span>
+                <span class="nav-link-text">User Roles</span>
+              <% end %>
+            </li>
+            <li class="sidebar-item <%= active_menu(subject_categories_path) %>">
+              <%= link_to subject_categories_path , class: "sidebar-link" do %>
+                <i class="fas fa-fw fa-book-open"></i>
+                <span class="nav-link-text">Subject Categories</span>
+              <% end %>
+            </li>
+            <li class="sidebar-item <%= active_menu(email_templates_path) %>">
+              <%= link_to email_templates_path , class: "sidebar-link" do %>
+                <i class="align-middle me-2 fas fa-fw fa-envelope"></i>
+                <span class="nav-link-text">Email Templates</span>
               <% end %>
             </li>
           </ul>
@@ -55,17 +78,18 @@
           <ul id="proposals" class="sidebar-dropdown list-unstyled collapse <%= proposal_menu %>" data-bs-parent="#sidebar">
             <li class="sidebar-item <%= active_menu(new_proposal_path) %>">
               <%= link_to new_proposal_path, class: "sidebar-link" do %>
-                <i class="fas fa-book"></i> Submit Proposal
+                <i class="fas fa-book proposal-item"></i> Create New Proposal
               <% end %>
             </li>
             <li class="sidebar-item <%= active_menu(proposals_path) %>">
               <%= link_to proposals_path, class: "sidebar-link" do %>
-                <i class="fas fa-book"></i> Proposals
+                <i class="fas fa-book proposal-item"></i> Past & Current Proposals
               <% end %>
             </li>
           </ul>
         </li>
       <% end %>
+
       <li class="sidebar-item <%= pages_list %>">
         <a data-bs-target="#pages" data-bs-toggle="collapse" class="sidebar-link collapsed">
         <i class="align-middle me-2 fas fa-fw fa-file"></i> <span class="align-middle">Pages</span>
@@ -77,10 +101,27 @@
             <% end %>
           </li>
         </ul>
+        <% if !current_user&.staff_member? %>
+          <ul id="pages" class="sidebar-dropdown list-unstyled collapse <%= pages_menu %>" data-bs-parent="#sidebar">
+            <li class="sidebar-item <%= active_menu(faqs_survey_index_path) %>">
+              <%= link_to faqs_survey_index_path, class: "sidebar-link" do %>
+                <i class="fas fa-book"></i> FAQs
+              <% end %>
+            </li>
+          </ul>
+        <% end %>
       </li>
+      <% if current_user&.staff_member? %>
+        <li class="sidebar-item <%= faq_menu %>">
+          <%= link_to faqs_path , class: "sidebar-link" do %>
+            <i class="far fa-file-alt ms-1"></i>
+            <span class="nav-link-text">FAQs</span>
+          <% end %>
+        </li>
+      <% end %>
       <% if !current_user&.staff_member? %>
         <li class="sidebar-item <%= feedback_menu %>">
-          <%= link_to new_feedback_path , class: "sidebar-link" do %>
+          <%= link_to feedbacks_path , class: "sidebar-link" do %>
             <i class="far fa-file-alt ms-1"></i>
             <span class="nav-link-text">Feedback</span>
           <% end %>

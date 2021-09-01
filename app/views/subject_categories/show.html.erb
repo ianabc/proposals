@@ -1,0 +1,36 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Subject Categories
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %> </a></li>
+          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Subject Categories", subject_categories_path %></li>
+          <li class="breadcrumb-item active" aria-current="page">Show</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h2>Category name: <em><%= @subject_category.name.capitalize %></em></h2>
+          </div>
+          <div class="card-body">
+            <div class="col-12 col-lg-12">
+              <div>
+                <h3>BIRS Subjects</h3>
+                <%= render partial: 'subjects_table', locals: { subjects: @subject_category.subjects, subject_area: true } %>
+
+                <h3>AMS Subjects</h3>
+                <%= render partial: 'subjects_table', locals: { subjects: @subject_category.ams_subjects, subject_area: false } %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

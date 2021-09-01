@@ -1,16 +1,27 @@
 <div>
-  <label for="statement"><%= field.statement %></label>
+  <span><%= location_name(field) %></span><br>
+  <label for="statement"><h2><%= field.position %>. <%= field.statement %></h2></label>
+  <%= mandatory_field?(field) %>
   <% if current_user&.staff_member? && @proposal_form&.draft? && params[:action] == 'edit' %>
-    <span data-action="click->proposal-form#editField" data-field-id="<%= field.id %>" data-proposal-form-id="<%= @proposal_form&.id %>" style="color: #3b7ddd" class="mx-1">Edit</span>
-    <%= link_to 'Delete', proposal_field_proposal_form_url(@proposal_form, field_id: field.id), method: :delete ,
+    <span data-action="click->proposal-form#editField" data-field-id="<%= field.id %>" data-proposal-form-id="<%= @proposal_form&.id %>" style="color: #3b7ddd" class="mx-1" data-type-id="<%= @proposal_type&.id %>">Edit</span>
+    <%= link_to 'Delete', proposal_field_proposal_type_proposal_form_url(@proposal_type, @proposal_form, field_id: field.id), method: :delete ,
     data: {confirm: "Are you sure you want to delete this field?"} %>
   <% end %>
 </div>
 
-<p class="collapsible collapsed" style="font-style: italic;">
-  <%= field.description %> <%= link_to "Learn More", guidelines_path, target: '_blank' %>
-</p>
-
+<span><%= field.description.html_safe %></span>
+<% if field.guideline_link.present? %>
+  <p><a href="<%= field.guideline_link %>" target="_blank"> 
+    Learn More
+  </a></p>
+<% end %>
 <div class="mb-3">
-  <input name="<%= field.id %>" class="form-control" type="date" value='<%= answer(field, @proposal) %>'> </input>
+  <input name="<%= field.id %>" <%= action ? 'disabled' : '' %> class="form-control" type="date" value='<%= answer(field, @proposal) %>'  data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur" />
 </div>
+<% if @submission %>
+  <ul>
+    <% validations(field, @proposal).each do |val| %>
+      <li class="field-validation"><%= val %></li>
+    <% end %>
+  </ul>
+<% end %>

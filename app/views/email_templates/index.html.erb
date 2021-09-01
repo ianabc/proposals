@@ -1,0 +1,50 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Email Templates
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %> </a></li>
+          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Email Templates", email_templates_path %></li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="text-end m-3">
+              <%= link_to "Add new template", new_email_template_url, class: "btn btn-primary" %>
+            </div>
+          </div>
+          <div class="card-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Email Type</th>
+                  <th>Email Subject</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @email_templates&.each do |template| %>
+                <tr>
+                  <td><%= template.title %></td>
+                  <td><%= template.email_type.split('_').map(&:capitalize).join(' ') %></td>
+                  <td><%= template.subject %></td>
+                  <td class="table-action">
+                    <%= link_to '<i class="align-middle fas fa-fw fa-eye"></i>Show'.html_safe, email_template_url(template) %>
+                  </td>
+                </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

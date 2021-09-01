@@ -1,0 +1,39 @@
+<% confirmed_participants.each do |participant| %>
+  <div class="mb-3 row border m-1">
+    <div class="col-6 mt-2">
+      <div class="mb-3">
+        <label for="firstname">First Name: </label>
+        <label for="firstname"><%= participant.firstname %></label>
+      </div>
+      <div class="mb-3">
+        <label for="lastname">Last Name: </label>
+        <label for="lastname"><%= participant.lastname %></label>
+      </div>
+      <div class="mb-3">
+        <label for="email">Email: </label>
+        <label for="email"><%= participant.email %></label>
+      </div>
+    </div>
+    <div class="col-6 mt-2">
+      <div class="mb-3">
+        <% if participant.affiliation.present? %>
+          <div class="mb-3">
+            <label>Affiliation: </label>
+            <label><%= participant.affiliation %></label>
+          </div>
+        <% end %>
+      </div>
+      <div class="mb-3">
+        <div class="mb-3">
+          <label>Career Stage: </label>
+          <% if participant.academic_status.present? && participant.academic_status != "Other" %>
+            <label><%= participant.academic_status %></label>
+          <% else %>
+            <label><%= participant.other_academic_status %></label>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
