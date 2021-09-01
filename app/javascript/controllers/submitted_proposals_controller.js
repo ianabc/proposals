@@ -50,7 +50,7 @@ export default class extends Controller {
     $("input:checked").each(function() {
       array.push(this.dataset.value);
     });
-    if(array[1] === undefined)
+    if(typeof array[1] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
