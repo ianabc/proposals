@@ -105,8 +105,9 @@ module ProposalFieldsHelper
       'two'
     elsif tab_three(proposal)
       'three'
+    else
+      'one'
     end
-    'one'
   end
 
   def tab_one(proposal)
