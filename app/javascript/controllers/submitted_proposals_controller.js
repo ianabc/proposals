@@ -1,8 +1,13 @@
 import { Controller } from "stimulus"
 import Rails from '@rails/ujs'
+import toastr from 'toastr'
 
 export default class extends Controller {
-  static targets = [ "template" ]
+  static targets = [ "toc", "ntoc" ]
+
+  connect () {
+    this.tocTarget.checked = true;
+  }
 
   editFlow() {
     var array = [];
@@ -37,6 +42,43 @@ export default class extends Controller {
     }else {
       $('#subject').val('')
       $('#body').val('')
+    }
+  }
+
+  tableOfContent() {
+    var array = [];
+    $("input:checked").each(function() {
+      array.push(this.dataset.value);
+    });
+    if(array[1] === undefined)
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      $.post(`/submitted_proposals/table_of_content?proposals=${array}`,
+        $('form#submitted-proposal').serialize(), function(data) {
+          $('#proposals').text(data.proposals)
+          $("#table-window").modal('show')
+        }
+      )
+    }
+  }
+
+  booklet() {
+    let ids = $('#proposals').text().slice(1)
+    let table = ''
+    if(this.tocTarget.checked) {
+      table = "toc"
+    }
+    else {
+      table = "ntoc"
+    }
+    if(table !== '') {
+      $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
+        function(data, status) {
+          document.getElementById("booklet").click();
+          window.location.reload()
+      })
     }
   }
 }

@@ -81,6 +81,28 @@ class SubmittedProposalsController < ApplicationController
                 notice: "Proposal has been declined."
   end
 
+  def proposals_booklet
+    @proposal_ids = params[:proposal_ids]
+    @table = params[:table]
+    @counter = @proposal_ids.split(',').count
+    create_file
+    head :ok
+  end
+
+  def download_booklet
+    f = File.open("#{Rails.root}/tmp/booklet-proposals.pdf")
+    send_file(
+      f,
+      filename: "proposal_booklet.pdf",
+      type: "application/pdf"
+    )
+  end
+
+  def table_of_content
+    proposals = params[:proposals]
+    render json: { proposals: proposals }, status: :ok
+  end
+
   private
 
   def query_params?
@@ -143,5 +165,27 @@ class SubmittedProposalsController < ApplicationController
 
   def set_proposal
     @proposal = Proposal.find_by(id: params[:id])
+  end
+
+  def create_file
+    if @counter == 1
+      @proposal = Proposal.find_by(id: @proposal_ids)
+      ProposalPdfService.new(@proposal.id, latex_temp_file, 'all').single_booklet(@table)
+      @fh = File.open("#{Rails.root}/tmp/#{latex_temp_file}")
+    else
+      @proposal = Proposal.find_by(id: @proposal_ids.split(',').first)
+      temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
+      ProposalPdfService.new(@proposal_ids.split(',').first, temp_file, 'all').multiple_booklet(@table, @proposal_ids)
+      @fh = File.open("#{Rails.root}/tmp/#{temp_file}")
+    end
+    @latex_infile = @fh.read
+    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
+
+    latex = "#{@proposal.macros}\n\\begin{document}\n#{@latex_infile}"
+    pdf_file = render_to_string layout: "application", inline: latex, formats: [:pdf]
+    @pdf_path = "#{Rails.root}/tmp/booklet-proposals.pdf"
+    File.open(@pdf_path, "w:UTF-8") do |file|
+      file.write(pdf_file)
+    end
   end
 end
