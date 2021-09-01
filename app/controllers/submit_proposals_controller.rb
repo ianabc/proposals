@@ -68,7 +68,6 @@ class SubmitProposalsController < ApplicationController
         you.'.squish
   end
 
-  # rubocop:disable Metrics/AbcSize
   # rubocop:disable Metrics/MethodLength
   def generate_proposal_pdf
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
@@ -90,7 +89,6 @@ class SubmitProposalsController < ApplicationController
     end
   end
   # rubocop:enable Metrics/MethodLength
-  # rubocop:enable Metrics/AbcSize
 
   def proposal_params
     params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,

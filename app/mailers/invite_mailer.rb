@@ -14,7 +14,7 @@ class InviteMailer < ApplicationMailer
     @existing_organizers = params[:organizers]
 
     @existing_organizers.prepend(", ") if @existing_organizers.present?
-    @existing_organizers = @existing_organizers.strip.delete_suffix(",")
+    @existing_organizers = @existing_organizers&.strip&.delete_suffix(",")
     @existing_organizers = @existing_organizers.sub(/.*\K,/, ' and') if @existing_organizers.present?
     @proposal = @invite.proposal
     @person = @invite.person

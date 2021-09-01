@@ -23,7 +23,7 @@ RSpec.describe "/survey", type: :request do
 
   describe "GET /index" do
     before do
-      get faq_survey_index_url
+      get faqs_survey_index_url
     end
     it { expect(response).to have_http_status(:ok) }
   end

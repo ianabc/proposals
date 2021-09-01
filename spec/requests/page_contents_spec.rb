@@ -2,9 +2,17 @@ require 'rails_helper'
 
 RSpec.describe "/page_content", type: :request do
   let(:page_content) { create(:page_content) }
+  let(:role) { create(:role, name: 'Staff') }
+  let(:user) { create(:user) }
+  let(:role_privilege) do
+    create(:role_privilege,
+           permission_type: "Manage", privilege_name: "PageContent", role_id: role.id)
+  end
 
   before do
-    authenticate_for_controllers
+    role_privilege
+    user.roles << role
+    sign_in user
   end
 
   describe "PATCH /update" do

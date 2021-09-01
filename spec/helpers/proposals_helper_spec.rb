@@ -74,17 +74,4 @@ RSpec.describe ProposalsHelper, type: :helper do
       expect(all_proposal_types).to match_array(proposal_type.pluck(:name, :id))
     end
   end
-
-  describe "#invite_role" do
-    let(:invite) { create(:invite, invited_as: 'Co Organizer') }
-
-    it "return organizer if invited as Co Organizer" do
-      expect(invite_role(invite.invited_as)).to eq('organizer')
-    end
-
-    it "return participant if not invited as Co Organizer" do
-      invite.update(invited_as: 'Participant')
-      expect(invite_role(invite.invited_as)).to eq('participant')
-    end
-  end
 end
