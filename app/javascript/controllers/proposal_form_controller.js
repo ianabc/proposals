@@ -6,7 +6,11 @@ export default class extends Controller {
                      'textField', 'proposalId', 'position' ]
   static values = { visible: Boolean, field: String, highestPosition: Number }
 
-  connect () {}
+  connect () {
+    if(this.hasPositionTarget) {
+      this.checkPosition(this.positionTarget.value)
+    }
+  }
 
   disableOtherInvites () {
     let DisableRole = 'participant'
@@ -105,19 +109,21 @@ export default class extends Controller {
     }
   }
 
-  checkPosition() {
+  checkPosition(targetPosition) {
     let highest = this.highestPositionValue
     let position = this.positionTarget.value
-    if(position > 0 && position <= highest + 1) {
-      document.getElementById('submitButton').disabled = false;
-    }
-    else {
-      document.getElementById('submitButton').disabled = true;
-      if(highest === 0) {
-        toastr.error("Postion should be greater than 0 and equal to 1")
+    if (position !== "") {
+      if((targetPosition > 0 && targetPosition <= highest + 1) || (position > 0 && position <= highest + 1)) {
+        document.getElementById('submitButton').disabled = false;
       }
       else {
-        toastr.error(`Postion should be greater than 0 and smaller or equal to ${highest + 1}`)
+        document.getElementById('submitButton').disabled = true;
+        if(highest === 0) {
+          toastr.error("Postion should be greater than 0 and equal to 1")
+        }
+        else {
+          toastr.error(`Postion should be greater than 0 and smaller or equal to ${highest + 1}`)
+        }
       }
     }
   }
