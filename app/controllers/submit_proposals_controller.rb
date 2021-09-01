@@ -4,11 +4,8 @@ class SubmitProposalsController < ApplicationController
     @proposals = ProposalForm.new
   end
 
-<<<<<<< HEAD
   # rubocop:disable Metrics/AbcSize
   # rubocop:disable Metrics/MethodLength
-=======
->>>>>>> development
   def create
     @proposal.update(proposal_params)
     update_proposal_ams_subject_code
@@ -33,11 +30,8 @@ class SubmitProposalsController < ApplicationController
     attachment = generate_proposal_pdf || return
     confirm_submission(attachment)
   end
-<<<<<<< HEAD
   # rubocop:enable Metrics/MethodLength
   # rubocop:enable Metrics/AbcSize
-=======
->>>>>>> development
 
   def thanks; end
 
@@ -74,11 +68,8 @@ class SubmitProposalsController < ApplicationController
         you.'.squish
   end
 
-<<<<<<< HEAD
   # rubocop:disable Metrics/AbcSize
   # rubocop:disable Metrics/MethodLength
-=======
->>>>>>> development
   def generate_proposal_pdf
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
     @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
@@ -98,11 +89,8 @@ class SubmitProposalsController < ApplicationController
       nil
     end
   end
-<<<<<<< HEAD
   # rubocop:enable Metrics/MethodLength
   # rubocop:enable Metrics/AbcSize
-=======
->>>>>>> development
 
   def proposal_params
     params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
