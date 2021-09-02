@@ -50,13 +50,27 @@ class SubmitProposalsController < ApplicationController
     end
   end
 
-
   def confirm_submission(attachment)
     check_file
-    @proposal.update(status: :submitted)
+    @attachment = attachment
+    if @proposal.may_active?
+      @proposal.active!
+      send_mail
+    elsif @proposal.may_revision?
+      @proposal.revision!
+      send_mail
+    else
+      redirect_to edit_proposal_path(@proposal), alert: "Your submission has
+          errors: #{submission.error_messages}.".squish
+      nil
+    end
+  end
+
+  def send_mail
+    check_file
     session[:is_submission] = nil
 
-    ProposalMailer.with(proposal: @proposal, file: attachment)
+    ProposalMailer.with(proposal: @proposal, file: @attachment)
                   .proposal_submission.deliver_later
 
     redirect_to thanks_submit_proposals_path, notice: 'Your proposal has
