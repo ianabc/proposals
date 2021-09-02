@@ -69,7 +69,7 @@ module Users
     end
 
     def assign_existing_person(resource, email)
-      person = Person.find_by(email: email) unless email.blank?
+      person = Person.find_by(email: email) if email.present?
       if person.present?
         person.skip_person_validation = true
         resource.person = person
