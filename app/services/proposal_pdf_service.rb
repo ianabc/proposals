@@ -37,7 +37,7 @@ class ProposalPdfService
     LatexToPdf.config[:arguments].delete('-halt-on-error') if @proposal.is_submission
 
     File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-      io.write(@input)
+      io.write(input)
     end
     self
   end

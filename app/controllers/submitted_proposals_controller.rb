@@ -169,16 +169,19 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_file
+    temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
     if @counter == 1
       @proposal = Proposal.find_by(id: @proposal_ids)
-      ProposalPdfService.new(@proposal.id, latex_temp_file, 'all').single_booklet(@table)
-      @fh = File.open("#{Rails.root}/tmp/#{latex_temp_file}")
+      ProposalPdfService.new(@proposal.id, temp_file, 'all').single_booklet(@table)
     else
       @proposal = Proposal.find_by(id: @proposal_ids.split(',').first)
-      temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
       ProposalPdfService.new(@proposal_ids.split(',').first, temp_file, 'all').multiple_booklet(@table, @proposal_ids)
-      @fh = File.open("#{Rails.root}/tmp/#{temp_file}")
     end
+    @fh = File.open("#{Rails.root}/tmp/#{temp_file}")
+    write_file
+  end
+
+  def write_file
     @latex_infile = @fh.read
     @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
 
