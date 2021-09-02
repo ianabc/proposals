@@ -7,23 +7,25 @@ class ProposalPdfService
     @input = input
   end
 
-  def pdf
-    input = @input.presence || 'Please enter some text.'
-    input = all_proposal_fields if @input == 'all'
+  def generate_latex_file
+    @input = @input.presence || 'Please enter some text.'
+    @input = all_proposal_fields if @input == 'all'
 
     if @proposal.is_submission
       LatexToPdf.config[:arguments].delete('-halt-on-error')
     end
 
     File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-      io.write(input)
+      io.write(@input)
     end
+    self
   end
 
   def to_s
-    fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
-    latex_infile = fh.read
-    @proposal.macros + "\n\\begin{document}\n" + latex_infile.to_s
+    generate_latex_file unless File.exist?("#{Rails.root}/tmp/#{@temp_file}")
+
+    latex_infile = File.read("#{Rails.root}/tmp/#{@temp_file}")
+    "#{@proposal.macros}\n\n\\begin{document}\n\n#{latex_infile}\n"
   end
 
   def self.format_errors(error)
@@ -33,6 +35,9 @@ class ProposalPdfService
     error_output = "<h2 class=\"text-danger\">LaTeX Error Log:</h2>\n\n"
     error_output << "<h4>Last 20 lines:</h4>\n\n"
     error_output << "<pre>\n" + error_summary + "\n</pre>\n\n"
+    error_output << %q[
+      <%= link_to "Edit Proposal", edit_proposal_path(@proposal, tab: "tab-2"),
+      class: 'btn btn-primary mb-4' %>]
     error_output << %q[
       <button class="btn btn-primary mb-4 latex-show-more" type="button"
                      data-bs-toggle="collapse" data-bs-target="#latex-error"
@@ -62,32 +67,33 @@ class ProposalPdfService
     proposal_organizers
     proposal_locations
     proposal_subjects
-    proposal_bibliography
     user_defined_fields
+    proposal_bibliography unless proposal.no_latex
     proposal_participants
     @text
   end
 
   def proposal_details
     code = proposal.code.blank? ? '' : "#{proposal.code}: "
+    confirmed_participants = proposal.invites.where(status: "confirmed", invited_as: "Participant")
+    confirmed_organizers = proposal.invites.where(status: "confirmed", invited_as: "Organizer")
     @text = "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal.title)} }\n\n"
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
+    @text << "\\noindent #{confirmed_participants.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
+    @text << "\\noindent #{confirmed_organizers.count} confirmed / #{proposal.proposal_type&.co_organizer} maximum organizers\n\n"
+    @text << "\\noindent 1 confirmed / lead organizer\n\n"
 
-    @text << "\\subsection*{Lead Organiser}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname}  \\\\ \n\n"
-    # unless proposal.lead_organizer&.address.blank?
-    #   @text << "#{proposal.lead_organizer.address}  \\\\ \n\n"
-    # end
+    @text << "\\subsection*{Lead Organizer}\n\n"
+    @text << "#{proposal.lead_organizer&.fullname} (#{LatexToPdf.escape_latex(proposal.lead_organizer&.affiliation)}) \\\\ \n\n"
     @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
   end
 
   def proposal_organizers
     return if proposal.supporting_organizers.count.zero?
 
-    @text << "\\subsection*{Supporting Organisers}\n\n"
-    proposal.supporting_organizers.each do |organiser|
-      @text << "\\noindent #{organiser.firstname} #{organiser.lastname}\n\n"
+    @text << "\\subsection*{Supporting Organizers}\n\n"
+    proposal.supporting_organizers.each do |organizer|
+      @text << "\\noindent #{organizer&.person&.firstname} #{organizer&.person&.lastname} (#{LatexToPdf.escape_latex(organizer&.person&.affiliation)})\n\n"
     end
   end
 
@@ -115,8 +121,9 @@ class ProposalPdfService
   end
 
   def proposal_bibliography
+    return unless proposal.bibliography.present?
     @text << "\\subsection*{Bibliography}\n\n"
-    @text << "\\noindent #{LatexToPdf.escape_latex(proposal.bibliography)}\n\n"
+    @text << "\\noindent #{proposal.bibliography}\n\n"
   end
 
   def user_defined_fields

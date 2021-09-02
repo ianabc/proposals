@@ -28,48 +28,46 @@
                 data-submit-proposals-proposal-value="<%= @proposal.id %>"data-nested-invites-wrapper-selector-value=".nested-invites-wrapper"
                 data-nested-invites-max-participant-value="<%= @proposal.proposal_type.participant %>"
                 data-nested-invites-max-organizer-value="<%= @proposal.proposal_type.co_organizer %>"
-                data-nested-invites-organizer-value="<%= Proposal.no_of_participants(@proposal.id, 'Organizer').count %>"
-                data-nested-invites-participant-value="<%= Proposal.no_of_participants(@proposal.id, 'Participant').count %>"
+                data-nested-invites-organizer-value="<%= confirmed_participants(@proposal.id, 'Organizer').count %>"
+                data-nested-invites-participant-value="<%= confirmed_participants(@proposal.id, 'Participant').count %>"
                 >
                 <div class="mb-3 d-flex flex-row-reverse">
-                  <% if params[:action] == 'edit' %>
-                    <% if lead_organizer?(@proposal.proposal_roles) %> 
-                      <% if @proposal.draft? %>
-                        <div class="float-end">
-                          <%= f.submit 'Save as draft', class:'btn btn-primary' %>
-                        </div>
-                      <% end %>
-                    <% end %>
+                  <% if show_edit_button?(@proposal) %>
+                    <div class="float-end">
+                      <%= f.submit 'Save as Draft', class:'btn btn-primary' %>
+                    </div>
                   <% end %>
                 </div>
                 <div class="col-12 col-lg-12">
                   <div class="tab">
                     <ul id="tabs" class="nav nav-tabs row" role="tablist">
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
-                        <a class="nav-link <%= active_tab(@proposal, 'one') %>" href="#tab-1" data-bs-toggle="tab" role="tab" data-target='submit-proposals.tabs'>Step 1</a>
+                        <a class="nav-link <%= active_tab(@proposal, 'one', params[:tab]) %>" href="#tab-1" data-bs-toggle="tab" role="tab" data-target='submit-proposals.tabs'>Step 1</a>
                       </li>
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
-                        <a class="nav-link <%= active_tab(@proposal, 'two') %>" href="#tab-2" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 2</a>
+                        <a class="nav-link <%= active_tab(@proposal, 'two', params[:tab]) %>" href="#tab-2" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 2</a>
                       </li>
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
-                        <a class="nav-link <%= active_tab(@proposal, 'three') %>" href="#tab-3" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 3</a>
+                        <a class="nav-link <%= active_tab(@proposal, 'three', params[:tab]) %>" href="#tab-3" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 3</a>
                       </li>
                       <li class="nav-item col-3" data-target='submit-proposals.tabs'>
                         <a class="nav-link" href="#tab-4" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Demographic Charts</a>
                       </li>
                     </ul>
                     <div class="tab-content">
-                      <div class="tab-pane <%= active_tab(@proposal, 'one') %>" id="tab-1" role="tabpanel">
+                      <div class="tab-pane <%= active_tab(@proposal, 'one', params[:tab]) %>" id="tab-1" role="tabpanel">
                         <h4 class="tab-title"></h4>
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 row">
                           <%= f.label :title, class: "required" %>
-                          <%= f.text_field :title, class: 'form-control', disabled: action, value: @proposal.title, data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
-                          <% if @submission && @proposal.title.blank? %>
-                            <p class="field-validation">Title is required</p>
-                          <% end %>
+                          <div class="col-6 mt-2">
+                            <%= f.text_field :title, class: 'form-control w-100', disabled: action, value: @proposal.title, data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <% if @submission && @proposal.title.blank? %>
+                              <p class="field-validation">Title is required</p>
+                            <% end %>
+                          </div>
                         </div>
 
                         <div class="mb-3">
@@ -79,13 +77,13 @@
 
                         <div class="mb-3">
                           <%= f.label :year %>
-                          <%= f.select :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), {}, disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                          <%= f.select :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), {}, disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                         </div>
                         <div class="mb-3 row">
                           <h3 class="form-section">Subject Areas</h4>
                           <div class="col-6 mt-2">
                             <label class="required">Subject Area</label>
-                            <%= f.select :subject_id, options_for_select(subjects_area, @proposal.subject&.id), { include_blank: '' }, disabled: action, class: "form-select", data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                            <%= f.select :subject_id, options_for_select(subjects_area, @proposal.subject&.id), { include_blank: '' }, disabled: action, class: "form-select", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                             <% if @submission && @proposal.subject&.id.nil? %>
                               <p class="field-validation">Subject is required</p>
                             <% end %>
@@ -93,15 +91,15 @@
                           <div class="col-6 mt-2">
                             <div class="mb-3">
                               <label class="required">AMS Subject Code 1</label>
-                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code1')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code1]', data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code1')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code1]', data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                               <% if @submission && proposal_ams_subjects_code(@proposal, 'code1').blank? %>
                                 <p class="field-validation">AMS Subject Code 1 is required</p>
                               <% end %>
                             </div>
 
                             <div class="mb-3">
-                              <label>AMS Subject Code 2</label>
-                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code2]', data: {'action': 'focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur'} %>
+                              <label class="required">AMS Subject Code 2</label>
+                              <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code2]', data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                             </div>
                           </div>
                           <div>
@@ -139,7 +137,7 @@
                                       </button>
                                   </div>
                                   <div class="mb-3">
-                                    <button data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Organizer(s)</button>
+                                    <button id="organizer" data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Organizer(s)</button>
                                   </div>
                                 <% end %>
                               </div>
@@ -173,7 +171,7 @@
                                         </button>
                                     </div>
                                     <div class="mb-3">
-                                      <button data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Participant(s)</button>
+                                      <button id="participant" data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Participant(s)</button>
                                     </div>
                                   <% end %>
                                 </div>
@@ -265,23 +263,25 @@
                         </div>
                       </div>
 
-                      <div class="tab-pane <%= active_tab(@proposal, 'two') %> overflow-hidden" id="tab-2" role="tabpanel">
+                      <div class="tab-pane <%= active_tab(@proposal, 'two', params[:tab]) %> overflow-hidden" id="tab-2" role="tabpanel">
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction2&.html_safe %></p>
                         </div>
+                        <input type="hidden" id="proposal_id" name="proposal_id" value="<%= @proposal.id %>">
+
                         <!-- <h4 class="tab-title">Common Fields</h4> -->
                         <div class="form-group mb-3">
-                          <input type="checkbox" name="no_latex" data-action="focus->auto-save-proposal#onFoucs blur->auto-save-proposal#onBlur click->submit-proposals#hidePreamble" id="no_latex" data-value="<%= @proposal.no_latex %>" <%= @proposal.no_latex ? 'checked' : '' %>, disabled="action">
+                          <input type="checkbox" name="no_latex" data-action="click->submit-proposals#hideAndSave" id="no_latex" data-value="<%= @proposal.no_latex %>" <%= 'checked=checked' if @proposal.no_latex %>>
                           <%= f.label :no_latex, "No LaTeX", class: "form-label" %>
                   			</div>
-                        <div class="form-group mb-3" name="latexPreamble" id="latexPreamble" data-submit-proposals-target="latexPreamble">
+                        <div class="form-group mb-3 <%= 'hidden' if @proposal.no_latex %>" name="latexPreamble" id="latexPreamble" data-submit-proposals-target="latexPreamble">
                           <h3>LaTeX Preamble</h3>
                           <p>If you have custom LaTeX macros, enter them here to add them to the document preamble.</p>
                           <div class="form-group mb-2">
                             <%= f.text_area(:preamble, size: '5x5', class:'form-control', value: @proposal.preamble, disabled: action)%>
                           </div>
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3 <%= 'hidden' if @proposal.no_latex %>" name="latexBibliography" id="latexBibliography" data-submit-proposals-target="latexBibliography">
                           <h3>Bibliography</h3>
                           <p>If you have a LaTeX bibliography, please enter it in this field. It will be included when you click the "Print Proposal" button.</p>
                           <div class="form-group mb-2">
@@ -300,7 +300,7 @@
                       </div>
                     </div>
 
-                    <div class="tab-pane <%= active_tab(@proposal, 'three') %>" id="tab-3" role="tabpanel">
+                    <div class="tab-pane <%= active_tab(@proposal, 'three', params[:tab]) %>" id="tab-3" role="tabpanel">
                       <div class="mb-3">
                         <p><%= @proposal.proposal_form.introduction3&.html_safe %></p>
                       </div>
@@ -319,7 +319,7 @@
                           <%= link_to "Print Proposal", rendered_proposal_proposal_path(@proposal.id, :format => :pdf), target: '_blank', class: 'p-2 mx-2 btn btn-primary' %>
                           <div class="float-end">
                             <button id="changeTab" class="p-2 mx-2 btn btn-primary" data-action='click->submit-proposals#previousTab'>Back</button>
-                            <%= f.submit 'Submit Proposal', data: {confirm: "This step is final and cannot be reversed. You cannot edit your proposal after submission. Proceed?"}, class:'btn btn-primary p-2' %>
+                            <%= f.submit 'Submit Proposal', data: {confirm: "This step is final and cannot be reversed. You cannot edit your proposal after submission. Proceed?"}, disabled: action, class:'btn btn-primary p-2' %>
                           </div>
                         </div>
                       </div>

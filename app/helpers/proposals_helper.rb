@@ -11,6 +11,10 @@ module ProposalsHelper
     Invite.where('invited_as = ? AND proposal_id = ?', invited_as, id)
   end
 
+  def confirmed_participants(id, invited_as)
+    Invite.where('invited_as = ? AND proposal_id = ?', invited_as, id).where.not(status: 'cancelled')
+  end
+
   def proposal_type_year(proposal_type)
     return [Date.current.year + 2] if proposal_type.year.blank?
 
@@ -40,6 +44,12 @@ module ProposalsHelper
   def lead_organizer?(proposal_roles)
     proposal_roles.joins(:role).where('person_id =? AND roles.name =?', current_user.person&.id,
                                       'lead_organizer').present?
+  end
+
+  def show_edit_button?(proposal)
+    return unless params[:action] == 'edit'
+    return unless proposal.editable?
+    lead_organizer?(proposal.proposal_roles)
   end
 
   def proposal_ams_subjects_code(proposal, code)
