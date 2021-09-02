@@ -98,14 +98,10 @@ module ProposalFieldsHelper
   def tab_errors(proposal, param_tab)
     return 'two' if param_tab == "tab-2"
     return 'one' unless session[:is_submission] || params[:action] == 'edit'
+    return 'one' if tab_one(proposal)
+    return 'two' if tab_two(proposal)
+    return 'three' if tab_three(proposal)
 
-    if tab_one(proposal)
-      'one'
-    elsif tab_two(proposal)
-      'two'
-    elsif tab_three(proposal)
-      'three'
-    end
     'one'
   end
 
