@@ -18,11 +18,11 @@
                     <%= f.label :affiliation, "Main Affiliation/Institution" , class: 'form-label required' %>
                     <%= f.text_field :affiliation, class:'form-control', placeholder: "Enter affiliation name" %>
                   </div>
+                  <div class="form-group mb-2">
+                    <%= f.label :department, "Department ", class: 'form-label required' %>
+                    <%= f.text_field :department, class:'form-control', placeholder: "Department name" %>
+                  </div>
                   <% if @invited_as.nil? %>
-                    <div class="form-group mb-2">
-                      <%= f.label :department, "Department " , class: 'form-label' %>
-                      <%= f.text_field :department, class:'form-control', placeholder: "Department name" %>
-                    </div>
                     <div class="form-group mb-2">
                       <%= f.label :title, "Title" , class: 'form-label' %>
                       <%= f.text_field :title, class:'form-control', placeholder: "Title" %>
