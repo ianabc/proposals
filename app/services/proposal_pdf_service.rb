@@ -77,17 +77,11 @@ class ProposalPdfService
     return if person.blank?
 
     affil = ""
-    if person&.affiliation.present?
-      affil << " (#{person.affiliation}"
-    end
-    if person&.department.present?
-      affil << ", #{person.department}"
-    end
+    affil << " (#{person.affiliation}" if person&.affiliation.present?
+    affil << ", #{person.department}" if person&.department.present?
     # pending confirmation that Title should be added
-    # if person&.title.present?
-    #   affil << ", #{person.title}"
-    # end
-    affil << ")" unless affil.blank?
+    # affil << ", #{person.title}" if person&.title.present?
+    affil << ")" if affil.present?
 
     delatex(affil)
   end
@@ -162,7 +156,7 @@ class ProposalPdfService
       unless field.answer.blank?
 
         if @proposal.no_latex
-          @text << "\\noindent #{delatex(field.answer)  }\n\n"
+          @text << "\\noindent #{delatex(field.answer)}\n\n"
         else
           @text << "\\noindent #{field.answer}\n\n"
         end
