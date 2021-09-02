@@ -42,7 +42,7 @@ RSpec.describe Person, type: :model do
       person.update(street_1: nil, city: nil)
     end
     it '' do
-      expect(person.errors.full_messages).to eq(["Street 1 can't be blank", "City can't be blank"])
+      expect(person.errors.full_messages).to eq(["Street 1 can't be blank", "City can't be blank", "Department can't be blank"])
     end
   end
 
@@ -83,11 +83,12 @@ RSpec.describe Person, type: :model do
     context 'when multiple fields are blank' do
       let(:person) { create(:person) }
       before do
-        person.update(affiliation: nil, academic_status: nil, first_phd_year: nil, country: nil)
+        person.update(affiliation: nil, department: nil, academic_status: nil, first_phd_year: nil, country: nil)
       end
       it '' do
         expect(person.errors.full_messages).to eq(["Main affiliation/institution can't be blank",
-                                                   "Academic status can't be blank", "Year of PhD can't be blank",\
+                                                   "Department can't be blank",
+                                                   "Academic status can't be blank", "Year of PhD can't be blank",
                                                    "Country can't be blank"])
       end
     end
@@ -107,7 +108,7 @@ RSpec.describe Person, type: :model do
         person.update(other_academic_status: nil)
       end
       it '' do
-        expect(person.errors.full_messages).to eq(["Other academic status Please indicate your academic status."])
+        expect(person.errors.full_messages).to eq(["Department can't be blank", "Other academic status Please indicate your academic status."])
       end
     end
     context 'When region is blank' do
@@ -116,7 +117,7 @@ RSpec.describe Person, type: :model do
         person.update(region: nil, country: 'Canada')
       end
       it '' do
-        expect(person.errors.full_messages).to eq(["Missing data:  You must select a Province"])
+        expect(person.errors.full_messages).to eq(["Department can't be blank", "Missing data:  You must select a Province"])
       end
     end
     context 'When State is present' do

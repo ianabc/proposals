@@ -84,7 +84,7 @@ class ProposalPdfService
     @text << "\\noindent 1 confirmed / lead organizer\n\n"
 
     @text << "\\subsection*{Lead Organizer}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname} (#{LatexToPdf.escape_latex(proposal.lead_organizer&.affiliation)}) \\\\ \n\n"
+    @text << "#{proposal.lead_organizer&.fullname}, #{proposal.lead_organizer&.department}, #{LatexToPdf.escape_latex(proposal.lead_organizer&.affiliation)} \\\\ \n\n"
     @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
   end
 
@@ -93,7 +93,7 @@ class ProposalPdfService
 
     @text << "\\subsection*{Supporting Organizers}\n\n"
     proposal.supporting_organizers.each do |organizer|
-      @text << "\\noindent #{organizer&.person&.firstname} #{organizer&.person&.lastname} (#{LatexToPdf.escape_latex(organizer&.person&.affiliation)})\n\n"
+      @text << "\\noindent #{organizer&.person&.firstname} #{organizer&.person&.lastname}, #{organizer&.person&.department}, #{LatexToPdf.escape_latex(organizer&.person&.affiliation)}\n\n"
     end
   end
 
