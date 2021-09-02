@@ -20,12 +20,7 @@ class ProposalFieldValidationsService
     validations.each do |val|
       case val.validation_type
       when 'mandatory'
-        if val.proposal_field.fieldable_type == 'ProposalFields::File' && attached_file
-          @errors << val.error_message
-        elsif !val.proposal_field.fieldable_type == 'ProposalFields::File'
-          @errors << val.error_message if @answer == ""
-          @errors << val.error_message unless @answer
-        end
+        @errors << val.error_message if @answer.blank?
       when 'less than (integer matcher)'
         @errors << val.error_message unless @answer.to_i < val.value.to_i
       when 'less than (float matcher)'

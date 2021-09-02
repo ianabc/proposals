@@ -8,6 +8,7 @@
       <th>Lead Organizer</th>
       <th>Preferred Location</th>
       <th>Status</th>
+      <th>Outcome</th>
       <th width="125">Updated</th>
       <th>Submitted to EditFlow</th>
       <th>Actions</th>
@@ -29,6 +30,7 @@
       <td class=<%= proposal_status_class(proposal.status) %> >
         <%= proposal.status&.split('_')&.map(&:capitalize)&.join(' ') %>
       </td>
+      <td><%= proposal.outcome&.capitalize %></td>
       <td><%= proposal.updated_at.to_date %></td>
       <td><%= proposal.edit_flow %></td>
       <td class="table-action">

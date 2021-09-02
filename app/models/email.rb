@@ -7,13 +7,30 @@ class Email < ApplicationRecord
   def update_status(proposal, status)
     case status
     when 'Revision'
-      proposal.update(status: 'revision_requested')
-      update_version
+      if proposal.may_requested?
+        proposal.requested!
+        update_version
+        return true
+      end
+    when 'Reject'
+      if proposal.may_decision?
+        proposal.decision!
+        proposal.update(outcome: 'rejected')
+        return true
+      end
     when 'Approval'
-      proposal.update(status: 'approved')
+      if proposal.may_decision?
+        proposal.decision!
+        proposal.update(outcome: 'approved')
+        return true
+      end
     when 'Decision'
-      proposal.update(status: 'decision_email_sent')
+      if proposal.may_decision?
+        proposal.decision!
+        return true
+      end
     end
+    false
   end
 
   def email_organizers

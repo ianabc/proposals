@@ -184,20 +184,33 @@ class ProposalPdfService
     @text
   end
 
+  def affil(person)
+    return if person.blank?
+
+    affil = ""
+    affil << " (#{person.affiliation}" if person&.affiliation.present?
+    affil << ", #{person.department}" if person&.department.present?
+    # pending confirmation that Title should be added
+    # affil << ", #{person.title}" if person&.title.present?
+    affil << ")" if affil.present?
+
+    delatex(affil)
+  end
+
   def proposal_details
     code = proposal.code.blank? ? '' : "#{proposal.code}: "
-    confirmed_participants = proposal.invites.where(status: "confirmed", invited_as: "Participant")
-    confirmed_organizers = proposal.invites.where(status: "confirmed", invited_as: "Organizer")
-    @text = "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal.title)} }\n\n"
+    confirmed_participants = proposal.invites.where(status: "confirmed",
+                                                    invited_as: "Participant")
+    confirmed_organizers = proposal.invites.where(status: "confirmed",
+                                                  invited_as: "Organizer")
+    @text = "\\section*{\\centering #{code} #{delatex(proposal.title)} }\n\n"
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << "\\noindent #{confirmed_participants.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
     @text << "\\noindent #{confirmed_organizers.count} confirmed / #{proposal.proposal_type&.co_organizer} maximum organizers\n\n"
     @text << "\\noindent 1 confirmed / lead organizer\n\n"
 
     @text << "\\subsection*{Lead Organizer}\n\n"
-
-    @text << "#{proposal.lead_organizer&.fullname} (#{LatexToPdf.escape_latex(proposal.lead_organizer&.affiliation)}) \\\\ \n\n"
-
+    @text << "#{proposal.lead_organizer&.fullname}#{affil(proposal.lead_organizer)} \\\\ \n"
     @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
     proposal_organizers
     proposal_locations
@@ -211,9 +224,11 @@ class ProposalPdfService
     return if proposal.supporting_organizers&.count&.zero?
 
     @text << "\\subsection*{Supporting Organizers}\n\n"
+    @text << "\\begin{itemize}\n"
     proposal.supporting_organizers.each do |organizer|
-      @text << "\\noindent #{organizer&.person&.firstname} #{organizer&.person&.lastname} (#{LatexToPdf.escape_latex(organizer&.person&.affiliation)})\n\n"
+      @text << "\\item #{organizer&.person&.fullname}#{affil(organizer&.person)}\n"
     end
+    @text << "\\end{itemize}\n\n"
   end
 
   def proposal_locations
@@ -252,12 +267,12 @@ class ProposalPdfService
         preferred_impossible_dates(field)
         next
       end
+      
       question = field.proposal_field.statement
-      @text << "\\subsection*{#{LatexToPdf.escape_latex(question)}}\n\n" if question.present?
+      @text << "\\subsection*{#{delatex(question)}}\n\n" if question.present?
       if field.answer.present?
-
         @text << if @proposal.no_latex
-                   "\\noindent #{LatexToPdf.escape_latex(field.answer)}\n\n"
+                   "\\noindent #{delatex(field.answer)}\n\n"
                  else
                    "\\noindent #{field.answer}\n\n"
                  end
@@ -275,7 +290,7 @@ class ProposalPdfService
       @participants = proposal.participants_career(career)
       @text << "\\begin{enumerate}\n\n"
       @participants.each do |participant|
-        @text << "\\item #{participant.firstname} #{participant.lastname} (#{LatexToPdf.escape_latex(participant.affiliation)}) \\ \n"
+        @text << "\\item #{participant.firstname} #{participant.lastname} (#{delatex(participant.affiliation)}) \\ \n"
       end
       @text << "\\end{enumerate}\n\n"
     end
@@ -304,5 +319,9 @@ class ProposalPdfService
       end
       @text << "\\end{enumerate}\n\n"
     end
+  end
+
+  def delatex(string)
+    LatexToPdf.escape_latex(string)
   end
 end

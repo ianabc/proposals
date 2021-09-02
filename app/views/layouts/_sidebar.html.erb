@@ -134,9 +134,9 @@
         <% end %>
       </li>
     </ul>
-    <% if ENV['APPLICATION_HOST']&.include?('staging') %>
+    <% if current_user&.staff_member? %>
     <div class="sidebar-nav">
-      <div class="sidebar-user">Deployed: TIMESTAMP</div>
+      <div class="sidebar-user fs-6">Deployed on:<br>TIMESTAMP</div>
     </div>
     <% end %>
   </div>

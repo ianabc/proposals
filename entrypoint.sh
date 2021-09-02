@@ -135,9 +135,9 @@ if [ $APPLICATION_HOST = "localhost" ]; then
   su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec bin/webpack-dev-server &"
 fi
 
-if [ $STAGING_SERVER = "true" ]; then
-  rake birs:release_tag
-fi
+
+# Update release tag
+rails birs:release_tag
 
 echo
 echo "Starting web server..."
