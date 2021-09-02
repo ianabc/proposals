@@ -58,6 +58,8 @@ class ProposalsController < ApplicationController
     @year = @proposal&.year || Date.current.year.to_i + 2
     @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
                                       .generate_latex_file.to_s
+    @proposal.review! if current_user.staff_member? && @proposal.may_review?
+
     render_latex
   end
 
@@ -133,7 +135,6 @@ class ProposalsController < ApplicationController
 
   def start_new_proposal
     prop = Proposal.new(proposal_params)
-    prop.status = :draft
     prop.proposal_form = ProposalForm.active_form(prop.proposal_type_id)
     prop
   end
