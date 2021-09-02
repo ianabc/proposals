@@ -84,11 +84,36 @@ RSpec.describe Invite, type: :model do
   end
 
   describe '#generate_code' do
-    context 'when code is present' do
+    context 'when code is not present' do
       let(:invite) do
-        create(:invite, firstname: 'New', lastname: 'Proposal', email: 'test@test.com', invited_as: 'coorganizer')
+        create(:invite, firstname: 'New', lastname: 'Proposal', email: 'test@test.com', invited_as: 'coorganizer',
+                        code: nil)
       end
       it { expect(invite.code).to be_present }
+    end
+  end
+
+  describe '#proposal_title' do
+    let(:proposal) { create(:proposal, title: '') }
+    context 'when proposal title is not present' do
+      it do
+        invite = Invite.new(deadline_date: DateTime.now, firstname: 'john', lastname: 'doe', email: 'john@gmail.com',
+                            proposal: proposal, invited_as: 'Participant')
+        invite.validate
+
+        expect(invite.errors.full_messages).to be_present
+      end
+    end
+
+    context 'when proposal title is present' do
+      before { proposal.update(title: 'proposal title') }
+      it do
+        invite = Invite.new(deadline_date: DateTime.now, firstname: 'john', lastname: 'doe', email: 'john@gmail.com',
+                            proposal: proposal, invited_as: 'Participant')
+        invite.validate
+
+        expect(invite).to be_valid
+      end
     end
   end
 end

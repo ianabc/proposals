@@ -114,7 +114,6 @@ Rails.application.routes.draw do
   end
 
   resources :subject_categories do
-    resources :subjects
     resources :ams_subjects
   end
 
