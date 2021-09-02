@@ -50,6 +50,7 @@ class Proposal < ApplicationRecord
     declined: 9
   }
 
+  # rubocop:disable Metrics/BlockLength
   aasm column: :status, enum: true do
     state :draft, initial: true
     state :submitted
@@ -88,6 +89,7 @@ class Proposal < ApplicationRecord
       transitions from: :decision_pending, to: :decision_email_sent
     end
   end
+  # rubocop:enable Metrics/BlockLength
 
   scope :active_proposals, lambda {
     where(status: 'submitted')

@@ -50,7 +50,6 @@ class SubmitProposalsController < ApplicationController
     end
   end
 
-
   def confirm_submission(attachment)
     check_file
     @attachment = attachment
@@ -63,7 +62,7 @@ class SubmitProposalsController < ApplicationController
     else
       redirect_to edit_proposal_path(@proposal), alert: "Your submission has
           errors: #{submission.error_messages}.".squish
-      return
+      nil
     end
   end
 
