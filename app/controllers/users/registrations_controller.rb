@@ -22,7 +22,7 @@ module Users
       yield resource if block_given?
 
       if resource.persisted?
-        respond_to_signup(resource)
+        respond_to_signup(resource_name, resource)
       else
         clean_up_passwords resource
         set_minimum_password_length
@@ -56,7 +56,7 @@ module Users
 
     protected
 
-    def respond_to_signup(resource)
+    def respond_to_signup(resource_name, resource)
       if resource.active_for_authentication?
         set_flash_message! :notice, :signed_up
         sign_up(resource_name, resource)
