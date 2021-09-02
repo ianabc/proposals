@@ -83,8 +83,6 @@ module ProposalsHelper
   end
 
   def proposal_status(status)
-    return "submitted" if %w[approved declined].include?(status)
-
     status&.split('_')&.map(&:capitalize)&.join(' ')
   end
 

@@ -56,13 +56,11 @@ class ProposalsController < ApplicationController
   def latex_output
     proposal_id = params[:id]
     ProposalPdfService.new(proposal_id, latex_temp_file, 'all').pdf
-
     @proposal = Proposal.find_by(id: proposal_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
-
     fh = File.open("#{Rails.root}/tmp/#{latex_temp_file}")
     @latex_infile = fh.read
-
+    @proposal.review! if current_user.staff_member? && @proposal.may_review?
     render_latex
   end
 
@@ -140,7 +138,6 @@ class ProposalsController < ApplicationController
 
   def start_new_proposal
     prop = Proposal.new(proposal_params)
-    prop.status = :draft
     prop.proposal_form = ProposalForm.active_form(prop.proposal_type_id)
     prop
   end
