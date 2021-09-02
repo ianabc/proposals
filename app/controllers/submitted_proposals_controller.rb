@@ -90,7 +90,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def download_booklet
-    f = File.open("#{Rails.root}/tmp/booklet-proposals.pdf")
+    f = File.open(Rails.root.join('tmp/booklet-proposals.pdf'))
     send_file(
       f,
       filename: "proposal_booklet.pdf",
@@ -187,7 +187,7 @@ class SubmittedProposalsController < ApplicationController
 
     latex = "#{@proposal.macros}\n\\begin{document}\n#{@latex_infile}"
     pdf_file = render_to_string layout: "application", inline: latex, formats: [:pdf]
-    @pdf_path = "#{Rails.root}/tmp/booklet-proposals.pdf"
+    @pdf_path = Rails.root.join('tmp/booklet-proposals.pdf')
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
