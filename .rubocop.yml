@@ -6,6 +6,7 @@ AllCops:
   NewCops: enable
   Include:
     - 'app/controllers/**/*'
+    - 'app/controllers/users/**/*'
     - 'app/models/**/*'
     - 'app/views/**/*'
     - 'app/helpers/**/*'

@@ -42,15 +42,22 @@ class SurveyController < ApplicationController
     if @invite.blank?
       message = 'Thank you for filling out our form!'
       redirect_to new_proposal_path, notice: message
+    elsif @invite.person_id.blank? || @invite.person.user.nil?
+      message = 'Thank you for filling out our form. If you wish to login to
+          see the proposal being drafted, please setup an account.'.squish
+      redirect_to new_user_registration_path, notice: message
     else
       message = 'Thank you for filling out our form. If you wish to login to
-        see the proposal being drafted, please setup an account by entering
-        your e-mail address, and following the link we send.'.squish
-      if @invite.person_id.blank? || @invite.person.user.nil?
-        redirect_to new_user_registration_path, notice: message
-      else
-        redirect_to new_password_path(@invite.person.user), notice: message
-      end
+          see the proposal being drafted, please set a password for your
+          account'.squish
+      reset_password_token(@invite.person.user)
+      redirect_to edit_password_url(@invite.person.user,
+                                    reset_password_token: @token), notice: message
     end
+  end
+
+  def reset_password_token(user)
+    @token, hashed = Devise.token_generator.generate(User, :reset_password_token)
+    user.update(reset_password_token: hashed, reset_password_sent_at: Time.zone.now)
   end
 end
