@@ -255,11 +255,11 @@ class ProposalPdfService
     @text << "#{proposal.subject&.title} \\\\ \n" if proposal.subject.present?
 
     ams_subjects = proposal.proposal_ams_subjects&.where(code: 'code1')
-    ams_subject1 = AmsSubject.find_by(id: ams_subjects.first.ams_subject_id)
+    ams_subject1 = AmsSubject.find_by(id: ams_subjects&.first&.ams_subject_id)
     @text << "\\noindent #{ams_subject1&.title} \\\\ \n" if ams_subject1.present?
 
     ams_subjects = proposal.proposal_ams_subjects&.where(code: 'code2')
-    ams_subject2 = AmsSubject.find_by(id: ams_subjects.first.ams_subject_id)
+    ams_subject2 = AmsSubject.find_by(id: ams_subjects&.first&.ams_subject_id)
     @text << "\\noindent #{ams_subject2&.title} \\\\ \n" if ams_subject2.present?
   end
 
