@@ -55,16 +55,16 @@ class ProposalPdfService
 
     error_output = "<h2 class=\"text-danger\">LaTeX Error Log:</h2>\n\n"
     error_output << "<h4>Last 20 lines:</h4>\n\n"
-    error_output << "<pre>\n" + error_summary + "\n</pre>\n\n"
+    error_output << "<pre>\n#{error_summary}\n</pre>\n\n"
     error_output << %q[
       <%= link_to "Edit Proposal", edit_proposal_path(@proposal, tab: "tab-2"),
       class: 'btn btn-primary mb-4' %>]
-    error_output << %q[
+    error_output << %q(
       <button class="btn btn-primary mb-4 latex-show-more" type="button"
                      data-bs-toggle="collapse" data-bs-target="#latex-error"
                      aria-expanded="false" aria-controls="latex-error">
               Show full error log
-      </button>']
+      </button>')
     error_output << "<pre class=\"collapse\" id=\"latex-error\">\n"
     error_output << "#{error_object.log}\n</pre>\n\n"
 
@@ -232,31 +232,33 @@ class ProposalPdfService
   end
 
   def proposal_locations
-    locations = proposal.locations&.count > 1 ? 'Locations' : 'Location'
-    unless proposal.locations.empty?
-      @text << "\\subsection*{Preferred #{locations}}\n\n"
-      @text << "\\begin{enumerate}\n"
-      proposal.locations&.each do |location|
-        @text << "\\item #{location.name}\n"
-      end
-      @text << "\\end{enumerate}\n"
+    return if proposal.locations.empty?
+
+    locations = proposal.locations.count > 1 ? 'Locations' : 'Location'
+    @text << "\\subsection*{Preferred #{locations}}\n\n"
+    @text << "\\begin{enumerate}\n"
+    proposal.locations&.each do |location|
+      @text << "\\item #{location.name}\n"
     end
+    @text << "\\end{enumerate}\n"
   end
 
   def proposal_subjects
     @text << "\\subsection*{Subject Areas}\n\n"
     @text << "#{proposal.subject&.title} \\\\ \n" if proposal.subject.present?
 
-    ams_subject1 = proposal.ams_subjects&.where(code: 'code1').first&.title
+    ams_subjects = proposal.proposal_ams_subjects&.where(code: 'code1')
+    ams_subject1 = ams_subjects.first&.title
     @text << "\\noindent #{ams_subject1} \\\\ \n" if ams_subject1.present?
 
-    ams_subject2 = proposal.ams_subjects&.where(code: 'code2').first&.title
+    ams_subjects = proposal.proposal_ams_subjects&.where(code: 'code2')
+    ams_subject2 = ams_subjects.first&.title
     @text << "\\noindent #{ams_subject2} \\\\ \n" if ams_subject2.present?
   end
 
   def proposal_bibliography
-    return unless proposal.bibliography.present?
-    
+    return if proposal.bibliography.blank?
+
     @text << "\\subsection*{Bibliography}\n\n"
     @text << "\\noindent #{LatexToPdf.escape_latex(proposal&.bibliography)}\n\n"
   end
@@ -267,7 +269,7 @@ class ProposalPdfService
         preferred_impossible_dates(field)
         next
       end
-      
+
       question = field.proposal_field.statement
       @text << "\\subsection*{#{delatex(question)}}\n\n" if question.present?
       if field.answer.present?
@@ -311,14 +313,14 @@ class ProposalPdfService
     end
 
     impossible = JSON.parse(field.answer)&.last(2)
-    unless impossible.any?
-      @text << "\\subsection*{Impossible dates}\n\n"
-      @text << "\\begin{enumerate}\n\n"
-      impossible.each do |date|
-        @text << "\\item #{date}\n\n"
-      end
-      @text << "\\end{enumerate}\n\n"
+    return if impossible.any?
+
+    @text << "\\subsection*{Impossible dates}\n\n"
+    @text << "\\begin{enumerate}\n\n"
+    impossible.each do |date|
+      @text << "\\item #{date}\n\n"
     end
+    @text << "\\end{enumerate}\n\n"
   end
 
   def delatex(string)
