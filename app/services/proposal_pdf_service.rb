@@ -88,7 +88,7 @@ class ProposalPdfService
     when "toc"
       proposal_table_of_content
     when "ntoc"
-      proposal_without_content
+      single_proposal_without_content
     else
       proposal_details
     end
@@ -98,6 +98,7 @@ class ProposalPdfService
   def multiple_proposals_fields
     case @table
     when "toc"
+      @text = "\\tableofcontents"
       proposals_with_content
     when "ntoc"
       proposals_without_content
@@ -106,7 +107,6 @@ class ProposalPdfService
   end
 
   def proposals_with_content
-    @text = "\\tableofcontents"
     number = 0
     @proposals.split(',').each do |id|
       number += 1
@@ -127,30 +127,29 @@ class ProposalPdfService
       proposals_sections
     else
       @text = "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-      @proposals.split(',').each do |id|
-        proposal = Proposal.find_by(id: id)
-        @proposal = proposal
-        code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
-        @text << "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-        proposals_sections
-      end
+      proposals_heading
     end
     @text
+  end
+
+  def proposals_heading
+    @proposals.split(',').each do |id|
+      proposal = Proposal.find_by(id: id)
+      @proposal = proposal
+      code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
+      @text << "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+      proposals_sections
+    end
   end
 
   def proposals_sections
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
-
     @text << "\\subsection*{Lead Organizer}\n\n"
     @text << "#{proposal.lead_organizer&.fullname}  \\\\ \n\n"
     @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
-    proposal_organizers
-    proposal_locations
-    proposal_subjects
-    proposal_bibliography
-    user_defined_fields
-    proposal_participants
+    pdf_content
+    @text
   end
 
   def proposal_table_of_content
@@ -158,23 +157,29 @@ class ProposalPdfService
     @text << "\\addtocontents{toc}{\ 1. #{proposal.subject&.title}}"
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
     @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-    proposal_without_content
+    @text << "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+    single_proposal_heading
     @text
   end
 
-  def proposal_without_content
+  def single_proposal_without_content
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    if @table == "toc"
-      @text << "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-    else
-      @text = "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-    end
+    @text = "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+    single_proposal_heading
+    @text
+  end
+
+  def single_proposal_heading
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
-
     @text << "\\subsection*{Lead Organizer}\n\n"
     @text << "#{proposal.lead_organizer&.fullname}  \\\\ \n\n"
     @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+    pdf_content
+    @text
+  end
+
+  def pdf_content
     proposal_organizers
     proposal_locations
     proposal_subjects
@@ -212,12 +217,8 @@ class ProposalPdfService
     @text << "\\subsection*{Lead Organizer}\n\n"
     @text << "#{proposal.lead_organizer&.fullname}#{affil(proposal.lead_organizer)} \\\\ \n"
     @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
-    proposal_organizers
-    proposal_locations
-    proposal_subjects
-    proposal_bibliography
-    user_defined_fields
-    proposal_participants
+    pdf_content
+    @text
   end
 
   def proposal_organizers
