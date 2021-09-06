@@ -73,17 +73,27 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
-  def approve_status
-    @proposal.update(status: 'approved')
-    redirect_to submitted_proposals_url(@proposal),
-                notice: "Proposal has been approved."
+  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength
+  def approve_decline_proposals
+    @errors = []
+    template_params
+    params[:proposal_ids]&.split(',')&.each do |id|
+      @proposal = Proposal.find_by(id: id)
+      @email = Email.new(email_params.merge(proposal_id: @proposal.id))
+      change_status
+      unless @check_status
+        @errors << "Proposal status cannot be changed"
+        render json: @errors.flatten.to_json, status: :unprocessable_entity
+        return
+      end
+      send_email_proposals
+    end
+    head :ok if @errors.empty?
+    render json: @errors.flatten.to_json, status: :unprocessable_entity unless @errors.empty?
   end
-
-  def decline_status
-    @proposal.update(status: 'declined')
-    redirect_to submitted_proposals_url(@proposal),
-                notice: "Proposal has been declined."
-  end
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/MethodLength
 
   private
 
@@ -163,5 +173,21 @@ class SubmittedProposalsController < ApplicationController
 
     @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
     File.new(@pdf_path, 'w')
+  end
+
+  def template_params
+    templates = params[:templates].split(": ")
+    type = "#{templates.first.downcase}_type" if templates.first.present?
+    template = templates.last
+    @email_template = EmailTemplate.find_by(email_type: type, title: template)
+    @email_template.update(subject: params[:subject], body: params[:body]) if @email_template.present?
+  end
+
+  def send_email_proposals
+    @email.cc_email = nil unless params[:cc]
+    @email.bcc_email = nil unless params[:bcc]
+    add_files
+    @email.email_organizers if @email.save
+    @errors << @email.errors.full_messages unless @email.errors.empty?
   end
 end

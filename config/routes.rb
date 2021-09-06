@@ -19,12 +19,11 @@ Rails.application.routes.draw do
     collection do
       get :download_csv
       post :edit_flow
+      post :approve_decline_proposals
     end
     member do
       post :staff_discussion
       post :send_emails
-      post :approve_status
-      post :decline_status
     end
   end
 
@@ -121,6 +120,7 @@ Rails.application.routes.draw do
   resources :emails do
     collection do
       patch :email_template
+      post :email_types
     end
   end
 
