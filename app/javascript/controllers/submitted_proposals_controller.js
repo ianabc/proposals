@@ -84,14 +84,8 @@ export default class extends Controller {
     $("input:checked").each(function() {
       array.push(this.dataset.value);
     });
-    let length = array.length
-    if(typeof array [`${length}`] === "undefined" && typeof array [`${length - 1}`] === "undefined") {
-      array = array.slice(0, length-2)
-    }
-    else if(length > 1 && typeof array [`${length - 1}`] === "undefined") {
-      array = array.slice(0, length-1)
-    }
     if(this.templatesTarget.value) {
+      array = this.checkArray(array)
       $.post(`/submitted_proposals/approve_decline_proposals?proposal_ids=${array}`,
         $("#approve_decline_proposals").serialize(), function() {
           toastr.success("Emails have been sent!")
@@ -110,5 +104,16 @@ export default class extends Controller {
     else {
       toastr.error("Please select any template")
     }
+  }
+
+  checkArray(array) {
+    let length = array.length
+    if(typeof array [`${length - 1}`] === "undefined" && typeof array [`${length - 2}`] === "undefined") {
+      array = array.slice(0, length-2)
+    }
+    else if(length > 1 && typeof array [`${length - 1}`] === "undefined") {
+      array = array.slice(0, length-1)
+    }
+    return array
   }
 }
