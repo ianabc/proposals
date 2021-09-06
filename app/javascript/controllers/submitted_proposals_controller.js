@@ -1,5 +1,6 @@
 import { Controller } from "stimulus"
 import Rails from '@rails/ujs'
+import toastr from 'toastr'
 
 export default class extends Controller {
   static targets = [ "templates" ]
@@ -66,9 +67,9 @@ export default class extends Controller {
         const opt = document.createElement('option');
         opt.innerHTML = ''
         selectBox.appendChild(opt);
-        data.email_templates.forEach(item => {
+        data.email_templates.forEach((item) => {
           const opt = document.createElement('option');
-          opt.innerHTML = item
+          opt.innerText = item
           selectBox.appendChild(opt);
         });
         $("#email-template").modal('show')
@@ -84,10 +85,10 @@ export default class extends Controller {
       array.push(this.dataset.value);
     });
     let length = array.length
-    if(typeof array[length] === "undefined" && typeof array[length-1] === "undefined") {
+    if(typeof array [`${length}`] === "undefined" && typeof array [`${length - 1}`] === "undefined") {
       array = array.slice(0, length-2)
     }
-    else if(length > 1 && typeof array[length-1] === "undefined") {
+    else if(length > 1 && typeof array [`${length - 1}`] === "undefined") {
       array = array.slice(0, length-1)
     }
     if(this.templatesTarget.value) {
@@ -103,7 +104,6 @@ export default class extends Controller {
         let errors = response.responseJSON
         $.each(errors, function(index, error) {
           toastr.error(error)
-          // window.location.reload();
         })
       });
     }
