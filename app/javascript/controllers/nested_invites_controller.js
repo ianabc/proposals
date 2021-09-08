@@ -79,13 +79,14 @@ export default class extends Controller {
     let inviteOrganizer = event.currentTarget.dataset.organizer || 0
     $.post(`/submit_proposals?proposal=${id}&create_invite=true.js`,
       $('form#submit_proposal').serialize(), function(data) {
-        invitedAs = $('#invited_as_pre').text()
-        if (invitedAs === 'participant') {
-          invitedAs = 'Participant'
-          inviteId = inviteParticipant
-        } else {
+        invitedAs = $('#invited_as_pre').text().toLowerCase()
+        if (invitedAs === 'organizer') {
           invitedAs = 'Organizer'
           inviteId = inviteOrganizer
+        }
+        else if (invitedAs === 'participant') {
+          invitedAs = 'Participant'
+          inviteId = inviteParticipant
         }
         $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`, function() {
           toastr.success("Invitation has been sent!")
