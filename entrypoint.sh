@@ -10,7 +10,7 @@ echo
 echo "Setting system timezone..."
 export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
 echo "tzdata tzdata/Areas select America" > /tmp/tz.txt
-if [ $STAGING_SERVER = "true" ]; then
+if [ "$STAGING_SERVER" == "true" ]; then
   echo "tzdata tzdata/Zones/America select Edmonton" >> /tmp/tz.txt
 else
   echo "tzdata tzdata/Zones/America select Vancouver" >> /tmp/tz.txt
@@ -104,7 +104,7 @@ if [ ! -e /home/app/proposals/app/assets/stylesheets/actiontext.scss ]; then
   echo "Done!"
 fi
 
-if [ $RAILS_ENV = "production" ]; then
+if [ "$RAILS_ENV" == "production" ]; then
   echo
   echo "Updating file permissions..."
   chown app:app -R /home/app/proposals
@@ -121,9 +121,12 @@ echo "Compiling Assets..."
 chmod 755 /home/app/proposals/node_modules
 su - app -c "cd /home/app/proposals; yarn install"
 
-if [ $RAILS_ENV = "production" ]; then
+if [ "$RAILS_ENV" == "production" ]; then
   su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
   su - app -c "cd /home/app/proposals; yarn"
+
+  # Update release tag
+  rake birs:release_tag
 else
   echo
   echo "Running: webpack --verbose --progress..."
@@ -134,15 +137,11 @@ echo
 echo "Done compiling assets!"
 
 
-if [ $APPLICATION_HOST = "localhost" ]; then
+if [ "$APPLICATION_HOST" == "localhost" ]; then
   echo
   echo "Launching webpack-dev-server..."
   su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec bin/webpack-dev-server &"
 fi
-
-
-# Update release tag
-rake birs:release_tag
 
 echo
 echo "Starting web server..."
