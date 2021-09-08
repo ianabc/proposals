@@ -135,9 +135,6 @@ class SubmitProposalsController < ApplicationController
 
     @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
                                       .generate_latex_file.to_s
-    File.new("#{Rails.root}/tmp/#{temp_file}", 'w') do |io|
-      io.write(@latex_infile)
-    end
   end
 
   def invalid_email_error_message
