@@ -75,12 +75,13 @@ export default class extends Controller {
     let id = event.currentTarget.dataset.id;
     let invitedAs = ''
     let inviteId = 0
+    let _this = this
     let inviteParticipant = event.currentTarget.dataset.participant || 0
     let inviteOrganizer = event.currentTarget.dataset.organizer || 0
     $.post(`/submit_proposals?proposal=${id}&create_invite=true.js`,
       $('form#submit_proposal').serialize(), function(data) {
         invitedAs = $('#invited_as_pre').text().toLowerCase()
-        if (invitedAs === 'organizer') {
+        if (invitedAs === 'supporting organizer') {
           invitedAs = 'Organizer'
           inviteId = inviteOrganizer
         }
@@ -88,12 +89,7 @@ export default class extends Controller {
           invitedAs = 'Participant'
           inviteId = inviteParticipant
         }
-        $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`, function() {
-          toastr.success("Invitation has been sent!")
-          setTimeout(function() {
-            window.location.reload();
-          }, 2000)
-        })
+        _this.sendInviteEmails(id, invitedAs, inviteId, data)
       }
     ) 
     .fail(function(response) {
@@ -102,5 +98,31 @@ export default class extends Controller {
         toastr.error(error)
       })
     });
+  }
+
+  sendInviteEmails(id, invitedAs, inviteId, data) {
+    if(data.errors.length > 0 && data.counter == 0) {
+       $.each(data.errors, function(index, error) {
+        toastr.error(error)
+      })
+    }
+    else if(data.errors.length > 0 && data.counter > 0) {
+      $.each(data.errors, function(index, error) {
+        toastr.error(error)
+      })
+      $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`, function() {
+        setTimeout(function() {
+          window.location.reload();
+        }, 3000)
+      })
+    }
+    else {
+      $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`, function() {
+        toastr.success('Invitation has been sent!')
+        setTimeout(function() {
+          window.location.reload();
+        }, 2000)
+      })
+    }
   }
 }
