@@ -4,7 +4,6 @@ RSpec.feature "Proposal edit", type: :feature do
   before do
     person = create(:person, :with_proposals)
 
-
     @proposal = person.proposals.first
     authenticate_user(person)
     visit edit_proposal_path(@proposal)
@@ -59,7 +58,7 @@ RSpec.feature "Proposal edit", type: :feature do
 
     within("form#submit_proposal") do
       expect(have_field('#file-upload')).to be_truthy
-      upload_file = Rails.root + "spec/fixtures/file.pdf"
+      upload_file = "#{Rails.root}/spec/fixtures/file.pdf"
       find_field('file-upload').attach_file(upload_file)
     end
 
