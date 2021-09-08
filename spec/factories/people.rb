@@ -28,7 +28,7 @@ FactoryBot.define do
       organizer = create(:role, name: 'lead_organizer')
       proposals.each do |proposal|
         proposal.create_organizer_role(person, organizer)
-        2.times do
+        3.times do
           create(:invite, proposal: proposal, status: 'confirmed',
                           invited_as: 'Organizer')
         end
