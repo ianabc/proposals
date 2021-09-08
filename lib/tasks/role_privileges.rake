@@ -87,6 +87,14 @@ namespace :birs do
       {
         permission_type: "Manage",
         privilege_name: "Validation"
+      },
+      {
+        permission_type: "Manage",
+        privilege_name: "SubmittedProposalsController"
+      },
+      {
+        permission_type: "Manage",
+        privilege_name: "SubjectCategory"
       }
     ]
 

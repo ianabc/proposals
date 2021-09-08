@@ -2,6 +2,17 @@ require 'rails_helper'
 
 RSpec.describe "/subject_categories", type: :request do
   let(:subject_category) { create(:subject_category) }
+  let(:role) { create(:role, name: 'Staff') }
+  let(:user) { create(:user) }
+  let(:role_privilege) do
+    create(:role_privilege,
+           permission_type: "Manage", privilege_name: "SubjectCategory", role_id: role.id)
+  end
+  before do
+    role_privilege
+    user.roles << role
+    sign_in user
+  end
 
   describe "GET /index" do
     before do
