@@ -35,6 +35,7 @@ class Proposal < ApplicationRecord
   validate :minimum_organizers, if: :is_submission
   validate :preferred_locations, if: :is_submission
   validate :not_before_opening, if: :is_submission
+  before_save :strip_whitespace
   before_save :create_code, if: :is_submission
 
   enum status: {
@@ -208,5 +209,11 @@ class Proposal < ApplicationRecord
 
     errors.add('Preferred Locations:', "Please select at least one preferred
                  location".squish)
+  end
+
+  def strip_whitespace
+    attributes.each do |key, value|
+      self[key] = value.strip if value.respond_to?(:strip)
+    end
   end
 end

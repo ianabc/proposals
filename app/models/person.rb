@@ -8,6 +8,7 @@ class Person < ApplicationRecord
   has_many :proposals, through: :proposal_roles
   has_one :demographic_data, dependent: :destroy
   before_save :downcase_email
+  before_save :strip_whitespace
 
   def downcase_email
     email.downcase!
@@ -71,5 +72,13 @@ class Person < ApplicationRecord
 
   def draft_proposals?
     proposals.where(status: :draft).present?
+  end
+
+  private
+
+  def strip_whitespace
+    attributes.each do |key, value|
+      self[key] = value.strip if value.respond_to?(:strip)
+    end
   end
 end
