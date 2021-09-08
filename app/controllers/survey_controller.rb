@@ -39,21 +39,34 @@ class SurveyController < ApplicationController
   end
 
   def post_demographic_form_path
+    message = 'Thank you for filling out our form!'
+
     if @invite.blank?
-      message = 'Thank you for filling out our form!'
       redirect_to new_proposal_path, notice: message
-    elsif @invite.person_id.blank? || @invite.person.user.nil?
-      message = 'Thank you for filling out our form. If you wish to login to
-          see the proposal being drafted, please setup an account.'.squish
+    elsif organizer_without_account?
+      message << ' If you wish to login to see the proposal being drafted,
+                  please setup an account.'.squish
       redirect_to new_user_registration_path, notice: message
-    else
-      message = 'Thank you for filling out our form. If you wish to login to
-          see the proposal being drafted, please set a password for your
-          account'.squish
+    elsif organizer_with_account?
+      message << ' If you wish to login to
+                  see the proposal being drafted, please set a password for your
+                  account'.squish
       reset_password_token(@invite.person.user)
       redirect_to edit_password_url(@invite.person.user,
-                                    reset_password_token: @token), notice: message
+                                    reset_password_token: @token),
+                                    notice: message
+    else
+      redirect_to root_path, notice: message
     end
+  end
+
+  def organizer_without_account?
+    @invite.invited_as == 'Organizer' &&
+      (@invite.person_id.blank? || @invite.person.user.nil?)
+  end
+
+  def organizer_with_account?
+    @invite.invited_as == 'Organizer' && @invite&.person&.user.present?
   end
 
   def reset_password_token(user)
