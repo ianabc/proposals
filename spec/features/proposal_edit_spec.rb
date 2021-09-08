@@ -26,11 +26,6 @@ RSpec.feature "Proposal edit", type: :feature do
     before do
       subject_category = create(:subject_category)
       @subjects = create_list(:subject, 4, subject_category_id: subject_category.id)
-      # BUGS: * ams_subject_categories factory is broken
-      #       * ams_subject factory :create fails, subject_id validation missing
-      # ams_subject_categories = create(:ams_subject_categories)
-      # ams_subject = create(:ams_subject, subject_category_id: ...)
-
       @proposal.update(subject: @subjects.first)
 
       visit edit_proposal_path(@proposal)
