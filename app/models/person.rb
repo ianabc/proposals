@@ -8,6 +8,7 @@ class Person < ApplicationRecord
   has_many :proposals, through: :proposal_roles
   has_one :demographic_data, dependent: :destroy
   before_save :downcase_email
+  before_save :strip_whitespace
 
   def downcase_email
     email.downcase!
@@ -36,7 +37,6 @@ class Person < ApplicationRecord
     proposals.where(status: "submitted")&.first
   end
 
-  # rubocop:disable Metrics/AbcSize
   def common_fields
     return if skip_person_validation
 
@@ -54,11 +54,6 @@ class Person < ApplicationRecord
 
     return unless country == 'Canada' || country == 'United States of America'
 
-    # if (country == 'Canada')
-    #   self.region = province if province.present?
-    # elsif (country == 'United States of America')
-    #   self.region = state if state.present?
-    # end
     case country
     when "Canada"
       self.region = province if province.present?
@@ -67,9 +62,16 @@ class Person < ApplicationRecord
     end
     errors.add("Missing data: ", "You must select a #{region_type}") if region.blank?
   end
-  # rubocop:enable Metrics/AbcSize
 
   def draft_proposals?
     proposals.where(status: :draft).present?
+  end
+
+  private
+
+  def strip_whitespace
+    attributes.each do |key, value|
+      self[key] = value.strip if value.respond_to?(:strip)
+    end
   end
 end
