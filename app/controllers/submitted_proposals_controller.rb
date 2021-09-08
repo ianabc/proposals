@@ -1,5 +1,6 @@
 class SubmittedProposalsController < ApplicationController
   before_action :authenticate_user!
+  before_action :authorize_user
   before_action :set_proposals, only: %i[index download_csv]
   before_action :set_proposal, except: %i[index download_csv]
 
@@ -163,5 +164,9 @@ class SubmittedProposalsController < ApplicationController
 
     @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
     File.new(@pdf_path, 'w')
+  end
+
+  def authorize_user
+    authorize! :manage, current_user
   end
 end
