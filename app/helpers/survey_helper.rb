@@ -1,7 +1,7 @@
 module SurveyHelper
   # rubocop:disable Metrics/MethodLength
   def citizenship_options
-    citizenships = [%w[Argentina Argentina], [' Australia', ' Australia'], %w[Austria Austria],
+    citizenships = [%w[Argentina Argentina], %w[Australia, Australia'], %w[Austria Austria],
                     %w[Belarus Belarus], %w[Belgium Belgium], %w[Benin Benin], %w[Brazil Brazil],
                     %w[Canada Canada], %w[Chile Chile], %w[China China], %w[Colombia Colombia],
                     ['Costa Rica', 'Costa Rica'], %w[Croatia Croatia], %w[Cyprus Cyprus],
