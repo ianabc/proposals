@@ -124,6 +124,9 @@ su - app -c "cd /home/app/proposals; yarn install"
 if [ $RAILS_ENV = "production" ]; then
   su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
   su - app -c "cd /home/app/proposals; yarn"
+
+  # Update release tag
+  rake birs:release_tag
 else
   echo
   echo "Running: webpack --verbose --progress..."
@@ -139,10 +142,6 @@ if [ $APPLICATION_HOST = "localhost" ]; then
   echo "Launching webpack-dev-server..."
   su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec bin/webpack-dev-server &"
 fi
-
-
-# Update release tag
-rake birs:release_tag
 
 echo
 echo "Starting web server..."
