@@ -1,11 +1,14 @@
 class SubmittedProposalsController < ApplicationController
   before_action :authenticate_user!
+  before_action :authorize_user
   before_action :set_proposals, only: %i[index download_csv]
   before_action :set_proposal, except: %i[index download_csv]
 
   def index; end
 
-  def show; end
+  def show
+    @proposal.review! if @proposal.may_review?
+  end
 
   def download_csv
     send_data @proposals.to_csv, filename: "submitted_proposals.csv"
@@ -43,11 +46,13 @@ class SubmittedProposalsController < ApplicationController
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
     change_status
+    unless @check_status
+      redirect_to submitted_proposal_url(@proposal), alert: "Email cannot sent."
+      return
+    end
     @email.cc_email = nil unless params[:cc]
     @email.bcc_email = nil unless params[:bcc]
-    params[:files]&.each do |file|
-      @email.files.attach(file)
-    end
+    add_files
     if @email.save
       @email.email_organizers
       redirect_to submitted_proposal_url(@proposal),
@@ -97,9 +102,10 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def change_status
-    @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
-    @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
-    @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
+    @check_status = @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
+    @check_status = @email.update_status(@proposal, 'Reject') if params[:templates].split(':').first == "Reject"
+    @check_status = @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
+    @check_status = @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
   end
 
   def latex_temp_file
@@ -138,6 +144,7 @@ class SubmittedProposalsController < ApplicationController
       flash[:alert] = "Error sending data!"
     else
       flash[:notice] = "Data sent to EditFlow!"
+      @proposal.progress! if @proposal.may_progress?
       @proposal.update(edit_flow: Time.zone.now)
     end
   end
@@ -146,10 +153,20 @@ class SubmittedProposalsController < ApplicationController
     @proposal = Proposal.find_by(id: params[:id])
   end
 
+  def add_files
+    params[:files]&.each do |file|
+      @email.files.attach(file)
+    end
+  end
+
   def check_file
     return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
 
     @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
     File.new(@pdf_path, 'w')
+  end
+
+  def authorize_user
+    authorize! :manage, current_user
   end
 end

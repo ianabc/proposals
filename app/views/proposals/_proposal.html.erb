@@ -238,7 +238,7 @@
                                 Supported file types: *.pdf
                               </p>
                               <div>
-                                <input type="file" multiple accept="application/pdf" name="file", data-action="multi-upload#uploadFile" data-proposal-form-id="<%= @proposal&.id %>">
+                                <input type="file" id="file-upload" multiple accept="application/pdf" name="file-upload", data-action="multi-upload#uploadFile" data-proposal-form-id="<%= @proposal&.id %>">
                               </div>
 
                               <% if @proposal&.files&.attached? %>

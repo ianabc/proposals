@@ -31,9 +31,12 @@ class ProposalsController < ApplicationController
     end
   end
 
-  def show; end
+  def show
+    authorize_access
+  end
 
   def edit
+    authorize_access
     @proposal.invites.build
   end
 
@@ -58,6 +61,8 @@ class ProposalsController < ApplicationController
     @year = @proposal&.year || Date.current.year.to_i + 2
     @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
                                       .generate_latex_file.to_s
+    @proposal.review! if current_user.staff_member? && @proposal.may_review?
+
     render_latex
   end
 
@@ -133,7 +138,6 @@ class ProposalsController < ApplicationController
 
   def start_new_proposal
     prop = Proposal.new(proposal_params)
-    prop.status = :draft
     prop.proposal_form = ProposalForm.active_form(prop.proposal_type_id)
     prop
   end
@@ -165,5 +169,12 @@ class ProposalsController < ApplicationController
   def set_careers
     @careers = Person.where(id: @proposal.participants.pluck(:person_id))
                      .pluck(:academic_status)
+  end
+
+  def authorize_access
+    return if current_user.staff_member? || current_user.is_organizer?(@proposal)
+    current_user.update(locked_at: DateTime.current)
+    sign_out(current_user)
+    redirect_to root_path, alert: "Unauthorized access."
   end
 end

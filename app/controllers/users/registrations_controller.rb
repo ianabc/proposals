@@ -16,8 +16,12 @@ module Users
     def create
       email = sign_up_params['person_attributes']['email']&.downcase
       build_resource(sign_up_params.merge(email: email))
-      resource = assign_existing_person(resource, email)
-      resource.save
+      person = Person.find_by(email: email) if email.present?
+      if person.present?
+        person.skip_person_validation = true
+        resource&.person = person
+      end
+      resource&.save
 
       yield resource if block_given?
 
@@ -68,19 +72,6 @@ module Users
       end
     end
 
-    def assign_existing_person(resource, email)
-      person = Person.find_by(email: email) if email.present?
-      if person.present?
-        person.skip_person_validation = true
-        resource.person = person
-      end
-      resource
-    end
-
-    # If you have extra params to permit, append them to the sanitizer.
-    # def configure_sign_up_params
-    #   devise_parameter_sanitizer.permit(:sign_up, keys: [:attribute])
-    # end
 
     # If you have extra params to permit, append them to the sanitizer.
     # def configure_account_update_params

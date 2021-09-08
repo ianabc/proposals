@@ -10,7 +10,12 @@ echo
 echo "Setting system timezone..."
 export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
 echo "tzdata tzdata/Areas select America" > /tmp/tz.txt
-echo "tzdata tzdata/Zones/America select Edmonton" >> /tmp/tz.txt
+if [ $STAGING_SERVER = "true" ]; then
+  echo "tzdata tzdata/Zones/America select Edmonton" >> /tmp/tz.txt
+else
+  echo "tzdata tzdata/Zones/America select Vancouver" >> /tmp/tz.txt
+fi
+
 debconf-set-selections /tmp/tz.txt
 rm /etc/timezone
 rm /etc/localtime
@@ -119,6 +124,9 @@ su - app -c "cd /home/app/proposals; yarn install"
 if [ $RAILS_ENV = "production" ]; then
   su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
   su - app -c "cd /home/app/proposals; yarn"
+
+  # Update release tag
+  rake birs:release_tag
 else
   echo
   echo "Running: webpack --verbose --progress..."
@@ -133,10 +141,6 @@ if [ $APPLICATION_HOST = "localhost" ]; then
   echo
   echo "Launching webpack-dev-server..."
   su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec bin/webpack-dev-server &"
-fi
-
-if [ $STAGING_SERVER = "true" ]; then
-  rake birs:release_tag
 fi
 
 echo

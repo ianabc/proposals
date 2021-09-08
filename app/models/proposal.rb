@@ -1,4 +1,5 @@
 class Proposal < ApplicationRecord
+  include AASM
   include PgSearch::Model
   pg_search_scope :search_proposals, against: %i[title],
                                      associated_against: {
@@ -15,12 +16,12 @@ class Proposal < ApplicationRecord
   has_many_attached :files
   has_many :proposal_locations, dependent: :destroy
   has_many :locations, -> { order 'proposal_locations.position' },
-                          through: :proposal_locations
+           through: :proposal_locations
   belongs_to :proposal_type
   has_many :proposal_roles, dependent: :destroy
   has_many :people, through: :proposal_roles
   has_many(:answers, -> { order 'answers.proposal_field_id' },
-                        inverse_of: :proposal, dependent: :destroy)
+           inverse_of: :proposal, dependent: :destroy)
   has_many :invites, dependent: :destroy
   belongs_to :proposal_form
   has_many :proposal_ams_subjects, dependent: :destroy
@@ -34,6 +35,7 @@ class Proposal < ApplicationRecord
   validate :minimum_organizers, if: :is_submission
   validate :preferred_locations, if: :is_submission
   validate :not_before_opening, if: :is_submission
+  before_save :strip_whitespace
   before_save :create_code, if: :is_submission
 
   enum status: {
@@ -48,6 +50,45 @@ class Proposal < ApplicationRecord
     approved: 8,
     declined: 9
   }
+
+  aasm column: :status, enum: true do
+    state :draft, initial: true
+    state :submitted
+    state :initial_review
+    state :revision_requested
+    state :revision_submitted
+    state :in_progress
+    state :decision_pending
+    state :decision_email_sent
+
+    event :active do
+      transitions from: :draft, to: :submitted
+    end
+
+    event :review do
+      transitions from: :submitted, to: :initial_review
+    end
+
+    event :progress do
+      transitions from: %i[initial_review revision_submitted], to: :in_progress
+    end
+
+    event :pending do
+      transitions from: %i[in_progress revision_submitted], to: :decision_pending
+    end
+
+    event :requested do
+      transitions from: %i[initial_review decision_pending revision_submitted], to: :revision_requested
+    end
+
+    event :revision do
+      transitions from: :revision_requested, to: :revision_submitted
+    end
+
+    event :decision do
+      transitions from: :decision_pending, to: :decision_email_sent
+    end
+  end
 
   scope :active_proposals, lambda {
     where(status: 'submitted')
@@ -85,7 +126,7 @@ class Proposal < ApplicationRecord
   end
 
   def list_of_organizers
-    invites.where(invites: { invited_as: 'Organizer' }).map(&:person)
+    invites.where(invites: { invited_as: 'Organizer', status: 'confirmed' }).map(&:person)
            .map(&:fullname).join(', ')
   end
 
@@ -144,9 +185,7 @@ class Proposal < ApplicationRecord
 
   def subjects
     errors.add('Subject Area:', "please select a subject area") if subject.nil?
-    unless ams_subjects.pluck(:code).count == 2
-      errors.add('AMS Subjects:', 'please select 2 AMS Subjects')
-    end
+    errors.add('AMS Subjects:', 'please select 2 AMS Subjects') unless ams_subjects.pluck(:code).count == 2
   end
 
   def next_number
@@ -166,9 +205,15 @@ class Proposal < ApplicationRecord
   end
 
   def preferred_locations
-    if locations.empty?
-      errors.add('Preferred Locations:', "Please select at least one preferred
+    return unless locations.empty?
+
+    errors.add('Preferred Locations:', "Please select at least one preferred
                  location".squish)
+  end
+
+  def strip_whitespace
+    attributes.each do |key, value|
+      self[key] = value.strip if value.respond_to?(:strip)
     end
   end
 end

@@ -26,7 +26,13 @@ FactoryBot.define do
     after(:create) do |person|
       proposals = create_list(:proposal, 3)
       organizer = create(:role, name: 'lead_organizer')
-      proposals.map { |p| p.create_organizer_role(person, organizer) }
+      proposals.each do |proposal|
+        proposal.create_organizer_role(person, organizer)
+        3.times do
+          create(:invite, proposal: proposal, status: 'confirmed',
+                          invited_as: 'Organizer')
+        end
+      end
     end
   end
 end
