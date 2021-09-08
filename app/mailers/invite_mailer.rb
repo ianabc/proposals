@@ -32,6 +32,7 @@ class InviteMailer < ApplicationMailer
 
   def invite_reminder
     @invite = params[:invite]
+    @invited_as = @invite&.invited_as&.downcase
     @existing_organizers = params[:organizers]
 
     @existing_organizers.prepend(", ") if @existing_organizers.present?

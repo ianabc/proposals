@@ -13,6 +13,8 @@ export default class extends Controller {
         _this.submitProposal(id)
       }, 10000);
       localStorage.setItem('interval', interval)
+      clearInterval(localStorage.getItem('interval'))
+      localStorage.removeItem("interval");
     } else {
       clearInterval(localStorage.getItem('interval'))
       localStorage.removeItem("interval");

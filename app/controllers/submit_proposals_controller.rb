@@ -36,18 +36,17 @@ class SubmitProposalsController < ApplicationController
   def create_invite
     return unless request.xhr?
 
-    errors = []
+    @errors = []
+    counter = 0
     params[:invites_attributes].each_value do |invite|
-      invite = @proposal.invites.new(invite_params(invite))
-      invite.save
-      errors << invite.errors.full_messages unless invite.errors.empty?
+      @invite = @proposal.invites.new(invite_params(invite))
+      counter += 1 if @invite.save
+      next if @invite.errors.empty?
+
+      invalid_email_error_message
     end
 
-    if errors.empty?
-      head :ok
-    else
-      render json: errors.flatten.to_json, status: :unprocessable_entity
-    end
+    render json: { errors: @errors, counter: counter }, status: :ok
   end
 
   def confirm_submission(attachment)
@@ -139,5 +138,13 @@ class SubmitProposalsController < ApplicationController
     File.new("#{Rails.root}/tmp/#{temp_file}", 'w') do |io|
       io.write(@latex_infile)
     end
+  end
+
+  def invalid_email_error_message
+    @errors << @invite.errors.full_messages
+    @errors.flatten!
+    return unless @invite.errors.added? :email, "is invalid"
+
+    @errors[@errors.index("Email is invalid")] = "Email is invalid: #{@invite.email}"
   end
 end

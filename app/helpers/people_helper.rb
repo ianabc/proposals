@@ -17,7 +17,6 @@ module PeopleHelper
     phd_year.push
   end
 
-  # rubocop:disable Metrics/MethodLength
   def country_options
     countries = [
       %w[Canada Canada], %w[France France], %w[Germany Germany], %w[Italy Italy],
@@ -25,9 +24,9 @@ module PeopleHelper
       ['United States of America', 'United States of America'],
       %w[],
       %w[Afghanistan Afghanistan], %w[Albania Albania], %w[Algeria Algeria], %w[Andorra Andorra],
-      %w[Angola Angola], %w[Antigua Antigua], %w[Barbuda Barbuda], %w[Argentina Argentina],
-      %w[Armenia Armenia], %w[Australia Australia], %w[Azerbaijan Azerbaijan], %w[Bahamas Bahamas],
-      %w[Bahrain Bahrain], %w[Bangladesh Bangladesh], %w[Barbados Barbados], %w[Belarus Belarus],
+      %w[Angola Angola], %w[Antigua Antigua], %w[Argentina Argentina],
+      %w[Armenia Armenia], %w[Australia Australia], %w[Austria Austria], %w[Azerbaijan Azerbaijan], %w[Bahamas Bahamas],
+      %w[Bahrain Bahrain], %w[Bangladesh Bangladesh], %w[Barbados Barbados], %w[Barbuda Barbuda], %w[Belarus Belarus],
       %w[Belgium Belgium], %w[Belize Belize], %w[Bhutan Bhutan], %w[Bolivia Bolivia], %w[Bosnia Bosnia],
       %w[Herzegovina Herzegovina], %w[Botswana Botswana], %w[Brazil Brazil], %w[Brunei Brunei], %w[Bulgaria Bulgaria],
       ['Burkina Faso', 'Burkina Faso'], %w[Burundi Burundi],
@@ -81,7 +80,6 @@ module PeopleHelper
     ]
     countries.map { |disp, _value| disp }
   end
-  # rubocop:enable Metrics/MethodLength
 
   def country_canada_options
     country_canada = [%w[Alberta Alberta], ['British Columbia', 'British Columbia'], %w[Manitoba Manitoba],
@@ -93,7 +91,6 @@ module PeopleHelper
     country_canada.map { |disp, _value| disp }
   end
 
-  # rubocop:disable Metrics/MethodLength
   def country_united_states_of_america_options
     country_united_states_of_america = [%w[Alabama Alabama], %w[Alaska Alaska], %w[Arizona Arizona],
                                         %w[Arkansas Arkansas], %w[California California],
@@ -122,5 +119,4 @@ module PeopleHelper
                                         ['U.S. Virgin Islands', 'U.S. Virgin Islands']]
     country_united_states_of_america.map { |disp, _value| disp }
   end
-  # rubocop:enable Metrics/MethodLength
 end

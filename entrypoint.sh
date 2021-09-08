@@ -10,7 +10,12 @@ echo
 echo "Setting system timezone..."
 export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
 echo "tzdata tzdata/Areas select America" > /tmp/tz.txt
-echo "tzdata tzdata/Zones/America select Edmonton" >> /tmp/tz.txt
+if [ $STAGING_SERVER = "true" ]; then
+  echo "tzdata tzdata/Zones/America select Edmonton" >> /tmp/tz.txt
+else
+  echo "tzdata tzdata/Zones/America select Vancouver" >> /tmp/tz.txt
+fi
+
 debconf-set-selections /tmp/tz.txt
 rm /etc/timezone
 rm /etc/localtime
@@ -137,7 +142,7 @@ fi
 
 
 # Update release tag
-rails birs:release_tag
+rake birs:release_tag
 
 echo
 echo "Starting web server..."

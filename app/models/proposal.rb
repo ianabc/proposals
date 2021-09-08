@@ -125,7 +125,7 @@ class Proposal < ApplicationRecord
   end
 
   def list_of_organizers
-    invites.where(invites: { invited_as: 'Organizer' }).map(&:person)
+    invites.where(invites: { invited_as: 'Organizer', status: 'confirmed' }).map(&:person)
            .map(&:fullname).join(', ')
   end
 

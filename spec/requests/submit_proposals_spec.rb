@@ -85,7 +85,7 @@ RSpec.describe "/submit_proposals", type: :request do
         post submit_proposals_url, params: params, xhr: true
       end
 
-      it { expect(response).to have_http_status(:unprocessable_entity) }
+      it { expect(response).to have_http_status(:ok) }
 
       it "does not update the proposal invites count" do
         expect(proposal.invites.count).to eq(1)
