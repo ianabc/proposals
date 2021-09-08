@@ -58,7 +58,7 @@ RSpec.feature "Proposal edit", type: :feature do
 
     within("form#submit_proposal") do
       expect(have_field('#file-upload')).to be_truthy
-      upload_file = "#{Rails.root.join('/spec/fixtures/file.pdf')}"
+      upload_file = "#{Rails.root.join('spec/fixtures/file.pdf')}"
       find_field('file-upload').attach_file(upload_file)
     end
 
