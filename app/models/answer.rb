@@ -10,7 +10,7 @@ class Answer < ApplicationRecord
 
   def strip_whitespace
     attributes.each do |key, value|
-      self[key] = value.strip if value.respond_to?("strip")
+      self[key] = value.strip if value.respond_to?(:strip)
     end
   end
 end
