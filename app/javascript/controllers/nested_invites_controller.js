@@ -101,7 +101,7 @@ export default class extends Controller {
   }
 
   sendInviteEmails(id, invitedAs, inviteId, data) {
-    if(data.errors.length > 0 && data.counter == 0) {
+    if(data.errors.length > 0 && data.counter === 0) {
        $.each(data.errors, function(index, error) {
         toastr.error(error)
       })
