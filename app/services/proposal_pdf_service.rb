@@ -88,15 +88,28 @@ class ProposalPdfService
 
   def proposal_details
     code = proposal.code.blank? ? '' : "#{proposal.code}: "
+    @text = "\\section*{\\centering #{code} #{delatex(proposal.title)} }\n\n"
+    proposal_participants_count
+    proposal_organizers_count
+    proposal_lead_organizer
+  end
+
+  def proposal_participants_count
     confirmed_participants = proposal.invites.where(status: "confirmed",
                                                     invited_as: "Participant")
-    confirmed_organizers = proposal.invites.where(status: "confirmed",
-                                                  invited_as: "Organizer")
-    @text = "\\section*{\\centering #{code} #{delatex(proposal.title)} }\n\n"
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << "\\noindent #{confirmed_participants.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
-    @text << "\\noindent #{confirmed_organizers.count + 1} confirmed / #{proposal.proposal_type&.co_organizer + 1} maximum organizers\n\n"
+    @text << "\\noindent #{confirmed_participants&.count} confirmed / #{proposal.proposal_type&.participant}
+            maximum participants\n\n"
+  end
 
+  def proposal_organizers_count
+    confirmed_organizers = proposal.invites.where(status: "confirmed",
+                                                  invited_as: "Organizer")&.count
+    organizers = proposal.proposal_type&.co_organizer
+    @text << "\\noindent #{confirmed_organizers + 1} confirmed / #{organizers + 1} maximum organizers\n\n"
+  end
+
+  def proposal_lead_organizer
     @text << "\\subsection*{Lead Organizer}\n\n"
     @text << "#{proposal.lead_organizer&.fullname}#{affil(proposal.lead_organizer)} \\\\ \n\n"
     @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
