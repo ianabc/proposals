@@ -168,7 +168,7 @@ class Proposal < ApplicationRecord
   private
 
   def not_before_opening
-    return if self.draft?
+    return if draft?
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
     errors.add("Late submission - ", "proposal submissions are not allowed
