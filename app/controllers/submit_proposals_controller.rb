@@ -1,5 +1,7 @@
 class SubmitProposalsController < ApplicationController
   before_action :set_proposal, only: %i[create]
+  before_action :authorize_user, only: %w[create create_invite]
+
   def new
     @proposals = ProposalForm.new
   end
@@ -135,9 +137,6 @@ class SubmitProposalsController < ApplicationController
 
     @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
                                       .generate_latex_file.to_s
-    File.new("#{Rails.root}/tmp/#{temp_file}", 'w') do |io|
-      io.write(@latex_infile)
-    end
   end
 
   def invalid_email_error_message
@@ -146,5 +145,9 @@ class SubmitProposalsController < ApplicationController
     return unless @invite.errors.added? :email, "is invalid"
 
     @errors[@errors.index("Email is invalid")] = "Email is invalid: #{@invite.email}"
+  end
+
+  def authorize_user
+    raise CanCan::AccessDenied unless current_user&.lead_organizer?(@proposal)
   end
 end
