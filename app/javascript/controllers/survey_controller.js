@@ -26,7 +26,7 @@ export default class extends Controller {
       $("#citizenship_other").prop('required', true);
     } else {
       this.otherCitizenshipTarget.classList.add("hidden")
-      $("#citizenship_other").hide();
+      $("#citizenship_other").prop('required', false);
     }
   }
 
@@ -36,7 +36,7 @@ export default class extends Controller {
       $("#ethnicity_other").prop('required', true);
     } else {
       this.otherEthnicityTarget.classList.add("hidden")
-      $("#ethnicity_other").hide();
+      $("#ethnicity_other").prop('required', false);
     }
   }
 
@@ -46,7 +46,7 @@ export default class extends Controller {
       $("#gender_other").prop('required', true);
     } else {
       this.otherGenderTarget.classList.add("hidden")
-      $("#gender_other").hide();
+      $("#gender_other").prop('required', false);
     }
   }
 
@@ -56,7 +56,7 @@ export default class extends Controller {
       $("#indigenous_person_yes").prop('required', true);
     } else {
       this.indigenousYesTarget.classList.add("hidden")
-      $("#indigenous_person_yes").hide();
+      $("#indigenous_person_yes").prop('required', false);
     }
   }
 
