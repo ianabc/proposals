@@ -1,5 +1,7 @@
 class SubmitProposalsController < ApplicationController
   before_action :set_proposal, only: %i[create]
+  before_action :authorize_user, only: %w[create create_invite]
+
   def new
     @proposals = ProposalForm.new
   end
@@ -9,18 +11,15 @@ class SubmitProposalsController < ApplicationController
     update_proposal_ams_subject_code
     submission = SubmitProposalService.new(@proposal, params)
     submission.save_answers
-    @proposal.skip_submission_validation = true unless @proposal.draft?
     session[:is_submission] = @proposal.is_submission = submission.is_final?
 
     create_invite and return if params[:create_invite]
 
-    if submission.has_errors?
+    if @proposal.is_submission && submission.has_errors?
       redirect_to edit_proposal_path(@proposal), alert: "Your submission has
           errors: #{submission.error_messages}.".squish
       return
-    end
-
-    unless @proposal.is_submission
+    else
       redirect_to edit_proposal_path(@proposal), notice: 'Draft saved.'
       return
     end
@@ -135,9 +134,6 @@ class SubmitProposalsController < ApplicationController
 
     @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
                                       .generate_latex_file.to_s
-    File.new("#{Rails.root}/tmp/#{temp_file}", 'w') do |io|
-      io.write(@latex_infile)
-    end
   end
 
   def invalid_email_error_message
@@ -146,5 +142,9 @@ class SubmitProposalsController < ApplicationController
     return unless @invite.errors.added? :email, "is invalid"
 
     @errors[@errors.index("Email is invalid")] = "Email is invalid: #{@invite.email}"
+  end
+
+  def authorize_user
+    raise CanCan::AccessDenied unless current_user&.lead_organizer?(@proposal)
   end
 end

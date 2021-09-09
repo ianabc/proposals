@@ -12,7 +12,8 @@ module ProposalsHelper
   end
 
   def confirmed_participants(id, invited_as)
-    Invite.where('invited_as = ? AND proposal_id = ?', invited_as, id).where.not(status: 'cancelled')
+    Invite.where('invited_as = ? AND proposal_id = ?', invited_as, id)
+          .where.not(status: 'cancelled')
   end
 
   def proposal_type_year(proposal_type)
@@ -38,12 +39,20 @@ module ProposalsHelper
   end
 
   def proposal_roles(proposal_roles)
-    proposal_roles.joins(:role).where(person_id: current_user.person&.id).pluck('roles.name').map(&:titleize).join(', ')
+    proposal_roles.joins(:role).where(person_id: current_user.person&.id)
+                  .pluck('roles.name').map(&:titleize).join(', ')
   end
 
   def lead_organizer?(proposal_roles)
-    proposal_roles.joins(:role).where('person_id =? AND roles.name =?', current_user.person&.id,
+    proposal_roles.joins(:role).where('person_id = ? AND roles.name = ?',
+                                      current_user.person&.id,
                                       'lead_organizer').present?
+  end
+
+  def participant?(proposal_roles)
+    proposal_roles.joins(:role).where('person_id = ? AND roles.name = ?',
+                                      current_user.person&.id,
+                                      'Participant').present?
   end
 
   def show_edit_button?(proposal)
@@ -74,7 +83,8 @@ module ProposalsHelper
   # rubocop:enable Rails/OutputSafety
 
   def existing_organizers(invite)
-    organizers = invite.proposal.list_of_organizers.remove(invite.person&.fullname)
+    organizers = invite.proposal.list_of_organizers
+                       .remove(invite.person&.fullname)
     organizers.prepend(" and ") if organizers.present?
     organizers.strip.delete_suffix(",")
   end
@@ -124,11 +134,13 @@ module ProposalsHelper
   end
 
   def invite_deadline_date_color(invite)
-    'text-danger' if invite.status == 'pending' && invite.deadline_date.to_date < DateTime.now.to_date
+    'text-danger' if invite.status == 'pending' &&
+                     invite.deadline_date.to_date < DateTime.now.to_date
   end
 
   def graph_data(param, param2, proposal)
-    citizenships = proposal.demographics_data.pluck(:result).pluck(param, param2).flatten.reject do |s|
+    citizenships = proposal.demographics_data.pluck(:result)
+                           .pluck(param, param2).flatten.reject do |s|
       s.blank? || s.eql?("Other")
     end
     data = Hash.new(0)
@@ -157,11 +169,9 @@ module ProposalsHelper
     data.values
   end
 
-  # rubocop:disable Metrics/AbcSize
   def career_data(param, param2, proposal)
     person = Person.where.not(id: proposal.lead_organizer.id)
-    career_stage = person.where(id: proposal.invites.where(invited_as:
-      'Participant').pluck(:person_id)).pluck(param, param2).flatten.reject do |s|
+    career_stage = person.where(id: proposal.invites.where(invited_as: 'Participant').pluck(:person_id)).pluck(param, param2).flatten.reject do |s|
       s.blank? || s.eql?("Other")
     end
     data = Hash.new(0)
@@ -171,7 +181,6 @@ module ProposalsHelper
     end
     data
   end
-  # rubocop:enable Metrics/AbcSize
 
   def career_labels(proposal)
     data = career_data("academic_status", "other_academic_status", proposal)
@@ -184,7 +193,8 @@ module ProposalsHelper
   end
 
   def stem_graph_data(proposal)
-    citizenships = proposal.demographics_data.pluck(:result).pluck("stem").flatten.reject do |s|
+    citizenships = proposal.demographics_data.pluck(:result).pluck("stem")
+                           .flatten.reject do |s|
       s.blank? || s.eql?("Other")
     end
     data = Hash.new(0)

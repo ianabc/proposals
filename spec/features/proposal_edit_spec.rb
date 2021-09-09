@@ -3,13 +3,15 @@ require 'rails_helper'
 RSpec.feature "Proposal edit", type: :feature do
   before do
     person = create(:person, :with_proposals)
-
     @proposal = person.proposals.first
+
     authenticate_user(person)
+    expect(person.user.lead_organizer?(@proposal)).to be_truthy
     visit edit_proposal_path(@proposal)
   end
 
   scenario "there is a Title field containing the title" do
+    expect(current_path).to eq(edit_proposal_path(@proposal))
     expect(find_field('title').value).to eq(@proposal.title)
   end
 
