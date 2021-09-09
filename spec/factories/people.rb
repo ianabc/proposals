@@ -22,11 +22,16 @@ FactoryBot.define do
     f.first_phd_year { Date.current.year - 5 }
   end
 
+  after(:create) do |person|
+    if person.class == Person # person is DemographicData object sometimes (!?)
+      person.demographic_data = create(:demographic_data, person: person)
+    end
+  end
+
   trait :with_proposals do
     after(:create) do |person|
-      proposals = create_list(:proposal, 3)
       organizer = create(:role, name: 'lead_organizer')
-      proposals.each do |proposal|
+      create_list(:proposal, 3).each do |proposal|
         proposal.create_organizer_role(person, organizer)
         3.times do
           create(:invite, proposal: proposal, status: 'confirmed',
