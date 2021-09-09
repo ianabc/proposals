@@ -45,13 +45,13 @@ module ProposalsHelper
 
   def lead_organizer?(proposal_roles)
     proposal_roles.joins(:role).where('person_id = ? AND roles.name = ?',
-                                       current_user.person&.id,
+                                      current_user.person&.id,
                                       'lead_organizer').present?
   end
 
   def participant?(proposal_roles)
     proposal_roles.joins(:role).where('person_id = ? AND roles.name = ?',
-                                       current_user.person&.id,
+                                      current_user.person&.id,
                                       'Participant').present?
   end
 
@@ -169,12 +169,9 @@ module ProposalsHelper
     data.values
   end
 
-  # rubocop:disable Metrics/AbcSize
   def career_data(param, param2, proposal)
     person = Person.where.not(id: proposal.lead_organizer.id)
-    career_stage = person.where(id: proposal.invites.where(invited_as:
-      'Participant').pluck(:person_id)).pluck(param, param2)
-                    .flatten.reject do |s|
+    career_stage = person.where(id: proposal.invites.where(invited_as: 'Participant').pluck(:person_id)).pluck(param, param2).flatten.reject do |s|
       s.blank? || s.eql?("Other")
     end
     data = Hash.new(0)
@@ -184,7 +181,6 @@ module ProposalsHelper
     end
     data
   end
-  # rubocop:enable Metrics/AbcSize
 
   def career_labels(proposal)
     data = career_data("academic_status", "other_academic_status", proposal)

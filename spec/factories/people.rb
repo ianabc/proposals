@@ -23,7 +23,7 @@ FactoryBot.define do
   end
 
   after(:create) do |person|
-    if person.class == Person # person is DemographicData object sometimes (!?)
+    if person.instance_of?(Person) # person is DemographicData object sometimes (!?)
       person.demographic_data = create(:demographic_data, person: person)
     end
   end
