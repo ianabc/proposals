@@ -95,8 +95,7 @@ class ProposalPdfService
     @text = "\\section*{\\centering #{code} #{delatex(proposal.title)} }\n\n"
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << "\\noindent #{confirmed_participants.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
-    @text << "\\noindent #{confirmed_organizers.count} confirmed / #{proposal.proposal_type&.co_organizer} maximum organizers\n\n"
-    @text << "\\noindent 1 confirmed / lead organizer\n\n"
+    @text << "\\noindent #{confirmed_organizers.count + 1} confirmed / #{proposal.proposal_type&.co_organizer + 1} maximum organizers\n\n"
 
     @text << "\\subsection*{Lead Organizer}\n\n"
     @text << "#{proposal.lead_organizer&.fullname}#{affil(proposal.lead_organizer)} \\\\ \n\n"
