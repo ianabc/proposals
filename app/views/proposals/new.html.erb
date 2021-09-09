@@ -16,11 +16,12 @@
       <div class="col-12">
         <div class="card">
           <div class="card-body">
-            <div data-controller="submit-proposals">  
+            <div data-controller="submit-proposals">
+              <h2>Start a New Proposal Application</h2>
               <%= form_for @proposal do  |f| %>
                 <div class="col-lg-8">
                   <div class="mb-3">
-                    <%= f.label :proposal_types, "Select the type of proposal:", class: 'form-label' %>
+                    <%= f.label :proposal_types, "Select the type of proposal to create:", class: 'form-label' %>
                     <%= f.select :proposal_type_id, options_for_select(proposal_types), {}, class: 'form-select w-50' %>
                   </div>
                   <div class="form-group">

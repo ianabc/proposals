@@ -6,6 +6,9 @@ class ProposalsController < ApplicationController
 
   def index
     @proposals = current_user&.person&.proposals
+                             &.each_with_object([]) do |proposal, props|
+      props << proposal if current_user&.organizer?(proposal)
+    end
   end
 
   def ranking

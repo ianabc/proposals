@@ -11,18 +11,15 @@ class SubmitProposalsController < ApplicationController
     update_proposal_ams_subject_code
     submission = SubmitProposalService.new(@proposal, params)
     submission.save_answers
-    @proposal.skip_submission_validation = true unless @proposal.draft?
     session[:is_submission] = @proposal.is_submission = submission.is_final?
 
     create_invite and return if params[:create_invite]
 
-    if submission.has_errors?
+    if @proposal.is_submission && submission.has_errors?
       redirect_to edit_proposal_path(@proposal), alert: "Your submission has
           errors: #{submission.error_messages}.".squish
       return
-    end
-
-    unless @proposal.is_submission
+    else
       redirect_to edit_proposal_path(@proposal), notice: 'Draft saved.'
       return
     end
