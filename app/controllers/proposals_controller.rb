@@ -1,7 +1,8 @@
 class ProposalsController < ApplicationController
-  before_action :set_proposal, only: %w[show edit destroy ranking locations]
-  before_action :set_careers, only: %w[show edit]
   before_action :authenticate_user!
+  before_action :set_proposal, only: %w[show edit destroy ranking locations]
+  before_action :authorize_user, only: %w[show edit]
+  before_action :set_careers, only: %w[show edit]
 
   def index
     @proposals = current_user&.person&.proposals
@@ -31,12 +32,9 @@ class ProposalsController < ApplicationController
     end
   end
 
-  def show
-    authorize_access
-  end
+  def show; end
 
   def edit
-    authorize_access
     @proposal.invites.build
   end
 
@@ -171,10 +169,12 @@ class ProposalsController < ApplicationController
                      .pluck(:academic_status)
   end
 
-  def authorize_access
-    return if current_user.staff_member? || current_user.is_organizer?(@proposal)
-    current_user.update(locked_at: DateTime.current)
-    sign_out(current_user)
-    redirect_to root_path, alert: "Unauthorized access."
+  def authorize_user
+    if (current_user&.person == @proposal&.lead_organizer) ||
+       current_user.organizer?(@proposal) && params[:action] == 'show'
+      nil
+    else
+      raise CanCan::AccessDenied
+    end
   end
 end

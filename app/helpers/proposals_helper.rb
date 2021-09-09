@@ -46,6 +46,11 @@ module ProposalsHelper
                                       'lead_organizer').present?
   end
 
+  def participant?(proposal_roles)
+    proposal_roles.joins(:role).where('person_id =? AND roles.name =?', current_user.person&.id,
+                                      'Participant').present?
+  end
+
   def show_edit_button?(proposal)
     return unless params[:action] == 'edit'
     return unless proposal.editable?

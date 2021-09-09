@@ -26,10 +26,10 @@ class User < ApplicationRecord
     roles.include?(staff)
   end
 
-  def is_organizer?(proposal)
-    self.person.proposal_roles.joins(:role)
-        .where('proposal_id = ? AND roles.name LIKE ?',
-                proposal.id, '%organizer').present?
+  def organizer?(proposal)
+    person.proposal_roles.joins(:role)
+          .where('proposal_id = ? AND roles.name LIKE ?',
+                 proposal&.id, 'Organizer').present?
   end
 
   def fullname
