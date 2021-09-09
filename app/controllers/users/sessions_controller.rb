@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Users
   class SessionsController < Devise::SessionsController
     # before_action :configure_sign_in_params, only: [:create]
@@ -29,8 +27,8 @@ module Users
     def after_sign_in_path_for(resource)
       return proposal_types_path if resource&.staff_member?
       return new_person_path if resource.person&.demographic_data.blank?
-      return proposals_path unless resource.person&.proposals.empty?
-      new_proposal_path
+      # return new_proposal_path if resource&.person&.proposals.empty?
+      new_proposal_or_list(resource)
     end
   end
 end
