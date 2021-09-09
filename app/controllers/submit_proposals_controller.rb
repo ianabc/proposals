@@ -1,5 +1,7 @@
 class SubmitProposalsController < ApplicationController
   before_action :set_proposal, only: %i[create]
+  before_action :authorize_user, only: %w[create create_invite]
+
   def new
     @proposals = ProposalForm.new
   end
@@ -143,5 +145,9 @@ class SubmitProposalsController < ApplicationController
     return unless @invite.errors.added? :email, "is invalid"
 
     @errors[@errors.index("Email is invalid")] = "Email is invalid: #{@invite.email}"
+  end
+
+  def authorize_user
+    raise CanCan::AccessDenied unless current_user&.lead_organizer?(@proposal)
   end
 end
