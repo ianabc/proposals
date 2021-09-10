@@ -147,9 +147,13 @@
                             <div class="mt-4">
                               <div class="mb-3">
                                 <h3 class="form-section">Add Participants:</h3>
+                                <p><strong>To add and save participants, you must invite them.</strong> To gauge the interest of the wider scientific community in your workshop, send invitations to potential participants. In this step of your proposal, you're encouraged to invite up to 342 participants, in order to showcase the appeal of your proposed workshop.</p>
+
+                                <p>To send an invitation to a potential participant, enter a First Name, Last Name, Email, and Deadline for Reply. To invite more than one at a time, click the "Add More Organizers" button. Then click Invite Participant(s).</p>
+
+                                <p>Invited participants will receive an email that asks if they would be interested in attending your proposed workshop if it were to happen. This invitation email is not a formal invitation; its purpose is to give you and the review committee an idea of your workshop's potential appeal.</p>
+
                                 <p>For recommendations regarding the composition of your participant list, please review the Participants sections of the <%= link_to "EDI Rubric", "/guidelines#edi_rubric", target: "_blank" %> and the <%= link_to "Scientific Merit", "/guidelines#scientific_merit_rubric", target: "_blank" %> sections of the <em>Guidelines for Proposals</em>.</p>
-                                <p>Please note that a full 5 Day workshop can host up to 42 participants on-site and up to 300 participants online (for Hybrid or Online formats).</p>
-                                <p><strong>To add and save participants, you must invite them.</strong> Add their information in the fields to provided. To invite more than one at a time, click the "Add More Organizers" button. Click the "Invite Participant(s)" button to send them an invitation email, which then also saves their information in our database. The invitation email contains a special link that they must follow to indicate their interest in attending your workshop, should it be accepted.</p>
 
                                 <% if @proposal.invites %>
                                   <% @proposal.invites.each do |invite|%>
