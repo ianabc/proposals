@@ -127,15 +127,13 @@ if [ "$RAILS_ENV" == "production" ]; then
 
   # Update release tag
   rake birs:release_tag
-else
-  echo
-  echo "Running: webpack --verbose --progress..."
-  su - app -c "cd /home/app/proposals; bin/webpack --verbose --progress"
 fi
 
 echo
+echo "Running: webpack --verbose --progress..."
+su - app -c "cd /home/app/proposals; bin/webpack --verbose --progress"
+echo
 echo "Done compiling assets!"
-
 
 if [ "$APPLICATION_HOST" == "localhost" ]; then
   echo
