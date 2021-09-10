@@ -25,7 +25,7 @@ class InviteMailer < ApplicationMailer
     @proposal = @invite.proposal
     @person = @invite.person
 
-    mail(to: @person.email, subject: 'BIRS Proposal: RSVP Confirmation')
+    mail(to: @person.email, subject: 'BIRS Proposal Confirmation of Interest')
   end
 
   def invite_decline
@@ -46,6 +46,6 @@ class InviteMailer < ApplicationMailer
     @proposal = @invite.proposal
     @person = @invite.person
 
-    mail(to: @person.email, subject: "Please Respond – BIRS Proposal: Invite for #{@invite.invited_as?}")
+    mail(to: @person.email, subject: "Please Respond – BIRS Proposal Invitation for #{@invite.invited_as?}")
   end
 end
