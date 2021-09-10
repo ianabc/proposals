@@ -1,16 +1,18 @@
 class InviteMailer < ApplicationMailer
+
+  def invited_as_text(invite)
+    return "an Organizer for" if invite.invited_as?.downcase == 'organizer'
+    "a Participant in"
+  end
+
   def invite_email
     @invite = params[:invite]
     @lead_organizer = params[:lead_organizer]
-
+    @invited_as = invited_as_text(invite)
     @proposal = @invite.proposal
     @person = @invite.person
 
-    if @invite.invited_as?.downcase == 'organizer'
-      @invited_as = "an Organizer for"
-    else
-      @invited_as = "a Participant in"
-    end
+
 
     mail(to: @person.email, subject: "BIRS Proposal Invitation for #{@invite.invited_as?}", cc: @lead_organizer.email)
   end
@@ -38,7 +40,7 @@ class InviteMailer < ApplicationMailer
 
   def invite_reminder
     @invite = params[:invite]
-    @invited_as = @invite&.invited_as&.downcase
+    @invited_as = invited_as_text(invite)
     @existing_organizers = params[:organizers]
 
     @existing_organizers.prepend(", ") if @existing_organizers.present?
