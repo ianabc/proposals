@@ -2,6 +2,8 @@ class InviteMailer < ApplicationMailer
   def invite_email
     @invite = params[:invite]
     @lead_organizer = params[:lead_organizer]
+    @body = params[:body]
+    email_placeholders
 
     @proposal = @invite.proposal
     @person = @invite.person
@@ -41,5 +43,16 @@ class InviteMailer < ApplicationMailer
     @person = @invite.person
 
     mail(to: @person.email, subject: "Please Respond – BIRS Proposal: Invite for #{@invite.invited_as?}")
+  end
+
+  private
+
+  def email_placeholders
+    placeholders = { "invite_deadline_date" => @invite&.deadline_date&.to_date.to_s,
+                     "invite_url" =>
+                     "<a href='#{invite_url(code: @invite&.code)}'>#{invite_url(code: @invite&.code)}</a>" }
+    placeholders.each { |k, v| @body.gsub!(k, v) }
+    @proposal = @invite.proposal
+    @person = @invite.person
   end
 end

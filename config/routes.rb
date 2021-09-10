@@ -68,6 +68,7 @@ Rails.application.routes.draw do
   resources :submit_proposals do
     collection do
       get :thanks
+      post :invitation_template
     end
   end
   resources :proposal_types do

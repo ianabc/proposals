@@ -58,17 +58,12 @@ export default class extends Controller {
 
     let id = event.currentTarget.dataset.id;
     let invitedAs = event.currentTarget.id
-    if(invitedAs === 'participant') {
-      $('#invited_as_pre').text(invitedAs)
-      invitedAs = 'Participant'
-      $('#invited_as_title').text(invitedAs)
-    } else {
-      invitedAs = 'supporting organizer'
-      $('#invited_as_pre').text(invitedAs)
-      invitedAs = 'Supporting Organizer'
-      $('#invited_as_title').text(invitedAs)
-    }
-    $("#email-preview").modal('show')
+    $.post(`/submit_proposals/invitation_template?proposal=${id}&invited_as=${invitedAs}`, function(data) {
+        $('#subject').text(data.subject)
+        $('#body').text(data.body)
+        $("#email-preview").modal('show')
+      }
+    )
   }
 
   sendInvite () {
@@ -78,14 +73,14 @@ export default class extends Controller {
     let _this = this
     let inviteParticipant = event.currentTarget.dataset.participant || 0
     let inviteOrganizer = event.currentTarget.dataset.organizer || 0
+    var body = document.getElementById("body").textContent;
     $.post(`/submit_proposals?proposal=${id}&create_invite=true.js`,
       $('form#submit_proposal').serialize(), function(data) {
-        invitedAs = $('#invited_as_pre').text().toLowerCase()
-        if (invitedAs === 'supporting organizer') {
+        if (body.includes("supporting organizer")) {
           invitedAs = 'Organizer'
           inviteId = inviteOrganizer
         }
-        else if (invitedAs === 'participant') {
+        else if (body.includes("participant")) {
           invitedAs = 'Participant'
           inviteId = inviteParticipant
         }
@@ -104,25 +99,29 @@ export default class extends Controller {
     if(data.errors.length > 0 && data.counter === 0) {
        $.each(data.errors, function(index, error) {
         toastr.error(error)
+        window.stop();
       })
     }
     else if(data.errors.length > 0 && data.counter > 0) {
       $.each(data.errors, function(index, error) {
         toastr.error(error)
       })
-      $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`, function() {
-        setTimeout(function() {
-          window.location.reload();
-        }, 3000)
+      $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`,
+        $('#email_preview').serialize(), function() {
+          setTimeout(function() {
+            window.location.reload();
+          }, 3000)
       })
     }
     else {
-      $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`, function() {
-        toastr.success('Invitation has been sent!')
-        setTimeout(function() {
-          window.location.reload();
-        }, 2000)
-      })
+      $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`,
+        $('#email_preview').serialize(), function() {
+          toastr.success('Invitation has been sent!')
+          setTimeout(function() {
+            window.location.reload();
+          }, 2000)
+        }
+      )
     }
   }
 }
