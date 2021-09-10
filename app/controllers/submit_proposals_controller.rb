@@ -32,9 +32,10 @@ class SubmitProposalsController < ApplicationController
 
   def invitation_template
     invited_as = params[:invited_as]
-    if invited_as == 'organizer'
+    case invited_as
+    when 'organizer'
       @email_template = EmailTemplate.find_by(email_type: "organizer_invitation_type")
-    elsif invited_as == 'participant'
+    when 'participant'
       @email_template = EmailTemplate.find_by(email_type: "participant_invitation_type")
     end
     preview_placeholders

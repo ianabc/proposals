@@ -5,9 +5,7 @@ module EmailTemplatesHelper
         case k&.split('_')&.first&.capitalize
         when 'Decision'
           "#{k&.split('_')&.first&.capitalize} Email"
-        when 'Organizer'
-          "#{k&.split('_')&.first&.capitalize} Invitation"
-        when 'Participant'
+        when 'Organizer' || 'Participant'
           "#{k&.split('_')&.first&.capitalize} Invitation"
         else
           k&.split('_')&.first&.capitalize
@@ -22,9 +20,7 @@ module EmailTemplatesHelper
       case email_type
       when 'Decision'
         "#{email_type} Email: #{template&.title}"
-      when 'Organizer'
-        next
-      when 'Participant'
+      when 'Organizer' || 'Participant'
         next
       else
         "#{email_type}: #{template&.title}"
