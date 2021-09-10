@@ -1,7 +1,7 @@
 class InviteMailer < ApplicationMailer
-
   def invited_as_text(invite)
-    return "an Organizer for" if invite.invited_as?.downcase == 'organizer'
+    return "an Organizer for" if invite.invited_as?.casecmp('organizer').zero?
+
     "a Participant in"
   end
 
@@ -11,8 +11,6 @@ class InviteMailer < ApplicationMailer
     @invited_as = invited_as_text(invite)
     @proposal = @invite.proposal
     @person = @invite.person
-
-
 
     mail(to: @person.email, subject: "BIRS Proposal Invitation for #{@invite.invited_as?}", cc: @lead_organizer.email)
   end
