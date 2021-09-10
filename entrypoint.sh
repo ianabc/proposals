@@ -122,7 +122,7 @@ chmod 755 /home/app/proposals/node_modules
 su - app -c "cd /home/app/proposals; yarn install"
 
 if [ "$RAILS_ENV" == "production" ]; then
-  su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
+  su - app -c "cd /home/app/proposals; RAILS_ENV=production SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
   su - app -c "cd /home/app/proposals; yarn"
 
   # Update release tag

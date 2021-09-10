@@ -7,11 +7,10 @@
     <p>"<%= @person.fullname %>"< <%= @person.email %> ></p>
     <p>(<%= @person.affiliation %>)</p>
     <p> </p>
-    <p>Is now Confirmed for event:</p>
-    <p><%= @proposal&.code %>: <%= @proposal&.title %></p>
-    <p> </p>
-    <p>Question: How was your RSVP experience?</p>
-    <p>Reply from <%= @person.lastname %>:</p>
-    <p>"<%= @feedback.content %>"</p>
+    <p>Feedback for proposal:</p>
+    <p><%= @proposal&.code %>: <%= @proposal&.title %> by</p>
+    <p><%= @proposal&.lead_organizer.fullname %></p>
+    <br><p><%= @person.fullname %>'s feedback:</p><br>
+    <p><%= @feedback.content %></p>
   </body>
 </html>
