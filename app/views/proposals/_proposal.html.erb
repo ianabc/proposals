@@ -107,10 +107,12 @@
                             <%= render partial: 'lead_organizer' %>
                             <div>
                               <h3 class="form-section">Add Supporting Organizers:</h3>
-                              <h5>
-                                For recommendations regarding the composition of the organizing committee, please 
-                                <%= link_to "see here", "/guidelines#organizing_committee", target: "_blank" %>.
-                              </h5>
+                              <p>For recommendations regarding the composition of the organizing committee, please <%= link_to "see these guidelines", "/guidelines#organizing_committee", target: "_blank" %>.</p>
+
+                              <p>Supporting Organizers are people to help you with the work of organizing and running your workshop. In the BIRS online systems, they will have similar privileges to your own, to enter and maintain schedules, manage participants, etc.. In this proposal system, they will be able to view, but not edit the proposal.</p>
+
+                              <p><strong>To add and save Supporting Organizers, you must invite them.</strong> Add their information in the fields to provided. To invite more than one at a time, click the "Add More Organizers" button. Click the "Invite Organizer(s)" button to send invitation emails, which then also saves their information in our database. The invitation email contains a special link that they must follow to indicate their interest in attending your workshop as a Supporting Organizer, should it be accepted.</p>
+
                               <%= organizer_intro(@proposal) %>
                               <% if @proposal.invites %>
                                 <% @proposal.invites.each do |invite|%>
@@ -145,7 +147,10 @@
                             <div class="mt-4">
                               <div class="mb-3">
                                 <h3 class="form-section">Add Participants:</h3>
-                                <h5>Please note that a full 5 Day workshop can host up to 42 participants on-site and up to 300 participants online.</h5>
+                                <p>For recommendations regarding the composition of your participant list, please review the Participants sections of the <%= link_to "EDI Rubric", "/guidelines#edi_rubric", target: "_blank" %> and the <%= link_to "Scientific Merit", "/guidelines#scientific_merit_rubric", target: "_blank" %> sections of the <em>Guidelines for Proposals</em>.</p>
+                                <p>Please note that a full 5 Day workshop can host up to 42 participants on-site and up to 300 participants online (for Hybrid or Online formats).</p>
+                                <p><strong>To add and save participants, you must invite them.</strong> Add their information in the fields to provided. To invite more than one at a time, click the "Add More Organizers" button. Click the "Invite Participant(s)" button to send them an invitation email, which then also saves their information in our database. The invitation email contains a special link that they must follow to indicate their interest in attending your workshop, should it be accepted.</p>
+
                                 <% if @proposal.invites %>
                                   <% @proposal.invites.each do |invite|%>
                                     <% if invite.invited_as == 'Participant' %>

@@ -1,5 +1,4 @@
 module SurveyHelper
-  # rubocop:disable Metrics/MethodLength
   def citizenship_options
     citizenships = [%w[Argentina Argentina], %w[Australia, Australia], %w[Austria Austria],
                     %w[Belarus Belarus], %w[Belgium Belgium], %w[Benin Benin], %w[Brazil Brazil],
@@ -38,7 +37,6 @@ module SurveyHelper
                   responses to this question will be considered in the data analysis.]', 'Prefer not to answer']]
     ethnicity.map { |disp, _value| disp }
   end
-  # rubocop:enable Metrics/MethodLength
 
   def gender_options
     gender = [%w[Woman Woman], %w[Man Man], ['Gender Fluid and/or non-Binary Person',
@@ -52,7 +50,7 @@ module SurveyHelper
     indigenous.map { |disp, _value| disp }
   end
 
-  def indigenouse_person_yes_options
+  def indigenous_person_yes_options
     indigenous_yes = [['First Nation', 'First Nation'], %w[Métis Métis], %w[Inuit Inuit],
                       ['Native American', 'Native American'],
                       ['Indigenous from outside of what is now known as Canada and the United States',

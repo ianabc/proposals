@@ -17,7 +17,7 @@
           <label>2. Do you identify as an Indigenous person?</label>
           <%= f.select "indigenous_person", options_for_select(indigenous_person_options, @result["indigenous_person"]),{ include_blank: '' }, data: {'survey-target': 'indigenous', action: 'click->survey#handleIndigenousOptions'}, class: "form-select", required: true %>
           <div class="hidden mt-3" data-survey-target="indigenousYes">
-            <%= f.select "indigenous_person_yes", options_for_select(indigenouse_person_yes_options, @result["indigenous_person_yes"]), {}, class: "form-control", id: 'indigenous_person_yes', multiple: true %>
+            <%= f.select "indigenous_person_yes", options_for_select(indigenous_person_yes_options, @result["indigenous_person_yes"]), {}, class: "form-control", id: 'indigenous_person_yes', multiple: true %>
           </div>
         </div>
       </div>
