@@ -65,9 +65,8 @@ module ProposalsHelper
     proposal.proposal_ams_subjects.find_by(code: code)&.ams_subject_id
   end
 
-  # rubocop:disable Rails/OutputSafety
   def organizer_intro(proposal)
-    types_with_intro = ['5 Day Workshop', 'Summer School']
+    types_with_intro = ['5-Day Workshop', 'Summer School']
     return '' unless types_with_intro.include? proposal.proposal_type.name
 
     "<p>5-Day Workshops and Summer Schools require a minimum of 2, and a maximum
@@ -80,7 +79,6 @@ module ProposalsHelper
      two members of the organizing committee must be from an under-represented
      community in STEM disciplines.</p>".html_safe
   end
-  # rubocop:enable Rails/OutputSafety
 
   def existing_organizers(invite)
     organizers = invite.proposal.list_of_organizers
