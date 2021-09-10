@@ -8,7 +8,7 @@ class InviteMailer < ApplicationMailer
   def invite_email
     @invite = params[:invite]
     @lead_organizer = params[:lead_organizer]
-    @invited_as = invited_as_text(invite)
+    @invited_as = invited_as_text(@invite)
     @proposal = @invite.proposal
     @person = @invite.person
 
