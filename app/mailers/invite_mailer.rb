@@ -6,7 +6,13 @@ class InviteMailer < ApplicationMailer
     @proposal = @invite.proposal
     @person = @invite.person
 
-    mail(to: @person.email, subject: "BIRS Proposal: Invite for #{@invite.invited_as?}", cc: @lead_organizer.email)
+    if @invite.invited_as?.downcase == 'organizer'
+      @invited_as = "an Organizer for"
+    else
+      @invited_as = "a Participant in"
+    end
+
+    mail(to: @person.email, subject: "BIRS Proposal Invitation for #{@invite.invited_as?}", cc: @lead_organizer.email)
   end
 
   def invite_acceptance
