@@ -73,8 +73,6 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
-  # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
   def approve_decline_proposals
     @errors = []
     template_params
@@ -92,8 +90,6 @@ class SubmittedProposalsController < ApplicationController
     head :ok if @errors.empty?
     render json: @errors.flatten.to_json, status: :unprocessable_entity unless @errors.empty?
   end
-  # rubocop:enable Metrics/AbcSize
-  # rubocop:enable Metrics/MethodLength
 
   private
 
