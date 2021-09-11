@@ -107,11 +107,13 @@
                             <%= render partial: 'lead_organizer' %>
                             <div>
                               <h3 class="form-section">Add Supporting Organizers:</h3>
-                              <p>For recommendations regarding the composition of the organizing committee, please <%= link_to "see these guidelines", "/guidelines#organizing_committee", target: "_blank" %>.</p>
-
                               <p>Supporting Organizers are people to help you with the work of organizing and running your workshop. In the BIRS online systems, they will have similar privileges to your own, to enter and maintain schedules, manage participants, etc.. In this proposal system, they will be able to view, but not edit the proposal.</p>
 
-                              <p><strong>To add and save Supporting Organizers, you must invite them.</strong> Add their information in the fields to provided. To invite more than one at a time, click the "Add More Organizers" button. Click the "Invite Organizer(s)" button to send invitation emails, which then also saves their information in our database. The invitation email contains a special link that they must follow to indicate their interest in attending your workshop as a Supporting Organizer, should it be accepted.</p>
+                              <p class="text-danger">To add and save Supporting Organizers, you must invite them.</p>
+
+                              <p>Add their information in the fields to provided. To invite more than one at a time, click the "Queue More Organizer Invitations" button. Click the "Invite Organizer(s)" button to send invitation emails, which then also saves their information in our database. The invitation email contains a special link that they must follow to indicate their interest in attending your workshop as a Supporting Organizer, should it be accepted.</p>
+
+                              <p>For recommendations regarding the composition of the organizing committee, please <%= link_to "see these guidelines", "/guidelines#organizing_committee", target: "_blank" %>.</p>
 
                               <%= organizer_intro(@proposal) %>
                               <% if @proposal.invites %>
@@ -135,7 +137,7 @@
                                     </template>
                                     <div data-nested-invites-target="target"></div>
                                       <button type="button" class="btn btn-light" data-action="nested-invites#addOrganizers" id="add-more-organizer">
-                                        Add More Organizers
+                                        Queue More Organizer Invitations
                                       </button>
                                   </div>
                                   <div class="mb-3">
@@ -147,11 +149,17 @@
                             <div class="mt-4">
                               <div class="mb-3">
                                 <h3 class="form-section">Add Participants:</h3>
-                                <p><strong>To add and save participants, you must invite them.</strong> To gauge the interest of the wider scientific community in your workshop, send invitations to potential participants. In this step of your proposal, you're encouraged to invite up to 342 participants, in order to showcase the appeal of your proposed workshop.</p>
+                                <p class="text-danger">To add and save participants, you must invite them.</p>
 
-                                <p>To send an invitation to a potential participant, enter a First Name, Last Name, Email, and Deadline for Reply. To invite more than one at a time, click the "Add More Organizers" button. Then click Invite Participant(s).</p>
+                                <p>To gauge the interest of the wider scientific community in your workshop, send invitations to potential participants. In this step of your proposal, you're encouraged to invite up to 342 participants, in order to showcase the appeal of your proposed workshop.</p>
 
-                                <p>Invited participants will receive an email that asks if they would be interested in attending your proposed workshop if it were to happen. This invitation email is not a formal invitation; its purpose is to give you and the review committee an idea of your workshop's potential appeal.</p>
+                                <p>All online and hybrid workshops can accommodate up to 300 virtual participants. For the in-person capacities of each type of workshop, see our <%= link_to "Participant Limits", "/guidelines#participant-limits", target: "_blank" %>.</p>
+
+                                <p>To send an invitation to a potential participant, enter a First Name, Last Name, Email, and Deadline for Reply. To invite more than one at a time, click the "Queue More Participant Invitations" button. Then click Invite Participant(s).</p>
+
+                                <p>The deadline for reply can be any date; it should be a date by which you'd like to hear back from your invitee.</p>
+
+                                <p><p>Invited participants will receive an email that asks if they would be interested in attending your proposed workshop if it were to happen. This invitation email is not a formal invitation; its purpose is to give you and the review committee an idea of your workshop's potential appeal.<em><%= link_to "Learn More", "/guidelines#adding-participants", target: "_blank" %></em></p>
 
                                 <p>For recommendations regarding the composition of your participant list, please review the Participants sections of the <%= link_to "EDI Rubric", "/guidelines#edi_rubric", target: "_blank" %> and the <%= link_to "Scientific Merit", "/guidelines#scientific_merit_rubric", target: "_blank" %> sections of the <em>Guidelines for Proposals</em>.</p>
 
@@ -176,7 +184,7 @@
                                       </template>
                                       <div data-nested-invites-target="targetOne"></div>
                                         <button type="button" class="btn btn-light" data-action="nested-invites#addParticipants" id="add-more-participant">
-                                          Add More Participants
+                                          Queue More Participant Invitations
                                         </button>
                                     </div>
                                     <div class="mb-3">
@@ -282,7 +290,7 @@
                         <div class="form-group mb-3">
                           <input type="checkbox" name="no_latex" data-action="click->submit-proposals#hideAndSave" id="no_latex" data-value="<%= @proposal.no_latex %>" <%= 'checked=checked' if @proposal.no_latex %>>
                           <%= f.label :no_latex, "No LaTeX", class: "form-label" %>
-                  			</div>
+                        </div>
                         <div class="form-group mb-3 <%= 'hidden' if @proposal.no_latex %>" name="latexPreamble" id="latexPreamble" data-submit-proposals-target="latexPreamble">
                           <h3>LaTeX Preamble</h3>
                           <p>If you have custom LaTeX macros, enter them here to add them to the document preamble.</p>
