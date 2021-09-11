@@ -122,20 +122,18 @@ chmod 755 /home/app/proposals/node_modules
 su - app -c "cd /home/app/proposals; yarn install"
 
 if [ "$RAILS_ENV" == "production" ]; then
-  su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
+  su - app -c "cd /home/app/proposals; RAILS_ENV=production SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
   su - app -c "cd /home/app/proposals; yarn"
 
   # Update release tag
   rake birs:release_tag
-else
-  echo
-  echo "Running: webpack --verbose --progress..."
-  su - app -c "cd /home/app/proposals; bin/webpack --verbose --progress"
 fi
 
 echo
+echo "Running: webpack --verbose --progress..."
+su - app -c "cd /home/app/proposals; bin/webpack --verbose --progress"
+echo
 echo "Done compiling assets!"
-
 
 if [ "$APPLICATION_HOST" == "localhost" ]; then
   echo
