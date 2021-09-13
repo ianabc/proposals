@@ -142,6 +142,7 @@ class ProposalPdfService
     end
   end
 
+  # rubocop:disable Metrics/AbcSize
   def proposals_sections
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
@@ -151,7 +152,9 @@ class ProposalPdfService
     pdf_content
     @text
   end
+  # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize
   def proposal_table_of_content
     @text = "\\tableofcontents"
     @text << "\\addtocontents{toc}{\ 1. #{proposal.subject&.title}}"
@@ -161,6 +164,7 @@ class ProposalPdfService
     single_proposal_heading
     @text
   end
+  # rubocop:enable Metrics/AbcSize
 
   def single_proposal_without_content
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
@@ -169,6 +173,7 @@ class ProposalPdfService
     @text
   end
 
+  # rubocop:disable Metrics/AbcSize
   def single_proposal_heading
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
@@ -178,6 +183,7 @@ class ProposalPdfService
     pdf_content
     @text
   end
+  # rubocop:enable Metrics/AbcSize
 
   def pdf_content
     proposal_organizers

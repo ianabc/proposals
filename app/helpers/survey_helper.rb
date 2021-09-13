@@ -25,9 +25,8 @@ module SurveyHelper
 
   def ethnicity_options
     ethnicity = [%w[Arab Arab], %w[Black Black], %w[Chinese Chinese], %w[Filipino Filipino],
-                 ['Hispanic/Latin American', 'Hispanic/Latin American'],
                  ['Indigenous (within North America)', 'Indigenous (within North America)'],
-                 %w[Japanese Japanese], %w[Korean Korean],
+                 %w[Japanese Japanese], %w[Korean Korean], ['Latin American', 'Latin American'],
                  ['South Asian (e.g., Indian, Pakistani, Sri Lankan)',
                   'South Asian (e.g., Indian, Pakistani, Sri Lankan)'],
                  ['Southeast Asian (e.g., Vietnamese, Cambodian, Laotian, Thai)',
