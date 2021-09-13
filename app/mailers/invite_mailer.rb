@@ -1,6 +1,6 @@
 class InviteMailer < ApplicationMailer
   def invited_as_text(invite)
-    return "an Organizer for" if invite.invited_as?.downcase.match?('organizer')
+    return "a Supporting Organizer for" if invite.invited_as?.downcase.match?('organizer')
 
     "a Participant in"
   end
