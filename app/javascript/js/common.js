@@ -7,6 +7,10 @@ $(document).ready(function() {
     window.location.reload()
   });
 
+  $(document).on('hide.bs.modal', '#table-window', function() {
+    window.location.reload()
+  });
+
   $('.latex-show-more').click(function() {
     var $this = $(this);
     $this.toggleClass('latex-show-more');
