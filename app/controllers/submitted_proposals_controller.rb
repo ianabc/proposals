@@ -6,9 +6,7 @@ class SubmittedProposalsController < ApplicationController
 
   def index; end
 
-  def show
-    @proposal.review! if @proposal.may_review?
-  end
+  def show; end
 
   def download_csv
     send_data @proposals.to_csv, filename: "submitted_proposals.csv"
@@ -46,13 +44,11 @@ class SubmittedProposalsController < ApplicationController
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
     change_status
-    unless @check_status
-      redirect_to submitted_proposal_url(@proposal), alert: "Email cannot sent."
-      return
-    end
     @email.cc_email = nil unless params[:cc]
     @email.bcc_email = nil unless params[:bcc]
-    add_files
+    params[:files]&.each do |file|
+      @email.files.attach(file)
+    end
     if @email.save
       @email.email_organizers
       redirect_to submitted_proposal_url(@proposal),
@@ -86,6 +82,28 @@ class SubmittedProposalsController < ApplicationController
                 notice: "Proposal has been declined."
   end
 
+  def proposals_booklet
+    @proposal_ids = params[:proposal_ids]
+    @table = params[:table]
+    @counter = @proposal_ids.split(',').count
+    create_file
+    head :ok
+  end
+
+  def download_booklet
+    f = File.open(Rails.root.join('tmp/booklet-proposals.pdf'))
+    send_file(
+      f,
+      filename: "proposal_booklet.pdf",
+      type: "application/pdf"
+    )
+  end
+
+  def table_of_content
+    proposals = params[:proposals]
+    render json: { proposals: proposals }, status: :ok
+  end
+
   private
 
   def query_params?
@@ -102,10 +120,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def change_status
-    @check_status = @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
-    @check_status = @email.update_status(@proposal, 'Reject') if params[:templates].split(':').first == "Reject"
-    @check_status = @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
-    @check_status = @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
+    @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
+    @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
+    @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
   end
 
   def latex_temp_file
@@ -144,7 +161,6 @@ class SubmittedProposalsController < ApplicationController
       flash[:alert] = "Error sending data!"
     else
       flash[:notice] = "Data sent to EditFlow!"
-      @proposal.progress! if @proposal.may_progress?
       @proposal.update(edit_flow: Time.zone.now)
     end
   end
@@ -153,9 +169,28 @@ class SubmittedProposalsController < ApplicationController
     @proposal = Proposal.find_by(id: params[:id])
   end
 
-  def add_files
-    params[:files]&.each do |file|
-      @email.files.attach(file)
+  def create_file
+    temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
+    if @counter == 1
+      @proposal = Proposal.find_by(id: @proposal_ids)
+      ProposalPdfService.new(@proposal.id, temp_file, 'all').single_booklet(@table)
+    else
+      @proposal = Proposal.find_by(id: @proposal_ids.split(',').first)
+      ProposalPdfService.new(@proposal_ids.split(',').first, temp_file, 'all').multiple_booklet(@table, @proposal_ids)
+    end
+    @fh = File.open("#{Rails.root}/tmp/#{temp_file}")
+    write_file
+  end
+
+  def write_file
+    @latex_infile = @fh.read
+    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
+
+    latex = "#{@proposal.macros}\n\\begin{document}\n#{@latex_infile}"
+    pdf_file = render_to_string layout: "application", inline: latex, formats: [:pdf]
+    @pdf_path = Rails.root.join('tmp/booklet-proposals.pdf')
+    File.open(@pdf_path, "w:UTF-8") do |file|
+      file.write(pdf_file)
     end
   end
 

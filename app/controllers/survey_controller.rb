@@ -19,7 +19,7 @@ class SurveyController < ApplicationController
     if demographic_data.save
       post_demographic_form_path
     else
-      redirect_to survey_questionnaire_survey_index_path(id: @invite.id),
+      redirect_to survey_questionnaire_survey_index_path(code: @invite&.code),
                   alert: demographic_data.errors.full_messages.join(', ')
     end
   end

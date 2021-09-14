@@ -19,7 +19,9 @@ class SubmitProposalsController < ApplicationController
       redirect_to edit_proposal_path(@proposal), alert: "Your submission has
           errors: #{submission.error_messages}.".squish
       return
-    else
+    end
+
+    unless @proposal.is_submission
       redirect_to edit_proposal_path(@proposal), notice: 'Draft saved.'
       return
     end
