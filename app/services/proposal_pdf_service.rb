@@ -306,7 +306,7 @@ class ProposalPdfService
   end
 
   def participant_name_and_affil(participant)
-    "\\item #{participant.fullname} #{affil(participant)} \\ \n"
+    "\\item #{participant.fullname} #{affil(participant)} \n\n"
   end
 
   def participant_list(career)
@@ -323,6 +323,8 @@ class ProposalPdfService
   def participant_careers
     careers = Person.where(id: @proposal.participants
                     .pluck(:person_id)).pluck(:academic_status)
+    return [] if careers.blank?
+
     careers.uniq.sort
   end
 
