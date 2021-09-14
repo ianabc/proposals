@@ -301,29 +301,45 @@ class ProposalPdfService
     end
   end
 
+  def career_heading
+    if career.blank?
+      "\\noindent \\textbf{Unknown}\n\n"
+    else
+      "\\noindent \\textbf{#{career}}\n\n"
+    end
+  end
+
+  def participant_name_and_affil(participant)
+    text = "\\item #{participant.fullname}"
+
+    if participant.affiliation.present?
+      text << " (#{delatex(participant.affiliation)})"
+    end
+    text << " \\ \n"
+  end
+
+  def participant_list(career)
+    @participants = proposal.participants_career(career)
+    return if @participants.blank?
+
+    text = "\\begin{enumerate}\n\n"
+    @participants.each do |participant|
+      text << participant_name_and_affil(participant)
+    end
+    text << "\\end{enumerate}\n\n"
+  end
+
   def proposal_participants
     return if proposal.participants&.count&.zero?
 
     @careers = Person.where(id: @proposal.participants
                      .pluck(:person_id)).pluck(:academic_status)
-    @text << "\\section*{Participants}\n\n"
-    @careers&.uniq&.sort&.each do |career|
-      @text << if career.blank?
-                 "\\noindent \\textbf{Unknown}\n\n"
-               else
-                 "\\noindent \\textbf{#{career}}\n\n"
-               end
 
-      @participants = proposal.participants_career(career)
-      @text << "\\begin{enumerate}\n\n"
-      @participants.each do |participant|
-        @text << "\\item #{participant.firstname} #{participant.lastname}"
-        if participant.affiliation.present?
-          @text << " (#{delatex(participant.affiliation)})"
-        end
-        @text << " \\ \n"
-      end
-      @text << "\\end{enumerate}\n\n"
+    @text << "\\section*{Participants}\n\n"
+
+    @careers&.uniq&.sort&.each do |career|
+      @text << career_heading(career)
+      @text << participant_list(career)
     end
   end
 
