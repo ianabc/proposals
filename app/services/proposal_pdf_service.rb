@@ -320,7 +320,7 @@ class ProposalPdfService
 
   def participant_list(career)
     @participants = proposal.participants_career(career)
-    return if @participants.blank?
+    return '' if @participants.blank?
 
     text = "\\begin{enumerate}\n\n"
     @participants.each do |participant|
