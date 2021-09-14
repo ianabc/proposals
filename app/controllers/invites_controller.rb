@@ -70,7 +70,7 @@ class InvitesController < ApplicationController
   private
 
   def set_invite_status
-    response_params == 'no' ? 'cancelled' : 'confirmed'
+    response_params == 'no' ? 'declined' : 'confirmed'
   end
 
   def set_invite_proposal
