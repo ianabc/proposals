@@ -25,11 +25,14 @@ class InvitesController < ApplicationController
   end
 
   def inviter_response
-    response = params[:commit].downcase
-    redirect_to invite_url(code: @invite&.code), alert: 'Invalid response' unless %w[yes no maybe].include?(response)
-    @invite.update(response: response_params, status: 'confirmed')
-    create_role
+    if invalid_response?
+      redirect_to invite_url(code: @invite&.code), alert: 'Invalid answer'
+      return
+    end
 
+    @invite.update(response: response_params, status: 'confirmed',
+                   skip_deadline_validation: true)
+    create_role
     send_email_on_response
   end
 
@@ -65,6 +68,10 @@ class InvitesController < ApplicationController
 
   def response_params
     params.require(:commit)&.downcase
+  end
+
+  def invalid_response?
+    %w[yes no maybe].none?(response_params)
   end
 
   def create_role
