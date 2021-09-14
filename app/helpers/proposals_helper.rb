@@ -65,19 +65,8 @@ module ProposalsHelper
     proposal.proposal_ams_subjects.find_by(code: code)&.ams_subject_id
   end
 
-  def organizer_intro(proposal)
-    types_with_intro = ['5-Day Workshop', 'Summer School']
-    return '' unless types_with_intro.include? proposal.proposal_type.name
-
-    "<p>5-Day Workshops and Summer Schools require a minimum of 2, and a maximum
-     of 4 total organizers per proposal. In accordance with BIRS' commitment to
-     equity, diversity and inclusion (EDI), the organizing committee should
-     contain at least one early-career researcher within ten years of their
-     doctoral degree. For applications with two organizers, at least one member
-     of the organizing committee must be from an under-represented community in
-     STEM disciplines. For applications with three or more organizers, at least
-     two members of the organizing committee must be from an under-represented
-     community in STEM disciplines.</p>".html_safe
+  def max_organizers(proposal)
+    numbers_to_words[proposal.max_supporting_organizers]
   end
 
   def existing_organizers(invite)
