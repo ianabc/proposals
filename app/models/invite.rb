@@ -24,8 +24,8 @@ class Invite < ApplicationRecord
   def add_person
     return if [firstname, lastname, email].map(&:blank?).any?
 
-    person = Person.find_by(email: email.downcase)
-    if person.nil?
+    person = Person.where(email: email.downcase).first
+    if person.blank?
       person = Person.create(email: email.downcase, firstname: firstname,
                              lastname: lastname)
     end
