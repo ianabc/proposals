@@ -1,5 +1,6 @@
 class SubmittedProposalsController < ApplicationController
   before_action :authenticate_user!
+  before_action :authorize_user
   before_action :set_proposals, only: %i[index download_csv]
   before_action :set_proposal, except: %i[index download_csv]
 
@@ -81,6 +82,28 @@ class SubmittedProposalsController < ApplicationController
                 notice: "Proposal has been declined."
   end
 
+  def proposals_booklet
+    @proposal_ids = params[:proposal_ids]
+    @table = params[:table]
+    @counter = @proposal_ids.split(',').count
+    create_file
+    head :ok
+  end
+
+  def download_booklet
+    f = File.open(Rails.root.join('tmp/booklet-proposals.pdf'))
+    send_file(
+      f,
+      filename: "proposal_booklet.pdf",
+      type: "application/pdf"
+    )
+  end
+
+  def table_of_content
+    proposals = params[:proposals]
+    render json: { proposals: proposals }, status: :ok
+  end
+
   private
 
   def query_params?
@@ -146,10 +169,39 @@ class SubmittedProposalsController < ApplicationController
     @proposal = Proposal.find_by(id: params[:id])
   end
 
+  def create_file
+    temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
+    if @counter == 1
+      @proposal = Proposal.find_by(id: @proposal_ids)
+      ProposalPdfService.new(@proposal.id, temp_file, 'all').single_booklet(@table)
+    else
+      @proposal = Proposal.find_by(id: @proposal_ids.split(',').first)
+      ProposalPdfService.new(@proposal_ids.split(',').first, temp_file, 'all').multiple_booklet(@table, @proposal_ids)
+    end
+    @fh = File.open("#{Rails.root}/tmp/#{temp_file}")
+    write_file
+  end
+
+  def write_file
+    @latex_infile = @fh.read
+    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
+
+    latex = "#{@proposal.macros}\n\\begin{document}\n#{@latex_infile}"
+    pdf_file = render_to_string layout: "application", inline: latex, formats: [:pdf]
+    @pdf_path = Rails.root.join('tmp/booklet-proposals.pdf')
+    File.open(@pdf_path, "w:UTF-8") do |file|
+      file.write(pdf_file)
+    end
+  end
+
   def check_file
     return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
 
     @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
     File.new(@pdf_path, 'w')
+  end
+
+  def authorize_user
+    authorize! :manage, current_user
   end
 end

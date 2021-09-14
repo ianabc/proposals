@@ -1,10 +1,14 @@
 class ProposalsController < ApplicationController
-  before_action :set_proposal, only: %w[show edit destroy ranking locations]
-  before_action :set_careers, only: %w[show edit]
   before_action :authenticate_user!
+  before_action :set_proposal, only: %w[show edit destroy ranking locations]
+  before_action :authorize_user, only: %w[show edit]
+  before_action :set_careers, only: %w[show edit]
 
   def index
     @proposals = current_user&.person&.proposals
+                             &.each_with_object([]) do |proposal, props|
+      props << proposal if current_user&.organizer?(proposal)
+    end
   end
 
   def ranking
@@ -58,6 +62,8 @@ class ProposalsController < ApplicationController
     @year = @proposal&.year || Date.current.year.to_i + 2
     @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
                                       .generate_latex_file.to_s
+    @proposal.review! if current_user.staff_member? && @proposal.may_review?
+
     render_latex
   end
 
@@ -133,7 +139,6 @@ class ProposalsController < ApplicationController
 
   def start_new_proposal
     prop = Proposal.new(proposal_params)
-    prop.status = :draft
     prop.proposal_form = ProposalForm.active_form(prop.proposal_type_id)
     prop
   end
@@ -165,5 +170,14 @@ class ProposalsController < ApplicationController
   def set_careers
     @careers = Person.where(id: @proposal.participants.pluck(:person_id))
                      .pluck(:academic_status)
+  end
+
+  def authorize_user
+    return if params[:action] == 'show' &&
+              (current_user.staff_member? || current_user.organizer?(@proposal))
+
+    return if params[:action] == 'edit' && current_user.lead_organizer?(@proposal)
+
+    raise CanCan::AccessDenied
   end
 end

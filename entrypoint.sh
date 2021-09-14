@@ -10,7 +10,12 @@ echo
 echo "Setting system timezone..."
 export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
 echo "tzdata tzdata/Areas select America" > /tmp/tz.txt
-echo "tzdata tzdata/Zones/America select Edmonton" >> /tmp/tz.txt
+if [ "$STAGING_SERVER" == "true" ]; then
+  echo "tzdata tzdata/Zones/America select Edmonton" >> /tmp/tz.txt
+else
+  echo "tzdata tzdata/Zones/America select Vancouver" >> /tmp/tz.txt
+fi
+
 debconf-set-selections /tmp/tz.txt
 rm /etc/timezone
 rm /etc/localtime
@@ -99,16 +104,10 @@ if [ ! -e /home/app/proposals/app/assets/stylesheets/actiontext.scss ]; then
   echo "Done!"
 fi
 
-if [ $RAILS_ENV = "production" ]; then
+if [ "$RAILS_ENV" == "production" ]; then
   echo
   echo "Updating file permissions..."
   chown app:app -R /home/app/proposals
-
-  echo
-  echo "Installing LaTeX..."
-  apt update
-  apt install --yes --fix-missing texlive-latex-extra texlive-extra-utils
-  echo "Done!"
 fi
 
 echo
@@ -116,27 +115,24 @@ echo "Compiling Assets..."
 chmod 755 /home/app/proposals/node_modules
 su - app -c "cd /home/app/proposals; yarn install"
 
-if [ $RAILS_ENV = "production" ]; then
-  su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
+if [ "$RAILS_ENV" == "production" ]; then
+  su - app -c "cd /home/app/proposals; RAILS_ENV=production SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
   su - app -c "cd /home/app/proposals; yarn"
-else
-  echo
-  echo "Running: webpack --verbose --progress..."
-  su - app -c "cd /home/app/proposals; bin/webpack --verbose --progress"
+
+  # Update release tag
+  rake birs:release_tag
 fi
 
 echo
+echo "Running: webpack --verbose --progress..."
+su - app -c "cd /home/app/proposals; bin/webpack --verbose --progress"
+echo
 echo "Done compiling assets!"
 
-
-if [ $APPLICATION_HOST = "localhost" ]; then
+if [ "$APPLICATION_HOST" == "localhost" ]; then
   echo
   echo "Launching webpack-dev-server..."
   su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec bin/webpack-dev-server &"
-fi
-
-if [ $STAGING_SERVER = "true" ]; then
-  rake birs:release_tag
 fi
 
 echo

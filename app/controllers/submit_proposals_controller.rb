@@ -1,5 +1,7 @@
 class SubmitProposalsController < ApplicationController
   before_action :set_proposal, only: %i[create]
+  before_action :authorize_user, only: %w[create create_invite]
+
   def new
     @proposals = ProposalForm.new
   end
@@ -9,12 +11,11 @@ class SubmitProposalsController < ApplicationController
     update_proposal_ams_subject_code
     submission = SubmitProposalService.new(@proposal, params)
     submission.save_answers
-    @proposal.skip_submission_validation = true unless @proposal.draft?
     session[:is_submission] = @proposal.is_submission = submission.is_final?
 
     create_invite and return if params[:create_invite]
 
-    if submission.has_errors?
+    if @proposal.is_submission && submission.has_errors?
       redirect_to edit_proposal_path(@proposal), alert: "Your submission has
           errors: #{submission.error_messages}.".squish
       return
@@ -36,27 +37,40 @@ class SubmitProposalsController < ApplicationController
   def create_invite
     return unless request.xhr?
 
-    errors = []
+    @errors = []
+    counter = 0
     params[:invites_attributes].each_value do |invite|
-      invite = @proposal.invites.new(invite_params(invite))
-      invite.save
-      errors << invite.errors.full_messages unless invite.errors.empty?
+      @invite = @proposal.invites.new(invite_params(invite))
+      counter += 1 if @invite.save
+      next if @invite.errors.empty?
+
+      invalid_email_error_message
     end
 
-    if errors.empty?
-      head :ok
-    else
-      render json: errors.flatten.to_json, status: :unprocessable_entity
-    end
+    render json: { errors: @errors, counter: counter }, status: :ok
   end
-
 
   def confirm_submission(attachment)
     check_file
-    @proposal.update(status: :submitted)
+    @attachment = attachment
+    if @proposal.may_active?
+      @proposal.active!
+      send_mail
+    elsif @proposal.may_revision?
+      @proposal.revision!
+      send_mail
+    else
+      redirect_to edit_proposal_path(@proposal), alert: "Your submission has
+          errors: #{submission.error_messages}.".squish
+      nil
+    end
+  end
+
+  def send_mail
+    check_file
     session[:is_submission] = nil
 
-    ProposalMailer.with(proposal: @proposal, file: attachment)
+    ProposalMailer.with(proposal: @proposal, file: @attachment)
                   .proposal_submission.deliver_later
 
     redirect_to thanks_submit_proposals_path, notice: 'Your proposal has
@@ -122,8 +136,17 @@ class SubmitProposalsController < ApplicationController
 
     @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
                                       .generate_latex_file.to_s
-    File.new("#{Rails.root}/tmp/#{temp_file}", 'w') do |io|
-      io.write(@latex_infile)
-    end
+  end
+
+  def invalid_email_error_message
+    @errors << @invite.errors.full_messages
+    @errors.flatten!
+    return unless @invite.errors.added? :email, "is invalid"
+
+    @errors[@errors.index("Email is invalid")] = "Email is invalid: #{@invite.email}"
+  end
+
+  def authorize_user
+    raise CanCan::AccessDenied unless current_user&.lead_organizer?(@proposal)
   end
 end

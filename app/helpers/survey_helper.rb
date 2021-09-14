@@ -1,12 +1,11 @@
 module SurveyHelper
-  # rubocop:disable Metrics/MethodLength
   def citizenship_options
-    citizenships = [%w[Argentina Argentina], [' Australia', ' Australia'], %w[Austria Austria],
+    citizenships = [%w[Argentina Argentina], %w[Australia Australia], %w[Austria Austria],
                     %w[Belarus Belarus], %w[Belgium Belgium], %w[Benin Benin], %w[Brazil Brazil],
                     %w[Canada Canada], %w[Chile Chile], %w[China China], %w[Colombia Colombia],
                     ['Costa Rica', 'Costa Rica'], %w[Croatia Croatia], %w[Cyprus Cyprus],
                     ['Czech Republic', 'Czech Republic'], %w[Denmark Denmark], %w[Egypt Egypt],
-                    %w[Finland Finland], ['France', ' France'], %w[Germany Germany], %w[Greece Greece],
+                    %w[Finland Finland], %w[France France], %w[Germany Germany], %w[Greece Greece],
                     %w[Guanajuato Guanajuato], ['Hong Kong', 'Hong Kong'], %w[Hungary Hungary],
                     %w[Iceland Iceland], %w[India India], %w[Indonesia Indonesia], %w[Iran Iran],
                     %w[Iraq Iraq], %w[Israel Israel], %w[Italy Italy], %w[Japan Japan],
@@ -38,11 +37,10 @@ module SurveyHelper
                   responses to this question will be considered in the data analysis.]', 'Prefer not to answer']]
     ethnicity.map { |disp, _value| disp }
   end
-  # rubocop:enable Metrics/MethodLength
 
   def gender_options
-    gender = [%w[Woman Woman], %w[Man Man], ['Gender Fluid and/or non-Binary Person',
-                                             'Gender Fluid and/or non-Binary Person'], %w[Other Other],
+    gender = [%w[Woman Woman], %w[Man Man], ['Gender fluid and/or non-binary person',
+                                             'Gender fluid and/or non-binary person'], %w[Other Other],
               ['Prefer not to answer', 'Prefer not to answer']]
     gender.map { |disp, _value| disp }
   end
@@ -52,7 +50,7 @@ module SurveyHelper
     indigenous.map { |disp, _value| disp }
   end
 
-  def indigenouse_person_yes_options
+  def indigenous_person_yes_options
     indigenous_yes = [['First Nation', 'First Nation'], %w[Métis Métis], %w[Inuit Inuit],
                       ['Native American', 'Native American'],
                       ['Indigenous from outside of what is now known as Canada and the United States',

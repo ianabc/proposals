@@ -14,7 +14,7 @@
                         <%= f.select "citizenships", options_for_select(citizenship_options), {}, data: {'survey-target': 'citizenship',action: 'click->survey#handleCitizenshipOptions'}, class: "form-control", multiple: true, required: true %>
                       </div>
                       <div class="hidden" data-survey-target="otherCitizenship">
-                        <%= f.label 'Other: ', class: ' mt-3'%>
+                        <%= f.label 'Other: ', class: 'required mt-3'%>
                         <%= f.text_field :citizenships_other, id: 'citizenship_other', class: 'form-control' %>
                       </div>
                     </div>
@@ -24,7 +24,7 @@
                         <label>2. Do you identify as an Indigenous person?</label>
                         <%= f.select "indigenous_person", options_for_select(indigenous_person_options),{ include_blank: '' }, data: {'survey-target': 'indigenous',action: 'click->survey#handleIndigenousOptions'}, class: "form-select", required: true %>
                         <div class="hidden mt-3" data-survey-target="indigenousYes">
-                          <%= f.select "indigenous_person_yes", options_for_select(indigenouse_person_yes_options), {}, class: "form-control", id: 'indigenous_person_yes', multiple: true %>
+                          <%= f.select "indigenous_person_yes", options_for_select(indigenous_person_yes_options), {}, class: "form-control", id: 'indigenous_person_yes', multiple: true %>
                         </div>
                       </div>
                     </div>
@@ -38,7 +38,7 @@
                         <%= f.select "ethnicity", options_for_select(ethnicity_options),{ include_blank: '' }, data: {'survey-target': 'ethnicity',action: 'click->survey#handleEthnicityOptions'}, class: "form-control overflow-scroll", multiple: true, required: true %>
                       </div>
                       <div class="hidden" data-survey-target="otherEthnicity">
-                        <%= f.label 'Other: ', class: ' mt-3 '%>
+                        <%= f.label 'Other: ', class: 'required mt-3 '%>
                         <%= f.text_field :ethnicity_other, id: 'ethnicity_other', class: 'form-control' %>
                       </div>
                     </div>
@@ -49,7 +49,7 @@
                         <%= f.select "gender", options_for_select(gender_options),{ include_blank: '' }, data: {'survey-target': 'gender',action: 'click->survey#handleGenderOptions'}, class: "form-select", required: true %>
                       </div>
                       <div class="hidden" data-survey-target="otherGender">
-                        <%= f.label 'Other: ', class: ' mt-3 '%>
+                        <%= f.label 'Other: ', class: 'required mt-3 '%>
                         <%= f.text_field :gender_other, id: 'gender_other', class: 'form-control' %>
                       </div>
                     </div>

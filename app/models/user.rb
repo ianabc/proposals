@@ -1,7 +1,5 @@
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :database_authenticatable, :registerable,
+  devise :database_authenticatable, :registerable, :lockable,
          :recoverable, :rememberable, :validatable, :confirmable
 
   has_many :user_roles, dependent: :destroy
@@ -24,6 +22,18 @@ class User < ApplicationRecord
   def staff_member?
     staff = Role.find_by(name: 'Staff')
     roles.include?(staff)
+  end
+
+  def organizer?(proposal)
+    person.proposal_roles.joins(:role)
+          .where('proposal_id = ? AND roles.name LIKE ?',
+                 proposal&.id, '%rganizer').present?
+  end
+
+  def lead_organizer?(proposal)
+    person.proposal_roles.joins(:role)
+          .where('proposal_id = ? AND roles.name = ?',
+                 proposal&.id, 'lead_organizer').present?
   end
 
   def fullname

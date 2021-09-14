@@ -46,6 +46,10 @@ RSpec.describe "Proposals", type: :request do
     end
   end
 
+  describe "POST /upload_file" do
+    it 'accepts a file upload'
+  end
+
   describe "GET /show" do
     before { get proposal_path(proposal) }
 

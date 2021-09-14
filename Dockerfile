@@ -20,7 +20,8 @@ RUN apt-get update -qq
 RUN apt-get install --yes --fix-missing pkg-config apt-utils build-essential \
               cmake automake tzdata locales curl git gnupg ca-certificates \
               libpq-dev wget libxrender1 libxext6 libsodium23 libsodium-dev \
-              netcat postgresql-client shared-mime-info
+              netcat postgresql-client shared-mime-info texlive \
+              texlive-latex-extra texlive-extra-utils
 
 # NodeJS
 RUN curl -sL https://deb.nodesource.com/setup_lts.x -o nodesource_setup.sh
