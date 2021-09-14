@@ -308,11 +308,11 @@ class ProposalPdfService
                      .pluck(:person_id)).pluck(:academic_status)
     @text << "\\section*{Participants}\n\n"
     @careers&.uniq&.sort&.each do |career|
-      if career.blank?
-        @text << "\\noindent \\textbf{Unknown}\n\n"
-      else
-        @text << "\\noindent \\textbf{#{career}}\n\n"
-      end
+      @text << if career.blank?
+                 "\\noindent \\textbf{Unknown}\n\n"
+               else
+                 "\\noindent \\textbf{#{career}}\n\n"
+               end
 
       @participants = proposal.participants_career(career)
       @text << "\\begin{enumerate}\n\n"
