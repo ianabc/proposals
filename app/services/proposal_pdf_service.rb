@@ -297,7 +297,7 @@ class ProposalPdfService
     end
   end
 
-  def career_heading
+  def career_heading(career)
     if career.blank?
       "\\noindent \\textbf{Unknown}\n\n"
     else
@@ -320,15 +320,18 @@ class ProposalPdfService
     text << "\\end{enumerate}\n\n"
   end
 
+  def participant_careers
+    careers = Person.where(id: @proposal.participants
+                    .pluck(:person_id)).pluck(:academic_status)
+    careers.uniq.sort
+  end
+
   def proposal_participants
     return if proposal.participants&.count&.zero?
 
-    @careers = Person.where(id: @proposal.participants
-                     .pluck(:person_id)).pluck(:academic_status)
-
+    @careers = participant_careers
     @text << "\\section*{Participants}\n\n"
-
-    @careers&.uniq&.sort&.each do |career|
+    @careers.each do |career|
       @text << career_heading(career)
       @text << participant_list(career)
     end
