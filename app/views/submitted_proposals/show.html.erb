@@ -55,7 +55,7 @@
                         <%= label_tag :title %>
                       </div>
                       <div class="mb-3">
-                        <%= text_field_tag :title, @proposal.title, disabled: true %>
+                        <%= text_field_tag :title, @proposal.title, disabled: true, class: 'form-control' %>
                         <% if @submission && @proposal.title.blank? %>
                           <p class="field-validation">Title is required</p>
                         <% end %>
