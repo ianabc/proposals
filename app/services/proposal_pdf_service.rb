@@ -279,8 +279,7 @@ class ProposalPdfService
   def proposal_bibliography
     return if proposal.bibliography.blank?
 
-    @text << "\\subsection*{Bibliography}\n\n"
-    @text << "\\noindent #{LatexToPdf.escape_latex(proposal&.bibliography)}\n\n"
+    @text << "\n\n#{proposal&.bibliography}\n\n"
   end
 
   def user_defined_fields
@@ -305,14 +304,19 @@ class ProposalPdfService
   def proposal_participants
     return if proposal.participants&.count&.zero?
 
-    @careers = Person.where(id: @proposal.participants.pluck(:person_id)).pluck(:academic_status)
+    @careers = Person.where(id: @proposal.participants
+                     .pluck(:person_id)).pluck(:academic_status)
     @text << "\\section*{Participants}\n\n"
     @careers.uniq.each do |career|
-      @text << "\\noindent #{career}\n\n"
+      @text << "\\noindent \textbf{#{career}}\n\n"
       @participants = proposal.participants_career(career)
       @text << "\\begin{enumerate}\n\n"
       @participants.each do |participant|
-        @text << "\\item #{participant.firstname} #{participant.lastname} (#{delatex(participant.affiliation)}) \\ \n"
+        @text << "\\item #{participant.firstname} #{participant.lastname}"
+        if participant.affiliation.present?
+          @text << " (#{delatex(participant.affiliation)})"
+        end
+        @text << " \\ \n"
       end
       @text << "\\end{enumerate}\n\n"
     end
