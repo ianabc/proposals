@@ -108,12 +108,6 @@ if [ "$RAILS_ENV" == "production" ]; then
   echo
   echo "Updating file permissions..."
   chown app:app -R /home/app/proposals
-
-  echo
-  echo "Installing LaTeX..."
-  apt update
-  apt install --yes --fix-missing texlive-latex-extra texlive-extra-utils
-  echo "Done!"
 fi
 
 echo

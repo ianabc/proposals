@@ -49,7 +49,14 @@ RSpec.feature "Proposal edit", type: :feature do
   end
 
   scenario "the Suporting Organizers' information is shown" do
+    create(:invite, proposal: @proposal, status: 'confirmed',
+                      invited_as: 'Organizer')
+
+    @proposal = Proposal.find(@proposal.id)
     expect(@proposal.supporting_organizers).not_to be_empty
+
+    visit edit_proposal_path(@proposal)
+
     @proposal.supporting_organizers.each do |invite|
       shows_person_info(invite.person)
     end
