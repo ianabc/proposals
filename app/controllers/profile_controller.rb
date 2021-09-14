@@ -3,7 +3,7 @@ class ProfileController < ApplicationController
 
   def edit
     @person.is_lead_organizer = true if @person.city
-    @result = @person.demographic_data.result
+    @result = @person.demographic_data&.result
   end
 
   def update
