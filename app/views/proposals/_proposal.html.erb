@@ -237,7 +237,7 @@
                                 <div class="mb-3">
                                   <% if @careers %>
                                     <h3 class="form-section">Confirmed Participants:</h3>
-                                    <% @careers.uniq.sort.each do |career| %>
+                                    <% @careers.uniq.each do |career| %>
                                       <h4><%= career %></h4>
                                         <%= render partial: 'confirm_participant', locals: { confirmed_participants: @proposal.participants_career(career) } %>
                                     <% end %>
