@@ -31,7 +31,7 @@ class InvitesController < ApplicationController
     end
 
     @invite.response = response_params
-    @invite.status = 'confirmed',
+    @invite.status = set_invite_status
     @invite.skip_deadline_validation = true
 
     if @invite.save
@@ -68,6 +68,10 @@ class InvitesController < ApplicationController
   end
 
   private
+
+  def set_invite_status
+    response_params == 'no' ? 'cancelled' : 'confirmed'
+  end
 
   def set_invite_proposal
     @proposal = Proposal.find_by(id: @invite&.proposal)
