@@ -164,8 +164,11 @@ class ProposalPdfService
     @text
   end
 
-  def confirmed_count
-    "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
+  def participant_confirmed_count
+    confirmed_participants = proposal.invites.where(status: "confirmed",
+                                                    invited_as: "Participant")
+    "#{confirmed_participants&.count} confirmed /
+     #{proposal.proposal_type&.participant} maximum participants\n\n".squish
   end
 
   def lead_organizer_info
@@ -176,7 +179,7 @@ class ProposalPdfService
 
   def single_proposal_heading
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << confirmed_count
+    @text << participant_confirmed_count
     @text << lead_organizer_info
     pdf_content
     @text
@@ -212,18 +215,17 @@ class ProposalPdfService
   end
 
   def proposal_participants_count
-    confirmed_participants = proposal.invites.where(status: "confirmed",
-                                                    invited_as: "Participant")
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << "\\noindent #{confirmed_participants&.count} confirmed / #{proposal.proposal_type&.participant}
-            maximum participants\n\n"
+    @text << participant_confirmed_count
   end
 
   def proposal_organizers_count
     confirmed_organizers = proposal.invites.where(status: "confirmed",
-                                                  invited_as: "Organizer")&.count
-    organizers = proposal.proposal_type&.co_organizer
-    @text << "\\noindent #{confirmed_organizers + 1} confirmed / #{organizers + 1} maximum organizers\n\n"
+                                                  invited_as: "Organizer")
+    confirmed_orgs = (confirmed_organizers&.count || 0) + 1
+    @text << "\\noindent #{confirmed_orgs} confirmed /
+              #{proposal.max_supporting_organizers + 1}
+              maximum organizers\n\n".squish
   end
 
   def proposal_lead_organizer

@@ -165,6 +165,22 @@ class Proposal < ApplicationRecord
     preamble || ''
   end
 
+  def max_supporting_organizers
+    proposal_type&.co_organizer
+  end
+
+  def max_participants
+    proposal_type&.participant
+  end
+
+  def max_virtual_participants
+    300 # temp until max_virtual setting is added
+  end
+
+  def max_total_participants
+    max_participants + max_virtual_participants
+  end
+
   private
 
   def not_before_opening
