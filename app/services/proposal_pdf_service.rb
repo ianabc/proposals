@@ -16,6 +16,7 @@ class ProposalPdfService
     File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
       io.write(@input)
     end
+    self
   end
 
   def single_booklet(table)
