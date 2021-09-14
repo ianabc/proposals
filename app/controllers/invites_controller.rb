@@ -29,7 +29,7 @@ class InvitesController < ApplicationController
       redirect_to invite_url(code: @invite&.code), alert: 'Invalid answer'
       return
     end
-    
+
     @invite.update(response: response_params, status: 'confirmed',
                    skip_deadline_validation: true)
     create_role
