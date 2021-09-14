@@ -129,7 +129,7 @@ class ProposalPdfService
     if @table == "toc"
       code = proposal.code.blank? ? '' : "#{proposal&.code}: "
       @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
-      proposals_sections
+      single_proposal_heading
     else
       @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
       proposals_heading
@@ -143,23 +143,13 @@ class ProposalPdfService
       @proposal = proposal
       code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
       @text << "\\section*{\\centering #{code} #{proposal_title(proposal)}}"
-      proposals_sections
+      single_proposal_heading
     end
-  end
-
-  def proposals_sections
-    @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
-    @text << "\\subsection*{Lead Organizer}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname}  \\\\ \n\n"
-    @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
-    pdf_content
-    @text
   end
 
   def proposal_table_of_content
     @text = "\\tableofcontents"
-    @text << "\\addtocontents{toc}{\ 1. #{proposal.subject&.title}}"
+    @text << "\\addtocontents{toc}{\ 1. #{proposal.subject&.title} }"
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
     @text << "\\addcontentsline{toc}{section}{ #{code} #{proposal_title(proposal)} }"
     @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
@@ -174,12 +164,20 @@ class ProposalPdfService
     @text
   end
 
+  def confirmed_count
+    "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
+  end
+
+  def lead_organizer_info
+    info = "\\subsection*{Lead Organizer}\n\n"
+    info << "#{proposal.lead_organizer&.fullname} \\\\ \n\n"
+    info << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+  end
+
   def single_proposal_heading
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
-    @text << "\\subsection*{Lead Organizer}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname}  \\\\ \n\n"
-    @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+    @text << confirmed_count
+    @text << lead_organizer_info
     pdf_content
     @text
   end
