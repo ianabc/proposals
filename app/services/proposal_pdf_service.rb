@@ -274,8 +274,10 @@ class ProposalPdfService
 
   def proposal_bibliography
     return if proposal.bibliography.blank?
-
-    @text << "\n\n#{proposal&.bibliography}\n\n"
+    bib = proposal.bibliography
+    @text << "\n\\begin{thebibliography}{99}\n\n" unless bib.include? 'thebibliography'
+    @text << "\n\n#{bib}\n\n"
+    @text << "\n\\end{thebibliography}\n\n" unless bib.include? 'thebibliography'
   end
 
   def user_defined_fields
