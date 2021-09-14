@@ -121,13 +121,17 @@ class ProposalPdfService
     @text
   end
 
+  def proposal_title(proposal)
+    proposal.no_latex ? delatex(proposal&.title) : proposal&.title
+  end
+
   def proposals_without_content
     if @table == "toc"
       code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-      @text << "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
       proposals_sections
     else
-      @text = "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+      @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
       proposals_heading
     end
     @text
@@ -138,7 +142,7 @@ class ProposalPdfService
       proposal = Proposal.find_by(id: id)
       @proposal = proposal
       code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
-      @text << "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)}}"
       proposals_sections
     end
   end
@@ -157,15 +161,15 @@ class ProposalPdfService
     @text = "\\tableofcontents"
     @text << "\\addtocontents{toc}{\ 1. #{proposal.subject&.title}}"
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-    @text << "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+    @text << "\\addcontentsline{toc}{section}{ #{code} #{proposal_title(proposal)} }"
+    @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
     single_proposal_heading
     @text
   end
 
   def single_proposal_without_content
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text = "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+    @text = "\\section*{\\centering #{code} #{proposal_title(proposal)}"
     single_proposal_heading
     @text
   end
@@ -203,7 +207,7 @@ class ProposalPdfService
 
   def proposal_details
     code = proposal.code.blank? ? '' : "#{proposal.code}: "
-    @text = "\\section*{\\centering #{code} #{delatex(proposal.title)} }\n\n"
+    @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }\n\n"
     proposal_participants_count
     proposal_organizers_count
     proposal_lead_organizer
@@ -333,7 +337,6 @@ class ProposalPdfService
   def preferred_impossible_dates(field)
     return unless field&.answer
 
-    # @text << "\\subsection*{#{field.proposal_field.statement}}\n\n"
     preferred = JSON.parse(field.answer)&.first(5)
     unless preferred.any?
       @text << "\\subsection*{Preferred dates}\n\n"
