@@ -121,13 +121,17 @@ class ProposalPdfService
     @text
   end
 
+  def proposal_title(proposal)
+    proposal.no_latex ? delatex(proposal&.title) : proposal&.title
+  end
+
   def proposals_without_content
     if @table == "toc"
       code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-      @text << "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-      proposals_sections
+      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
+      single_proposal_heading
     else
-      @text = "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+      @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
       proposals_heading
     end
     @text
@@ -138,53 +142,45 @@ class ProposalPdfService
       proposal = Proposal.find_by(id: id)
       @proposal = proposal
       code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
-      @text << "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-      proposals_sections
+      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)}}"
+      single_proposal_heading
     end
   end
 
-  # rubocop:disable Metrics/AbcSize
-  def proposals_sections
-    @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
-    @text << "\\subsection*{Lead Organizer}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname}  \\\\ \n\n"
-    @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
-    pdf_content
-    @text
-  end
-  # rubocop:enable Metrics/AbcSize
-
-  # rubocop:disable Metrics/AbcSize
   def proposal_table_of_content
     @text = "\\tableofcontents"
-    @text << "\\addtocontents{toc}{\ 1. #{proposal.subject&.title}}"
+    @text << "\\addtocontents{toc}{\ 1. #{proposal.subject&.title} }"
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-    @text << "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+    @text << "\\addcontentsline{toc}{section}{ #{code} #{proposal_title(proposal)} }"
+    @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
     single_proposal_heading
     @text
   end
-  # rubocop:enable Metrics/AbcSize
 
   def single_proposal_without_content
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text = "\\section*{\\centering #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+    @text = "\\section*{\\centering #{code} #{proposal_title(proposal)}"
     single_proposal_heading
     @text
   end
 
-  # rubocop:disable Metrics/AbcSize
+  def confirmed_count
+    "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
+  end
+
+  def lead_organizer_info
+    info = "\\subsection*{Lead Organizer}\n\n"
+    info << "#{proposal.lead_organizer&.fullname} \\\\ \n\n"
+    info << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+  end
+
   def single_proposal_heading
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << "#{proposal.invites.count} confirmed / #{proposal.proposal_type&.participant} maximum participants\n\n"
-    @text << "\\subsection*{Lead Organizer}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname}  \\\\ \n\n"
-    @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+    @text << confirmed_count
+    @text << lead_organizer_info
     pdf_content
     @text
   end
-  # rubocop:enable Metrics/AbcSize
 
   def pdf_content
     proposal_organizers
@@ -202,16 +198,14 @@ class ProposalPdfService
     affil = ""
     affil << " (#{person.affiliation}" if person&.affiliation.present?
     affil << ", #{person.department}" if person&.department.present?
-    # TODO: pending confirmation that Title should be added
-    # affil << ", #{person.title}" if person&.title.present?
-    affil << ")" if affil.present?
+    affil << ")" if person&.affiliation.present?
 
     delatex(affil)
   end
 
   def proposal_details
     code = proposal.code.blank? ? '' : "#{proposal.code}: "
-    @text = "\\section*{\\centering #{code} #{delatex(proposal.title)} }\n\n"
+    @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }\n\n"
     proposal_participants_count
     proposal_organizers_count
     proposal_lead_organizer
@@ -301,31 +295,49 @@ class ProposalPdfService
     end
   end
 
+  def career_heading(career)
+    if career.blank?
+      "\\noindent \\textbf{Unknown}\n\n"
+    else
+      "\\noindent \\textbf{#{career}}\n\n"
+    end
+  end
+
+  def participant_name_and_affil(participant)
+    "\\item #{participant.fullname} #{affil(participant)} \\ \n"
+  end
+
+  def participant_list(career)
+    @participants = proposal.participants_career(career)
+    return '' if @participants.blank?
+
+    text = "\\begin{enumerate}\n\n"
+    @participants.each do |participant|
+      text << participant_name_and_affil(participant)
+    end
+    text << "\\end{enumerate}\n\n"
+  end
+
+  def participant_careers
+    careers = Person.where(id: @proposal.participants
+                    .pluck(:person_id)).pluck(:academic_status)
+    careers.uniq.sort
+  end
+
   def proposal_participants
     return if proposal.participants&.count&.zero?
 
-    @careers = Person.where(id: @proposal.participants
-                     .pluck(:person_id)).pluck(:academic_status)
+    @careers = participant_careers
     @text << "\\section*{Participants}\n\n"
-    @careers.uniq.each do |career|
-      @text << "\\noindent \textbf{#{career}}\n\n"
-      @participants = proposal.participants_career(career)
-      @text << "\\begin{enumerate}\n\n"
-      @participants.each do |participant|
-        @text << "\\item #{participant.firstname} #{participant.lastname}"
-        if participant.affiliation.present?
-          @text << " (#{delatex(participant.affiliation)})"
-        end
-        @text << " \\ \n"
-      end
-      @text << "\\end{enumerate}\n\n"
+    @careers.each do |career|
+      @text << career_heading(career)
+      @text << participant_list(career)
     end
   end
 
   def preferred_impossible_dates(field)
     return unless field&.answer
 
-    # @text << "\\subsection*{#{field.proposal_field.statement}}\n\n"
     preferred = JSON.parse(field.answer)&.first(5)
     unless preferred.any?
       @text << "\\subsection*{Preferred dates}\n\n"

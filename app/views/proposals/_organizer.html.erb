@@ -39,7 +39,7 @@
       <label for="deadline_date"><%= invite.deadline_date.to_date %></label>
     </div>
     <div class="float-end mb-3">
-      <% if invite.pending? %>
+      <% if invite.pending? && params[:action] == 'edit' %>
         <%= link_to 'Cancel Invite', cancel_url(code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
         <%= link_to 'Invite Reminder', invite_reminder_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
       <% end %>
