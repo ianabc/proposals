@@ -85,7 +85,7 @@ export default class extends Controller {
           invitedAs = 'Participant'
           inviteId = inviteParticipant
         }
-        _this.sendInviteEmails(id, invitedAs, inviteId, data, body)
+        _this.sendInviteEmails(id, invitedAs, inviteId, data)
       }
     ) 
     .fail(function(response) {
@@ -96,7 +96,10 @@ export default class extends Controller {
     });
   }
 
-  sendInviteEmails(id, invitedAs, inviteId, data, body) {
+  sendInviteEmails(id, invitedAs, inviteId, data) {
+    var url = ''
+    let formData = new FormData()
+    let email_body = $('#email_body').val()
     if(data.errors.length > 0 && data.counter === 0) {
        $.each(data.errors, function(index, error) {
         toastr.error(error)
@@ -107,9 +110,8 @@ export default class extends Controller {
       $.each(data.errors, function(index, error) {
         toastr.error(error)
       })
-      let formData = new FormData()
-      formData.append("body", body)
-      var url = `/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`
+      formData.append("body", email_body)
+      url = `/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`
       Rails.ajax({
         url,
         type: "POST",
@@ -122,9 +124,8 @@ export default class extends Controller {
       })
     }
     else {
-      let formData = new FormData()
-      formData.append("body", body)
-      var url = `/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`
+      formData.append("body", email_body)
+      url = `/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`
       Rails.ajax({
         url,
         type: "POST",
