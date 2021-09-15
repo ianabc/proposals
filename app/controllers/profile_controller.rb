@@ -2,8 +2,7 @@ class ProfileController < ApplicationController
   before_action :person, only: %i[edit update demographic_data]
 
   def edit
-    @person.is_lead_organizer = true if @person.city
-    @result = @person.demographic_data&.result
+    @result = @person&.demographic_data&.result
   end
 
   def update

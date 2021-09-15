@@ -36,9 +36,12 @@ RSpec.describe Person, type: :model do
   end
 
   describe '#lead_organizer_attributes' do
-    let(:person) { create(:person) }
+    let(:proposal) { create(:proposal) }
+    let(:proposal_roles) { create_list(:proposal_role, 3, proposal: proposal) }
+    let(:person) { proposal_roles.last.person }
     before do
-      person.is_lead_organizer = true
+      proposal_roles.last.role.update(name: 'lead_organizer')
+      person.is_lead_organizer
       person.update(street_1: nil, city: nil)
     end
     it '' do
