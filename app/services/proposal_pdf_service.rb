@@ -168,7 +168,7 @@ class ProposalPdfService
     confirmed_participants = proposal.invites.where(status: "confirmed",
                                                     invited_as: "Participant")
     "#{confirmed_participants&.count} confirmed /
-     #{proposal.proposal_type&.participant} maximum participants\n\n".squish
+     #{proposal.proposal_type&.participant} maximum participants \\\\ \n".squish
   end
 
   def lead_organizer_info
@@ -272,18 +272,25 @@ class ProposalPdfService
     @text << "\\noindent #{ams_subject2&.title} \\\\ \n" if ams_subject2.present?
   end
 
-  def add_bibliography_tags(bibliography)
-    return bibliography if bibliography.include? 'thebibliography'
+  def add_bibliography_heading(bibliography)
+    text = "\n\n\\subsection*{Bibliography}\n\n"
+    if proposal.no_latex
+      text << delatex(bibliography)
+    else
+      return bibliography if bibliography.include? 'thebibliography'
 
-    text = "\n\\begin{thebibliography}{99}\n\n"
-    text << bibliography
-    text << "\n\\end{thebibliography}\n\n"
+      text = "\n\\begin{thebibliography}{99}\n\n"
+      text << bibliography
+      text << "\n\\end{thebibliography}\n\n"
+    end
+
+    text
   end
 
   def proposal_bibliography
     return if proposal.bibliography.blank?
 
-    @text << add_bibliography_tags(bibliography)
+    @text << add_bibliography_heading(bibliography)
   end
 
   def user_defined_fields
