@@ -18,7 +18,7 @@ class Person < ApplicationRecord
     "#{firstname} #{lastname}"
   end
 
-  validate :lead_organizer_attributes, if: :is_lead_organizer, on: :update
+  validate :lead_organizer_attributes, if: :lead_organizer?, on: :update
   validate :common_fields, on: :update
 
   def lead_organizer_attributes
@@ -26,10 +26,10 @@ class Person < ApplicationRecord
     errors.add('City', "can't be blank") if city.blank?
   end
 
-  def is_lead_organizer
+  def lead_organizer?
     proposal_roles.joins(:role)
-                .where('roles.name = ?', 'lead_organizer')
-                .present?
+                  .where(roles: { name: 'lead_organizer' })
+                  .present?
   end
 
   def region_type

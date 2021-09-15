@@ -41,7 +41,7 @@ RSpec.describe Person, type: :model do
     let(:person) { proposal_roles.last.person }
     before do
       proposal_roles.last.role.update(name: 'lead_organizer')
-      person.is_lead_organizer
+      person.lead_organizer?
       person.update(street_1: nil, city: nil)
     end
     it '' do
