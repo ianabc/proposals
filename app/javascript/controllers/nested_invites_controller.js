@@ -1,4 +1,5 @@
 import { Controller } from 'stimulus'
+import Rails from '@rails/ujs'
 import toastr from 'toastr'
 
 export default class extends Controller {
@@ -60,7 +61,7 @@ export default class extends Controller {
     let invitedAs = event.currentTarget.id
     $.post(`/submit_proposals/invitation_template?proposal=${id}&invited_as=${invitedAs}`, function(data) {
         $('#subject').text(data.subject)
-        $('#body').text(data.body)
+        $('#email_body').text(data.body)
         $("#email-preview").modal('show')
       }
     )
@@ -73,7 +74,7 @@ export default class extends Controller {
     let _this = this
     let inviteParticipant = event.currentTarget.dataset.participant || 0
     let inviteOrganizer = event.currentTarget.dataset.organizer || 0
-    var body = document.getElementById("body").textContent;
+    var body = $('#email_body').val()
     $.post(`/submit_proposals?proposal=${id}&create_invite=true.js`,
       $('form#submit_proposal').serialize(), function(data) {
         if (body.includes("supporting organizer")) {
@@ -84,7 +85,7 @@ export default class extends Controller {
           invitedAs = 'Participant'
           inviteId = inviteParticipant
         }
-        _this.sendInviteEmails(id, invitedAs, inviteId, data)
+        _this.sendInviteEmails(id, invitedAs, inviteId, data, body)
       }
     ) 
     .fail(function(response) {
@@ -95,7 +96,7 @@ export default class extends Controller {
     });
   }
 
-  sendInviteEmails(id, invitedAs, inviteId, data) {
+  sendInviteEmails(id, invitedAs, inviteId, data, body) {
     if(data.errors.length > 0 && data.counter === 0) {
        $.each(data.errors, function(index, error) {
         toastr.error(error)
@@ -106,22 +107,35 @@ export default class extends Controller {
       $.each(data.errors, function(index, error) {
         toastr.error(error)
       })
-      $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`,
-        $('#email_preview').serialize(), function() {
+      let formData = new FormData()
+      formData.append("body", body)
+      var url = `/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`
+      Rails.ajax({
+        url,
+        type: "POST",
+        data: formData,
+        success: () => {
           setTimeout(function() {
             window.location.reload();
           }, 3000)
+        }
       })
     }
     else {
-      $.post(`/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`,
-        $('#email_preview').serialize(), function() {
+      let formData = new FormData()
+      formData.append("body", body)
+      var url = `/proposals/${id}/invites/${inviteId}/invite_email?invited_as=${invitedAs}`
+      Rails.ajax({
+        url,
+        type: "POST",
+        data: formData,
+        success: () => {
           toastr.success('Invitation has been sent!')
           setTimeout(function() {
             window.location.reload();
           }, 2000)
         }
-      )
+      })
     }
   }
 }
