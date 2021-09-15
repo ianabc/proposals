@@ -42,6 +42,9 @@
       <% if invite.pending? && params[:action] == 'edit' %>
         <%= link_to 'Cancel Invite', cancel_url(code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
         <%= link_to 'Invite Reminder', invite_reminder_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
+      <% elsif invite.confirmed? && params[:action] == 'edit' %>
+        <%= link_to 'Cancel Invite', cancel_confirmed_invite_url(code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
+        <%= link_to 'Send New Invite', new_invite_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
       <% end %>
     </div>
   </div>

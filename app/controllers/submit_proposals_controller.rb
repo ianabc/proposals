@@ -1,5 +1,5 @@
 class SubmitProposalsController < ApplicationController
-  before_action :set_proposal, only: %i[create]
+  before_action :set_proposal, only: %i[create invitation_template]
   before_action :authorize_user, only: %w[create create_invite]
 
   def new
@@ -31,6 +31,19 @@ class SubmitProposalsController < ApplicationController
   end
 
   def thanks; end
+
+  def invitation_template
+    invited_as = params[:invited_as]
+    case invited_as
+    when 'organizer'
+      @email_template = EmailTemplate.find_by(email_type: "organizer_invitation_type")
+    when 'participant'
+      @email_template = EmailTemplate.find_by(email_type: "participant_invitation_type")
+    end
+    preview_placeholders
+
+    render json: { subject: @email_template.subject, body: @template_body }, status: :ok
+  end
 
   private
 
@@ -148,5 +161,13 @@ class SubmitProposalsController < ApplicationController
 
   def authorize_user
     raise CanCan::AccessDenied unless current_user&.lead_organizer?(@proposal)
+  end
+
+  def preview_placeholders
+    @template_body = @email_template.body
+    placeholders = { "Proposal_lead_organizer_name" => @proposal&.lead_organizer&.fullname,
+                     "proposal_type" => @proposal.proposal_type&.name,
+                     "proposal_title" => @proposal&.title }
+    placeholders.each { |k, v| @template_body.gsub!(k, v) }
   end
 end

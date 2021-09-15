@@ -124,7 +124,6 @@
                           </div>
                           <div>
                             <h3>Supporting Organizers:</h3>
-                            <%= organizer_intro(@proposal) %>
                             <% if @proposal.invites %>
                               <% @proposal.invites.each do |invite|%>
                                 <% if invite.invited_as == 'Organizer' %>
