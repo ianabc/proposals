@@ -34,6 +34,7 @@ Rails.application.routes.draw do
   get :invite, to: 'invites#show'
   get 'expired' => 'invites#expired'
   post 'cancel' => 'invites#cancel'
+  post 'cancel_confirmed_invite' => 'invites#cancel_confirmed_invite'
 
   resources :proposals do
     post :latex, to: 'proposals#latex_input'
@@ -51,6 +52,7 @@ Rails.application.routes.draw do
         post :inviter_response
         post :invite_reminder
         post :invite_email
+        post :new_invite
       end
       collection do
         get :thanks
