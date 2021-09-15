@@ -272,7 +272,7 @@ class ProposalPdfService
     @text << "\\noindent #{ams_subject2&.title} \\\\ \n" if ams_subject2.present?
   end
 
- def add_bibliography_tags(bibliography)
+  def add_bibliography_tags(bibliography)
     return bibliography if bibliography.include? 'thebibliography'
 
     text = "\n\\begin{thebibliography}{99}\n\n"
