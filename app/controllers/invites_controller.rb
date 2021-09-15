@@ -1,7 +1,8 @@
 class InvitesController < ApplicationController
   before_action :authenticate_user!, except: %i[show inviter_response thanks expired]
-  before_action :set_proposal, only: %i[invite_reminder invite_email]
-  before_action :set_invite, only: %i[show inviter_response cancel invite_reminder invite_email]
+  before_action :set_proposal, only: %i[invite_reminder invite_email new_invite]
+  before_action :set_invite,
+                only: %i[show inviter_response cancel invite_reminder invite_email new_invite cancel_confirmed_invite]
   before_action :set_invite_proposal, only: %i[show]
 
   def show
@@ -58,6 +59,20 @@ class InvitesController < ApplicationController
     @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
     @invite.update(status: 'cancelled')
     redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
+  end
+
+  def cancel_confirmed_invite
+    @proposal_role = @invite.person.proposal_roles.first
+    @proposal_role.destroy
+    @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
+    @invite.update(status: 'cancelled')
+    redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
+  end
+
+  def new_invite
+    @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
+    @invite.update(status: 'pending')
+    redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has become new invite!'
   end
 
   private
