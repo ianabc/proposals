@@ -190,7 +190,7 @@ class ProposalPdfService
     proposal_locations
     proposal_subjects
     user_defined_fields
-    proposal_bibliography unless proposal.no_latex
+    proposal_bibliography
     proposal_participants
     @text
   end
@@ -272,10 +272,18 @@ class ProposalPdfService
     @text << "\\noindent #{ams_subject2&.title} \\\\ \n" if ams_subject2.present?
   end
 
+  def add_bibliography_tags(bibliography)
+    return bibliography if bibliography.include? 'thebibliography'
+
+    text = "\n\\begin{thebibliography}{99}\n\n"
+    text << bibliography
+    text << "\n\\end{thebibliography}\n\n"
+  end
+
   def proposal_bibliography
     return if proposal.bibliography.blank?
 
-    @text << "\n\n#{proposal&.bibliography}\n\n"
+    @text << add_bibliography_tags(bibliography)
   end
 
   def user_defined_fields
