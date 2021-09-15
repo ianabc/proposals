@@ -31,10 +31,17 @@ class InvitesController < ApplicationController
       return
     end
 
-    @invite.update(response: response_params, status: 'confirmed',
-                   skip_deadline_validation: true)
-    create_role
-    send_email_on_response
+    @invite.response = response_params
+    @invite.status = set_invite_status
+    @invite.skip_deadline_validation = true
+
+    if @invite.save
+      create_role
+      send_email_on_response
+    else
+      redirect_to invite_url(code: @invite&.code),
+                  alert: "Problem saving response: #{@invite.errors.full_messages}"
+    end
   end
 
   def invite_reminder
@@ -76,6 +83,10 @@ class InvitesController < ApplicationController
   end
 
   private
+
+  def set_invite_status
+    response_params == 'no' ? nil : 'confirmed'
+  end
 
   def set_invite_proposal
     @proposal = Proposal.find_by(id: @invite&.proposal)
@@ -129,7 +140,6 @@ class InvitesController < ApplicationController
     @invite.proposal.proposal_roles.create(role: role, person: @invite.person)
   end
 
-  # rubocop:disable Metrics/AbcSize
   def send_email_on_response
     @organizers = @invite.proposal.list_of_organizers.remove(@invite.person&.fullname)
 
@@ -137,10 +147,9 @@ class InvitesController < ApplicationController
       InviteMailer.with(invite: @invite).invite_decline.deliver_later
       redirect_to thanks_proposal_invites_path(@invite.proposal)
     else
-      InviteMailer.with(invite: @invite, token: @token, organizers: @organizers).invite_acceptance
-                  .deliver_later
+      InviteMailer.with(invite: @invite, organizers: @organizers)
+                  .invite_acceptance.deliver_later
       redirect_to new_person_path(code: @invite.code)
     end
   end
-  # rubocop:enable Metrics/AbcSize
 end
