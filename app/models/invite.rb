@@ -24,11 +24,18 @@ class Invite < ApplicationRecord
   def add_person
     return if [firstname, lastname, email].map(&:blank?).any?
 
-    person = Person.where(email: email.downcase).first
+    email.downcase!
+    person = Person.where(email: email).first
+
     if person.blank?
-      person = Person.create(email: email.downcase, firstname: firstname,
-                             lastname: lastname)
+      begin
+        person = Person.create(email: email, firstname: firstname,
+                               lastname: lastname)
+      rescue ActiveRecord::RecordNotUnique
+        person = Person.find_by(email: email)
+      end
     end
+
     self.person = person
   end
 
