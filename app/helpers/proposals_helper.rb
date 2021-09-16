@@ -206,7 +206,8 @@ module ProposalsHelper
   end
 
   def gender_graph(data)
-    if data.key?('Prefer not to answer') && data.key?('Gender fluid and/or non-binary person')
+    if data.key?('Prefer not to answer') ||
+       data.key?('Gender fluid and/or non-binary person')
       data = gender_add(data, 0)
     else
       single_data_delete(data)
