@@ -58,6 +58,7 @@ module ProposalsHelper
   def show_edit_button?(proposal)
     return unless params[:action] == 'edit'
     return unless proposal.editable?
+
     lead_organizer?(proposal.proposal_roles)
   end
 
@@ -148,11 +149,13 @@ module ProposalsHelper
 
   def gender_labels(proposal)
     data = graph_data("gender", "gender_other", proposal)
+    data = gender_graph(data)
     data.keys
   end
 
   def gender_values(proposal)
     data = graph_data("gender", "gender_other", proposal)
+    data = gender_graph(data)
     data.values
   end
 
@@ -200,5 +203,49 @@ module ProposalsHelper
   def stem_values(proposal)
     data = stem_graph_data(proposal)
     data.values
+  end
+
+  def gender_graph(data)
+    if data.key?('Prefer not to answer') ||
+       data.key?('Gender fluid and/or non-binary person')
+      data = gender_add(data, 0)
+    else
+      single_data_delete(data)
+    end
+    data
+  end
+
+  def gender_add(data, values)
+    gender_option = ['Gender fluid and/or non-binary person', 'Prefer not to answer']
+    data.map do |k, v|
+      [
+        (values += v.to_i if gender_option.include?(k))
+      ]
+    end
+    gender_delete(data, values)
+  end
+
+  def gender_delete(data, values)
+    data.delete('Prefer not to answer')
+    data.delete('Gender fluid and/or non-binary person')
+    data.merge({ "Other" => values })
+  end
+
+  def single_data_delete(data)
+    data.map do |k, v|
+      [
+        case k
+        when 'Prefer not to answer'
+          single_gender_delete(data, 'Prefer not to answer', v)
+        when 'Gender fluid and/or non-binary person'
+          single_gender_delete(data, 'Gender fluid and/or non-binary person', v)
+        end
+      ]
+    end
+  end
+
+  def single_gender_delete(data, option, val)
+    data.delete(option)
+    data.merge({ "Other" => val })
   end
 end
