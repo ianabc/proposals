@@ -74,4 +74,18 @@ namespace :birs do
       SurveyQuestion.create(statement: survey_question[:statement], options: survey_question[:options], select: survey_question[:select], survey: survey)
     end
   end
+
+  desc "Update demographic data in database"
+  task survey_gender_field: :environment do
+    DemographicData.all.each do |data|
+      case data.result["gender"]
+      when 'Female'
+        data.result["gender"] = 'Woman'
+        data.save
+      when 'Male'
+        data.result["gender"] = 'Man'
+        data.save
+      end
+    end
+  end
 end
