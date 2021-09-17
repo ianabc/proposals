@@ -61,6 +61,7 @@ export default class extends Controller {
     let invitedAs = event.currentTarget.id
     $.post(`/submit_proposals/invitation_template?proposal=${id}&invited_as=${invitedAs}`, function(data) {
         $('#subject').text(data.subject)
+        $('#email_body_preview').html(data.body)
         $('#email_body').text(data.body)
         $("#email-preview").modal('show')
       }
