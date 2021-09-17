@@ -206,7 +206,7 @@ module ProposalsHelper
   end
 
   def gender_graph(data)
-    if data.key?('Prefer not to answer') ||
+    if data.key?('Prefer not to answer') &&
        data.key?('Gender fluid and/or non-binary person')
       data = gender_add(data, 0)
     else
@@ -247,5 +247,13 @@ module ProposalsHelper
   def single_gender_delete(data, option, val)
     data.delete(option)
     data.merge({ "Other" => val })
+  end
+
+  def invite_first_name(invite)
+    invite.person&.firstname || invite.firstname
+  end
+
+  def invite_last_name(invite)
+    invite.person&.lastname || invite.lastname
   end
 end
