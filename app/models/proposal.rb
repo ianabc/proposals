@@ -150,9 +150,9 @@ class Proposal < ApplicationRecord
     CSV.generate(headers: true) do |csv|
       csv << attributes
       all.find_each do |proposal|
-        csv << [proposal.code, proposal.title, proposal.proposal_type.name,
-                proposal.lead_organizer.fullname, proposal.the_locations,
-                proposal.status, proposal.updated_at.to_date]
+        csv << [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
+                proposal&.lead_organizer&.fullname, proposal&.the_locations,
+                proposal&.status, proposal&.updated_at&.to_date]
       end
     end
   end
