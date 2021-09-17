@@ -197,6 +197,8 @@ class ProposalPdfService
 
     @text << "\\pagebreak"
     proposal_organizing_committee
+    @text << "\\pagebreak"
+    organizing_participant_committee
     @text
   end
 
@@ -389,7 +391,7 @@ class ProposalPdfService
   end
 
   def proposal_organizing_committee
-    @text << "\\section*{Organizing Committee}\n\n"
+    @text << "\\section*{\\centering Organizing Committee}\n\n"
     confirmed_organizer
     @text << "\\subsection*{A) Early-Career Researcher}\n\n"
     organizer_early_career
@@ -419,5 +421,129 @@ class ProposalPdfService
 
       @text << "\\noindent #{organizer.person.fullname} : #{result['stem']}\n \n \n"
     end
+  end
+
+  def organizing_participant_committee
+    @text << "\\section*{\\centering Organizing Committee and Participant}\n\n"
+    confirmed_committee
+    @text << "\\subsection*{1) Indigenous Person}\n\n"
+    number_of_indigenous
+    @text << "\\subsection*{2) Ethnicity Chart}"
+    ethnicity_chart
+    @text << "\\subsection*{3) Gender Chart}"
+    gender_chart
+    other_demographic_data
+    @text
+  end
+
+  def other_demographic_data
+    @text << "\\subsection*{4) Number of 2SLGBTQIA+ Persons}"
+    number_of_community_persons
+    @text << "\\subsection*{5) Number of Medical Condition Persons}"
+    number_of_medical_condition
+    @text << "\\subsection*{6) Number of persons from under-represented Minority in the country of current affiliation}"
+    minority_current_affiliation
+    @text << "\\subsection*{7) Number of STEM Persons}"
+    number_of_stem_persons
+    @text << "\\subsection*{8) Number of persons from under-represented Minority in your area}"
+    area_minority
+  end
+
+  def confirmed_committee
+    @confirmed_invitations = proposal.invites.where(status: "confirmed")
+  end
+
+  def number_of_indigenous
+    total_count = 0
+    actual_count = 0
+    @confirmed_invitations&.each do |invite|
+      result = invite.person&.demographic_data&.result
+      total_count += 1
+      actual_count += 1 unless result.nil? || result["indigenous_person"].nil?
+    end
+    @text << "\\noindent Number of Indigenous persons (Organizing Committee +
+                Participants): #{actual_count}/#{total_count}\n\n\n"
+  end
+
+  def ethnicity_chart
+    total_count = 0
+    actual_count = 0
+    @confirmed_invitations&.each do |invite|
+      result = invite.person&.demographic_data&.result
+      total_count += 1
+      actual_count += 1 unless result.nil? || result["ethnicity"].nil?
+    end
+    @text << "\\noindent  Ethnicity Chart (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
+  end
+
+  def gender_chart
+    total_count = 0
+    actual_count = 0
+    @confirmed_invitations&.each do |invite|
+      result = invite.person&.demographic_data&.result
+      total_count += 1
+      actual_count += 1 unless result.nil? || result["gender"].nil?
+    end
+    @text << "\\noindent Gender chart (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
+  end
+
+  def number_of_community_persons
+    total_count = 0
+    actual_count = 0
+    @confirmed_invitations&.each do |invite|
+      result = invite.person&.demographic_data&.result
+      total_count += 1
+      actual_count += 1 unless result.nil? || result["community"].nil?
+    end
+    @text << "\\noindent  Number of 2SLGBTQIA+ persons (Organizing Committee +
+                Participants): #{actual_count}/#{total_count}\n\n\n"
+  end
+
+  def number_of_medical_condition
+    total_count = 0
+    actual_count = 0
+    @confirmed_invitations&.each do |invite|
+      result = invite.person&.demographic_data&.result
+      total_count += 1
+      actual_count += 1 unless result.nil? || result["disability"].nil?
+    end
+    @text << "\\noindent Number of persons with disability, impairment, or ongoing medical
+                condition (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
+  end
+
+  def minority_current_affiliation
+    total_count = 0
+    actual_count = 0
+    @confirmed_invitations&.each do |invite|
+      result = invite.person&.demographic_data&.result
+      total_count += 1
+      actual_count += 1 unless result.nil? || result["minorities"].nil?
+    end
+    @text << "\\noindent Number of persons from under-represented minority in the country of current
+                affiliation (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
+  end
+
+  def number_of_stem_persons
+    total_count = 0
+    actual_count = 0
+    @confirmed_invitations&.each do |invite|
+      result = invite.person&.demographic_data&.result
+      total_count += 1
+      actual_count += 1 unless result.nil? || result["stem"].nil?
+    end
+    @text << "\\noindent Number of persons from STEM (Organizing Committee +
+                Participants): #{actual_count}/#{total_count}\n\n\n"
+  end
+
+  def area_minority
+    total_count = 0
+    actual_count = 0
+    @confirmed_invitations&.each do |invite|
+      result = invite.person&.demographic_data&.result
+      total_count += 1
+      actual_count += 1 unless result.nil? || result["underRepresented"].nil?
+    end
+    @text << "\\noindent Number of persons in under-represented minority in your area
+                (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
   end
 end
