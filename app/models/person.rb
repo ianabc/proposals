@@ -1,5 +1,5 @@
 class Person < ApplicationRecord
-  attr_accessor :is_lead_organizer, :province, :state, :skip_person_validation
+  attr_accessor :province, :state, :skip_person_validation
 
   validates :firstname, :lastname, presence: true
   validates :email, presence: true, uniqueness: true
@@ -18,12 +18,18 @@ class Person < ApplicationRecord
     "#{firstname} #{lastname}"
   end
 
-  validate :lead_organizer_attributes, if: :is_lead_organizer, on: :update
+  validate :lead_organizer_attributes, if: :lead_organizer?, on: :update
   validate :common_fields, on: :update
 
   def lead_organizer_attributes
     errors.add('Street 1', "can't be blank") if street_1.blank?
     errors.add('City', "can't be blank") if city.blank?
+  end
+
+  def lead_organizer?
+    proposal_roles.joins(:role)
+                  .where(roles: { name: 'lead_organizer' })
+                  .present?
   end
 
   def region_type

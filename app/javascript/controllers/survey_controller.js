@@ -61,7 +61,7 @@ export default class extends Controller {
   }
 
   handleDisabilityOptions() {
-    if(this.disabilityTarget.value === 'Yes' || this.disabilityTarget.value === 'Prefer') {
+    if(this.disabilityTarget.value === 'Yes' || this.disabilityTarget.value === 'Prefer not to answer') {
       alert('BIRS is committed to providing an experience that is accessible to all attendees. If you would like to discuss accommodations that could enhance your time with BIRS, please contact the BIRS Program Coordinator at birs@birs.ca.')
     }
   }

@@ -177,8 +177,6 @@
 \fancyhf{}
 \fancyhead[CO,CE]{\bfseries Banff International Research Station <%= @year %> Proposal Submission}
 
-% \begin{document}
-
 \thispagestyle{empty}
 
 \newpage
@@ -197,6 +195,8 @@
 
 \setcounter{page}{1}
 
+%---------------------------- begin proposal contents ----------------------------%
 <%= yield %>
+%---------------------------- end proposal contents ----------------------------%
 
 \end{document}
