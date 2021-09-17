@@ -88,4 +88,15 @@ namespace :birs do
       end
     end
   end
+
+  desc "Update ethnicity data in database"
+  task survey_ethnicity_field: :environment do
+    DemographicData.all.each do |data|
+      case data.result["ethnicity"]
+      when 'Latin American'
+        data.result["ethnicity"] = 'Hispanic/Latin American'
+        data.save
+      end
+    end
+  end
 end
