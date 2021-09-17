@@ -1,10 +1,11 @@
 class ProposalPdfService
-  attr_reader :proposal, :temp_file, :table
+  attr_reader :proposal, :temp_file, :table, :user
 
-  def initialize(proposal_id, file, input)
+  def initialize(proposal_id, file, input, user)
     @proposal = Proposal.find(proposal_id)
     @temp_file = file
     @input = input
+    @user = user
   end
 
   def generate_latex_file
@@ -192,6 +193,10 @@ class ProposalPdfService
     user_defined_fields
     proposal_bibliography
     proposal_participants
+    return @text unless @user.staff_member?
+
+    @text << "\\pagebreak"
+    proposal_organizing_committee
     @text
   end
 
@@ -290,7 +295,7 @@ class ProposalPdfService
   def proposal_bibliography
     return if proposal.bibliography.blank?
 
-    @text << add_bibliography_heading(bibliography)
+    @text << add_bibliography_heading(proposal.bibliography)
   end
 
   def user_defined_fields
@@ -340,6 +345,7 @@ class ProposalPdfService
                     .pluck(:person_id)).pluck(:academic_status)
     return [] if careers.blank?
 
+    careers.delete(nil)
     careers.uniq.sort
   end
 
@@ -380,5 +386,38 @@ class ProposalPdfService
 
   def delatex(string)
     LatexToPdf.escape_latex(string)
+  end
+
+  def proposal_organizing_committee
+    @text << "\\section*{Organizing Committee}\n\n"
+    confirmed_organizer
+    @text << "\\subsection*{A) Early-Career Researcher}\n\n"
+    organizer_early_career
+    @text << "\\subsection*{B) Under represented in STEM}"
+    organizer_represented_stem
+    @text
+  end
+
+  def confirmed_organizer
+    @confirmed_organizers = proposal.invites.where(status: "confirmed",
+                                                   invited_as: "Organizer")
+  end
+
+  def organizer_early_career
+    @confirmed_organizers&.each do |organizer|
+      person = organizer&.person
+      next if person.academic_status.nil?
+
+      @text << "\\noindent #{person.fullname} : #{person.academic_status}\n \n \n"
+    end
+  end
+
+  def organizer_represented_stem
+    @confirmed_organizers&.each do |organizer|
+      result = organizer.person&.demographic_data&.result
+      next if result.nil? || result["stem"] == "Prefer not to answer"
+
+      @text << "\\noindent #{organizer.person.fullname} : #{result['stem']}\n \n \n"
+    end
   end
 end

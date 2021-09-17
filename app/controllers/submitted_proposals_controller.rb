@@ -130,7 +130,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_pdf_file
-    prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
+    prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
                                    .generate_latex_file
 
     @year = @proposal&.year || Date.current.year.to_i + 2
@@ -173,10 +173,11 @@ class SubmittedProposalsController < ApplicationController
     temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
     if @counter == 1
       @proposal = Proposal.find_by(id: @proposal_ids)
-      ProposalPdfService.new(@proposal.id, temp_file, 'all').single_booklet(@table)
+      ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user).single_booklet(@table)
     else
       @proposal = Proposal.find_by(id: @proposal_ids.split(',').first)
-      ProposalPdfService.new(@proposal_ids.split(',').first, temp_file, 'all').multiple_booklet(@table, @proposal_ids)
+      ProposalPdfService.new(@proposal_ids.split(',').first, temp_file, 'all', current_user)
+                        .multiple_booklet(@table, @proposal_ids)
     end
     @fh = File.open("#{Rails.root}/tmp/#{temp_file}")
     write_file
