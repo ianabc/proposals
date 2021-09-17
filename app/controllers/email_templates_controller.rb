@@ -1,6 +1,6 @@
 class EmailTemplatesController < ApplicationController
   load_and_authorize_resource
-  before_action :set_template, only: %i[show]
+  before_action :set_template, only: %i[show edit update destroy]
 
   def index
     @email_templates = EmailTemplate.all
@@ -12,7 +12,6 @@ class EmailTemplatesController < ApplicationController
 
   def create
     @email_template = EmailTemplate.new(email_template_params)
-
     if @email_template.save
       redirect_to email_templates_path, notice: 'Email Template successfully created'
     else
@@ -21,6 +20,21 @@ class EmailTemplatesController < ApplicationController
   end
 
   def show; end
+
+  def edit; end
+
+  def update
+    if @email_template.update(email_template_params)
+      redirect_to email_templates_path, notice: 'Email Template successfully updated'
+    else
+      redirect_to edit_email_template_path(@email_template), alert: @email_template.errors.full_messages
+    end
+  end
+
+  def destroy
+    @email_template.destroy
+    redirect_to email_templates_path, notice: 'Email Template successfully deleted'
+  end
 
   private
 
