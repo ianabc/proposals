@@ -55,8 +55,9 @@ class InviteMailer < ApplicationMailer
 
   def email_placeholders
     placeholders = { "invite_deadline_date" => @invite&.deadline_date&.to_date.to_s,
-                     "invite_url" =>
-                     "<a href='#{invite_url(code: @invite&.code)}'>#{invite_url(code: @invite&.code)}</a>" }
+                     "invite_url" => "<a href='#{invite_url(code: @invite&.code)}'>#{invite_url(code: @invite&.code)}</a>",
+                     "invited_as" => invited_as_text(@invite)
+                   }
     placeholders.each { |k, v| @email_body = @body.gsub(k, v) }
     @proposal = @invite.proposal
     @person = @invite.person
@@ -65,8 +66,9 @@ class InviteMailer < ApplicationMailer
   def mail_to_lead_organizer
     @lead_organizer = params[:lead_organizer]
     placeholders = { "invite_deadline_date" => @invite&.deadline_date&.to_date.to_s,
-                     "invite_url" =>
-                     "<a href='#{invite_url(code: 123)}'>#{invite_url(code: 123)}</a>" }
+                     "invite_url" => "<a href='#{invite_url(code: 123)}'>#{invite_url(code: 123)}</a>",
+                     "invited_as" => invited_as_text(@invite)
+                    }
     placeholders.each { |k, v| @email_body = @body.gsub(k, v) }
     @proposal = @invite.proposal
     @person = @invite.person
