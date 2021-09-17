@@ -14,14 +14,21 @@ export default class extends Controller {
     $("input:checked").each(function() {
       array.push(this.dataset.value);
     });
-    let data = new FormData()
-    data.append("ids", array)
-    var url = `/submitted_proposals/edit_flow`
-    Rails.ajax({
-      url,
-      type: "POST",
-      data
-    })
+    if(typeof array[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      array = array.slice(1)
+      let data = new FormData()
+      data.append("ids", array)
+      var url = `/submitted_proposals/edit_flow`
+      Rails.ajax({
+        url,
+        type: "POST",
+        data
+      })
+    }
   }
 
   emailTemplate() {
