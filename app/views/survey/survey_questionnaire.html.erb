@@ -10,7 +10,7 @@
                   <div class="col-lg-8">
                     <div class="mb-3"> 
                       <div>
-                        <label>1. What is your country of citizenship?</label>
+                        <label>1. What is your country of citizenship? &dagger;</label>
                         <%= f.select "citizenships", options_for_select(citizenship_options), {}, data: {'survey-target': 'citizenship',action: 'click->survey#handleCitizenshipOptions'}, class: "form-control", multiple: true, required: true %>
                       </div>
                       <div class="hidden" data-survey-target="otherCitizenship">
@@ -31,7 +31,7 @@
                     
                     <div class="mb-3">
                       <div>
-                        <label>3. How do you describe your ethnicity?</label>
+                        <label>3. How do you describe your ethnicity? &dagger;</label>
                         <div>
                           <label>If you identify as biracial or multiracial, please select all that apply by holding down Ctrl/⌘ while you select.</label>
                         </div>
@@ -45,7 +45,7 @@
                     
                     <div class="mb-3">
                       <div>
-                        <label>4. How do you describe your gender?</label>
+                        <label>4. How do you describe your gender? &dagger;</label>
                         <%= f.select "gender", options_for_select(gender_options),{ include_blank: '' }, data: {'survey-target': 'gender',action: 'click->survey#handleGenderOptions'}, class: "form-select", required: true %>
                       </div>
                       <div class="hidden" data-survey-target="otherGender">
@@ -91,7 +91,7 @@
 
                     <div class="mb-3">
                       <div>
-                        <label>8. Do you consider yourself to be part of an under-represented minority in STEM?</label>
+                        <label>8. Do you consider yourself to be part of an under-represented minority in STEM? &dagger;</label>
                         <div>
                           <label>
                             <em>For more information about under-represented minorities, please look at our 

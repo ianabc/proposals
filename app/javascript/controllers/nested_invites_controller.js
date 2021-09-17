@@ -61,6 +61,7 @@ export default class extends Controller {
     let invitedAs = event.currentTarget.id
     $.post(`/submit_proposals/invitation_template?proposal=${id}&invited_as=${invitedAs}`, function(data) {
         $('#subject').text(data.subject)
+        $('#email_body_preview').html(data.body)
         $('#email_body').text(data.body)
         $("#email-preview").modal('show')
       }
@@ -74,7 +75,7 @@ export default class extends Controller {
     let _this = this
     let inviteParticipant = event.currentTarget.dataset.participant || 0
     let inviteOrganizer = event.currentTarget.dataset.organizer || 0
-    var body = $('#email_body').val()
+    var body = $('#email_body').text()
     $.post(`/submit_proposals?proposal=${id}&create_invite=true.js`,
       $('form#submit_proposal').serialize(), function(data) {
         if (body.includes("supporting organizer")) {
@@ -99,7 +100,7 @@ export default class extends Controller {
   sendInviteEmails(id, invitedAs, inviteId, data) {
     var url = ''
     let formData = new FormData()
-    let emailBody = $('#email_body').val()
+    let emailBody = $('#email_body').text()
     if(data.errors.length > 0 && data.counter === 0) {
        $.each(data.errors, function(index, error) {
         toastr.error(error)

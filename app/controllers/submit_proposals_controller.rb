@@ -164,7 +164,13 @@ class SubmitProposalsController < ApplicationController
   end
 
   def preview_placeholders
-    @template_body = @email_template.body
+    @template_body = @email_template&.body
+
+    if @template_body.blank?
+      redirect_to new_email_template_path, alert: 'No email template found!'
+      return
+    end
+
     placeholders = { "Proposal_lead_organizer_name" => @proposal&.lead_organizer&.fullname,
                      "proposal_type" => @proposal.proposal_type&.name,
                      "proposal_title" => @proposal&.title }
