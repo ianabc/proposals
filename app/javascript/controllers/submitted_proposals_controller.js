@@ -59,7 +59,7 @@ export default class extends Controller {
     $("input:checked").each(function() {
       array.push(this.dataset.value);
     });
-    if(typeof array[0] === "undefined")
+    if(typeof array[1] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
@@ -90,6 +90,7 @@ export default class extends Controller {
       array.push(this.dataset.value);
     });
     if(this.templatesTarget.value) {
+      array = array.slice(1)
       array = this.checkArray(array)
       $.post(`/submitted_proposals/approve_decline_proposals?proposal_ids=${array}`,
         $("#approve_decline_proposals").serialize(), function() {

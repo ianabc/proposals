@@ -3,6 +3,7 @@ class SubmittedProposalsController < ApplicationController
   before_action :authorize_user
   before_action :set_proposals, only: %i[index download_csv]
   before_action :set_proposal, except: %i[index download_csv]
+  before_action :template_params, only: %i[approve_decline_proposals]
 
   def index; end
 
@@ -71,21 +72,17 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def approve_decline_proposals
-    @errors = []
-    template_params
     params[:proposal_ids]&.split(',')&.each do |id|
-      @proposal = Proposal.find_by(id: id)
-      @email = Email.new(email_params.merge(proposal_id: @proposal.id))
-      change_status
-      unless @check_status
-        @errors << "Proposal status cannot be changed"
-        render json: @errors.flatten.to_json, status: :unprocessable_entity
-        return
-      end
+      create_birs_email(id)
+      render_error and return unless @check_status
+
       send_email_proposals
     end
-    head :ok if @errors.empty?
-    render json: @errors.flatten.to_json, status: :unprocessable_entity unless @errors.empty?
+    if @errors.empty?
+      head :ok
+    else
+      render json: @errors.flatten.to_json, status: :unprocessable_entity
+    end
   end
 
   def proposals_booklet
@@ -126,9 +123,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def change_status
-    @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
-    @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
-    @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
+    @check_status = @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
+    @check_status = @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
+    @check_status = @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
   end
 
   def latex_temp_file
@@ -158,7 +155,7 @@ class SubmittedProposalsController < ApplicationController
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: query_edit_flow, fileMain: File.open(@pdf_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
-    puts response
+    Rails.logger.debug response
 
     if response.body.include?("errors")
       Rails.logger.debug { "\n\n*****************************************\n\n" }
@@ -226,5 +223,23 @@ class SubmittedProposalsController < ApplicationController
 
   def authorize_user
     authorize! :manage, current_user
+  end
+
+  def create_birs_email(id)
+    @proposal = Proposal.find_by(id: id)
+    @email = Email.new(email_params.merge(proposal_id: @proposal.id))
+    change_status
+  end
+
+  def render_error
+    @errors = []
+    @errors << "Proposal status cannot be changed"
+    render json: @errors.flatten.to_json, status: :unprocessable_entity
+  end
+
+  def add_files
+    params[:files]&.each do |file|
+      @email.files.attach(file)
+    end
   end
 end
