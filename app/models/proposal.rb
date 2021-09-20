@@ -35,6 +35,7 @@ class Proposal < ApplicationRecord
   validate :minimum_organizers, if: :is_submission
   validate :preferred_locations, if: :is_submission
   validate :not_before_opening, if: :is_submission
+  before_save :strip_whitespace
   before_save :create_code, if: :is_submission
 
   enum status: {
@@ -125,7 +126,7 @@ class Proposal < ApplicationRecord
   end
 
   def list_of_organizers
-    invites.where(invites: { invited_as: 'Organizer' }).map(&:person)
+    invites.where(invites: { invited_as: 'Organizer', status: 'confirmed' }).map(&:person)
            .map(&:fullname).join(', ')
   end
 
@@ -149,9 +150,9 @@ class Proposal < ApplicationRecord
     CSV.generate(headers: true) do |csv|
       csv << attributes
       all.find_each do |proposal|
-        csv << [proposal.code, proposal.title, proposal.proposal_type.name,
-                proposal.lead_organizer.fullname, proposal.the_locations,
-                proposal.status, proposal.updated_at.to_date]
+        csv << [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
+                proposal&.lead_organizer&.fullname, proposal&.the_locations,
+                proposal&.status, proposal&.updated_at&.to_date]
       end
     end
   end
@@ -164,10 +165,26 @@ class Proposal < ApplicationRecord
     preamble || ''
   end
 
+  def max_supporting_organizers
+    proposal_type&.co_organizer
+  end
+
+  def max_participants
+    proposal_type&.participant
+  end
+
+  def max_virtual_participants
+    300 # temp until max_virtual setting is added
+  end
+
+  def max_total_participants
+    max_participants + max_virtual_participants
+  end
+
   private
 
   def not_before_opening
-    return if skip_submission_validation
+    return if draft?
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
     errors.add("Late submission - ", "proposal submissions are not allowed
@@ -208,5 +225,11 @@ class Proposal < ApplicationRecord
 
     errors.add('Preferred Locations:', "Please select at least one preferred
                  location".squish)
+  end
+
+  def strip_whitespace
+    attributes.each do |key, value|
+      self[key] = value.strip if value.respond_to?(:strip)
+    end
   end
 end

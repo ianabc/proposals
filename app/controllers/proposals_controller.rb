@@ -1,10 +1,14 @@
 class ProposalsController < ApplicationController
-  before_action :set_proposal, only: %w[show edit destroy ranking locations]
-  before_action :set_careers, only: %w[show edit]
   before_action :authenticate_user!
+  before_action :set_proposal, only: %w[show edit destroy ranking locations]
+  before_action :authorize_user, only: %w[show edit]
+  before_action :set_careers, only: %w[show edit]
 
   def index
     @proposals = current_user&.person&.proposals
+                             &.each_with_object([]) do |proposal, props|
+      props << proposal if current_user&.organizer?(proposal)
+    end
   end
 
   def ranking
@@ -45,7 +49,7 @@ class ProposalsController < ApplicationController
   def latex_input
     proposal_id = latex_params[:proposal_id]
     session[:proposal_id] = proposal_id
-    ProposalPdfService.new(proposal_id, latex_temp_file, latex_params[:latex])
+    ProposalPdfService.new(proposal_id, latex_temp_file, latex_params[:latex], current_user)
                       .generate_latex_file
 
     head :ok
@@ -56,7 +60,7 @@ class ProposalsController < ApplicationController
     proposal_id = params[:id]
     @proposal = Proposal.find_by(id: proposal_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
-    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
+    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
                                       .generate_latex_file.to_s
     @proposal.review! if current_user.staff_member? && @proposal.may_review?
 
@@ -71,11 +75,19 @@ class ProposalsController < ApplicationController
     @proposal = Proposal.find_by(id: prop_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
 
-    field_input = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
-    field_input = LatexToPdf.escape_latex(field_input) if @proposal.no_latex
-    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, field_input)
+    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, field_input, current_user)
                                       .generate_latex_file.to_s
     render_latex
+  end
+
+  def field_input
+    temp_file = "#{Rails.root}/tmp/#{latex_temp_file}"
+    field_input = 'all'
+    if File.exist?(temp_file)
+      field_input = File.read(temp_file)
+      field_input = LatexToPdf.escape_latex(field_input) if @proposal.no_latex
+    end
+    field_input
   end
 
   def destroy
@@ -166,5 +178,14 @@ class ProposalsController < ApplicationController
   def set_careers
     @careers = Person.where(id: @proposal.participants.pluck(:person_id))
                      .pluck(:academic_status)
+  end
+
+  def authorize_user
+    return if params[:action] == 'show' &&
+              (current_user.staff_member? || current_user.organizer?(@proposal))
+
+    return if params[:action] == 'edit' && current_user.lead_organizer?(@proposal)
+
+    raise CanCan::AccessDenied
   end
 end

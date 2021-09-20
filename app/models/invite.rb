@@ -6,6 +6,7 @@ class Invite < ApplicationRecord
 
   before_validation :downcase_email, :assign_person
   before_save :generate_code
+  before_save :strip_whitespace
 
   validates :firstname, :lastname, :email, :invited_as,
             :deadline_date, :person_id, presence: true
@@ -23,9 +24,18 @@ class Invite < ApplicationRecord
   def add_person
     return if [firstname, lastname, email].map(&:blank?).any?
 
-    person = Person.find_by(email: email.downcase)
-    person ||= Person.create(email: email.downcase, firstname: firstname,
-                             lastname: lastname)
+    email.downcase!
+    person = Person.where(email: email).first
+
+    if person.blank?
+      begin
+        person = Person.create(email: email, firstname: firstname,
+                               lastname: lastname)
+      rescue ActiveRecord::RecordNotUnique
+        person = Person.find_by(email: email)
+      end
+    end
+
     self.person = person
   end
 
@@ -67,5 +77,11 @@ class Invite < ApplicationRecord
 
     errors.add('Duplicate:', "Same email cannot be used to invite already
                               invited organizers or participants.".squish)
+  end
+
+  def strip_whitespace
+    attributes.each do |key, value|
+      self[key] = value.strip if value.respond_to?(:strip)
+    end
   end
 end

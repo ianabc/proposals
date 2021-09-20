@@ -1,5 +1,7 @@
 class SubmitProposalsController < ApplicationController
-  before_action :set_proposal, only: %i[create]
+  before_action :set_proposal, only: %i[create invitation_template]
+  before_action :authorize_user, only: %w[create create_invite]
+
   def new
     @proposals = ProposalForm.new
   end
@@ -9,12 +11,11 @@ class SubmitProposalsController < ApplicationController
     update_proposal_ams_subject_code
     submission = SubmitProposalService.new(@proposal, params)
     submission.save_answers
-    @proposal.skip_submission_validation = true unless @proposal.draft?
     session[:is_submission] = @proposal.is_submission = submission.is_final?
 
     create_invite and return if params[:create_invite]
 
-    if submission.has_errors?
+    if @proposal.is_submission && submission.has_errors?
       redirect_to edit_proposal_path(@proposal), alert: "Your submission has
           errors: #{submission.error_messages}.".squish
       return
@@ -31,23 +32,35 @@ class SubmitProposalsController < ApplicationController
 
   def thanks; end
 
+  def invitation_template
+    invited_as = params[:invited_as]
+    case invited_as
+    when 'organizer'
+      @email_template = EmailTemplate.find_by(email_type: "organizer_invitation_type")
+    when 'participant'
+      @email_template = EmailTemplate.find_by(email_type: "participant_invitation_type")
+    end
+    preview_placeholders
+
+    render json: { subject: @email_template.subject, body: @template_body }, status: :ok
+  end
+
   private
 
   def create_invite
     return unless request.xhr?
 
-    errors = []
+    @errors = []
+    counter = 0
     params[:invites_attributes].each_value do |invite|
-      invite = @proposal.invites.new(invite_params(invite))
-      invite.save
-      errors << invite.errors.full_messages unless invite.errors.empty?
+      @invite = @proposal.invites.new(invite_params(invite))
+      counter += 1 if @invite.save
+      next if @invite.errors.empty?
+
+      invalid_email_error_message
     end
 
-    if errors.empty?
-      head :ok
-    else
-      render json: errors.flatten.to_json, status: :unprocessable_entity
-    end
+    render json: { errors: @errors, counter: counter }, status: :ok
   end
 
   def confirm_submission(attachment)
@@ -80,7 +93,7 @@ class SubmitProposalsController < ApplicationController
 
   def generate_proposal_pdf
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
-    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
+    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user)
                                       .generate_latex_file.to_s
 
     begin
@@ -134,10 +147,33 @@ class SubmitProposalsController < ApplicationController
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
     return if File.exist?("#{Rails.root}/tmp/#{temp_file}")
 
-    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all')
+    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user)
                                       .generate_latex_file.to_s
-    File.new("#{Rails.root}/tmp/#{temp_file}", 'w') do |io|
-      io.write(@latex_infile)
+  end
+
+  def invalid_email_error_message
+    @errors << @invite.errors.full_messages
+    @errors.flatten!
+    return unless @invite.errors.added? :email, "is invalid"
+
+    @errors[@errors.index("Email is invalid")] = "Email is invalid: #{@invite.email}"
+  end
+
+  def authorize_user
+    raise CanCan::AccessDenied unless current_user&.lead_organizer?(@proposal)
+  end
+
+  def preview_placeholders
+    @template_body = @email_template&.body
+
+    if @template_body.blank?
+      redirect_to new_email_template_path, alert: 'No email template found!'
+      return
     end
+
+    placeholders = { "Proposal_lead_organizer_name" => @proposal&.lead_organizer&.fullname,
+                     "proposal_type" => @proposal.proposal_type&.name,
+                     "proposal_title" => @proposal&.title }
+    placeholders.each { |k, v| @template_body.gsub!(k, v) }
   end
 end

@@ -18,8 +18,11 @@ Rails.application.routes.draw do
   resources :submitted_proposals do
     collection do
       get :download_csv
+      post :proposals_booklet
+      get :download_booklet
       post :edit_flow
       post :approve_decline_proposals
+      post :table_of_content
     end
     member do
       post :staff_discussion
@@ -30,6 +33,7 @@ Rails.application.routes.draw do
   get :invite, to: 'invites#show'
   get 'expired' => 'invites#expired'
   post 'cancel' => 'invites#cancel'
+  post 'cancel_confirmed_invite' => 'invites#cancel_confirmed_invite'
 
   resources :proposals do
     post :latex, to: 'proposals#latex_input'
@@ -47,6 +51,7 @@ Rails.application.routes.draw do
         post :inviter_response
         post :invite_reminder
         post :invite_email
+        post :new_invite
       end
       collection do
         get :thanks
@@ -67,6 +72,7 @@ Rails.application.routes.draw do
   resources :submit_proposals do
     collection do
       get :thanks
+      post :invitation_template
     end
   end
   resources :proposal_types do

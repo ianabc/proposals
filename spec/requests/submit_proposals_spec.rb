@@ -1,6 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe "/submit_proposals", type: :request do
+  before do
+    person = create(:person, :with_proposals)
+    prop = person.proposals.first
+    authenticate_for_controllers(person, 'lead_organizer')
+    expect(person.user.lead_organizer?(prop)).to be_truthy
+  end
+
   let(:proposal_type) { create(:proposal_type) }
   let(:proposal) { create(:proposal, proposal_type: proposal_type) }
 
@@ -67,17 +74,50 @@ RSpec.describe "/submit_proposals", type: :request do
         location_ids: location.id, no_latex: false, create_invite: true }
     end
 
-    context 'with valid invite params' do
+    context 'with valid invite params, as lead organizer' do
       before do
-        post submit_proposals_url, params: params, xhr: true
+        @prop = @person.proposals.first
+        expect(@person.user.lead_organizer?(@prop)).to be_truthy
+        @invites_count = @prop.invites.count
+        post submit_proposals_url, params: params.merge(proposal: @prop.id), xhr: true
       end
 
+      it { expect(response).to have_http_status(:ok) }
+
       it "updates the proposal invites count" do
-        expect(proposal.invites.count).to eq(1)
+        expect(@prop.invites.count).to eq(@invites_count + 1)
       end
     end
 
-    context 'with invalid invite params' do
+    context 'with valid invite params, not as lead organizer' do
+      before do
+        expect(proposal.invites.count).to eq(0)
+        post submit_proposals_url, params: params, xhr: true
+      end
+
+      it { expect(response).to have_http_status(:forbidden) }
+
+      it "does not update the proposal invites count" do
+        expect(proposal.invites.count).to eq(0)
+      end
+    end
+
+    context 'with invalid invite params, as lead organizer' do
+      before do
+        @prop = @person.proposals.first
+        @invites_count = @prop.invites.count
+
+        post submit_proposals_url, params: params.merge(proposal: @prop.id), xhr: true
+      end
+
+      it { expect(response).to have_http_status(:ok) }
+
+      it "does not update the proposal invites count" do
+        expect(proposal.invites.count).not_to eq(@invites_count + 1)
+      end
+    end
+
+    context 'with invalid invite params, not as lead organizer' do
       before do
         proposal.invites.new(invites_attributes['0']).save
         expect(proposal.invites.count).to eq(1)
@@ -85,7 +125,7 @@ RSpec.describe "/submit_proposals", type: :request do
         post submit_proposals_url, params: params, xhr: true
       end
 
-      it { expect(response).to have_http_status(:unprocessable_entity) }
+      it { expect(response).to have_http_status(:forbidden) }
 
       it "does not update the proposal invites count" do
         expect(proposal.invites.count).to eq(1)

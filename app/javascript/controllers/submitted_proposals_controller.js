@@ -3,7 +3,11 @@ import Rails from '@rails/ujs'
 import toastr from 'toastr'
 
 export default class extends Controller {
-  static targets = [ "templates" ]
+  static targets = [ "toc", "ntoc", "templates" ]
+
+  connect () {
+    this.tocTarget.checked = true;
+  }
 
   editFlow() {
     var array = [];
@@ -15,6 +19,7 @@ export default class extends Controller {
       toastr.error("Please select any checkbox!")
     }
     else {
+      array = array.slice(1)
       let data = new FormData()
       data.append("ids", array)
       var url = `/submitted_proposals/edit_flow`
@@ -115,5 +120,42 @@ export default class extends Controller {
       array = array.slice(0, length-1)
     }
     return array
+  }
+
+  tableOfContent() {
+    var array = [];
+    $("input:checked").each(function() {
+      array.push(this.dataset.value);
+    });
+    if(typeof array[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      $.post(`/submitted_proposals/table_of_content?proposals=${array}`,
+        $('form#submitted-proposal').serialize(), function(data) {
+          $('#proposals').text(data.proposals)
+          $("#table-window").modal('show')
+        }
+      )
+    }
+  }
+
+  booklet() {
+    let ids = $('#proposals').text().slice(1)
+    let table = ''
+    if(this.tocTarget.checked) {
+      table = "toc"
+    }
+    else {
+      table = "ntoc"
+    }
+    if(table !== '') {
+      $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
+        function() {
+          document.getElementById("booklet").click();
+          window.location.reload()
+      })
+    }
   }
 }

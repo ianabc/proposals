@@ -1,7 +1,8 @@
 class InvitesController < ApplicationController
   before_action :authenticate_user!, except: %i[show inviter_response thanks expired]
-  before_action :set_proposal, only: %i[invite_reminder invite_email]
-  before_action :set_invite, only: %i[show inviter_response cancel invite_reminder invite_email]
+  before_action :set_proposal, only: %i[invite_reminder invite_email new_invite]
+  before_action :set_invite,
+                only: %i[show inviter_response cancel invite_reminder invite_email new_invite cancel_confirmed_invite]
   before_action :set_invite_proposal, only: %i[show]
 
   def show
@@ -25,13 +26,22 @@ class InvitesController < ApplicationController
   end
 
   def inviter_response
-    @invite.update(response: response_params, status: 'confirmed')
-    unless @invite.no?
-      proposal_role
-      create_user if @invite.invited_as == 'Organizer' && !@invite.person.user
+    if invalid_response?
+      redirect_to invite_url(code: @invite&.code), alert: 'Invalid answer'
+      return
     end
 
-    send_email_on_response
+    @invite.response = response_params
+    @invite.status = set_invite_status
+    @invite.skip_deadline_validation = true
+
+    if @invite.save
+      create_role
+      send_email_on_response
+    else
+      redirect_to invite_url(code: @invite&.code),
+                  alert: "Problem saving response: #{@invite.errors.full_messages}"
+    end
   end
 
   def invite_reminder
@@ -58,7 +68,25 @@ class InvitesController < ApplicationController
     redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
   end
 
+  def cancel_confirmed_invite
+    @proposal_role = @invite.person.proposal_roles.first
+    @proposal_role.destroy
+    @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
+    @invite.update(status: 'cancelled')
+    redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
+  end
+
+  def new_invite
+    @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
+    @invite.update(status: 'pending')
+    redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has become new invite!'
+  end
+
   private
+
+  def set_invite_status
+    response_params == 'no' ? nil : 'confirmed'
+  end
 
   def set_invite_proposal
     @proposal = Proposal.find_by(id: @invite&.proposal)
@@ -66,6 +94,17 @@ class InvitesController < ApplicationController
 
   def response_params
     params.require(:commit)&.downcase
+  end
+
+  def invalid_response?
+    %w[yes no maybe].none?(response_params)
+  end
+
+  def create_role
+    return if @invite.no?
+
+    proposal_role
+    create_user if @invite.invited_as == 'Organizer' && !@invite.person.user
   end
 
   def create_user
@@ -89,8 +128,11 @@ class InvitesController < ApplicationController
   end
 
   def send_invite_emails
+    @body = params[:body]
     @inviters.each do |invite|
-      InviteMailer.with(invite: invite, lead_organizer: @proposal.lead_organizer).invite_email.deliver_later
+      InviteMailer.with(invite: invite, body: @body).invite_email.deliver_later
+      InviteMailer.with(invite: invite, lead_organizer: @proposal.lead_organizer,
+                        body: @body).invite_email.deliver_later
     end
   end
 
@@ -99,7 +141,6 @@ class InvitesController < ApplicationController
     @invite.proposal.proposal_roles.create(role: role, person: @invite.person)
   end
 
-  # rubocop:disable Metrics/AbcSize
   def send_email_on_response
     @organizers = @invite.proposal.list_of_organizers.remove(@invite.person&.fullname)
 
@@ -107,10 +148,9 @@ class InvitesController < ApplicationController
       InviteMailer.with(invite: @invite).invite_decline.deliver_later
       redirect_to thanks_proposal_invites_path(@invite.proposal)
     else
-      InviteMailer.with(invite: @invite, token: @token, organizers: @organizers).invite_acceptance
-                  .deliver_later
+      InviteMailer.with(invite: @invite, organizers: @organizers)
+                  .invite_acceptance.deliver_later
       redirect_to new_person_path(code: @invite.code)
     end
   end
-  # rubocop:enable Metrics/AbcSize
 end

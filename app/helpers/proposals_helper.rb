@@ -12,7 +12,8 @@ module ProposalsHelper
   end
 
   def confirmed_participants(id, invited_as)
-    Invite.where('invited_as = ? AND proposal_id = ?', invited_as, id).where.not(status: 'cancelled')
+    Invite.where('invited_as = ? AND proposal_id = ?', invited_as, id)
+          .where.not(status: 'cancelled')
   end
 
   def proposal_type_year(proposal_type)
@@ -38,17 +39,26 @@ module ProposalsHelper
   end
 
   def proposal_roles(proposal_roles)
-    proposal_roles.joins(:role).where(person_id: current_user.person&.id).pluck('roles.name').map(&:titleize).join(', ')
+    proposal_roles.joins(:role).where(person_id: current_user.person&.id)
+                  .pluck('roles.name').map(&:titleize).join(', ')
   end
 
   def lead_organizer?(proposal_roles)
-    proposal_roles.joins(:role).where('person_id =? AND roles.name =?', current_user.person&.id,
+    proposal_roles.joins(:role).where('person_id = ? AND roles.name = ?',
+                                      current_user.person&.id,
                                       'lead_organizer').present?
+  end
+
+  def participant?(proposal_roles)
+    proposal_roles.joins(:role).where('person_id = ? AND roles.name = ?',
+                                      current_user.person&.id,
+                                      'Participant').present?
   end
 
   def show_edit_button?(proposal)
     return unless params[:action] == 'edit'
     return unless proposal.editable?
+
     lead_organizer?(proposal.proposal_roles)
   end
 
@@ -56,25 +66,13 @@ module ProposalsHelper
     proposal.proposal_ams_subjects.find_by(code: code)&.ams_subject_id
   end
 
-  # rubocop:disable Rails/OutputSafety
-  def organizer_intro(proposal)
-    types_with_intro = ['5 Day Workshop', 'Summer School']
-    return '' unless types_with_intro.include? proposal.proposal_type.name
-
-    "<p>5-Day Workshops and Summer Schools require a minimum of 2, and a maximum
-     of 4 total organizers per proposal. In accordance with BIRS' commitment to
-     equity, diversity and inclusion (EDI), the organizing committee should
-     contain at least one early-career researcher within ten years of their
-     doctoral degree. For applications with two organizers, at least one member
-     of the organizing committee must be from an under-represented community in
-     STEM disciplines. For applications with three or more organizers, at least
-     two members of the organizing committee must be from an under-represented
-     community in STEM disciplines.</p>".html_safe
+  def max_organizers(proposal)
+    numbers_to_words[proposal.max_supporting_organizers]
   end
-  # rubocop:enable Rails/OutputSafety
 
   def existing_organizers(invite)
-    organizers = invite.proposal.list_of_organizers.remove(invite.person&.fullname)
+    organizers = invite.proposal.list_of_organizers
+                       .remove(invite.person&.fullname)
     organizers.prepend(" and ") if organizers.present?
     organizers.strip.delete_suffix(",")
   end
@@ -124,11 +122,13 @@ module ProposalsHelper
   end
 
   def invite_deadline_date_color(invite)
-    'text-danger' if invite.status == 'pending' && invite.deadline_date.to_date < DateTime.now.to_date
+    'text-danger' if invite.status == 'pending' &&
+                     invite.deadline_date.to_date < DateTime.now.to_date
   end
 
   def graph_data(param, param2, proposal)
-    citizenships = proposal.demographics_data.pluck(:result).pluck(param, param2).flatten.reject do |s|
+    citizenships = proposal.demographics_data.pluck(:result)
+                           .pluck(param, param2).flatten.reject do |s|
       s.blank? || s.eql?("Other")
     end
     data = Hash.new(0)
@@ -149,19 +149,19 @@ module ProposalsHelper
 
   def gender_labels(proposal)
     data = graph_data("gender", "gender_other", proposal)
+    data = gender_graph(data)
     data.keys
   end
 
   def gender_values(proposal)
     data = graph_data("gender", "gender_other", proposal)
+    data = gender_graph(data)
     data.values
   end
 
-  # rubocop:disable Metrics/AbcSize
   def career_data(param, param2, proposal)
     person = Person.where.not(id: proposal.lead_organizer.id)
-    career_stage = person.where(id: proposal.invites.where(invited_as:
-      'Participant').pluck(:person_id)).pluck(param, param2).flatten.reject do |s|
+    career_stage = person.where(id: proposal.invites.where(invited_as: 'Participant').pluck(:person_id)).pluck(param, param2).flatten.reject do |s|
       s.blank? || s.eql?("Other")
     end
     data = Hash.new(0)
@@ -171,7 +171,6 @@ module ProposalsHelper
     end
     data
   end
-  # rubocop:enable Metrics/AbcSize
 
   def career_labels(proposal)
     data = career_data("academic_status", "other_academic_status", proposal)
@@ -184,7 +183,8 @@ module ProposalsHelper
   end
 
   def stem_graph_data(proposal)
-    citizenships = proposal.demographics_data.pluck(:result).pluck("stem").flatten.reject do |s|
+    citizenships = proposal.demographics_data.pluck(:result).pluck("stem")
+                           .flatten.reject do |s|
       s.blank? || s.eql?("Other")
     end
     data = Hash.new(0)
@@ -203,5 +203,57 @@ module ProposalsHelper
   def stem_values(proposal)
     data = stem_graph_data(proposal)
     data.values
+  end
+
+  def gender_graph(data)
+    if data.key?('Prefer not to answer') &&
+       data.key?('Gender fluid and/or non-binary person')
+      data = gender_add(data, 0)
+    else
+      single_data_delete(data)
+    end
+    data
+  end
+
+  def gender_add(data, values)
+    gender_option = ['Gender fluid and/or non-binary person', 'Prefer not to answer']
+    data.map do |k, v|
+      [
+        (values += v.to_i if gender_option.include?(k))
+      ]
+    end
+    gender_delete(data, values)
+  end
+
+  def gender_delete(data, values)
+    data.delete('Prefer not to answer')
+    data.delete('Gender fluid and/or non-binary person')
+    data.merge({ "Other" => values })
+  end
+
+  def single_data_delete(data)
+    data.map do |k, v|
+      [
+        case k
+        when 'Prefer not to answer'
+          single_gender_delete(data, 'Prefer not to answer', v)
+        when 'Gender fluid and/or non-binary person'
+          single_gender_delete(data, 'Gender fluid and/or non-binary person', v)
+        end
+      ]
+    end
+  end
+
+  def single_gender_delete(data, option, val)
+    data.delete(option)
+    data.merge({ "Other" => val })
+  end
+
+  def invite_first_name(invite)
+    invite.person&.firstname || invite.firstname
+  end
+
+  def invite_last_name(invite)
+    invite.person&.lastname || invite.lastname
   end
 end
