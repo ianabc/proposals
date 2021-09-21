@@ -60,6 +60,11 @@
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
                         </div>
+                        <% if @proposal.code.present? && params[:action] == 'show' %> 
+                          <div class="mb-3">
+                            <p>Code: <%= @proposal.code %></p>
+                          </div>
+                        <% end %>
                         <div class="mb-3 row">
                           <%= f.label :title, class: "required" %>
                           <div class="col-6 mt-2">
