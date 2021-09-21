@@ -17,10 +17,8 @@ class SubmittedProposalsController < ApplicationController
   def edit_flow
     params[:ids]&.split(',')&.each do |id|
       @proposal = Proposal.find_by(id: id.to_i)
-      unless @proposal.may_progress?
-        render json: { errors: 'Please select initial review proposal(s).' }, status: :unprocessable_entity
-        return
-      end
+      check_status and return unless @proposal.may_progress?
+
       post_to_editflow
     end
 
@@ -211,5 +209,9 @@ class SubmittedProposalsController < ApplicationController
 
   def authorize_user
     authorize! :manage, current_user
+  end
+
+  def check_status
+    render json: { errors: 'Please select initial review proposal(s).' }, status: :unprocessable_entity
   end
 end
