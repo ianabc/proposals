@@ -31,7 +31,13 @@
         <% end %>
       </td>
       <td class=<%= proposal_status_class(proposal.status) %> >
-        <%= proposal.status&.split('_')&.map(&:capitalize)&.join(' ') %>
+        <div class="form-group" data-submitted-proposals-target="proposalStatus" data-id=<%= proposal.id %> >
+          <label data-action="click->submitted-proposals#handleStatus" data-id=<%= proposal.id %>><%= proposal.status&.split('_')&.map(&:capitalize)&.join(' ') %></label>
+        </div>
+        <div class="hidden form-group" data-submitted-proposals-target="statusOptions" data-id=<%= proposal.id %> >
+          <input type="hidden" id="proposal_id" name="proposal_id" value="<%= proposal.id %>">
+          <%= select_tag :status, options_for_select(specific_proposal_statuses, proposal.status), include_blank: '', class: 'form-select', data: { 'action': 'click->submitted-proposals#proposalStatuses', 'submitted-proposals-target': 'status', 'id': proposal.id }, required: true %>
+        </div>
       </td>
       <td><%= proposal.outcome&.capitalize %></td>
       <td><%= proposal.updated_at.to_date %></td>

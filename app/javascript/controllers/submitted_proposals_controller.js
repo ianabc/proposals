@@ -3,7 +3,7 @@ import Rails from '@rails/ujs'
 import toastr from 'toastr'
 
 export default class extends Controller {
-  static targets = [ "toc", "ntoc", "templates" ]
+  static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus' ]
 
   connect () {
     this.tocTarget.checked = true;
@@ -157,6 +157,36 @@ export default class extends Controller {
           document.getElementById("booklet").click();
           window.location.reload()
       })
+    }
+  }
+
+  handleStatus() {
+    let currentProposalId = event.currentTarget.dataset.id
+    for(var i = 0; i < this.statusOptionsTargets.length; i++){
+      if(currentProposalId === this.statusOptionsTargets [`${i}`].dataset.id){
+        this.proposalStatusTargets [`${i}`].classList.add("hidden")
+        this.statusOptionsTargets [`${i}`].classList.remove("hidden")
+      }
+    }
+  }
+
+  proposalStatuses() {
+    let id = event.currentTarget.dataset.id
+    let status = ''
+    let _this = this
+    for(var i = 0; i < this.statusTargets.length; i++){
+      if(id === this.statusTargets [`${i}`].dataset.id){
+        status = this.statusTargets [`${i}`].value
+        $.post(`/submitted_proposals/${id}/update_status?status=${status}`, function() {
+          toastr.success('Proposal status has been updated!')
+          setTimeout(function() {
+            window.location.reload();
+          }, 1000)
+        })
+        .fail(function() {
+          toastr.error("Proposal status cannot be updated!")
+        });
+      }
     }
   }
 }
