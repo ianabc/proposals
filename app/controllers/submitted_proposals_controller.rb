@@ -9,6 +9,21 @@ class SubmittedProposalsController < ApplicationController
 
   def show; end
 
+  def edit; end
+
+  def update
+    @proposal.update(proposal_params)
+    submission = SubmitProposalService.new(@proposal, params)
+    submission.save_answers
+
+    if submission.has_errors?
+      redirect_to edit_submitted_proposal_url(@proposal), alert: "Your submission has
+          errors: #{submission.error_messages}.".squish
+      return
+    end
+    redirect_to edit_submitted_proposal_url(@proposal), notice: 'Proposal has been updated successfully!'
+  end
+
   def download_csv
     send_data @proposals.to_csv, filename: "submitted_proposals.csv"
   end
@@ -241,5 +256,26 @@ class SubmittedProposalsController < ApplicationController
     params[:files]&.each do |file|
       @email.files.attach(file)
     end
+  end
+
+  def proposal_params
+    params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
+                  :no_latex, :preamble, :bibliography)
+          .merge(ams_subject_ids: proposal_ams_subjects)
+          .merge(no_latex: params[:no_latex] == 'on')
+  end
+
+  def proposal_ams_subjects
+    @code1 = params.dig(:ams_subjects, :code1)
+    @code2 = params.dig(:ams_subjects, :code2)
+    update_proposal_ams_subject_code
+    [@code1, @code2]
+  end
+
+  def update_proposal_ams_subject_code
+    ProposalAmsSubject.create(ams_subject_id: @code1, proposal: @proposal,
+                              code: 'code1')
+    ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
+                              code: 'code2')
   end
 end

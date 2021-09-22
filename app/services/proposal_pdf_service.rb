@@ -407,11 +407,20 @@ class ProposalPdfService
 
   def organizer_early_career
     @confirmed_organizers&.each do |organizer|
-      person = organizer&.person
-      next if person.academic_status.nil?
+      @person = organizer&.person
+      next unless @person.academic_status.present? || @person.academic_status == "Post Doctoral"
 
-      @text << "\\noindent #{person.fullname} : #{person.academic_status}\n \n \n"
+      early_career
     end
+  end
+
+  def early_career
+    @text << if @person.first_phd_year.to_i >= Time.current.year - 10 &&
+                @person.first_phd_year.to_i <= Time.current.year
+               "\\noindent #{@person.fullname} : Yes\n \n \n"
+             else
+               "\\noindent #{@person.fullname} : No\n \n \n"
+             end
   end
 
   def organizer_represented_stem
