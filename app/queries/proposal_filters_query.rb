@@ -42,7 +42,6 @@ class ProposalFiltersQuery
   def filter_by_status(statuses)
     return @result if statuses.blank?
 
-    # @result.search_proposal_status(status).sort_by { |p| p.code || '' }
     r = []
     statuses.each do |status|
       r << @result.search_proposal_status(status).sort_by { |p| p.code || '' }
