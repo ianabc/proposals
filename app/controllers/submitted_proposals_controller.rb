@@ -3,10 +3,26 @@ class SubmittedProposalsController < ApplicationController
   before_action :authorize_user
   before_action :set_proposals, only: %i[index download_csv]
   before_action :set_proposal, except: %i[index download_csv]
+  before_action :template_params, only: %i[approve_decline_proposals]
 
   def index; end
 
   def show; end
+
+  def edit; end
+
+  def update
+    @proposal.update(proposal_params)
+    submission = SubmitProposalService.new(@proposal, params)
+    submission.save_answers
+
+    if submission.has_errors?
+      redirect_to edit_submitted_proposal_url(@proposal), alert: "Your submission has
+          errors: #{submission.error_messages}.".squish
+      return
+    end
+    redirect_to edit_submitted_proposal_url(@proposal), notice: 'Proposal has been updated successfully!'
+  end
 
   def download_csv
     send_data @proposals.to_csv, filename: "submitted_proposals.csv"
@@ -70,16 +86,18 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
-  def approve_status
-    @proposal.update(status: 'approved')
-    redirect_to submitted_proposals_url(@proposal),
-                notice: "Proposal has been approved."
-  end
+  def approve_decline_proposals
+    params[:proposal_ids]&.split(',')&.each do |id|
+      create_birs_email(id)
+      render_error and return unless @check_status
 
-  def decline_status
-    @proposal.update(status: 'declined')
-    redirect_to submitted_proposals_url(@proposal),
-                notice: "Proposal has been declined."
+      send_email_proposals
+    end
+    if @errors.empty?
+      head :ok
+    else
+      render json: @errors.flatten.to_json, status: :unprocessable_entity
+    end
   end
 
   def proposals_booklet
@@ -132,9 +150,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def change_status
-    @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
-    @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
-    @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
+    @check_status = @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
+    @check_status = @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
+    @check_status = @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
   end
 
   def latex_temp_file
@@ -164,7 +182,7 @@ class SubmittedProposalsController < ApplicationController
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: query_edit_flow, fileMain: File.open(@pdf_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
-    puts response
+    Rails.logger.debug response
 
     if response.body.include?("errors")
       Rails.logger.debug { "\n\n*****************************************\n\n" }
@@ -214,7 +232,62 @@ class SubmittedProposalsController < ApplicationController
     File.new(@pdf_path, 'w')
   end
 
+  def template_params
+    templates = params[:templates].split(": ")
+    type = "#{templates.first.downcase}_type" if templates.first.present?
+    template = templates.last
+    @email_template = EmailTemplate.find_by(email_type: type, title: template)
+    @email_template.update(subject: params[:subject], body: params[:body]) if @email_template.present?
+  end
+
+  def send_email_proposals
+    @email.cc_email = nil unless params[:cc]
+    @email.bcc_email = nil unless params[:bcc]
+    add_files
+    @email.email_organizers if @email.save
+    @errors << @email.errors.full_messages unless @email.errors.empty?
+  end
+
   def authorize_user
     authorize! :manage, current_user
+  end
+
+  def create_birs_email(id)
+    @proposal = Proposal.find_by(id: id)
+    @email = Email.new(email_params.merge(proposal_id: @proposal.id))
+    change_status
+  end
+
+  def render_error
+    @errors = []
+    @errors << "Proposal status cannot be changed"
+    render json: @errors.flatten.to_json, status: :unprocessable_entity
+  end
+
+  def add_files
+    params[:files]&.each do |file|
+      @email.files.attach(file)
+    end
+  end
+
+  def proposal_params
+    params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
+                  :no_latex, :preamble, :bibliography)
+          .merge(ams_subject_ids: proposal_ams_subjects)
+          .merge(no_latex: params[:no_latex] == 'on')
+  end
+
+  def proposal_ams_subjects
+    @code1 = params.dig(:ams_subjects, :code1)
+    @code2 = params.dig(:ams_subjects, :code2)
+    update_proposal_ams_subject_code
+    [@code1, @code2]
+  end
+
+  def update_proposal_ams_subject_code
+    ProposalAmsSubject.create(ams_subject_id: @code1, proposal: @proposal,
+                              code: 'code1')
+    ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
+                              code: 'code2')
   end
 end
