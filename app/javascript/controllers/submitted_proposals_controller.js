@@ -3,7 +3,7 @@ import Rails from '@rails/ujs'
 import toastr from 'toastr'
 
 export default class extends Controller {
-  static targets = [ "toc", "ntoc" ]
+  static targets = [ "toc", "ntoc", "templates" ]
 
   connect () {
     this.tocTarget.checked = true;
@@ -50,6 +50,77 @@ export default class extends Controller {
       $('#subject').val('')
       $('#body').val('')
     }
+  }
+
+  emailModal() {
+    event.preventDefault()
+
+    var array = [];
+    $("input:checked").each(function() {
+      array.push(this.dataset.value);
+    });
+    if(typeof array[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      let id = event.currentTarget.id
+      let _this = this
+      $.post(`/emails/email_types?type=${id}`, function(data) {
+        const selectBox = _this.templatesTarget;
+        selectBox.innerHTML = '';
+        const opt = document.createElement('option');
+        opt.innerHTML = ''
+        selectBox.appendChild(opt);
+        data.email_templates.forEach((item) => {
+          const opt = document.createElement('option');
+          opt.innerText = item
+          selectBox.appendChild(opt);
+        });
+        $("#email-template").modal('show')
+      })
+    }
+  }
+
+  sendEmails(event) {
+    event.preventDefault();
+
+    var array = [];
+    $("input:checked").each(function() {
+      array.push(this.dataset.value);
+    });
+    if(this.templatesTarget.value) {
+      array = array.slice(1)
+      array = this.checkArray(array)
+      $.post(`/submitted_proposals/approve_decline_proposals?proposal_ids=${array}`,
+        $("#approve_decline_proposals").serialize(), function() {
+          toastr.success("Emails have been sent!")
+          setTimeout(function() {
+            window.location.reload();
+          }, 2000)
+        }
+      )
+      .fail(function(response) {
+        let errors = response.responseJSON
+        $.each(errors, function(index, error) {
+          toastr.error(error)
+        })
+      });
+    }
+    else {
+      toastr.error("Please select any template")
+    }
+  }
+
+  checkArray(array) {
+    let length = array.length
+    if(typeof array [`${length - 1}`] === "undefined" && typeof array [`${length - 2}`] === "undefined") {
+      array = array.slice(0, length-2)
+    }
+    else if(length > 1 && typeof array [`${length - 1}`] === "undefined") {
+      array = array.slice(0, length-1)
+    }
+    return array
   }
 
   tableOfContent() {

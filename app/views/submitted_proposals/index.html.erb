@@ -65,6 +65,11 @@
                       <%= link_to "Download CSV", download_csv_submitted_proposals_url( {:format => :csv}.merge(params.permit!)), class: "btn btn-primary" %>
                     </div>
                     <%= render partial: "proposals" %>
+                    <div class="text-end m-3">
+                      <span data-action="click->submitted-proposals#emailModal" id="approve" class="btn btn-primary">Approve Selected Proposals</span>
+                      <span data-action="click->submitted-proposals#emailModal" id="decline" class="btn btn-primary">Decline Selected Proposals</span>
+                      <%= render 'email_templates' %>
+                    </div>
                   </div>
                   
                   <div class="tab-pane" id="tab-2" role="tabpanel">
