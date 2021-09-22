@@ -34,6 +34,11 @@ module ProposalsHelper
     Proposal.statuses.map { |k, v| [k.humanize.capitalize, v] }
   end
 
+  def specific_proposal_statuses
+    statuses = Proposal.statuses.reject { |k, _v| %w[approved declined].include?(k) }
+    statuses.map { |k, v| [k.humanize.capitalize, v] }
+  end
+
   def common_proposal_fields(proposal)
     proposal.proposal_form&.proposal_fields&.where(location_id: nil)
   end

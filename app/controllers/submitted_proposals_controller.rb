@@ -104,6 +104,18 @@ class SubmittedProposalsController < ApplicationController
     render json: { proposals: proposals }, status: :ok
   end
 
+  def update_status
+    status = params[:status]
+    if status.blank?
+      render json: {}, status: :unprocessable_entity
+      return
+    end
+
+    @proposal.update(status: status.to_i)
+
+    head :ok
+  end
+
   private
 
   def query_params?

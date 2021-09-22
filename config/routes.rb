@@ -24,6 +24,7 @@ Rails.application.routes.draw do
       post :table_of_content
     end
     member do
+      post :update_status
       post :staff_discussion
       post :send_emails
       post :approve_status
