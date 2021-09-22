@@ -35,7 +35,8 @@ module ProposalsHelper
   end
 
   def specific_proposal_statuses
-    statuses = Proposal.statuses.reject { |k, _v| %w[approved declined].include?(k) }
+    specific_status = %w[approved declined]
+    statuses = Proposal.statuses.reject { |k, _v| specific_status.include?(k) }
     statuses.map { |k, v| [k.humanize.capitalize, v] }
   end
 
