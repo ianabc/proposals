@@ -56,6 +56,11 @@
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
                         </div>
+                        <% if @proposal.code.present? && params[:action] == 'show' %> 
+                          <div class="mb-3">
+                            <p>Code: <%= @proposal.code %></p>
+                          </div>
+                        <% end %>
                         <div>
                           <%= label_tag :title %>
                         </div>
