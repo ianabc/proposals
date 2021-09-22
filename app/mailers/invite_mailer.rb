@@ -61,11 +61,11 @@ class InviteMailer < ApplicationMailer
   end
 
   def replace_email_placeholders
+    @email_body = String.new(@body)
     placeholders = { "invite_deadline_date" => @invite&.deadline_date&.to_date.to_s,
                      "invite_url" => invite_link(@invite),
                      "invited_as" => invited_as_text(@invite) }
-    placeholders.each { |k, v| @body.gsub!(k, v) }
-    @email_body = @body
+    placeholders.each { |k, v| @email_body.gsub!(k, v) }
     @proposal = @invite.proposal
     @person = @invite.person
   end

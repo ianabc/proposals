@@ -10,6 +10,21 @@ class SubmittedProposalsController < ApplicationController
     @proposal.review! if @proposal.may_review?
   end
 
+  def edit; end
+
+  def update
+    @proposal.update(proposal_params)
+    submission = SubmitProposalService.new(@proposal, params)
+    submission.save_answers
+
+    if submission.has_errors?
+      redirect_to edit_submitted_proposal_url(@proposal), alert: "Your submission has
+          errors: #{submission.error_messages}.".squish
+      return
+    end
+    redirect_to edit_submitted_proposal_url(@proposal), notice: 'Proposal has been updated successfully!'
+  end
+
   def download_csv
     send_data @proposals.to_csv, filename: "submitted_proposals.csv"
   end
@@ -17,7 +32,7 @@ class SubmittedProposalsController < ApplicationController
   def edit_flow
     params[:ids]&.split(',')&.each do |id|
       @proposal = Proposal.find_by(id: id.to_i)
-      check_status and return unless @proposal.may_progress?
+      check_proposal_status and return unless @proposal.may_progress?
 
       post_to_editflow
     end
@@ -211,7 +226,28 @@ class SubmittedProposalsController < ApplicationController
     authorize! :manage, current_user
   end
 
-  def check_status
+  def check_proposal_status
     render json: { errors: 'Please select initial review proposal(s).' }, status: :unprocessable_entity
+  end
+
+  def proposal_params
+    params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
+                  :no_latex, :preamble, :bibliography)
+          .merge(ams_subject_ids: proposal_ams_subjects)
+          .merge(no_latex: params[:no_latex] == 'on')
+  end
+
+  def proposal_ams_subjects
+    @code1 = params.dig(:ams_subjects, :code1)
+    @code2 = params.dig(:ams_subjects, :code2)
+    update_proposal_ams_subject_code
+    [@code1, @code2]
+  end
+
+  def update_proposal_ams_subject_code
+    ProposalAmsSubject.create(ams_subject_id: @code1, proposal: @proposal,
+                              code: 'code1')
+    ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
+                              code: 'code2')
   end
 end
