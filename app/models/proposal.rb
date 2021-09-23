@@ -108,7 +108,7 @@ class Proposal < ApplicationRecord
   end
 
   def demographics_data
-    DemographicData.where(person_id: invites.where(invited_as: 'Participant')
+    DemographicData.where(person_id: invites.where(status: 'confirmed')
                    .pluck(:person_id))
   end
 
