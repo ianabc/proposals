@@ -56,6 +56,11 @@
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
                         </div>
+                        <% if @proposal.code.present? && params[:action] == 'show' %> 
+                          <div class="mb-3">
+                            <p>Code: <%= @proposal.code %></p>
+                          </div>
+                        <% end %>
                         <div>
                           <%= label_tag :title %>
                         </div>
@@ -150,6 +155,21 @@
                               </div>
                             </div>
                           </div>
+                          <% if @proposal&.files&.attached? %>
+                            <h4 class="file-uploads">Attached files:</h4>
+                            <ul class="list-group list-group-flush">
+                              <% @proposal.files.each do |file| %>
+                                <li class="list-group-item">
+                                  <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
+                                  <% if params[:action] == 'edit' %>
+                                    <span data-proposal-id="<%= @proposal.id %>" data-attachment-id="<%= file.id %>" data-action="click->multi-upload#removeFile" class="btn btn-sm btn-light m-3">
+                                    Remove file
+                                    </span>
+                                  <% end %>
+                                </li>
+                              <% end %>
+                            </ul>
+                          <% end %>
                           <div class="d-flex flex-row-reverse">
                             <button id="changeTab" class="p-2 btn btn-primary" data-action='click->submit-proposals#nextTab'>Next</button>
                           </div>
@@ -193,9 +213,11 @@
 
                         <div class="mb-3">
                           <%= label_tag :location, "Select your preferred location for this event:", class: 'form-label lead' %>
-                          <%= select_tag "locations", options_for_select(proposal_type_locations(@proposal.proposal_type), location_in_answers(@proposal)), include_blank: '', data: {proposal_type: @proposal&.proposal_type&.id, 'submit-proposals-target': 'locationIds',action: 'change->submit-proposals#handleLocationChange'}, disabled: action, class: 'form-select w-50', multiple: true, name: 'location_ids[]' %>
-                          <div data-submit-proposals-target="dragLocations" class="ms-5"></div>
                         </div>
+                          <div class="d-flex flex-row">
+                            <%= select_tag "locations", options_for_select(proposal_type_locations(@proposal.proposal_type), location_in_answers(@proposal)), include_blank: '', data: {proposal_type: @proposal&.proposal_type&.id, 'submit-proposals-target': 'locationIds',action: 'change->submit-proposals#handleLocationChange'}, disabled: action, class: 'form-select w-50', multiple: true, name: 'location_ids[]' %>
+                            <div data-submit-proposals-target="dragLocations" class="ms-5"></div>
+                          </div>
                         <div data-submit-proposals-target='locationSpecificQuestions'></div>
 
                         <div class="row mt-20">&nbsp;</div>
@@ -317,7 +339,7 @@
                           <button class="ms-auto p-2 btn btn-primary" id="changeTab" data-action='click->submit-proposals#previousTab'>Back</button>
                         </div>
                       </div>
-    <% end %>
+            <% end %>
 
                       <div class="tab-pane" id="tab-5" role="tabpanel">
                         <h4 class="tab-title"></h4>
