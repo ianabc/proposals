@@ -27,7 +27,7 @@ class SubmitProposalsController < ApplicationController
     end
 
     @attachment = generate_proposal_pdf || return
-    confirm_submission(submission, attachment)
+    confirm_submission
   end
 
   def thanks; end
@@ -64,7 +64,7 @@ class SubmitProposalsController < ApplicationController
     render json: { errors: @errors, counter: counter }, status: :ok
   end
 
-  def confirm_submission(submission)
+  def confirm_submission
     if @proposal.may_active?
       @proposal.active!
       send_mail
