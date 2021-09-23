@@ -85,16 +85,39 @@ namespace :birs do
       when 'Male'
         data.result["gender"] = 'Man'
         data.save
+      when 'Prefer not to answer [Please note: If you choose this response, none of your other responses to this question will be considered in the data analysis.]'
+        data.result["gender"] = 'Prefer not to answer'
+        data.save
       end
     end
   end
 
   desc "Update ethnicity data in database"
   task survey_ethnicity_field: :environment do
-    DemographicData.all.each do |data|
-      case data.result["ethnicity"]
+    def update_answer(answer)
+      case answer
       when 'Latin American'
-        data.result["ethnicity"] = 'Hispanic/Latin American'
+        return 'Hispanic/Latin American'
+      when /^Prefer not to answer/
+        return 'Prefer not to answer'
+      end
+      answer
+    end
+
+    DemographicData.all.each do |data|
+      answer = data.result["ethnicity"]
+      new_answer = []
+
+      if answer.is_a? Array
+        answer.each do |a|
+          new_answer << update_answer(a) unless a.empty?
+        end
+      else
+        new_answer = [update_answer(answer)]
+      end
+
+      unless new_answer == answer
+        data.result["ethnicity"] = new_answer
         data.save
       end
     end
