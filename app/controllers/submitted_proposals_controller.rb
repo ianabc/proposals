@@ -149,7 +149,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def set_proposals
-    @proposals = Proposal.order(:created_at)
+    @proposals = Proposal.order(:code, :created_at)
     @proposals = ProposalFiltersQuery.new(@proposals).find(params) if query_params?
   end
 

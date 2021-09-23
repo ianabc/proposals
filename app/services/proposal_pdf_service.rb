@@ -435,24 +435,24 @@ class ProposalPdfService
   def organizing_participant_committee
     @text << "\\section*{\\centering Organizing Committee and Participant}\n\n"
     confirmed_committee
-    @text << "\\subsection*{1) Indigenous Person}\n\n"
+    @text << "\\subsection*{1) Indigenous}\n\n"
     number_of_indigenous
-    @text << "\\subsection*{2) Ethnicity Chart}"
+    @text << "\\subsection*{2) Ethnicity}"
     ethnicity_chart
-    @text << "\\subsection*{3) Gender Chart}"
+    @text << "\\subsection*{3) Gender}"
     gender_chart
     other_demographic_data
     @text
   end
 
   def other_demographic_data
-    @text << "\\subsection*{4) Number of 2SLGBTQIA+ Persons}"
+    @text << "\\subsection*{4) 2SLGBTQIA+}"
     number_of_community_persons
-    @text << "\\subsection*{5) Number of Medical Condition Persons}"
+    @text << "\\subsection*{5) Disability, impairment, or ongoing medical condition}"
     number_of_medical_condition
-    @text << "\\subsection*{6) Number of persons from under-represented Minority in the country of current affiliation}"
+    @text << "\\subsection*{6) Minority in the country of current affiliation}"
     minority_current_affiliation
-    @text << "\\subsection*{7) Number of STEM Persons}"
+    @text << "\\subsection*{7) Under-represented in STEM}"
     number_of_stem_persons
     @text << "\\subsection*{8) Number of persons from under-represented Minority in your area}"
     area_minority
@@ -470,14 +470,17 @@ class ProposalPdfService
       total_count += 1
       actual_count += 1 if result.present? && result["indigenous_person"] == "Yes"
     end
-    @text << "\\noindent Number of Indigenous persons (Organizing Committee +
-                Participants): #{actual_count}/#{total_count}\n\n\n"
+    @text << "\\noindent Number of people self-identified as Indigenous: #{actual_count}/#{total_count}\n\n\n"
   end
 
   def ethnicity_chart
     @text << "\\subsection*{\\hspace{1cm} Ethnicity \\hfill No.}"
     invites_ethnicity_data(@proposal).each do |key, value|
-      @text << "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
+      if key.include?('Prefer not to answer')
+        @text << "\\noindent  \\hspace{1cm} Prefer not to answer \\hfill #{value}\n\n\n"
+      else
+        @text << "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
+      end
     end
   end
 
@@ -496,8 +499,7 @@ class ProposalPdfService
       total_count += 1
       actual_count += 1 if result.present? && result["community"] == "Yes"
     end
-    @text << "\\noindent  Number of 2SLGBTQIA+ persons (Organizing Committee +
-                Participants): #{actual_count}/#{total_count}\n\n\n"
+    @text << "\\noindent Number of people self-identified as 2SLGBTQIA+: #{actual_count}/#{total_count}\n\n\n"
   end
 
   def number_of_medical_condition
@@ -508,8 +510,8 @@ class ProposalPdfService
       total_count += 1
       actual_count += 1 if result.present? && result["disability"] == "Yes"
     end
-    @text << "\\noindent Number of persons with disability, impairment, or ongoing medical
-                condition (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
+    @text << "\\noindent Number of people self-identified as a person with a disability,
+                 impairment, or ongoing medical condition: #{actual_count}/#{total_count}\n\n\n"
   end
 
   def minority_current_affiliation
@@ -520,8 +522,8 @@ class ProposalPdfService
       total_count += 1
       actual_count += 1 if result.present? && result["minorities"] == "Yes"
     end
-    @text << "\\noindent Number of persons from under-represented minority in the country of current
-                affiliation (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
+    @text << "\\noindent Number of people self-identified as a minority
+                in the country of current affiliation: #{actual_count}/#{total_count}\n\n\n"
   end
 
   def number_of_stem_persons
@@ -532,8 +534,7 @@ class ProposalPdfService
       total_count += 1
       actual_count += 1 if result.present? && result["stem"] == "Yes"
     end
-    @text << "\\noindent Number of persons from STEM (Organizing Committee +
-                Participants): #{actual_count}/#{total_count}\n\n\n"
+    @text << "\\noindent Number of people self-identified as under-represented in STEM: #{actual_count}/#{total_count}\n\n\n"
   end
 
   def area_minority
