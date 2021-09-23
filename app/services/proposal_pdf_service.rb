@@ -435,12 +435,12 @@ class ProposalPdfService
   def organizing_participant_committee
     @text << "\\section*{\\centering Organizing Committee and Participant}\n\n"
     confirmed_committee
-    @text << "\\subsection*{1) Indigenous}\n\n"
-    number_of_indigenous
-    @text << "\\subsection*{2) Ethnicity}"
-    ethnicity_chart
     @text << "\\subsection*{3) Gender}"
     gender_chart
+    @text << "\\subsection*{2) Ethnicity}"
+    ethnicity_chart
+    @text << "\\subsection*{1) Indigenous}\n\n"
+    number_of_indigenous
     other_demographic_data
     @text
   end
@@ -454,7 +454,7 @@ class ProposalPdfService
     minority_current_affiliation
     @text << "\\subsection*{7) Under-represented in STEM}"
     number_of_stem_persons
-    @text << "\\subsection*{8) Number of persons from under-represented Minority in your area}"
+    @text << "\\subsection*{8) Number of people self-identified as an under-represented minority in their area:}"
     area_minority
   end
 
