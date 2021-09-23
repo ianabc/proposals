@@ -29,10 +29,10 @@ class SurveyController < ApplicationController
   def questionnaire_answers
     answers = questionnaire_params
     questionnaire_params.each do |key, value|
-      if value.is_a? Array
-        if value.any? { |answer| answer.match?(/^Prefer not/) }
-          answers[key] = ['Prefer not to answer']
-        end
+      if value.is_a? Array && value.any? { |answr| answr.match?(/^Prefer not/) }
+        answers[key] = ['Prefer not to answer']
+      else
+        answers[key] = 'Prefer not to answer' if value.match?(/^Prefer not/)
       end
     end
 
