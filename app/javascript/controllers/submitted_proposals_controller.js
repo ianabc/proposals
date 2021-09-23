@@ -26,7 +26,11 @@ export default class extends Controller {
       Rails.ajax({
         url,
         type: "POST",
-        data
+        data,
+        error: (response) => {
+          let errors = response.errors
+          toastr.error(errors)
+        }
       })
     }
   }
