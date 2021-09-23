@@ -7,7 +7,9 @@ class SubmittedProposalsController < ApplicationController
 
   def index; end
 
-  def show; end
+  def show
+    @proposal.review! if @proposal.may_review?
+  end
 
   def edit; end
 
@@ -31,6 +33,8 @@ class SubmittedProposalsController < ApplicationController
   def edit_flow
     params[:ids]&.split(',')&.each do |id|
       @proposal = Proposal.find_by(id: id.to_i)
+      check_proposal_status and return unless @proposal.may_progress?
+
       post_to_editflow
     end
 
@@ -190,6 +194,7 @@ class SubmittedProposalsController < ApplicationController
       Rails.logger.debug { "\n\n*****************************************\n\n" }
       flash[:alert] = "Error sending data!"
     else
+      @proposal.progress!
       flash[:notice] = "Data sent to EditFlow!"
       @proposal.update(edit_flow: Time.zone.now)
     end
@@ -250,6 +255,10 @@ class SubmittedProposalsController < ApplicationController
 
   def authorize_user
     authorize! :manage, current_user
+  end
+
+  def check_proposal_status
+    render json: { errors: 'Please select initial review proposal(s).' }, status: :unprocessable_entity
   end
 
   def create_birs_email(id)
