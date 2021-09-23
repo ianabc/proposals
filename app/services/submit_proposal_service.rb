@@ -23,11 +23,11 @@ class SubmitProposalService
       @errors << @proposal.errors.full_messages
     end
 
-    !errors.flatten.empty?
+    !@errors.flatten.empty?
   end
 
   def error_messages
-    errors.uniq.flatten.join(', ')
+    @errors.uniq.flatten.join(', ')
   end
 
   def is_final?

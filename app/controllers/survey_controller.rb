@@ -31,7 +31,7 @@ class SurveyController < ApplicationController
     questionnaire_params.each do |key, value|
       if value.is_a?(Array) && value.any? { |answr| answr.match?(/^Prefer not/) }
         answers[key] = ['Prefer not to answer']
-      elsif value.match?(/^Prefer not/)
+      elsif value.is_a?(String) && value.match?(/^Prefer not/)
         answers[key] = 'Prefer not to answer'
       end
     end
