@@ -26,7 +26,7 @@ class SubmitProposalsController < ApplicationController
       return
     end
 
-    attachment = generate_proposal_pdf || return
+    @attachment = generate_proposal_pdf || return
     confirm_submission(submission, attachment)
   end
 
@@ -43,7 +43,7 @@ class SubmitProposalsController < ApplicationController
     preview_placeholders
 
     render json: { subject: @email_template.subject, body: @template_body },
-                   status: :ok
+                    status: :ok
   end
 
   private
@@ -64,20 +64,16 @@ class SubmitProposalsController < ApplicationController
     render json: { errors: @errors, counter: counter }, status: :ok
   end
 
-  def confirm_submission(submission, attachment)
-    @attachment = attachment
+  def confirm_submission(submission)
     if @proposal.may_active?
       @proposal.active!
       send_mail
     elsif @proposal.may_revision?
       @proposal.revision!
       send_mail
-    elsif submission.has_errors?
-      redirect_to edit_proposal_path(@proposal), alert: "Your submission has
-                  errors: #{submission.error_messages}.".squish and return
     else
-      redirect_to edit_proposal_path(@proposal), alert: "Unknown error. Please
-                  contact us.".squish and return
+      redirect_to edit_proposal_path(@proposal), alert: "Your proposal has
+                  errors: #{@proposal.errors.full_messages}.".squish and return
     end
   end
 
