@@ -475,25 +475,17 @@ class ProposalPdfService
   end
 
   def ethnicity_chart
-    total_count = 0
-    actual_count = 0
-    @confirmed_invitations&.each do |invite|
-      result = invite.person&.demographic_data&.result
-      total_count += 1
-      actual_count += 1 unless result.nil? || result["ethnicity"].nil?
+    @text << "\\subsection*{\\hspace{1cm} Ethnicity \\hfill No.}"
+    invites_ethnicity_data(@proposal).each do |key, value|
+      @text << "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
     end
-    @text << "\\noindent  Ethnicity Chart (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
   end
 
   def gender_chart
-    total_count = 0
-    actual_count = 0
-    @confirmed_invitations&.each do |invite|
-      result = invite.person&.demographic_data&.result
-      total_count += 1
-      actual_count += 1 unless result.nil? || result["gender"].nil?
+    @text << "\\subsection*{\\hspace{1cm} Gender \\hfill No.}"
+    invites_gender_data(@proposal).each do |key, value|
+      @text << "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
     end
-    @text << "\\noindent Gender chart (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
   end
 
   def number_of_community_persons
@@ -554,5 +546,26 @@ class ProposalPdfService
     end
     @text << "\\noindent Number of persons in under-represented minority in your area
                 (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
+  end
+
+  def invites_graph_data(param, param2, proposal)
+    invites_data = proposal.invites_demographic_data.pluck(:result)
+                           .pluck(param, param2).flatten.reject do |s|
+      s.blank? || s.eql?("Other")
+    end
+    @data = Hash.new(0)
+
+    invites_data.each do |c|
+      @data[c] += 1
+    end
+    @data
+  end
+
+  def invites_ethnicity_data(proposal)
+    @data = invites_graph_data("ethnicity", "ethnicity_other", proposal)
+  end
+
+  def invites_gender_data(proposal)
+    @data = invites_graph_data("gender", "gender_other", proposal)
   end
 end

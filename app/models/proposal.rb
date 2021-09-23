@@ -112,6 +112,11 @@ class Proposal < ApplicationRecord
                    .pluck(:person_id))
   end
 
+  def invites_demographic_data
+    DemographicData.where(person_id: invites.where(status: 'confirmed')
+                   .pluck(:person_id))
+  end
+
   def create_organizer_role(person, organizer)
     proposal_roles.create!(person: person, role: organizer)
   end
