@@ -51,7 +51,7 @@ class Email < ApplicationRecord
   def proposal_mailer(email_address, organizer_name)
     ProposalMailer.with(email_data: self, email: email_address,
                         organizer: organizer_name)
-                  .staff_send_emails.deliver_later
+                  .staff_send_emails.deliver_now
   end
 
   def update_version

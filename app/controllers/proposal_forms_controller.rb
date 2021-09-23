@@ -16,13 +16,15 @@ class ProposalFormsController < ApplicationController
 
   def edit
     return unless @proposal_form.active?
+    return if params[:cloned]
 
     @proposal_form.update(status: :inactive)
     form = @proposal_form.deep_clone include: { proposal_fields:
                                                 %i[options validations] }
-    form.status = :draft
+    form.status = :active
     form.save
-    redirect_to edit_proposal_type_proposal_form_path(@proposal_type, form)
+
+    redirect_to edit_proposal_type_proposal_form_path(@proposal_type, form, cloned: true)
   end
 
   def show
