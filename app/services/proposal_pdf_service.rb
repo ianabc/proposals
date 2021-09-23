@@ -454,7 +454,7 @@ class ProposalPdfService
     minority_current_affiliation
     @text << "\\subsection*{7) Under-represented in STEM}"
     number_of_stem_persons
-    @text << "\\subsection*{8) Number of people self-identified as an under-represented minority in their area:}"
+    @text << "\\subsection*{8) Under-represented minority in area}"
     area_minority
   end
 
