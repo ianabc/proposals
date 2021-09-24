@@ -492,18 +492,18 @@ class ProposalPdfService
   def ethnicity_chart
     @text << "\\noindent  \\hspace{1cm} \\textbf{\\underline{Ethnicity}} \\hfill \\textbf{\\underline{No.}}\n\n"
 
-    invites_ethnicity_data(@proposal).each do |key, value|
-      if key.include?('Prefer not to answer')
-        @text << "\\noindent  \\hspace{1cm} Prefer not to answer \\hfill #{value}\n\n\n"
-      else
-        @text << "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
-      end
+    invites_ethnicity_data.each do |key, value|
+      @text << if key.include?('Prefer not to answer')
+                 "\\noindent  \\hspace{1cm} Prefer not to answer \\hfill #{value}\n\n\n"
+               else
+                 "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
+               end
     end
   end
 
   def gender_chart
-    @text << "\\noindent  \\hspace{1cm} \\textbf{\\underline{Gender|} \\hfill \\textbf{\\underline{No.}}\n\n"
-    invites_gender_data(@proposal).each do |key, value|
+    @text << "\\noindent  \\hspace{1cm} \\textbf{\\underline{Gender}} \\hfill \\textbf{\\underline{No.}}\n\n"
+    invites_gender_data.each do |key, value|
       @text << "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
     end
   end
@@ -551,7 +551,8 @@ class ProposalPdfService
       total_count += 1
       actual_count += 1 if result.present? && result["stem"] == "Yes"
     end
-    @text << "\\noindent Number of people self-identified as under-represented in STEM: #{actual_count}/#{total_count}\n\n\n"
+    @text << "\\noindent Number of people self-identified as under-represented in
+                STEM: #{actual_count}/#{total_count}\n\n\n"
   end
 
   def area_minority
@@ -566,29 +567,33 @@ class ProposalPdfService
                 (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
   end
 
-  def invites_graph_data(param, param2, proposal)
+  def invites_graph_data(param, param2)
     @data = Hash.new(0)
     @confirmed_invitations&.each do |invite|
-      dd = invite.person&.demographic_data
-      if dd.blank?
+      @dd = invite.person&.demographic_data
+      if @dd.blank?
         @data['Unknown'] += 1
         next
       end
 
-      invites_data = [dd.result[param], dd.result[param2]].flatten.reject do |s|
-        s.blank? || s.eql?("Other")
-      end
-      invites_data.each { |c| @data[c] += 1 }
+      update_invites_data(param, param2)
     end
 
     @data&.sort
   end
 
-  def invites_ethnicity_data(proposal)
-    @data = invites_graph_data("ethnicity", "ethnicity_other", proposal)
+  def update_invites_data(param, param2)
+    @invites_data = [@dd.result[param], @dd.result[param2]].flatten.reject do |s|
+      s.blank? || s.eql?("Other")
+    end
+    @invites_data.each { |c| @data[c] += 1 }
   end
 
-  def invites_gender_data(proposal)
-    @data = invites_graph_data("gender", "gender_other", proposal)
+  def invites_ethnicity_data
+    @data = invites_graph_data("ethnicity", "ethnicity_other")
+  end
+
+  def invites_gender_data
+    @data = invites_graph_data("gender", "gender_other")
   end
 end
