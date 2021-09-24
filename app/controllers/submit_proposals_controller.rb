@@ -11,7 +11,7 @@ class SubmitProposalsController < ApplicationController
     update_proposal_ams_subject_code
     submission = SubmitProposalService.new(@proposal, params)
     submission.save_answers
-    @proposal.skip_submission_validation = true unless @proposal.draft?
+    @proposal.allow_late_submission = true unless @proposal.draft?
     session[:is_submission] = @proposal.is_submission = submission.is_final?
 
     create_invite and return if params[:create_invite]
