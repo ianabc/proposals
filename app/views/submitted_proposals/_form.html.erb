@@ -56,9 +56,9 @@
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
                         </div>
-                        <% if @proposal.code.present? && params[:action] == 'show' %> 
+                        <% if @proposal.code.present? %>
                           <div class="mb-3">
-                            <p>Code: <%= @proposal.code %></p>
+                            <h3>Proposal code: <%= @proposal.code %></h3>
                           </div>
                         <% end %>
                         <div>

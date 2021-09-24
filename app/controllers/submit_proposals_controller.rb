@@ -26,8 +26,8 @@ class SubmitProposalsController < ApplicationController
       return
     end
 
-    attachment = generate_proposal_pdf || return
-    confirm_submission(attachment)
+    @attachment = generate_proposal_pdf || return
+    confirm_submission
   end
 
   def thanks; end
@@ -42,7 +42,8 @@ class SubmitProposalsController < ApplicationController
     end
     preview_placeholders
 
-    render json: { subject: @email_template.subject, body: @template_body }, status: :ok
+    render json: { subject: @email_template.subject, body: @template_body },
+                    status: :ok
   end
 
   private
@@ -63,9 +64,7 @@ class SubmitProposalsController < ApplicationController
     render json: { errors: @errors, counter: counter }, status: :ok
   end
 
-  def confirm_submission(attachment)
-    check_file
-    @attachment = attachment
+  def confirm_submission
     if @proposal.may_active?
       @proposal.active!
       send_mail
@@ -73,14 +72,12 @@ class SubmitProposalsController < ApplicationController
       @proposal.revision!
       send_mail
     else
-      redirect_to edit_proposal_path(@proposal), alert: "Your submission has
-          errors: #{submission.error_messages}.".squish
-      nil
+      redirect_to edit_proposal_path(@proposal), alert: "Your proposal has
+                  errors: #{@proposal.errors.full_messages}.".squish and return
     end
   end
 
   def send_mail
-    check_file
     session[:is_submission] = nil
 
     ProposalMailer.with(proposal: @proposal, file: @attachment)
@@ -106,8 +103,7 @@ class SubmitProposalsController < ApplicationController
                       errors".squish
 
       redirect_to rendered_proposal_proposal_path(@proposal, format: :pdf),
-                  alert: error_message
-      nil
+                  alert: error_message and return
     end
   end
 
@@ -141,14 +137,6 @@ class SubmitProposalsController < ApplicationController
 
   def invite_params(invite)
     invite.permit(:firstname, :lastname, :email, :deadline_date, :invited_as)
-  end
-
-  def check_file
-    temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
-    return if File.exist?("#{Rails.root}/tmp/#{temp_file}")
-
-    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user)
-                                      .generate_latex_file.to_s
   end
 
   def invalid_email_error_message

@@ -113,8 +113,11 @@ class Proposal < ApplicationRecord
   end
 
   def invites_demographic_data
+    # persons can have multiple confirmed invites
+    # for persons with more than one demo data record, use the latest one
     DemographicData.where(person_id: invites.where(status: 'confirmed')
-                   .pluck(:person_id))
+                   .pluck(:person_id).uniq).order(:id)
+                   .each_with_object({}) { |d, u| u[d.person_id] = d }.values
   end
 
   def create_organizer_role(person, organizer)
