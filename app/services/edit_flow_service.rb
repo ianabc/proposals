@@ -9,27 +9,36 @@ class EditFlowService
     organizer_country = @proposal.lead_organizer.country
     raise "Lead Organizer has no country" if organizer_country.blank?
 
-    Country.find_country_by_name(organizer_country)
+    find_country(@proposal.lead_organizer)
   end
 
-  def organizer_country(invite)
+  def organizer_person(invite)
     if invite&.person.blank?
       raise "Organizer #{invite.firstname} #{invite.lastname} has no person
              record".squish
     end
 
-    organizer_country = invite.person.country
-    if organizer_country.blank?
-      raise "Organizer #{organizer.fullname} has no country"
-    end
+    invite.person
+  end
 
-    country = Country.find_country_by_name(organizer_country)
+  def find_country(organizer)
+    country = Country.find_country_by_name(organizer&.country)
     if country.blank?
-      raise "No match in Country database for Organizer #{invite.firstname}
-            #{invite.lastname} country: #{organizer_country}".squish
+      raise "No match in Country database for Organizer #{organizer.fullname}
+            country: #{organizer&.country}".squish
     end
 
     country
+  end
+
+  def organizer_country(invite)
+    organizer = organizer_person(invite)
+
+    if organizer.country.blank?
+      raise "Organizer #{organizer.fullname} has no country"
+    end
+
+    find_country(organizer)
   end
 
   def supporting_organizers
