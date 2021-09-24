@@ -149,7 +149,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def set_proposals
-    @proposals = Proposal.order(:code, :created_at)
+    @proposals = Proposal.order(:created_at)
     @proposals = ProposalFiltersQuery.new(@proposals).find(params) if query_params?
   end
 
@@ -183,8 +183,11 @@ class SubmittedProposalsController < ApplicationController
 
     query_edit_flow = EditFlowService.new(@proposal).query
 
+    attach_supplementry_files
+
     response = RestClient.post ENV['EDITFLOW_API_URL'],
-                               { query: query_edit_flow, fileMain: File.open(@pdf_path) },
+                               { query: query_edit_flow, fileMain: File.open(@pdf_path),
+                                 fileMain: File.open(@supplementry_files_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
     Rails.logger.debug response
 
@@ -197,6 +200,18 @@ class SubmittedProposalsController < ApplicationController
       @proposal.progress!
       flash[:notice] = "Data sent to EditFlow!"
       @proposal.update(edit_flow: Time.zone.now)
+    end
+  end
+
+  def attach_supplementry_files
+    @supplementry_files_path = []
+    @proposal.files.each do |file|
+      path = ActiveStorage::Blob.service.send(:path_for, file.key)
+      supp_file = File.read(path)
+      @supplementry_files_path << "#{Rails.root}/tmp/supplementry-#{file.filename}.pdf"
+      File.open("#{Rails.root}/tmp/supplementry-#{file.filename}.pdf", 'wb') do |file|
+        file.write(supp_file)
+      end
     end
   end
 

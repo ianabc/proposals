@@ -44,7 +44,7 @@ class EditFlowService
                         name: "#{proposal.lead_organizer.affiliation}"
                       }
                       countryAtSubmission: {
-                        codeAlpha2: "#{@country_code.alpha2}"
+                        codeAlpha2: "#{@country_code&.alpha2}"
                       }
                     },
                     {
@@ -58,7 +58,7 @@ class EditFlowService
                         name: "#{@organizers.first.person.affiliation}"
                       }
                       countryAtSubmission: {
-                        codeAlpha2: "#{@country_code_organizers.alpha2}"
+                        codeAlpha2: "#{@country_code_organizers&.alpha2}"
                       }
                     },
                   ]
@@ -66,14 +66,14 @@ class EditFlowService
                   subjectsPrimary: {
                     scheme: "MSC2020"
                     subjects: [
-                      {code: "00-01"}
+                      {code: "#{@proposal.ams_subjects.first.code}"}
                     ]
                   }
 
                   subjectsSecondary: {
                     scheme: "MSC2020"
                     subjects: [
-                      {code: "00B05"}
+                      {code: "#{@proposal.ams_subjects.last.code}"}
                       {code: "00A07"}
                     ]
                   }
