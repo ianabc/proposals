@@ -489,16 +489,16 @@ class ProposalPdfService
     @text << "\\noindent  \\hspace{1cm} \\textbf{\\underline{Ethnicity}} \\hfill \\textbf{\\underline{No.}}\n\n"
 
     invites_ethnicity_data(@proposal).each do |key, value|
-      if key.include?('Prefer not to answer')
-        @text << "\\noindent  \\hspace{1cm} Prefer not to answer \\hfill #{value}\n\n\n"
-      else
-        @text << "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
-      end
+      @text << if key.include?('Prefer not to answer')
+                 "\\noindent  \\hspace{1cm} Prefer not to answer \\hfill #{value}\n\n\n"
+               else
+                 "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
+               end
     end
   end
 
   def gender_chart
-    @text << "\\noindent  \\hspace{1cm} \\textbf{\\underline{Gender|} \\hfill \\textbf{\\underline{No.}}\n\n"
+    @text << "\\noindent  \\hspace{1cm} \\textbf{\\underline{Gender}} \\hfill \\textbf{\\underline{No.}}\n\n"
     invites_gender_data(@proposal).each do |key, value|
       @text << "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
     end
@@ -562,7 +562,7 @@ class ProposalPdfService
                 (Organizing Committee + Participants): #{actual_count}/#{total_count}\n\n\n"
   end
 
-  def invites_graph_data(param, param2, proposal)
+  def invites_graph_data(param, param2, _proposal)
     @data = Hash.new(0)
     @confirmed_invitations&.each do |invite|
       dd = invite.person&.demographic_data
