@@ -181,7 +181,11 @@ class SubmittedProposalsController < ApplicationController
   def post_to_editflow
     create_pdf_file
 
-    query_edit_flow = EditFlowService.new(@proposal).query
+    begin
+      query_edit_flow = EditFlowService.new(@proposal).query
+    rescue => error
+      redirect_to submitted_proposals_path, alert: error.message
+    end
 
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: query_edit_flow, fileMain: File.open(@pdf_path) },
