@@ -183,8 +183,8 @@ class SubmittedProposalsController < ApplicationController
 
     begin
       query_edit_flow = EditFlowService.new(@proposal).query
-    rescue => error
-      redirect_to submitted_proposals_path, alert: error.message
+    rescue RuntimeError => e
+      redirect_to submitted_proposals_path, alert: e.message
     end
 
     response = RestClient.post ENV['EDITFLOW_API_URL'],
