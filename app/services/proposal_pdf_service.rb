@@ -443,7 +443,7 @@ class ProposalPdfService
 
   def organizing_participant_committee
     @text << "\\section*{\\centering Organizing Committee and Participant Demographics}\n\n"
-    confirmed_invitations
+    set_confirmed_invitations
     @text << "\\subsection*{1) Gender}"
     gender_chart
     @text << "\\subsection*{2) Ethnicity}"
@@ -467,7 +467,7 @@ class ProposalPdfService
     area_minority
   end
 
-  def confirmed_invitations
+  def set_confirmed_invitations
     # due to earlier bugs, there can be more than one confirmed invitation for
     # the same person in a proposal, so use the newest one for each person
     @confirmed_invitations = proposal.invites.where(status: "confirmed")
