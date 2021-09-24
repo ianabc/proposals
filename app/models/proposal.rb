@@ -11,7 +11,7 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposal_subject, against: %i[subject_id]
   pg_search_scope :search_proposal_year, against: %i[year]
 
-  attr_accessor :is_submission, :allow_late_submission
+  attr_accessor :is_submission
 
   has_many_attached :files
   has_many :proposal_locations, dependent: :destroy
@@ -189,12 +189,11 @@ class Proposal < ApplicationRecord
   private
 
   def not_before_opening
-    return if draft?
-    return if allow_late_submission
+    return if draft? || revision_requested?
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
-    errors.add("Late submission - ", "proposal submissions are not allowed
-               because of due date #{proposal_type.closed_date.to_date}".squish)
+    errors.add("Late submission - ", "proposal submissions closed on
+               #{proposal_type.closed_date.to_date}".squish)
   end
 
   def minimum_organizers
