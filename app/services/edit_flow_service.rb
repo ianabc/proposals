@@ -13,12 +13,12 @@ class EditFlowService
   end
 
   def organizer_country(invite)
-    if invite.person.blank?
+    if invite&.person.blank?
       raise "Organizer #{invite.firstname} #{invite.lastname} has no person
              record".squish
     end
 
-    organizer_country = organizer.country
+    organizer_country = invite.person.country
     if organizer_country.blank?
       raise "Organizer #{organizer.fullname} has no country"
     end
