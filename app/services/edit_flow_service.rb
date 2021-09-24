@@ -44,7 +44,7 @@ class EditFlowService
   def supporting_organizers
     organizers = []
     @proposal.invites.where(invited_as: 'Organizer',
-                                status: 'confirmed').each do |invite|
+                            status: 'confirmed').each do |invite|
       country_code = organizer_country(invite)&.alpha2
       organizers << [invite.person, country_code]
     end
@@ -54,7 +54,7 @@ class EditFlowService
   def co_authors
     supporting_organizers&.each_with_object('') do |org_data, text|
       organizer, country_code = org_data
-      text << %Q[{
+      text << %({
                       emailAddress: {
                         address: "#{organizer.email}"
                       }
@@ -67,7 +67,7 @@ class EditFlowService
                       countryAtSubmission: {
                         codeAlpha2: "#{country_code}"
                       }
-                    },]
+                    },)
     end
   end
 
