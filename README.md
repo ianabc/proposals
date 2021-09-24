@@ -9,7 +9,7 @@ See [the wiki](https://github.com/birs-math/proposals/wiki) for the intial speci
 
 1. Copy the `docker-compose.yml.example` file to `docker-compose.yml`.
 
-2. Create the data containers, for persistent storage, as described at the top of the file.
+2. Create the data containers if necessary, for persistent storage, as described at the top of the file.
 
 3. Fill in the environment variables for usernames & passwords, and various seed keys, in the file.
 

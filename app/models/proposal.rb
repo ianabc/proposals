@@ -11,7 +11,7 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposal_subject, against: %i[subject_id]
   pg_search_scope :search_proposal_year, against: %i[year]
 
-  attr_accessor :is_submission, :skip_submission_validation
+  attr_accessor :is_submission
 
   has_many_attached :files
   has_many :proposal_locations, dependent: :destroy
@@ -113,8 +113,11 @@ class Proposal < ApplicationRecord
   end
 
   def invites_demographic_data
+    # persons can have multiple confirmed invites
+    # for persons with more than one demo data record, use the latest one
     DemographicData.where(person_id: invites.where(status: 'confirmed')
-                   .pluck(:person_id))
+                   .pluck(:person_id).uniq).order(:id)
+                   .each_with_object({}) { |d, u| u[d.person_id] = d }.values
   end
 
   def create_organizer_role(person, organizer)
@@ -189,11 +192,11 @@ class Proposal < ApplicationRecord
   private
 
   def not_before_opening
-    return if draft?
+    return if draft? || revision_requested?
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
-    errors.add("Late submission - ", "proposal submissions are not allowed
-               because of due date #{proposal_type.closed_date.to_date}".squish)
+    errors.add("Late submission - ", "proposal submissions closed on
+               #{proposal_type.closed_date.to_date}".squish)
   end
 
   def minimum_organizers

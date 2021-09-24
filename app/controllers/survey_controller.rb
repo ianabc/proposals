@@ -69,6 +69,8 @@ class SurveyController < ApplicationController
                                     reset_password_token: @token),
                                     notice: message
     else
+      message << ' We will contact you with the next steps, after the
+                 peer-review process is complete.'.squish
       redirect_to root_path, notice: message
     end
   end
