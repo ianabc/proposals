@@ -570,12 +570,14 @@ class ProposalPdfService
         @data['Unknown'] += 1
         next
       end
-      [dd.result[param], dd.result[param2]].flatten.reject do |s|
+
+      invites_data = [dd.result[param], dd.result[param2]].flatten.reject do |s|
         s.blank? || s.eql?("Other")
-      end.each { |c| @data[c] += 1 }
+      end
+      invites_data.each { |c| @data[c] += 1 }
     end
 
-    @data.sort
+    @data&.sort
   end
 
   def invites_ethnicity_data(proposal)
