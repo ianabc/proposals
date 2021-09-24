@@ -70,7 +70,7 @@ class SurveyController < ApplicationController
                                     notice: message
     else
       message << ' We will contact you with the next steps, after the
-                 peer-review process is complete.'
+                 peer-review process is complete.'.squish
       redirect_to root_path, notice: message
     end
   end
