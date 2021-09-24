@@ -165,13 +165,6 @@ class ProposalPdfService
     @text
   end
 
-  def participant_confirmed_count
-    confirmed_participants = proposal.invites.where(status: "confirmed",
-                                                    invited_as: "Participant")
-    "#{confirmed_participants&.count} confirmed /
-     #{proposal.proposal_type&.participant} maximum participants \\\\ \n".squish
-  end
-
   def lead_organizer_info
     info = "\\subsection*{Lead Organizer}\n\n"
     info << "#{proposal.lead_organizer&.fullname} \\\\ \n\n"
@@ -221,14 +214,30 @@ class ProposalPdfService
     proposal_lead_organizer
   end
 
+  def confirmed_organizers
+    proposal.invites.where(status: "confirmed", invited_as: "Organizer")
+  end
+
+  def confirmed_participants
+    proposal.invites.where(status: "confirmed", invited_as: "Participant")
+  end
+
+  def remove_organizers_from_participants
+    confirmed_participants.pluck(:person_id) - confirmed_organizers.pluck(:person_id)
+  end
+
+  def participant_confirmed_count
+    num_participants = remove_organizers_from_participants&.count || 0
+    "#{num_participants} confirmed /
+     #{proposal.proposal_type&.participant} maximum participants \\\\ \n".squish
+  end
+
   def proposal_participants_count
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << participant_confirmed_count
   end
 
   def proposal_organizers_count
-    confirmed_organizers = proposal.invites.where(status: "confirmed",
-                                                  invited_as: "Organizer")
     confirmed_orgs = (confirmed_organizers&.count || 0) + 1
     @text << "\\noindent #{confirmed_orgs} confirmed /
               #{proposal.max_supporting_organizers + 1}
@@ -433,13 +442,13 @@ class ProposalPdfService
   end
 
   def organizing_participant_committee
-    @text << "\\section*{\\centering Organizing Committee and Participant}\n\n"
-    confirmed_committee
-    @text << "\\subsection*{3) Gender}"
+    @text << "\\section*{\\centering Organizing Committee and Participant Demographics}\n\n"
+    confirmed_invitations
+    @text << "\\subsection*{1) Gender}"
     gender_chart
     @text << "\\subsection*{2) Ethnicity}"
     ethnicity_chart
-    @text << "\\subsection*{1) Indigenous}\n\n"
+    @text << "\\subsection*{3) Indigenous}\n\n"
     number_of_indigenous
     other_demographic_data
     @text
@@ -458,8 +467,11 @@ class ProposalPdfService
     area_minority
   end
 
-  def confirmed_committee
+  def confirmed_invitations
+    # due to earlier bugs, there can be more than one confirmed invitation for
+    # the same person in a proposal, so use the newest one for each person
     @confirmed_invitations = proposal.invites.where(status: "confirmed")
+                                     .order(:id).uniq(&:person_id)
   end
 
   def number_of_indigenous
@@ -474,7 +486,8 @@ class ProposalPdfService
   end
 
   def ethnicity_chart
-    @text << "\\subsection*{\\hspace{1cm} Ethnicity \\hfill No.}"
+    @text << "\\noindent  \\hspace{1cm} \\textbf{\\underline{Ethnicity}} \\hfill \\textbf{\\underline{No.}}\n\n"
+
     invites_ethnicity_data(@proposal).each do |key, value|
       if key.include?('Prefer not to answer')
         @text << "\\noindent  \\hspace{1cm} Prefer not to answer \\hfill #{value}\n\n\n"
@@ -485,7 +498,7 @@ class ProposalPdfService
   end
 
   def gender_chart
-    @text << "\\subsection*{\\hspace{1cm} Gender \\hfill No.}"
+    @text << "\\noindent  \\hspace{1cm} \\textbf{\\underline{Gender|} \\hfill \\textbf{\\underline{No.}}\n\n"
     invites_gender_data(@proposal).each do |key, value|
       @text << "\\noindent  \\hspace{1cm} #{key} \\hfill #{value}\n\n\n"
     end
@@ -550,16 +563,19 @@ class ProposalPdfService
   end
 
   def invites_graph_data(param, param2, proposal)
-    invites_data = proposal.invites_demographic_data.pluck(:result)
-                           .pluck(param, param2).flatten.reject do |s|
-      s.blank? || s.eql?("Other")
-    end
     @data = Hash.new(0)
-
-    invites_data.each do |c|
-      @data[c] += 1
+    @confirmed_invitations&.each do |invite|
+      dd = invite.person&.demographic_data
+      if dd.blank?
+        @data['Unknown'] += 1
+        next
+      end
+      [dd.result[param], dd.result[param2]].flatten.reject do |s|
+        s.blank? || s.eql?("Other")
+      end.each { |c| @data[c] += 1 }
     end
-    @data
+
+    @data.sort
   end
 
   def invites_ethnicity_data(proposal)
