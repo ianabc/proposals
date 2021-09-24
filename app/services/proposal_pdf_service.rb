@@ -472,6 +472,9 @@ class ProposalPdfService
     # the same person in a proposal, so use the newest one for each person
     @confirmed_invitations = proposal.invites.where(status: "confirmed")
                                      .order(:id).uniq(&:person_id)
+
+    # add the Lead Organizer, who has no invitation
+    @confirmed_invitations << Invite.new(person: @proposal.lead_organizer)
   end
 
   def number_of_indigenous
@@ -482,7 +485,8 @@ class ProposalPdfService
       total_count += 1
       actual_count += 1 if result.present? && result["indigenous_person"] == "Yes"
     end
-    @text << "\\noindent Number of people self-identified as Indigenous: #{actual_count}/#{total_count}\n\n\n"
+    @text << "\\noindent Number of people self-identified as Indigenous:
+              #{actual_count}/#{total_count}\n\n\n".squish
   end
 
   def ethnicity_chart
