@@ -1,6 +1,7 @@
 class ProposalsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_proposal, only: %w[show edit destroy ranking locations]
+  before_action :check_status, only: %w[edit]
   before_action :authorize_user, only: %w[show edit]
   before_action :set_careers, only: %w[show edit]
 
@@ -178,6 +179,12 @@ class ProposalsController < ApplicationController
   def set_careers
     @careers = Person.where(id: @proposal.participants.pluck(:person_id))
                      .pluck(:academic_status)
+  end
+
+  def check_status
+    return if @proposal.editable?
+
+    raise CanCan::AccessDenied
   end
 
   def authorize_user
