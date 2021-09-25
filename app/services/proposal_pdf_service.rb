@@ -396,7 +396,7 @@ class ProposalPdfService
   end
 
   def delatex(string)
-    return if string.blank?
+    return '' if string.blank?
 
     LatexToPdf.escape_latex(string)
   end
