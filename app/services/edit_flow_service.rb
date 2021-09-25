@@ -5,16 +5,83 @@ class EditFlowService
     @proposal = proposal
   end
 
-  def query
-    @country_code = Country.find_country_by_name(proposal.lead_organizer.country)
-    @organizers = proposal.invites.where(invited_as: 'Organizer')
-    @country_code_organizers = Country.find_country_by_name(@organizers.first.person.country)
-    query = call_query
+  def proposal_country
+    organizer_country = @proposal.lead_organizer.country
+    raise "Lead Organizer has no country" if organizer_country.blank?
+
+    find_country(@proposal.lead_organizer)
   end
 
-  private
+  def organizer_person(invite)
+    if invite&.person.blank?
+      raise "Organizer #{invite.firstname} #{invite.lastname} has no person
+             record".squish
+    end
 
-  def call_query
+    invite.person
+  end
+
+  def find_country(organizer)
+    country = Country.find_country_by_name(organizer&.country)
+    if country.blank?
+      raise "No match in Country database for Organizer #{organizer.fullname}
+            country: #{organizer&.country}".squish
+    end
+
+    country
+  end
+
+  def organizer_country(invite)
+    organizer = organizer_person(invite)
+
+    if organizer.country.blank?
+      raise "Organizer #{organizer.fullname} has no country"
+    end
+
+    find_country(organizer)
+  end
+
+  def supporting_organizers
+    organizers = []
+    @proposal.invites.where(invited_as: 'Organizer',
+                            status: 'confirmed').each do |invite|
+      country_code = organizer_country(invite)&.alpha2
+      organizers << [invite.person, country_code]
+    end
+    organizers
+  end
+
+  def co_authors
+    supporting_organizers&.each_with_object('') do |org_data, text|
+      organizer, country_code = org_data
+      text << %({
+                      emailAddress: {
+                        address: "#{organizer.email}"
+                      }
+                      nameGiven: "#{organizer.firstname}"
+                      nameSurname: "#{organizer.lastname}"
+                      mrAuthorID: 12345
+                      institutionAtSubmission: {
+                        name: "#{organizer.affiliation}"
+                      }
+                      countryAtSubmission: {
+                        codeAlpha2: "#{country_code}"
+                      }
+                    },)
+    end
+  end
+
+  def proposal_abstract
+    # get the proposal's Press Release field?
+    ''
+  end
+
+  def ams_subject_code(code)
+    title = @proposal.ams_subjects.send(code).title
+    "#{title[/^\d+/]}-XX"
+  end
+
+  def query
     <<END_STRING
             mutation {
               article: submitArticle(
@@ -23,58 +90,42 @@ class EditFlowService
                     code: "#{@proposal.subject.code}"
                   }
 
-                  title: "#{@proposal.title}"
-                  abstract: "#{@proposal.title}" # I thought we'd discussed something else going in here... -AJ
+                  title: "#{@proposal.code}: #{@proposal.title}"
+                  abstract: "#{proposal_abstract}"
 
                   emailAddressCorrespAuthor: {
                     address: "#{@proposal.lead_organizer.email}"
                   }
 
-                  # just want to make clear we can do more than two authors -AJ
                   authors: [
                     {
                       emailAddress: {
                         address: "#{@proposal.lead_organizer.email}"
                       }
-                      nameFull: "#{proposal.lead_organizer.fullname}" # I added this field -AJ
+                      nameFull: "#{proposal.lead_organizer.fullname}"
                       nameGiven: "#{proposal.lead_organizer.firstname}"
                       nameSurname: "#{proposal.lead_organizer.lastname}"
-                      # renamed nameInOriginalScript --> nameInNonLatinScript; use only for non-latin names, eg, "日暮 ひぐらし かごめ" -AJ
                       institutionAtSubmission: {
                         name: "#{proposal.lead_organizer.affiliation}"
                       }
                       countryAtSubmission: {
-                        codeAlpha2: "#{@country_code.alpha2}"
+                        codeAlpha2: "#{proposal_country.alpha2}"
                       }
                     },
-                    {
-                      emailAddress: {
-                        address: "#{@organizers.first.email}"
-                      }
-                      nameGiven: "#{@organizers.first.firstname}"
-                      nameSurname: "#{@organizers.first.lastname}"
-                      mrAuthorID: 12345
-                      institutionAtSubmission: {
-                        name: "#{@organizers.first.person.affiliation}"
-                      }
-                      countryAtSubmission: {
-                        codeAlpha2: "#{@country_code_organizers.alpha2}"
-                      }
-                    },
+                    #{co_authors}
                   ]
 
                   subjectsPrimary: {
                     scheme: "MSC2020"
                     subjects: [
-                      {code: "00-01"}
+                      {code: "#{ams_subject_code(:first)}"}
                     ]
                   }
 
                   subjectsSecondary: {
                     scheme: "MSC2020"
                     subjects: [
-                      {code: "00B05"}
-                      {code: "00A07"}
+                      {code: "#{ams_subject_code(:last)}"}
                     ]
                   }
 
@@ -86,8 +137,7 @@ class EditFlowService
                   ]
                 }
               ) {
-                id # new uuid field for article since `identifier` field is only guaranteed to be unique within a given journal; `id` will be used for querying -AJ
-                identifier # human-readable identifier unique within journal -AJ
+                id
               }
             }
 END_STRING
