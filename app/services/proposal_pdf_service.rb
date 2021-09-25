@@ -168,7 +168,7 @@ class ProposalPdfService
   def lead_organizer_info
     info = "\\subsection*{Lead Organizer}\n\n"
     info << "#{proposal.lead_organizer&.fullname} \\\\ \n\n"
-    info << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+    info << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
   end
 
   def single_proposal_heading
@@ -199,8 +199,8 @@ class ProposalPdfService
     return if person.blank?
 
     affil = ""
-    affil << " (#{person.affiliation}" if person&.affiliation.present?
-    affil << ", #{person.department}" if person&.department.present?
+    affil << " (#{delatex(person.affiliation)}" if person&.affiliation.present?
+    affil << ", #{delatex(person.department)}" if person&.department.present?
     affil << ")" if person&.affiliation.present?
 
     delatex(affil)
@@ -246,8 +246,8 @@ class ProposalPdfService
 
   def proposal_lead_organizer
     @text << "\\subsection*{Lead Organizer}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname}#{affil(proposal.lead_organizer)} \\\\ \n"
-    @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+    @text << "#{proposal.lead_organizer&.fullname}#{delatex(affil(proposal.lead_organizer))} \\\\ \n"
+    @text << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
     pdf_content
     @text
   end
@@ -258,7 +258,7 @@ class ProposalPdfService
     @text << "\\subsection*{Supporting Organizers}\n\n"
     @text << "\\begin{itemize}\n"
     proposal.supporting_organizers.each do |organizer|
-      @text << "\\item #{organizer&.person&.fullname}#{affil(organizer&.person)}\n"
+      @text << "\\item #{organizer&.person&.fullname}#{delatex(affil(organizer&.person))}\n"
     end
     @text << "\\end{itemize}\n\n"
   end

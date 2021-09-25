@@ -192,7 +192,7 @@ class SubmittedProposalsController < ApplicationController
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: query_edit_flow, fileMain: File.open(@pdf_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
-    Rails.logger.info { "\nEditFlow response: #{response.inspect}\n\n" }
+    Rails.logger.info { "\nEditFlow response to #{@proposal.code} POST:\n#{response}\n\n" }
 
     if response.body.include?("errors")
       flash[:alert] = "Error sending data!"
