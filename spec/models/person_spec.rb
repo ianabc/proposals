@@ -20,6 +20,11 @@ RSpec.describe Person, type: :model do
       p = build(:person, email: '')
       expect(p.valid?).to be_falsey
     end
+
+    it "has a country" do
+      p = build(:person)
+      expect(p.country).not_to be_blank
+    end
   end
 
   describe 'associations' do
