@@ -164,17 +164,27 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_pdf_file
-    prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
-                                   .generate_latex_file
-
+    @prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
+                                    .generate_latex_file.to_s
+    append_supplementary_files if @proposal.files.attached?
     @year = @proposal&.year || Date.current.year.to_i + 2
     pdf_file = render_to_string layout: "application",
-                                inline: prop_latex.to_s, formats: [:pdf]
+                                inline: @prop_latex, formats: [:pdf]
 
     @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
     check_file
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
+    end
+  end
+
+  def append_supplementary_files
+    number = 0
+    @proposal.files.each do |file|
+      # filename = File.basename(rails_blob_path(file), ".*")
+      number += 1
+      @prop_latex << "\\noindent #{number}. \\href{#{request.base_url}/#{url_for(rails_blob_path(file))}}
+      {Supplementry File #{number}} \n\n\n"
     end
   end
 
@@ -184,24 +194,24 @@ class SubmittedProposalsController < ApplicationController
     begin
       query_edit_flow = EditFlowService.new(@proposal).query
     rescue RuntimeError => e
-      redirect_to submitted_proposals_path, alert: e.message
+      redirect_to submitted_proposals_path, alert: "Errors: #{e.message}"
     end
 
+    Rails.logger.info { "\n\n*****************************************\n\n" }
+    Rails.logger.info { "Posting #{@proposal.code} to EditFlow..." }
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: query_edit_flow, fileMain: File.open(@pdf_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
-    Rails.logger.debug response
+    Rails.logger.info { "\nEditFlow response: #{response.inspect}\n\n" }
 
     if response.body.include?("errors")
-      Rails.logger.debug { "\n\n*****************************************\n\n" }
-      Rails.logger.debug { "EditFlow POST error:\n #{response.body.inspect}\n" }
-      Rails.logger.debug { "\n\n*****************************************\n\n" }
       flash[:alert] = "Error sending data!"
     else
       @proposal.progress!
       flash[:notice] = "Data sent to EditFlow!"
       @proposal.update(edit_flow: Time.zone.now)
     end
+    Rails.logger.info { "\n\n*****************************************\n\n" }
   end
 
   def set_proposal

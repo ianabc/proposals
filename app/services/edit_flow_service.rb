@@ -60,7 +60,7 @@ class EditFlowService
                       }
                       nameGiven: "#{organizer.firstname}"
                       nameSurname: "#{organizer.lastname}"
-                      mrAuthorID: 0
+                      mrAuthorID: 12345
                       institutionAtSubmission: {
                         name: "#{organizer.affiliation}"
                       }
