@@ -183,7 +183,7 @@ class SubmittedProposalsController < ApplicationController
     @proposal.files.each do |file|
       # filename = File.basename(rails_blob_path(file), ".*")
       number += 1
-      @prop_latex << "#{number}. \\href{#{request.base_url}/#{url_for(rails_blob_path(file))}}
+      @prop_latex << "\\noindent #{number}. \\href{#{request.base_url}/#{url_for(rails_blob_path(file))}}
       {Supplementry File #{number}} \n\n\n"
     end
   end
