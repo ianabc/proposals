@@ -167,8 +167,8 @@ class ProposalPdfService
 
   def lead_organizer_info
     info = "\\subsection*{Lead Organizer}\n\n"
-    info << "#{proposal.lead_organizer&.fullname} \\\\ \n\n"
-    info << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+    info << "#{proposal.lead_organizer&.fullname} (#{affil(proposal.lead_organizer)}) \\\\ \n\n"
+    info << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
   end
 
   def single_proposal_heading
@@ -197,7 +197,7 @@ class ProposalPdfService
   end
 
   def affil(person)
-    return if person.blank?
+    return '' if person.blank?
 
     affil = ""
     affil << " (#{person.affiliation}" if person&.affiliation.present?
@@ -247,8 +247,8 @@ class ProposalPdfService
 
   def proposal_lead_organizer
     @text << "\\subsection*{Lead Organizer}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname}#{affil(proposal.lead_organizer)} \\\\ \n"
-    @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+    @text << "#{proposal.lead_organizer&.fullname} (#{affil(proposal.lead_organizer)}) \\\\ \n"
+    @text << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
     pdf_content
     @text
   end
@@ -397,6 +397,8 @@ class ProposalPdfService
   end
 
   def delatex(string)
+    return '' if string.blank?
+
     LatexToPdf.escape_latex(string)
   end
 
