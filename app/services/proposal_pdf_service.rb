@@ -192,6 +192,9 @@ class ProposalPdfService
     proposal_organizing_committee
     @text << "\\pagebreak"
     organizing_participant_committee
+    if proposal.files.attached?
+      proposal_supplementary_files
+    end
     @text
   end
 
@@ -595,5 +598,11 @@ class ProposalPdfService
 
   def invites_gender_data
     @data = invites_graph_data("gender", "gender_other")
+  end
+
+  def proposal_supplementary_files
+    @text << "\\pagebreak"
+    @text << "\\section*{Supplementry Files}\n\n"
+    @text
   end
 end
