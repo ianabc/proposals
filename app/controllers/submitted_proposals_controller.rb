@@ -31,16 +31,17 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def edit_flow
+    @notices = []
     params[:ids]&.split(',')&.each do |id|
       @proposal = Proposal.find_by(id: id.to_i)
       check_proposal_status and return unless @proposal.may_progress?
 
-      post_to_editflow
+      break unless post_to_editflow
     end
 
+    flash[:notice] = @notices.join("<br>\n") unless @notices.empty?
     respond_to do |format|
       format.js { render js: "window.location='/submitted_proposals'" }
-      format.html { redirect_to submitted_proposals_path, notice: 'Successfully sent proposal(s) to EditFlow!' }
     end
   end
 
@@ -164,6 +165,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_pdf_file
+    Rails.logger.info { "\n\nCreating PDF for #{@proposal&.code}...\n\n" }
     prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
                                    .generate_latex_file
 
@@ -171,37 +173,50 @@ class SubmittedProposalsController < ApplicationController
     pdf_file = render_to_string layout: "application",
                                 inline: prop_latex.to_s, formats: [:pdf]
 
-    @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
-    check_file
-    File.open(@pdf_path, "w:UTF-8") do |file|
-      file.write(pdf_file)
+    @pdf_path = "#{Rails.root}/tmp/#{@proposal&.code}-#{DateTime.now.to_i}.pdf"
+
+    begin
+      File.open(@pdf_path, "w:UTF-8") do |file|
+        file.write(pdf_file)
+      end
+      return true
+    rescue => e
+      Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}" }
+      flash[:alert] = "Error creating #{@proposal&.code} PDF: #{e.message}"
+      return
     end
   end
 
   def post_to_editflow
-    create_pdf_file
+    Rails.logger.info { "\n\n*****************************************\n\n" }
+    Rails.logger.info { "\n\nPosting #{@proposal.code} to EditFlow...\n\n" }
+    return unless create_pdf_file
 
     begin
       query_edit_flow = EditFlowService.new(@proposal).query
     rescue RuntimeError => e
-      redirect_to submitted_proposals_path, alert: "Errors: #{e.message}"
+      Rails.logger.info { "\n\nErrors in #{@proposal.code}: #{e.message}\n\n" }
+      flash[:alert] = "Errors in #{@proposal.code}: #{e.message}"
     end
 
-    Rails.logger.info { "\n\n*****************************************\n\n" }
-    Rails.logger.info { "Posting #{@proposal.code} to EditFlow..." }
+    return unless flash[:alert].blank?
+
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: query_edit_flow, fileMain: File.open(@pdf_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
-    Rails.logger.info { "\nEditFlow response: #{response.inspect}\n\n" }
 
     if response.body.include?("errors")
-      flash[:alert] = "Error sending data!"
+      Rails.logger.info { "\n\nError sending #{@proposal.code}: #{response.body}\n\n" }
+      flash[:alert] = "Error sending #{@proposal.code}: #{response.body}"
+      return
     else
+      Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
       @proposal.progress!
-      flash[:notice] = "Data sent to EditFlow!"
-      @proposal.update(edit_flow: Time.zone.now)
+      @notices << "#{@proposal.code} sent to EditFlow!"
+      @proposal.update(edit_flow: DateTime.current)
     end
     Rails.logger.info { "\n\n*****************************************\n\n" }
+    return true
   end
 
   def set_proposal
@@ -232,13 +247,6 @@ class SubmittedProposalsController < ApplicationController
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
-  end
-
-  def check_file
-    return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
-
-    @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
-    File.new(@pdf_path, 'w')
   end
 
   def template_params
