@@ -192,9 +192,7 @@ class ProposalPdfService
     proposal_organizing_committee
     @text << "\\pagebreak"
     organizing_participant_committee
-    if proposal.files.attached?
-      proposal_supplementary_files
-    end
+    proposal_supplementary_files if proposal.files.attached?
     @text
   end
 
