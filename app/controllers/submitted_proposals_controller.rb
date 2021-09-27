@@ -165,8 +165,8 @@ class SubmittedProposalsController < ApplicationController
 
   def create_pdf_file
     @prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
-                                   .generate_latex_file.to_s
-    append_supplementary_files
+                                    .generate_latex_file.to_s
+    append_supplementary_files if @proposal.files.attached?
     @year = @proposal&.year || Date.current.year.to_i + 2
     pdf_file = render_to_string layout: "application",
                                 inline: @prop_latex, formats: [:pdf]
@@ -182,8 +182,9 @@ class SubmittedProposalsController < ApplicationController
     number = 0
     @proposal.files.each do |file|
       # filename = File.basename(rails_blob_path(file), ".*")
-      number = number + 1
-      @prop_latex << "#{number}. \\href{#{request.base_url}/#{url_for(rails_blob_path(file))}}{Supplementry File #{number}}"
+      number += 1
+      @prop_latex << "#{number}. \\href{#{request.base_url}/#{url_for(rails_blob_path(file))}}
+      {Supplementry File #{number}} \n\n\n"
     end
   end
 
