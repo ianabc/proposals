@@ -164,17 +164,27 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_pdf_file
-    prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
-                                   .generate_latex_file
-
+    @prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
+                                    .generate_latex_file.to_s
+    append_supplementary_files if @proposal.files.attached?
     @year = @proposal&.year || Date.current.year.to_i + 2
     pdf_file = render_to_string layout: "application",
-                                inline: prop_latex.to_s, formats: [:pdf]
+                                inline: @prop_latex, formats: [:pdf]
 
     @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
     check_file
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
+    end
+  end
+
+  def append_supplementary_files
+    number = 0
+    @proposal.files.each do |file|
+      # filename = File.basename(rails_blob_path(file), ".*")
+      number += 1
+      @prop_latex << "\\noindent #{number}. \\href{#{request.base_url}/#{url_for(rails_blob_path(file))}}
+      {Supplementry File #{number}} \n\n\n"
     end
   end
 
