@@ -11,19 +11,8 @@ class SubmittedProposalsController < ApplicationController
     @proposal.review! if @proposal.may_review?
   end
 
-  def edit; end
-
-  def update
-    @proposal.update(proposal_params)
-    submission = SubmitProposalService.new(@proposal, params)
-    submission.save_answers
-
-    if submission.has_errors?
-      redirect_to edit_submitted_proposal_url(@proposal), alert: "Your submission has
-          errors: #{submission.error_messages}.".squish
-      return
-    end
-    redirect_to edit_submitted_proposal_url(@proposal), notice: 'Proposal has been updated successfully!'
+  def edit
+    @proposal.invites.build
   end
 
   def download_csv
