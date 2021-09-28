@@ -40,8 +40,8 @@ class SubmittedProposalsController < ApplicationController
 
     respond_to do |format|
       format.js { render js: "window.location='/submitted_proposals'" }
-      format.html { redirect_to submitted_proposals_path,
-                                notice: "Proposals submitted to EditFlow!" }
+      message = "Proposals submitted to EditFlow!"
+      format.html { redirect_to submitted_proposals_path, notice: message }
     end
   end
 
@@ -165,13 +165,11 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def generate_pdf_string
-    begin
-      render_to_string layout: "application", inline: @prop_latex, formats: [:pdf]
-    rescue => e
-      Rails.logger.info { "\n\n#{@proposal.code} LaTeX error:\n #{e.message}\n\n" }
-      flash[:alert] = "#{@proposal.code} LaTeX error: #{e.message}"
-      return ''
-    end
+    render_to_string layout: "application", inline: @prop_latex, formats: [:pdf]
+  rescue => e
+    Rails.logger.info { "\n\n#{@proposal.code} LaTeX error:\n #{e.message}\n\n" }
+    flash[:alert] = "#{@proposal.code} LaTeX error: #{e.message}"
+    return ''
   end
 
   def write_pdf_file(pdf_file)
@@ -232,9 +230,9 @@ class SubmittedProposalsController < ApplicationController
       return
     else
       Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
-      @proposal.progress!
-      flash[:notice] =  "#{@proposal&.code} sent to EditFlow!"
+      flash[:notice] = "#{@proposal&.code} sent to EditFlow!"
       @proposal.update(edit_flow: DateTime.current)
+      @proposal.progress!
     end
     Rails.logger.info { "\n\n*****************************************\n\n" }
     return true
