@@ -174,17 +174,17 @@ class SubmittedProposalsController < ApplicationController
     pdf_file = render_to_string layout: "application",
                                 inline: @prop_latex, formats: [:pdf]
 
-    @pdf_path = "#{Rails.root}/tmp/#{@proposal&.code}-#{DateTime.now.to_i}.pdf"
+    @pdf_path = Rails.root.join('tmp',
+                                "#{@proposal&.code}-#{DateTime.now.to_i}.pdf")
 
     begin
       File.open(@pdf_path, "w:UTF-8") do |file|
         file.write(pdf_file)
       end
-      return true
     rescue => e
       Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}" }
       flash[:alert] = "Error creating #{@proposal&.code} PDF: #{e.message}"
-      return
+      return false
     end
   end
 
@@ -207,7 +207,7 @@ class SubmittedProposalsController < ApplicationController
       flash[:alert] = "Errors in #{@proposal.code}: #{e.message}"
     end
 
-    return unless flash[:alert].blank?
+    return if flash[:alert].present?
 
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: query_edit_flow, fileMain: File.open(@pdf_path) },

@@ -19,14 +19,18 @@ RSpec.describe 'EditFlowService' do
     @proposal.proposal_ams_subjects << subject1
     @proposal.proposal_ams_subjects << subject2
     @EFS = EditFlowService.new(@proposal)
-    update_supporting_organizers
+    update_organizers
   end
 
-  def update_supporting_organizers
-    # this info is getting blanked out with invite creation
+  def update_organizers
+    # ensure country exists in the `Country` database
+    countries = %w[Canada Mexico Brazil India Japan Sweden Denmark Ukraine]
+    @proposal.lead_organizer.update_columns(country: countries.sample)
+
+    # invite.person info is getting blanked out with invite creation
     @proposal.invites.where(invited_as: 'Organizer').each do |invite|
       person = invite.person
-      person.country = %w[Canada Mexico Brazil India Japan].sample
+      person.country = countries.sample
       person.affiliation = Faker::University.name
       person.skip_person_validation = true
       person.save!
@@ -107,6 +111,7 @@ RSpec.describe 'EditFlowService' do
 
   context ".query" do
     before do
+      update_organizers
       @result = @EFS.query
       expect(@result).not_to be_empty
       expect(@result.class).to eq(String)
@@ -115,11 +120,12 @@ RSpec.describe 'EditFlowService' do
     it 'contains proposal subject, title, lead organizer info' do
       expect(@result).to include(%(code: "#{@proposal.subject.code}"))
       expect(@result).to include(%(title: "#{@proposal.code}: #{@proposal.title}"))
-      expect(@result).to include(%(address: "#{@proposal.lead_organizer.email}"))
-      expect(@result).to include(%(nameFull: "#{@proposal.lead_organizer.fullname}"))
-      expect(@result).to include(%(nameGiven: "#{@proposal.lead_organizer.firstname}"))
-      expect(@result).to include(%(nameSurname: "#{@proposal.lead_organizer.lastname}"))
-      expect(@result).to include(%(name: "#{@proposal.lead_organizer.affiliation}"))
+      lead_org = @proposal.lead_organizer
+      expect(@result).to include(%(address: "#{lead_org.email}"))
+      expect(@result).to include(%(nameFull: "#{lead_org.fullname}"))
+      expect(@result).to include(%(nameGiven: "#{lead_org.firstname}"))
+      expect(@result).to include(%(nameSurname: "#{lead_org.lastname}"))
+      expect(@result).to include(%(name: "#{lead_org.affiliation}"))
     end
 
     it "contains the proposal's lead organizer country code" do
@@ -128,7 +134,7 @@ RSpec.describe 'EditFlowService' do
     end
 
     it "contains the proposal's supporting organizer's info" do
-      update_supporting_organizers
+      update_organizers
 
       supporting_org, country_code = @EFS.supporting_organizers.sample
       expect(@result).to include(%(address: "#{supporting_org.email}"))
