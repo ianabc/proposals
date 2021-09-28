@@ -121,7 +121,11 @@ class ProposalsController < ApplicationController
     flash[:notice] = 'File has been removed!'
 
     if request.xhr?
-      render js: "window.location='#{edit_proposal_path(@proposal)}'"
+      if current_user.staff_member?
+        render js: "window.location='#{edit_submitted_proposal_url(@proposal)}'"
+      else
+        render js: "window.location='#{edit_proposal_path(@proposal)}'"
+      end
     else
       redirect_to edit_proposal_path(@proposal)
     end
@@ -191,7 +195,8 @@ class ProposalsController < ApplicationController
     return if params[:action] == 'show' &&
               (current_user.staff_member? || current_user.organizer?(@proposal))
 
-    return if params[:action] == 'edit' && current_user.lead_organizer?(@proposal)
+    return if params[:action] == 'edit' &&
+              (current_user.staff_member? || current_user.lead_organizer?(@proposal))
 
     raise CanCan::AccessDenied
   end

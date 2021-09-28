@@ -12,15 +12,6 @@ class EditFlowService
     find_country(@proposal.lead_organizer)
   end
 
-  def organizer_person(invite)
-    if invite&.person.blank?
-      raise "Organizer #{invite.firstname} #{invite.lastname} has no person
-             record".squish
-    end
-
-    invite.person
-  end
-
   def find_country(organizer)
     country = Country.find_country_by_name(organizer&.country)
     if country.blank?
@@ -32,7 +23,7 @@ class EditFlowService
   end
 
   def organizer_country(invite)
-    organizer = organizer_person(invite)
+    organizer = invite.person
 
     if organizer.country.blank?
       raise "Organizer #{organizer.fullname} has no country"
@@ -60,7 +51,6 @@ class EditFlowService
                       }
                       nameGiven: "#{organizer.firstname}"
                       nameSurname: "#{organizer.lastname}"
-                      mrAuthorID: 12345
                       institutionAtSubmission: {
                         name: "#{organizer.affiliation}"
                       }
@@ -77,7 +67,9 @@ class EditFlowService
   end
 
   def ams_subject_code(code)
-    title = @proposal.ams_subjects.send(code).title
+    title = @proposal.ams_subjects.send(code)&.title
+    raise "#{@proposal&.code} has missing AMS Subject code" if title.blank?
+
     "#{title[/^\d+/]}-XX"
   end
 
@@ -102,14 +94,14 @@ class EditFlowService
                       emailAddress: {
                         address: "#{@proposal.lead_organizer.email}"
                       }
-                      nameFull: "#{proposal.lead_organizer.fullname}"
-                      nameGiven: "#{proposal.lead_organizer.firstname}"
-                      nameSurname: "#{proposal.lead_organizer.lastname}"
+                      nameFull: "#{@proposal.lead_organizer.fullname}"
+                      nameGiven: "#{@proposal.lead_organizer.firstname}"
+                      nameSurname: "#{@proposal.lead_organizer.lastname}"
                       institutionAtSubmission: {
-                        name: "#{proposal.lead_organizer.affiliation}"
+                        name: "#{@proposal.lead_organizer.affiliation}"
                       }
                       countryAtSubmission: {
-                        codeAlpha2: "#{proposal_country.alpha2}"
+                        codeAlpha2: "#{find_country(@proposal.lead_organizer).alpha2}"
                       }
                     },
                     #{co_authors}
