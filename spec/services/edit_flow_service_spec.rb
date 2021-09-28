@@ -53,9 +53,16 @@ RSpec.describe 'EditFlowService' do
     expect(@EFS.proposal_country.alpha2).to eq(code)
   end
 
-  it '.ams_subject_code' do
+  context '.ams_subject_code' do
     # rspec factory subjects setup needs revision!
-    expect(@EFS.ams_subject_code(:first)).to eq('123-XX')
+    it 'returns the AMS subject code with -XX appended' do
+      expect(@EFS.ams_subject_code(:first)).to eq('123-XX')
+    end
+
+    it 'raises an exception if the proposal has a missing AMS subject' do
+      new_efs = EditFlowService.new(create(:proposal))
+      expect { new_efs.ams_subject_code(:first) }.to raise_error(RuntimeError)
+    end
   end
 
   context '.proposal_country' do

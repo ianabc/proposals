@@ -39,9 +39,13 @@ class SubmittedProposalsController < ApplicationController
       break unless post_to_editflow
     end
 
-    flash[:notice] = @notices.join("<br>\n") unless @notices.empty?
     respond_to do |format|
-      format.js { render js: "window.location='/submitted_proposals'" }
+      if flash[:alert].present?
+        format.js { render js: "window.location='/submitted_proposals'" }
+      else
+        flash[:notice] = @notices.join("<br>\n") unless @notices.empty?
+        format.html { redirect_to submitted_proposals_path }
+      end
     end
   end
 
@@ -171,8 +175,15 @@ class SubmittedProposalsController < ApplicationController
     append_supplementary_files if @proposal.files.attached?
 
     @year = @proposal&.year || Date.current.year.to_i + 2
-    pdf_file = render_to_string layout: "application",
-                                inline: @prop_latex, formats: [:pdf]
+
+    begin
+      pdf_file = render_to_string layout: "application",
+                                  inline: @prop_latex, formats: [:pdf]
+    rescue => e
+      Rails.logger.info { "\n\n#{@proposal.code} LaTeX error:\n #{e.message}\n\n" }
+      flash[:alert] = "#{@proposal.code} LaTeX error: #{e.message}"
+      return false
+    end
 
     @pdf_path = Rails.root.join('tmp',
                                 "#{@proposal&.code}-#{DateTime.now.to_i}.pdf")
@@ -201,7 +212,7 @@ class SubmittedProposalsController < ApplicationController
     return unless create_pdf_file
 
     begin
-      query_edit_flow = EditFlowService.new(@proposal).query
+      edit_flow_query = EditFlowService.new(@proposal).query
     rescue RuntimeError => e
       Rails.logger.info { "\n\nErrors in #{@proposal.code}: #{e.message}\n\n" }
       flash[:alert] = "Errors in #{@proposal.code}: #{e.message}"
@@ -210,7 +221,7 @@ class SubmittedProposalsController < ApplicationController
     return if flash[:alert].present?
 
     response = RestClient.post ENV['EDITFLOW_API_URL'],
-                               { query: query_edit_flow, fileMain: File.open(@pdf_path) },
+                               { query: edit_flow_query, fileMain: File.open(@pdf_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
 
     if response.body.include?("errors")
