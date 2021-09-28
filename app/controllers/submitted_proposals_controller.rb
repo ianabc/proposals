@@ -31,7 +31,6 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def edit_flow
-    @notices = []
     params[:ids]&.split(',')&.each do |id|
       @proposal = Proposal.find_by(id: id.to_i)
       check_proposal_status and return unless @proposal.may_progress?
@@ -40,12 +39,9 @@ class SubmittedProposalsController < ApplicationController
     end
 
     respond_to do |format|
-      if flash[:alert].present?
-        format.js { render js: "window.location='/submitted_proposals'" }
-      else
-        flash[:notice] = @notices.join("<br>\n") unless @notices.empty?
-        format.html { redirect_to submitted_proposals_path }
-      end
+      format.js { render js: "window.location='/submitted_proposals'" }
+      format.html { redirect_to submitted_proposals_path,
+                                notice: "Proposals submitted to EditFlow!" }
     end
   end
 
@@ -168,6 +164,30 @@ class SubmittedProposalsController < ApplicationController
     "propfile-#{current_user.id}-#{@proposal.id}.tex"
   end
 
+  def generate_pdf_string
+    begin
+      render_to_string layout: "application", inline: @prop_latex, formats: [:pdf]
+    rescue => e
+      Rails.logger.info { "\n\n#{@proposal.code} LaTeX error:\n #{e.message}\n\n" }
+      flash[:alert] = "#{@proposal.code} LaTeX error: #{e.message}"
+      return ''
+    end
+  end
+
+  def write_pdf_file(pdf_file)
+    return if pdf_file.blank?
+
+    begin
+      File.open(@pdf_path, "w:UTF-8") do |file|
+        file.write(pdf_file)
+      end
+    rescue => e
+      Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}\n\n" }
+      flash[:alert] = "Error creating #{@proposal&.code} PDF: #{e.message}"
+      return false
+    end
+  end
+
   def create_pdf_file
     Rails.logger.info { "\n\nCreating PDF for #{@proposal&.code}...\n\n" }
     @prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
@@ -175,28 +195,10 @@ class SubmittedProposalsController < ApplicationController
     append_supplementary_files if @proposal.files.attached?
 
     @year = @proposal&.year || Date.current.year.to_i + 2
+    @pdf_path = Rails.root.join('tmp', "#{@proposal&.code}-#{DateTime.now.to_i}.pdf")
 
-    begin
-      pdf_file = render_to_string layout: "application",
-                                  inline: @prop_latex, formats: [:pdf]
-    rescue => e
-      Rails.logger.info { "\n\n#{@proposal.code} LaTeX error:\n #{e.message}\n\n" }
-      flash[:alert] = "#{@proposal.code} LaTeX error: #{e.message}"
-      return false
-    end
-
-    @pdf_path = Rails.root.join('tmp',
-                                "#{@proposal&.code}-#{DateTime.now.to_i}.pdf")
-
-    begin
-      File.open(@pdf_path, "w:UTF-8") do |file|
-        file.write(pdf_file)
-      end
-    rescue => e
-      Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}" }
-      flash[:alert] = "Error creating #{@proposal&.code} PDF: #{e.message}"
-      return false
-    end
+    pdf_file = generate_pdf_string
+    write_pdf_file(pdf_file)
   end
 
   def append_supplementary_files
@@ -231,7 +233,7 @@ class SubmittedProposalsController < ApplicationController
     else
       Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
       @proposal.progress!
-      @notices << "#{@proposal.code} sent to EditFlow!"
+      flash[:notice] =  "#{@proposal&.code} sent to EditFlow!"
       @proposal.update(edit_flow: DateTime.current)
     end
     Rails.logger.info { "\n\n*****************************************\n\n" }
