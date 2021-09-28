@@ -105,8 +105,14 @@ RSpec.describe 'EditFlowService' do
     expect(organizers.first).to eq(supporting_organizer1)
   end
 
-  it ".co_authors" do
-    expect(@EFS.co_authors).not_to be_empty
+  it ".co_authors contains the proposal's supporting organizer's info" do
+    supporting_org, country_code = @EFS.supporting_organizers.sample
+    result = @EFS.co_authors
+    expect(result).to include(%(address: "#{supporting_org.email}"))
+    expect(result).to include(%(nameGiven: "#{supporting_org.firstname}"))
+    expect(result).to include(%(nameSurname: "#{supporting_org.lastname}"))
+    expect(result).to include(%(name: "#{supporting_org.affiliation}"))
+    expect(result).to include(%(codeAlpha2: "#{country_code}"))
   end
 
   context ".query" do
@@ -130,17 +136,6 @@ RSpec.describe 'EditFlowService' do
 
     it "contains the proposal's lead organizer country code" do
       country_code = @EFS.find_country(@proposal.lead_organizer).alpha2
-      expect(@result).to include(%(codeAlpha2: "#{country_code}"))
-    end
-
-    it "contains the proposal's supporting organizer's info" do
-      update_organizers
-
-      supporting_org, country_code = @EFS.supporting_organizers.sample
-      expect(@result).to include(%(address: "#{supporting_org.email}"))
-      expect(@result).to include(%(nameGiven: "#{supporting_org.firstname}"))
-      expect(@result).to include(%(nameSurname: "#{supporting_org.lastname}"))
-      expect(@result).to include(%(name: "#{supporting_org.affiliation}"))
       expect(@result).to include(%(codeAlpha2: "#{country_code}"))
     end
   end
