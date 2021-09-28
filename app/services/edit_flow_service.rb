@@ -68,7 +68,8 @@ class EditFlowService
 
   def ams_subject_code(code)
     title = @proposal.ams_subjects.send(code)&.title
-    raise "Missing AMS Subject code for @proposal&.code" if title.blank?
+    raise "#{@proposal&.code} has missing AMS Subject code" if title.blank?
+
     "#{title[/^\d+/]}-XX"
   end
 
