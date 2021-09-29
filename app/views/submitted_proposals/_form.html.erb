@@ -243,13 +243,13 @@
 
                             <% if params[:action] == 'show' %>
                             <div>
-                              <%= render partial: 'lead_organizer' %>
+                              <%= render partial: 'proposals/lead_organizer' %>
                               <div>
                                 <h3 class="form-section">Supporting Organizers:</h3>
                                 <% if @proposal.invites %>
                                   <% @proposal.invites.each do |invite|%>
                                     <% if invite.invited_as == 'Organizer' %>
-                                      <%= render partial: 'organizer', locals: { invite: invite } %>
+                                      <%= render partial: 'proposals/organizer', locals: { invite: invite } %>
                                     <% end %>
                                   <% end %>
                                 <% end %>
@@ -260,7 +260,7 @@
                                   <% if @proposal.invites %>
                                     <% @proposal.invites.each do |invite|%>
                                       <% if invite.invited_as == 'Participant' %>
-                                        <%= render partial: 'organizer', locals: { invite: invite } %>
+                                        <%= render partial: 'proposals/organizer', locals: { invite: invite } %>
                                       <% end %>
                                     <% end %>
                                   <% end %>
@@ -272,7 +272,7 @@
                                     <h3 class="form-section">Confirmed Participants:</h3>
                                     <% @careers.uniq.each do |career| %>
                                       <h4><%= career %></h4>
-                                        <%= render partial: 'confirm_participant', locals: { confirmed_participants: @proposal.participants_career(career) } %>
+                                        <%= render partial: 'proposals/confirm_participant', locals: { confirmed_participants: @proposal.participants_career(career) } %>
                                     <% end %>
                                   <% end %>
                                 </div>

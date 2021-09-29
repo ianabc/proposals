@@ -4,6 +4,6 @@
   </head>
   <body>
     <p>Dear <%= @organizer %>,</p>
-    <p><%= @email.body %></p>
+    <p><%= raw @email.body %></p>
   </body>
 </html>
