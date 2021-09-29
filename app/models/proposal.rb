@@ -1,7 +1,7 @@
 class Proposal < ApplicationRecord
   include AASM
   include PgSearch::Model
-  pg_search_scope :search_proposals, against: %i[title],
+  pg_search_scope :search_proposals, against: %i[title code],
                                      associated_against: {
                                        people: %i[firstname lastname]
                                      }
