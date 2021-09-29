@@ -91,6 +91,6 @@ module SubmittedProposalsHelper
   end
 
   def organizers_email(proposal)
-    proposal.invites.where(invited_as: 'Organizer').map(&:person).map(&:email).join(', ')
+    proposal.invites.where(invited_as: 'Organizer').map(&:person).map(&:email)
   end
 end

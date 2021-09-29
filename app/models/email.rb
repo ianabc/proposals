@@ -33,13 +33,12 @@ class Email < ApplicationRecord
     false
   end
 
-  def email_organizers
+  def email_organizers(organizers_email)
     proposal_mailer(proposal.lead_organizer.email,
                     proposal.lead_organizer.fullname)
 
-    proposal.invites.where(invited_as: 'Organizer')&.each do |organizer|
-      proposal_mailer(organizer.email, organizer.person.fullname)
-    end
+    @organizers_email = organizers_email
+    send_organizers_email if @organizers_email.present?
   end
 
   def all_emails(email)
@@ -52,6 +51,17 @@ class Email < ApplicationRecord
     ProposalMailer.with(email_data: self, email: email_address,
                         organizer: organizer_name)
                   .staff_send_emails.deliver_now
+  end
+
+  def send_organizers_email
+    @organizers_email&.each do |email|
+      next if email.nil?
+
+      organizer = Invite.find_by(email: email)
+      next if organizer.nil?
+
+      proposal_mailer(organizer.email, organizer.person.fullname)
+    end
   end
 
   def update_version

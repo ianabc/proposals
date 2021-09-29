@@ -11,6 +11,7 @@ import "controllers"
 import "bootstrap"
 import "jquery"
 import "@fortawesome/fontawesome-free/css/all"
+import "@yaireo/tagify"
 
 import "spark"; // vendor/assets/javascripts
 

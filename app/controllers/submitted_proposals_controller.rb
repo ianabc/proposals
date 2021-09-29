@@ -54,13 +54,13 @@ class SubmittedProposalsController < ApplicationController
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
     change_status
-    @email.cc_email = nil unless params[:cc]
-    @email.bcc_email = nil unless params[:bcc]
     params[:files]&.each do |file|
       @email.files.attach(file)
     end
+    organizers_email = params[:organizers_email]
+    organizers_email = JSON.parse(organizers_email).map(&:values).flatten
     if @email.save
-      @email.email_organizers
+      @email.email_organizers(organizers_email)
       redirect_to submitted_proposal_url(@proposal),
                   notice: "Sent email to proposal organizers."
     else
