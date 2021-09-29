@@ -60,9 +60,8 @@ class SubmittedProposalsController < ApplicationController
     organizers_email = params[:organizers_email]
     organizers_email = JSON.parse(organizers_email).map(&:values).flatten
     if @email.save
-      @email.email_organizers(organizers_email)
-      redirect_to submitted_proposal_url(@proposal),
-                  notice: "Sent email to proposal organizers."
+      @email.email_organizers
+      page_redirect
     else
       redirect_to submitted_proposal_url(@proposal),
                   alert: @email.errors.full_messages
@@ -318,5 +317,15 @@ class SubmittedProposalsController < ApplicationController
                               code: 'code1')
     ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
                               code: 'code2')
+  end
+
+  def page_redirect
+    if params[:action] == "show"
+      redirect_to submitted_proposal_url(@proposal),
+                  notice: "Sent email to proposal organizers."
+    else
+      redirect_to edit_submitted_proposal_url(@proposal),
+                  notice: "Sent email to proposal organizers."
+    end
   end
 end
