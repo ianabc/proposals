@@ -7,6 +7,7 @@ class Invite < ApplicationRecord
   before_validation :downcase_email, :assign_person
   before_save :generate_code
   before_save :strip_whitespace
+  before_save :email_downcase
 
   validates :firstname, :lastname, :email, :invited_as,
             :deadline_date, :person_id, presence: true
@@ -16,6 +17,10 @@ class Invite < ApplicationRecord
 
   enum status: { pending: 0, confirmed: 1, cancelled: 2 }
   enum response: { yes: 0, maybe: 1, no: 2 }
+
+  def email_downcase
+    email.downcase!
+  end
 
   def generate_code
     self.code = SecureRandom.urlsafe_base64(37) if code.blank?

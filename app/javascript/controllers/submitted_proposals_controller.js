@@ -1,12 +1,19 @@
 import { Controller } from "stimulus"
 import Rails from '@rails/ujs'
 import toastr from 'toastr'
+import Tagify from '@yaireo/tagify'
 
 export default class extends Controller {
-  static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus' ]
+  static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus', 'organizersEmail' ]
 
   connect () {
-    this.tocTarget.checked = true;
+    if(this.hasTocTarget) {
+      this.tocTarget.checked = true;
+    }
+    else if (this.hasOrganizersEmailTarget) {
+      var inputElm = this.organizersEmailTarget,
+      tagify = new Tagify (inputElm);
+    }
   }
 
   editFlow() {
@@ -46,13 +53,13 @@ export default class extends Controller {
         type: "PATCH",
         data,
         success: (data) => {
-          $('#subject').val(data.email_template.subject)
-          $('#body').val(data.email_template.body)
+          $('#birs_email_subject').val(data.email_template.subject)
+          $('#birs_email_body').val(data.email_template.body)
         }
       })
     }else {
-      $('#subject').val('')
-      $('#body').val('')
+      $('#birs_email_subject').val('')
+      $('#birs_email_body').val('')
     }
   }
 
