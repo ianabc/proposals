@@ -54,15 +54,14 @@ class SubmittedProposalsController < ApplicationController
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
     change_status
-    @email.cc_email = nil unless params[:cc]
-    @email.bcc_email = nil unless params[:bcc]
     params[:files]&.each do |file|
       @email.files.attach(file)
     end
+    organizers_email = params[:organizers_email]
+    organizers_email = JSON.parse(organizers_email).map(&:values).flatten
     if @email.save
       @email.email_organizers
-      redirect_to submitted_proposal_url(@proposal),
-                  notice: "Sent email to proposal organizers."
+      page_redirect
     else
       redirect_to submitted_proposal_url(@proposal),
                   alert: @email.errors.full_messages
@@ -318,5 +317,15 @@ class SubmittedProposalsController < ApplicationController
                               code: 'code1')
     ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
                               code: 'code2')
+  end
+
+  def page_redirect
+    if params[:action] == "show"
+      redirect_to submitted_proposal_url(@proposal),
+                  notice: "Sent email to proposal organizers."
+    else
+      redirect_to edit_submitted_proposal_url(@proposal),
+                  notice: "Sent email to proposal organizers."
+    end
   end
 end
