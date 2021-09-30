@@ -74,6 +74,7 @@ class SubmitProposalsController < ApplicationController
       @proposal.active!
       send_mail
     elsif @proposal.may_revision?
+      @proposal.allow_late_submission = true if @proposal.revision_requested?
       @proposal.revision!
       send_mail
     else
