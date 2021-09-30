@@ -607,7 +607,7 @@ class ProposalPdfService
 
     @proposal.files&.each do |file|
       path = ActiveStorage::Blob.service.send(:path_for, file.key)
-      raise "Error: #{file.filename} is not a PDF!" unless File.extname(file.filename) == /\.pdf$/i
+      # raise "Error: #{file.filename} is not a PDF!" unless File.extname(file.filename) == /\.pdf$/i
 
       file_content = File.read(path)
       file_name = "#{@proposal&.code}-#{file.filename}"
