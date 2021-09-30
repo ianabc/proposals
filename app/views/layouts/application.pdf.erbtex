@@ -30,7 +30,6 @@
 \usepackage{hyperref}
 \hypersetup{pdfborder={0 0 0 [0 0]}}
 \usepackage{comment}
-\usepackage{pdfpages}
 
 
 \DeclareMathOperator{\Gal}{Gal}

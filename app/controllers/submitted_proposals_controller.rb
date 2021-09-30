@@ -178,20 +178,12 @@ class SubmittedProposalsController < ApplicationController
     Rails.logger.info { "\n\nCreating PDF for #{@proposal&.code}...\n\n" }
     @prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
                                     .generate_latex_file.to_s
-    append_supplementary_files if @proposal.files.attached?
 
     @year = @proposal&.year || Date.current.year.to_i + 2
     @pdf_path = Rails.root.join('tmp', "#{@proposal&.code}-#{DateTime.now.to_i}.pdf")
 
     pdf_file = generate_pdf_string
     write_pdf_file(pdf_file)
-  end
-
-  def append_supplementary_files
-    @proposal.files.each_with_index do |file, counter|
-      @prop_latex << "\\noindent #{number}. \\href{#{request.base_url}/#{url_for(rails_blob_path(file))}}
-      {Supplementry File #{counter += 1}} \n\n\n"
-    end
   end
 
   def post_to_editflow

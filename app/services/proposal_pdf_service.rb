@@ -603,6 +603,23 @@ class ProposalPdfService
   def proposal_supplementary_files
     @text << "\\pagebreak"
     @text << "\\section*{Supplementry Files}\n\n"
+    @text << "\n\\begin{figure}\n  \\centering\n"
+
+    @proposal.files&.each do |file|
+      path = ActiveStorage::Blob.service.send(:path_for, file.key)
+      raise "Error: #{file.filename} is not a PDF!" unless File.extname(file.filename) == /\.pdf$/i
+
+      file_content = File.read(path)
+      file_name = "#{@proposal&.code}-#{file.filename}"
+      write_attachment_file(file_content, file_name)
+      @text << "    \\includegraphics{#{file_name}}\n"
+    end
+
+    @text << "\\end{figure}\n\n"
     @text
+  end
+
+  def write_attachment_file(file_contents, file_name)
+    File.binwrite("#{Rails.root}/tmp/#{file_name}", file_contents)
   end
 end
