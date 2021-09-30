@@ -63,7 +63,7 @@ namespace :birs do
     category = SubjectCategory.find_or_create_by!(name: 'none')
     subject_codes.each do |subject|
       puts "Adding BIRS Subject: #{subject[:code]}: #{subject[:title]}"
-      Subject.create(code: subject[:code], title: subject[:title], subject_category: category)
+      Subject.find_or_create_by(code: subject[:code], title: subject[:title], subject_category: category)
     end
     puts "Done!"
   end
@@ -139,7 +139,7 @@ namespace :birs do
 
     ams_subject_codes.each do |ams_subject|
       puts "Adding AMS Subject: #{ams_subject[:title]}"
-      AmsSubject.create(code: ams_subject[:code], title: ams_subject[:title])
+      AmsSubject.find_or_create_by(code: ams_subject[:code], title: ams_subject[:title])
     end
     puts "Done!"
   end
@@ -154,7 +154,7 @@ namespace :birs do
     category = SubjectCategory.find_or_create_by!(name: 'none')
     new_subjects.each do |subject|
       puts "Adding new subject: #{subject[:code]} => #{subject[:title]}"
-      Subject.create(code: subject[:code], title: subject[:title], subject_category: category)
+      Subject.find_or_create_by(code: subject[:code], title: subject[:title], subject_category: category)
     end
   end
 
@@ -169,12 +169,12 @@ namespace :birs do
           first_code = subject.title.split.first
           first_code += "-XX"
           subject.update(code: first_code)
-          ProposalAmsSubject.create!(ams_subject: subject, proposal: proposal, code: 'code1')
+          ProposalAmsSubject.find_or_create_by(ams_subject: subject, proposal: proposal, code: 'code1')
         when 'code2'
           first_code = subject.title.split.first
           first_code += "-XX"
           subject.update(code: first_code)
-          ProposalAmsSubject.create!(ams_subject: subject, proposal: proposal, code: 'code2')
+          ProposalAmsSubject.find_or_create_by(ams_subject: subject, proposal: proposal, code: 'code2')
         end
       end
     end
