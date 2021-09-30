@@ -180,11 +180,11 @@ class SubmitProposalsController < ApplicationController
   end
 
   def change_proposal_status
-    if @proposal.active!
-      send_mail
-    else
+    unless @proposal.active!
       redirect_to edit_proposal_path(@proposal), alert: "Your proposal has
                   errors: #{@proposal.errors.full_messages}.".squish and return
     end
+
+    send_mail
   end
 end
