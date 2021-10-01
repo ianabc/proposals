@@ -4,7 +4,7 @@ export default class extends Controller {
   static targets = ['province','state','otherAcademicStatus', 'otherOption', 'countryOption']
 
   connect() {
-    if(this.otherOptionTarget.value || this.countryOptionTarget.value) {
+    if(this.hasOtherOptionTarget || this.hasCountryOptionTarget) {
       this.handleAcademicOptions(this.otherOptionTarget.value)
       this.handleCountryOptions(this.countryOptionTarget.value)
     }
