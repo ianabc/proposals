@@ -607,8 +607,7 @@ class ProposalPdfService
       @text << "\n\\newpage\n\\thispagestyle{empty}\n"
 
       file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
-      file_name = write_attachment_file(File.read(file_path),
-                                        "#{file.filename}")
+      file_name = write_attachment_file(File.read(file_path), file.filename)
 
       @text << supplementary_file_tex(num, file, file_name)
     end
