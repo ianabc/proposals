@@ -606,7 +606,7 @@ class ProposalPdfService
     @proposal.files&.each_with_index do |file, num|
       @text << "\n\\newpage\n\\thispagestyle{empty}\n"
 
-      filename = file.filename.to_s.gsub('_', '-')
+      filename = file.filename.to_s.tr('_', '-')
       file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
       full_filename = write_attachment_file(File.read(file_path), filename)
 
