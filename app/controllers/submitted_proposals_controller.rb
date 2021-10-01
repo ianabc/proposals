@@ -54,17 +54,19 @@ class SubmittedProposalsController < ApplicationController
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
     change_status
-    params[:files]&.each do |file|
-      @email.files.attach(file)
+    unless @check_status
+      @message = "Proposal status cannot be changed!"
+      page_redirect_with_alert
+      return
     end
-    organizers_email = params[:organizers_email]
-    organizers_email = JSON.parse(organizers_email).map(&:values).flatten
+    add_files
+    organizers_email_addresses
     if @email.save
-      @email.email_organizers
+      @email.email_organizers(@organizers_email)
       page_redirect
     else
-      redirect_to submitted_proposal_url(@proposal),
-                  alert: @email.errors.full_messages
+      @message = @email.errors.full_messages
+      page_redirect_with_alert
     end
   end
 
@@ -265,10 +267,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def send_email_proposals
-    @email.cc_email = nil unless params[:cc]
-    @email.bcc_email = nil unless params[:bcc]
     add_files
-    @email.email_organizers if @email.save
+    organizers_email = @proposal.invites.where(invited_as: 'Organizer')&.pluck(:email)
+    @email.email_organizers(organizers_email) if @email.save
     @errors << @email.errors.full_messages unless @email.errors.empty?
   end
 
@@ -327,5 +328,21 @@ class SubmittedProposalsController < ApplicationController
       redirect_to edit_submitted_proposal_url(@proposal),
                   notice: "Sent email to proposal organizers."
     end
+  end
+
+  def page_redirect_with_alert
+    if params[:action] == "show"
+      redirect_to submitted_proposal_url(@proposal),
+                  alert: @message
+    else
+      redirect_to edit_submitted_proposal_url(@proposal),
+                  alert: @message
+    end
+  end
+
+  def organizers_email_addresses
+    return if params[:organizers_email].blank?
+
+    @organizers_email = JSON.parse(params[:organizers_email]).map(&:values).flatten
   end
 end

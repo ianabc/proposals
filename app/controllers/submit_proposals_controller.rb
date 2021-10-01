@@ -71,8 +71,7 @@ class SubmitProposalsController < ApplicationController
 
   def confirm_submission
     if @proposal.may_active?
-      @proposal.active!
-      send_mail
+      change_proposal_status
     elsif @proposal.may_revision?
       @proposal.revision!
       send_mail
@@ -178,5 +177,14 @@ class SubmitProposalsController < ApplicationController
     else
       redirect_to edit_submitted_proposal_url(@proposal), notice: 'Proposal has been updated successfully!'
     end
+  end
+
+  def change_proposal_status
+    unless @proposal.active!
+      redirect_to edit_proposal_path(@proposal), alert: "Your proposal has
+                  errors: #{@proposal.errors.full_messages}.".squish and return
+    end
+
+    send_mail
   end
 end
