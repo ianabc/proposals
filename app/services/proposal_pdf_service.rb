@@ -606,8 +606,8 @@ class ProposalPdfService
     @proposal.files&.each do |file|
       @text << "\\newpage\n\\thispagestyle{empty}\n"
       file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
-      file_name =  write_attachment_file(File.read(file_path),
-                                         "#{@proposal&.code}-#{file.filename}")
+      file_name = write_attachment_file(File.read(file_path),
+                                        "#{@proposal&.code}-#{file.filename}")
       @text << "\\includepdf[scale=0.8,pages=1,pagecommand={\\subsection*{Supplementry File: #{file.filename}}}]{#{file_name}}\n\n"
       @text << "\\includepdf[scale=0.8,pages=2-,pagecommand={\\thispagestyle{empty}}]{#{file_name}}\n\n"
     end
