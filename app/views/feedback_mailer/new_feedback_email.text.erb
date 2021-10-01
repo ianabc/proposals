@@ -4,9 +4,10 @@ Feedback from:
  
 
 Feedback for proposal:
-<%= @proposal&.code %>: <%= @proposal&.title %> by
-<%= @proposal&.lead_organizer.fullname %>
-
+<% if @proposal.present? %>
+  <%= @proposal&.code %>: <%= @proposal&.title %> by
+  <%= @proposal&.lead_organizer&.fullname %>
+<% end %>
 
 <%= @person.fullname %>'s feedback:
 <%= @feedback.content %>
