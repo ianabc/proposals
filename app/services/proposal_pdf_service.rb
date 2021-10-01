@@ -194,10 +194,7 @@ class ProposalPdfService
       participant_demographics
     end
 
-    if proposal.files.attached?
-      @text << "\\pagebreak"
-      proposal_supplementary_files
-    end
+    proposal_supplementary_files if proposal.files.attached?
     @text
   end
 
@@ -606,16 +603,28 @@ class ProposalPdfService
   end
 
   def proposal_supplementary_files
-    number = 0
-    @proposal.files&.each do |file|
-      @text << "\\newpage\n\\thispagestyle{empty}\n"
+    @proposal.files&.each_with_index do |file, num|
+      @text << "\n\\newpage\n\\thispagestyle{empty}\n"
+
       file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
       file_name = write_attachment_file(File.read(file_path),
-                                        "#{@proposal&.code}-#{file.filename}")
-      @text << "\\includepdf[scale=0.8,pages=-,pagecommand={\\subsection*{#{number += 1}.
-      Supplementry File}}]{#{file_name}}\n\n"
+                                        "#{file.filename}")
+
+      @text << supplementary_file_tex(num, file, file_name)
     end
-    @text
+  end
+
+  def supplementary_file_tex(num, file, file_name)
+    tex = "\\includepdf[scale=1,pages=1,pagecommand={\\subsection*
+           {Supplementry File #{num += 1}: #{file.filename}}}]{#{file_name}}\n"
+
+    # Only include the subsection heading on the 1st page of the attached file
+    if PDF::Reader.new(file_name).page_count > 1
+      tex << "\\includepdf[scale=1,pages=2-,pagecommand={
+              \\thispagestyle{empty}}]{#{file_name}}\n"
+    end
+
+    tex
   end
 
   def write_attachment_file(file_content, file_name)

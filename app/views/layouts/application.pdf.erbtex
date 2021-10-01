@@ -24,7 +24,6 @@
 \usepackage{color}
 \usepackage{hyphenat}
 \usepackage{fancyhdr}
-\pagestyle{fancy}
 \usepackage{here}
 \usepackage{multirow}
 \usepackage[utf8]{inputenc}
@@ -173,23 +172,9 @@
 {\large #2}
 \end{itemize}}
 
-%\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
-%\let\endchangemargin=\endlist
-
 \fancyhf{}
 \fancyhead[CO,CE]{\bfseries Banff International Research Station <%= @year %> Proposal Submission}
-
-\newenvironment{changemargin}[2]{%
-   \begin{list}{}{%
-     \setlength{\topsep}{0pt}%
-     \setlength{\leftmargin}{#1}%
-     \setlength{\rightmargin}{#2}%
-     \setlength{\listparindent}{\parindent}%
-     \setlength{\itemindent}{\parindent}%
-     \setlength{\parsep}{\parskip}%
-   }%
-   \item[]}{\end{list}}
-
+\pagestyle{fancy}
 \renewcommand{\thepage}{\arabic{page}}
 \rfoot{\thepage}
 
