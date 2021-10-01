@@ -10,7 +10,7 @@
                   <div class="col-lg-8">
                     <div class="mb-3"> 
                       <div>
-                        <label>1. What is your country of citizenship? &dagger;</label>
+                        <label class="form-label required">1. What is your country of citizenship? &dagger;</label>
                         <%= f.select "citizenships", options_for_select(citizenship_options), {}, data: {'survey-target': 'citizenship',action: 'click->survey#handleCitizenshipOptions'}, class: "form-control", multiple: true, required: true %>
                       </div>
                       <div class="hidden" data-survey-target="otherCitizenship">
@@ -21,7 +21,7 @@
 
                     <div class="mb-3">
                       <div>
-                        <label>2. Do you identify as an Indigenous person?</label>
+                        <label class="form-label required">2. Do you identify as an Indigenous person?</label>
                         <%= f.select "indigenous_person", options_for_select(indigenous_person_options),{ include_blank: '' }, data: {'survey-target': 'indigenous',action: 'click->survey#handleIndigenousOptions'}, class: "form-select", required: true %>
                         <div class="hidden mt-3" data-survey-target="indigenousYes">
                           <%= f.select "indigenous_person_yes", options_for_select(indigenous_person_yes_options), {}, class: "form-control", id: 'indigenous_person_yes', multiple: true %>
@@ -31,7 +31,7 @@
                     
                     <div class="mb-3">
                       <div>
-                        <label>3. How do you describe your ethnicity? &dagger;</label>
+                        <label class="form-label required">3. How do you describe your ethnicity? &dagger;</label>
                         <div>
                           <label>If you identify as biracial or multiracial, please select all that apply by holding down Ctrl/⌘ while you select.</label>
                         </div>
@@ -45,7 +45,7 @@
                     
                     <div class="mb-3">
                       <div>
-                        <label>4. How do you describe your gender? &dagger;</label>
+                        <label class="form-label required">4. How do you describe your gender? &dagger;</label>
                         <%= f.select "gender", options_for_select(gender_options),{ include_blank: '' }, data: {'survey-target': 'gender',action: 'click->survey#handleGenderOptions'}, class: "form-select", required: true %>
                       </div>
                       <div class="hidden" data-survey-target="otherGender">
@@ -56,14 +56,14 @@
                     
                     <div class="mb-3">
                       <div>
-                        <label>5. Do you identify as a member of the 2SLGBTQIA+ community?</label>
+                        <label class="form-label required">5. Do you identify as a member of the 2SLGBTQIA+ community?</label>
                         <%= f.select(:community, options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']]),{ include_blank: '' }, {class: "form-select", required: true}) %>
                       </div>
                     </div>
 
                     <div class="mb-3">
                       <div>
-                        <label>6. Do you have a disability, impairment, or ongoing medical condition that impacts your participation in everyday life?</label>
+                        <label class="form-label required">6. Do you have a disability, impairment, or ongoing medical condition that impacts your participation in everyday life?</label>
                         <div>
                           <label>
                             <em>For more information about under-represented minorities, please look at our 
@@ -77,7 +77,7 @@
                     
                     <div class="mb-3">
                       <div>
-                        <label>7. Do you consider yourself to be part of an under-represented minority in the country of your current affiliation?</label>
+                        <label class="form-label required">7. Do you consider yourself to be part of an under-represented minority in the country of your current affiliation?</label>
                         <div>
                           <label>
                             <em>For more information about under-represented minorities, please look at our 
@@ -91,7 +91,7 @@
 
                     <div class="mb-3">
                       <div>
-                        <label>8. Do you consider yourself to be part of an under-represented minority in STEM? &dagger;</label>
+                        <label class="form-label required">8. Do you consider yourself to be part of an under-represented minority in STEM? &dagger;</label>
                         <div>
                           <label>
                             <em>For more information about under-represented minorities, please look at our 
@@ -105,7 +105,7 @@
                     
                     <div class="mb-3">
                       <div>
-                        <label>9. Do you consider yourself to be part of an under-represented minority in your research area?</label>
+                        <label class="form-label required">9. Do you consider yourself to be part of an under-represented minority in your research area?</label>
                         <div>
                           <label>
                             <em>For more information about under-represented minorities, please look at our 

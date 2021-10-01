@@ -186,12 +186,14 @@ class ProposalPdfService
     user_defined_fields
     proposal_bibliography
     proposal_participants
-    return @text unless @user.staff_member?
 
-    @text << "\\pagebreak"
-    proposal_organizing_committee
-    @text << "\\pagebreak"
-    organizing_participant_committee
+    if @user.staff_member?
+      @text << "\\pagebreak"
+      proposal_organizing_committee
+      @text << "\\pagebreak"
+      participant_demographics
+    end
+
     proposal_supplementary_files if proposal.files.attached?
     @text
   end
@@ -444,7 +446,7 @@ class ProposalPdfService
     end
   end
 
-  def organizing_participant_committee
+  def participant_demographics
     @text << "\\section*{\\centering Organizing Committee and Participant Demographics}\n\n"
     set_confirmed_invitations
     @text << "\\subsection*{1) Gender}"
@@ -601,8 +603,32 @@ class ProposalPdfService
   end
 
   def proposal_supplementary_files
-    @text << "\\pagebreak"
-    @text << "\\section*{Supplementry Files}\n\n"
-    @text
+    @proposal.files&.each_with_index do |file, num|
+      @text << "\n\\newpage\n\\thispagestyle{empty}\n"
+
+      file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
+      file_name = write_attachment_file(File.read(file_path), file.filename)
+
+      @text << supplementary_file_tex(num, file, file_name)
+    end
+  end
+
+  def supplementary_file_tex(num, file, file_name)
+    tex = "\\includepdf[scale=1,pages=1,pagecommand={\\subsection*
+           {Supplementry File #{num += 1}: #{file.filename}}}]{#{file_name}}\n"
+
+    # Only include the subsection heading on the 1st page of the attached file
+    if PDF::Reader.new(file_name).page_count > 1
+      tex << "\\includepdf[scale=1,pages=2-,pagecommand={
+              \\thispagestyle{empty}}]{#{file_name}}\n"
+    end
+
+    tex
+  end
+
+  def write_attachment_file(file_content, file_name)
+    full_path_filename = "#{Rails.root}/tmp/#{file_name}"
+    File.binwrite(full_path_filename, file_content)
+    full_path_filename
   end
 end

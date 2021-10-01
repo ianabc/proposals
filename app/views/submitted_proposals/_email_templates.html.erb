@@ -9,20 +9,18 @@
         <div class="modal-body text-justify" style="text-align: justify;" >
           <div class="mb-3">
             <div class="mb-3">
-              <%= check_box_tag :cc %>
               <label>CC</label>
               <input type="text" name="cc_email" class="form-control">
               <small>This text field supports a list of cc emails i.e. birs@example.com, noreply@example.com..</small>
             </div>
             <div class="mb-3">
-              <%= check_box_tag :bcc %>
               <label>BCC</label>
               <input type="text" name="bcc_email" class="form-control">
               <small>This text field supports a list of bcc emails i.e. birs@example.com, noreply@example.com..</small>
             </div>
             <div class="mb-3">
               <label class="form-label">Subject</label>
-              <input type="text" name="subject" class="form-control w-50" id="subject" required="true">
+              <input type="text" name="subject" class="form-control w-50" id="birs_email_subject" required="true">
             </div>
             <div class="mb-3">
               <label class='form-label required'>Template</label>
@@ -34,7 +32,7 @@
             </div>
             <div>
               <label class="form-label">Body</label>
-              <textarea class="form-control" name="body" required="true" id="body"></textarea>
+              <textarea class="form-control" name="body" required="true" id="birs_email_body"></textarea>
             </div>
           </div>
         </div>
