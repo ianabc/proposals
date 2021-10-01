@@ -186,12 +186,14 @@ class ProposalPdfService
     user_defined_fields
     proposal_bibliography
     proposal_participants
-    return @text unless @user.staff_member?
 
-    @text << "\\pagebreak"
-    proposal_organizing_committee
-    @text << "\\pagebreak"
-    organizing_participant_committee
+    if @user.staff_member?
+      @text << "\\pagebreak"
+      proposal_organizing_committee
+      @text << "\\pagebreak"
+      participant_demographics
+    end
+
     proposal_supplementary_files if proposal.files.attached?
     @text
   end
@@ -444,7 +446,7 @@ class ProposalPdfService
     end
   end
 
-  def organizing_participant_committee
+  def participant_demographics
     @text << "\\section*{\\centering Organizing Committee and Participant Demographics}\n\n"
     set_confirmed_invitations
     @text << "\\subsection*{1) Gender}"
@@ -601,25 +603,24 @@ class ProposalPdfService
   end
 
   def proposal_supplementary_files
-    @text << "\\pagebreak"
-    @text << "\\section*{Supplementry Files}\n\n"
-    @text << "\n\\begin{figure}\n  \\centering\n"
-
     @proposal.files&.each do |file|
+      @text << "\\newpage\n"
+      @text << "\\thispagestyle{empty}\n"
       path = ActiveStorage::Blob.service.send(:path_for, file.key)
-      # raise "Error: #{file.filename} is not a PDF!" unless File.extname(file.filename) == /\.pdf$/i
-
       file_content = File.read(path)
-      file_name = "#{@proposal&.code}-#{file.filename}"
-      write_attachment_file(file_content, file_name)
-      @text << "    \\includegraphics{#{file_name}}\n"
+      file_name =  write_attachment_file(file_content,
+                                         "#{@proposal&.code}-#{file.filename}")
+
+      @text << "\\includepdf[scale=0.8,pages=1,pagecommand={\\subsection*{Supplementry File: #{file.filename}}}]{#{file_name}}\n\n"
+      @text << "\\includepdf[scale=0.8,pages=2-,pagecommand={\\thispagestyle{empty}}]{#{file_name}}\n\n"
     end
 
-    @text << "\\end{figure}\n\n"
     @text
   end
 
-  def write_attachment_file(file_contents, file_name)
-    File.binwrite("#{Rails.root}/tmp/#{file_name}", file_contents)
+  def write_attachment_file(file_content, file_name)
+    full_path_filename = "#{Rails.root}/tmp/#{file_name}"
+    File.binwrite(full_path_filename, file_content)
+    full_path_filename
   end
 end
