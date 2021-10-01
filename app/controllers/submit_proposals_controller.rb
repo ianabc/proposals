@@ -176,7 +176,7 @@ class SubmitProposalsController < ApplicationController
       redirect_to edit_submitted_proposal_url(@proposal), alert: "Your submission has
           errors: #{@submission.error_messages}.".squish
     else
-      redirect_to edit_submitted_proposal_url(@proposal), notice: 'Proposal has been updated successfully!'
+      redirect_to submitted_proposals_url(@proposal), notice: 'Proposal has been updated successfully!'
     end
   end
 
