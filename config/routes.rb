@@ -32,7 +32,7 @@ Rails.application.routes.draw do
   end
 
   get :invite, to: 'invites#show'
-  get 'expired' => 'invites#expired'
+  get 'cancelled' => 'invites#cancelled'
   post 'cancel' => 'invites#cancel'
   post 'cancel_confirmed_invite' => 'invites#cancel_confirmed_invite'
 

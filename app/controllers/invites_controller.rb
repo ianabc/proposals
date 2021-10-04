@@ -1,5 +1,5 @@
 class InvitesController < ApplicationController
-  before_action :authenticate_user!, except: %i[show inviter_response thanks expired]
+  before_action :authenticate_user!, except: %i[show inviter_response thanks cancelled]
   before_action :set_proposal, only: %i[invite_reminder invite_email new_invite]
   before_action :set_invite,
                 only: %i[show inviter_response cancel invite_reminder invite_email new_invite cancel_confirmed_invite]
@@ -8,7 +8,7 @@ class InvitesController < ApplicationController
   def show
     redirect_to root_path, alert: "Invite code is invalid" and return if @invite.nil?
     redirect_to root_path and return if @invite.confirmed?
-    redirect_to expired_path and return if @invite.cancelled?
+    redirect_to cancelled_path and return if @invite.cancelled?
 
     render layout: 'devise'
   end
@@ -58,7 +58,7 @@ class InvitesController < ApplicationController
     render layout: 'devise'
   end
 
-  def expired
+  def cancelled
     render layout: 'devise'
   end
 

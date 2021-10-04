@@ -65,7 +65,7 @@ RSpec.describe "/proposals/:proposal_id/invites", type: :request do
 
     context 'when status is cancelled' do
       let(:invite1) { create(:invite, status: 'cancelled') }
-      it { expect(response).to redirect_to(expired_path) }
+      it { expect(response).to redirect_to(cancelled_path) }
     end
   end
 
@@ -76,9 +76,9 @@ RSpec.describe "/proposals/:proposal_id/invites", type: :request do
     end
   end
 
-  describe "GET /expired" do
-    it "render a message when an invite has been expired" do
-      get expired_path
+  describe "GET /cancelled" do
+    it "render a message when an invite has been cancelled" do
+      get cancelled_path
       expect(response).to have_http_status(:ok)
     end
   end
