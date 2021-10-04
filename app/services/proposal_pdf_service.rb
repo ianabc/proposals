@@ -167,8 +167,8 @@ class ProposalPdfService
 
   def lead_organizer_info
     info = "\\subsection*{Lead Organizer}\n\n"
-    info << "#{proposal.lead_organizer&.fullname} \\\\ \n\n"
-    info << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+    info << "#{proposal.lead_organizer&.fullname} (#{affil(proposal.lead_organizer)}) \\\\ \n\n"
+    info << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
   end
 
   def single_proposal_heading
@@ -186,17 +186,20 @@ class ProposalPdfService
     user_defined_fields
     proposal_bibliography
     proposal_participants
-    return @text unless @user.staff_member?
 
-    @text << "\\pagebreak"
-    proposal_organizing_committee
-    @text << "\\pagebreak"
-    organizing_participant_committee
+    if @user.staff_member?
+      @text << "\\pagebreak"
+      proposal_organizing_committee
+      @text << "\\pagebreak"
+      participant_demographics
+    end
+
+    proposal_supplementary_files if proposal.files.attached?
     @text
   end
 
   def affil(person)
-    return if person.blank?
+    return '' if person.blank?
 
     affil = ""
     affil << " (#{person.affiliation}" if person&.affiliation.present?
@@ -246,8 +249,8 @@ class ProposalPdfService
 
   def proposal_lead_organizer
     @text << "\\subsection*{Lead Organizer}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname}#{affil(proposal.lead_organizer)} \\\\ \n"
-    @text << "\\noindent #{proposal.lead_organizer&.email}\n\n"
+    @text << "#{proposal.lead_organizer&.fullname} (#{affil(proposal.lead_organizer)}) \\\\ \n"
+    @text << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
     pdf_content
     @text
   end
@@ -396,6 +399,8 @@ class ProposalPdfService
   end
 
   def delatex(string)
+    return '' if string.blank?
+
     LatexToPdf.escape_latex(string)
   end
 
@@ -441,7 +446,7 @@ class ProposalPdfService
     end
   end
 
-  def organizing_participant_committee
+  def participant_demographics
     @text << "\\section*{\\centering Organizing Committee and Participant Demographics}\n\n"
     set_confirmed_invitations
     @text << "\\subsection*{1) Gender}"
@@ -595,5 +600,37 @@ class ProposalPdfService
 
   def invites_gender_data
     @data = invites_graph_data("gender", "gender_other")
+  end
+
+  def proposal_supplementary_files
+    @proposal.files&.each_with_index do |file, num|
+      @text << "\n\\newpage\n\\thispagestyle{empty}\n"
+
+      filename = file.filename.to_s.tr('_', '-')
+      file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
+      full_filename = write_attachment_file(File.read(file_path), filename)
+
+      @text << supplementary_file_tex(num, filename, full_filename)
+    end
+  end
+
+  def supplementary_file_tex(num, filename, full_filename)
+    # scale first page 0.8 to avoid the page content overlapping the heading
+    tex = "\\includepdf[scale=0.8,pages=1,pagecommand={\\subsection*
+           {Supplementry File #{num += 1}: #{filename}}}]{#{full_filename}}\n"
+
+    # Only include the subsection heading on the 1st page of the attached file
+    if PDF::Reader.new(full_filename).page_count > 1
+      tex << "\\includepdf[scale=1,pages=2-,pagecommand={
+              \\thispagestyle{empty}}]{#{full_filename}}\n"
+    end
+
+    tex
+  end
+
+  def write_attachment_file(file_content, filename)
+    full_path_filename = "#{Rails.root}/tmp/#{@proposal&.code}-#{filename}"
+    File.binwrite(full_path_filename, file_content)
+    full_path_filename
   end
 end

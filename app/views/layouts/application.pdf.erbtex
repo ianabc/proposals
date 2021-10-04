@@ -30,6 +30,7 @@
 \usepackage{hyperref}
 \hypersetup{pdfborder={0 0 0 [0 0]}}
 \usepackage{comment}
+\usepackage{pdfpages}
 
 
 \DeclareMathOperator{\Gal}{Gal}
@@ -171,29 +172,12 @@
 {\large #2}
 \end{itemize}}
 
-\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
-\let\endchangemargin=\endlist
-
 \fancyhf{}
 \fancyhead[CO,CE]{\bfseries Banff International Research Station <%= @year %> Proposal Submission}
+\pagestyle{fancy}
+\renewcommand{\thepage}{\arabic{page}}
+\rfoot{\thepage}
 
-\thispagestyle{empty}
-
-\newpage
-\thispagestyle{empty}
-
-\cleardoublepage
-
-\setcounter{page}{1}
-\renewcommand{\thepage}{\roman{page}}
-
-\newpage
-
-\cleardoublepage
-
-\cleardoublepage
-
-\setcounter{page}{1}
 
 %---------------------------- begin proposal contents ----------------------------%
 <%= yield %>

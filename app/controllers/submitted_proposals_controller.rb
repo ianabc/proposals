@@ -11,19 +11,8 @@ class SubmittedProposalsController < ApplicationController
     @proposal.review! if @proposal.may_review?
   end
 
-  def edit; end
-
-  def update
-    @proposal.update(proposal_params)
-    submission = SubmitProposalService.new(@proposal, params)
-    submission.save_answers
-
-    if submission.has_errors?
-      redirect_to edit_submitted_proposal_url(@proposal), alert: "Your submission has
-          errors: #{submission.error_messages}.".squish
-      return
-    end
-    redirect_to edit_submitted_proposal_url(@proposal), notice: 'Proposal has been updated successfully!'
+  def edit
+    @proposal.invites.build
   end
 
   def download_csv
@@ -35,12 +24,13 @@ class SubmittedProposalsController < ApplicationController
       @proposal = Proposal.find_by(id: id.to_i)
       check_proposal_status and return unless @proposal.may_progress?
 
-      post_to_editflow
+      break unless post_to_editflow
     end
 
     respond_to do |format|
       format.js { render js: "window.location='/submitted_proposals'" }
-      format.html { redirect_to submitted_proposals_path, notice: 'Successfully sent proposal(s) to EditFlow!' }
+      message = "Proposals submitted to EditFlow!"
+      format.html { redirect_to submitted_proposals_path, notice: message }
     end
   end
 
@@ -64,18 +54,19 @@ class SubmittedProposalsController < ApplicationController
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
     change_status
-    @email.cc_email = nil unless params[:cc]
-    @email.bcc_email = nil unless params[:bcc]
-    params[:files]&.each do |file|
-      @email.files.attach(file)
+    unless @check_status
+      @message = "Proposal status cannot be changed!"
+      page_redirect_with_alert
+      return
     end
+    add_files
+    organizers_email_addresses
     if @email.save
-      @email.email_organizers
-      redirect_to submitted_proposal_url(@proposal),
-                  notice: "Sent email to proposal organizers."
+      @email.email_organizers(@organizers_email)
+      page_redirect
     else
-      redirect_to submitted_proposal_url(@proposal),
-                  alert: @email.errors.full_messages
+      @message = @email.errors.full_messages
+      page_redirect_with_alert
     end
   end
 
@@ -163,45 +154,70 @@ class SubmittedProposalsController < ApplicationController
     "propfile-#{current_user.id}-#{@proposal.id}.tex"
   end
 
-  def create_pdf_file
-    prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
-                                   .generate_latex_file
+  def generate_pdf_string
+    render_to_string layout: "application", inline: @prop_latex, formats: [:pdf]
+  rescue => e
+    Rails.logger.info { "\n\n#{@proposal.code} LaTeX error:\n #{e.message}\n\n" }
+    flash[:alert] = "#{@proposal.code} LaTeX error: #{e.message}"
+    return ''
+  end
 
-    @year = @proposal&.year || Date.current.year.to_i + 2
-    pdf_file = render_to_string layout: "application",
-                                inline: prop_latex.to_s, formats: [:pdf]
+  def write_pdf_file(pdf_file)
+    return if pdf_file.blank?
 
-    @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
-    check_file
-    File.open(@pdf_path, "w:UTF-8") do |file|
-      file.write(pdf_file)
+    begin
+      File.open(@pdf_path, "w:UTF-8") do |file|
+        file.write(pdf_file)
+      end
+    rescue => e
+      Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}\n\n" }
+      flash[:alert] = "Error creating #{@proposal&.code} PDF: #{e.message}"
+      return false
     end
   end
 
+  def create_pdf_file
+    Rails.logger.info { "\n\nCreating PDF for #{@proposal&.code}...\n\n" }
+    @prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
+                                    .generate_latex_file.to_s
+
+    @year = @proposal&.year || Date.current.year.to_i + 2
+    @pdf_path = Rails.root.join('tmp', "#{@proposal&.code}-#{DateTime.now.to_i}.pdf")
+
+    pdf_file = generate_pdf_string
+    write_pdf_file(pdf_file)
+  end
+
   def post_to_editflow
-    create_pdf_file
+    Rails.logger.info { "\n\n*****************************************\n\n" }
+    Rails.logger.info { "\n\nPosting #{@proposal.code} to EditFlow...\n\n" }
+    return unless create_pdf_file
 
     begin
-      query_edit_flow = EditFlowService.new(@proposal).query
+      edit_flow_query = EditFlowService.new(@proposal).query
     rescue RuntimeError => e
-      redirect_to submitted_proposals_path, alert: "Errors: #{e.message}"
+      Rails.logger.info { "\n\nErrors in #{@proposal.code}: #{e.message}\n\n" }
+      flash[:alert] = "Errors in #{@proposal.code}: #{e.message}"
     end
 
-    Rails.logger.info { "\n\n*****************************************\n\n" }
-    Rails.logger.info { "Posting #{@proposal.code} to EditFlow..." }
+    return if flash[:alert].present?
+
     response = RestClient.post ENV['EDITFLOW_API_URL'],
-                               { query: query_edit_flow, fileMain: File.open(@pdf_path) },
+                               { query: edit_flow_query, fileMain: File.open(@pdf_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
-    Rails.logger.info { "\nEditFlow response: #{response.inspect}\n\n" }
 
     if response.body.include?("errors")
-      flash[:alert] = "Error sending data!"
+      Rails.logger.info { "\n\nError sending #{@proposal.code}: #{response.body}\n\n" }
+      flash[:alert] = "Error sending #{@proposal.code}: #{response.body}"
+      return
     else
+      Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
+      flash[:notice] = "#{@proposal&.code} sent to EditFlow!"
+      @proposal.update(edit_flow: DateTime.current)
       @proposal.progress!
-      flash[:notice] = "Data sent to EditFlow!"
-      @proposal.update(edit_flow: Time.zone.now)
     end
     Rails.logger.info { "\n\n*****************************************\n\n" }
+    return true
   end
 
   def set_proposal
@@ -234,13 +250,6 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
-  def check_file
-    return if File.exist?("#{Rails.root}/tmp/#{latex_temp_file}")
-
-    @pdf_path = "#{Rails.root}/tmp/submit-#{DateTime.now.to_i}.pdf"
-    File.new(@pdf_path, 'w')
-  end
-
   def template_params
     templates = params[:templates].split(": ")
     type = "#{templates.first.downcase}_type" if templates.first.present?
@@ -250,10 +259,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def send_email_proposals
-    @email.cc_email = nil unless params[:cc]
-    @email.bcc_email = nil unless params[:bcc]
     add_files
-    @email.email_organizers if @email.save
+    organizers_email = @proposal.invites.where(invited_as: 'Organizer')&.pluck(:email)
+    @email.email_organizers(organizers_email) if @email.save
     @errors << @email.errors.full_messages unless @email.errors.empty?
   end
 
@@ -302,5 +310,31 @@ class SubmittedProposalsController < ApplicationController
                               code: 'code1')
     ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
                               code: 'code2')
+  end
+
+  def page_redirect
+    if params[:action] == "show"
+      redirect_to submitted_proposal_url(@proposal),
+                  notice: "Sent email to proposal organizers."
+    else
+      redirect_to edit_submitted_proposal_url(@proposal),
+                  notice: "Sent email to proposal organizers."
+    end
+  end
+
+  def page_redirect_with_alert
+    if params[:action] == "show"
+      redirect_to submitted_proposal_url(@proposal),
+                  alert: @message
+    else
+      redirect_to edit_submitted_proposal_url(@proposal),
+                  alert: @message
+    end
+  end
+
+  def organizers_email_addresses
+    return if params[:organizers_email].blank?
+
+    @organizers_email = JSON.parse(params[:organizers_email]).map(&:values).flatten
   end
 end

@@ -1,7 +1,7 @@
 class Proposal < ApplicationRecord
   include AASM
   include PgSearch::Model
-  pg_search_scope :search_proposals, against: %i[title],
+  pg_search_scope :search_proposals, against: %i[title code],
                                      associated_against: {
                                        people: %i[firstname lastname]
                                      }
@@ -11,7 +11,7 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposal_subject, against: %i[subject_id]
   pg_search_scope :search_proposal_year, against: %i[year]
 
-  attr_accessor :is_submission
+  attr_accessor :is_submission, :allow_late_submission
 
   has_many_attached :files
   has_many :proposal_locations, dependent: :destroy
@@ -192,7 +192,7 @@ class Proposal < ApplicationRecord
   private
 
   def not_before_opening
-    return if draft? || revision_requested?
+    return if draft? || revision_requested? || allow_late_submission
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
     errors.add("Late submission - ", "proposal submissions closed on
