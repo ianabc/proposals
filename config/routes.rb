@@ -39,6 +39,8 @@ Rails.application.routes.draw do
   resources :proposals do
     post :latex, to: 'proposals#latex_input'
     member do
+      get :versions
+      get :proposal_version
       get :rendered_proposal, to: 'proposals#latex_output'
       get :rendered_field, to: 'proposals#latex_field'
       patch :ranking
