@@ -32,10 +32,27 @@ module ProposalFieldsHelper
     Answer.find_by(proposal_field_id: field.id, proposal_id: proposal.id)&.answer
   end
 
+  def answer_with_version(field, proposal, version)
+    return unless proposal
+
+    Answer.find_by(proposal_field_id: field.id, proposal_id: proposal.id, version: version)&.answer
+  end
+
   def multichoice_answer(field, proposal)
     return unless proposal
 
     answer = Answer.find_by(proposal_field_id: field.id, proposal_id: proposal.id)&.answer
+    if answer
+      JSON.parse(answer)
+    else
+      answer
+    end
+  end
+
+  def multichoice_answer_with_version(field, proposal, version)
+    return unless proposal
+
+    answer = Answer.find_by(proposal_field_id: field.id, proposal_id: proposal.id, version: version)&.answer
     if answer
       JSON.parse(answer)
     else
@@ -70,8 +87,18 @@ module ProposalFieldsHelper
     end
   end
 
+  def dates_answer_with_version(field, proposal, attr, version)
+    ans = answer_with_version(field, proposal, version)
+    if ans
+      JSON.parse(ans)[attr.to_i]
+    else
+      ans
+    end
+  end
+
   def action
-    params[:action] == 'show' || (params[:action] == 'location_based_fields' && request.referer.exclude?('edit'))
+    params[:action] == 'show' || params[:action] == 'proposal_version' ||
+      (params[:action] == 'location_based_fields' && request.referer.exclude?('edit'))
   end
 
   def mandatory_field?(field)
