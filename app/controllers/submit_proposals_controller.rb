@@ -77,8 +77,7 @@ class SubmitProposalsController < ApplicationController
       @proposal.revision!
       send_mail
     else
-      redirect_to edit_proposal_path(@proposal), alert: "Your proposal has
-                  errors: #{@proposal.errors.full_messages}.".squish and return
+      error_page_redirect
     end
   end
 
@@ -187,5 +186,16 @@ class SubmitProposalsController < ApplicationController
     end
 
     send_mail
+  end
+
+  def error_page_redirect
+    if @proposal.errors.any?
+      redirect_to edit_proposal_path(@proposal), alert: "Your proposal has
+                  errors: #{@proposal.errors.full_messages}.".squish and return
+    end
+
+    redirect_to edit_proposal_path(@proposal), alert: "The proposal status is
+                #{@proposal.status&.humanize} but expecting Draft or Revision
+                requested.".squish and return
   end
 end
