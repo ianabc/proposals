@@ -37,6 +37,7 @@ class ProposalTypesController < ApplicationController
   end
 
   def location_based_fields
+    @version = params[:proposal_version].to_i if params[:proposal_version].present?
     @proposal = Proposal.find(params[:proposal_id])
     @proposal_fields = @proposal.proposal_form&.proposal_fields&.where(location_id: params[:ids].split(","))
     @submission = session[:is_submission]
