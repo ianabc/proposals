@@ -111,31 +111,6 @@
                             </div>
                           </div>
                           <div>
-                            <div>
-                              <h3>Lead Organizer</h3>
-                              <div class="mb-3 row border m-1 p-1">
-                                <div class="col-6 mt-2">
-                                  <div class="mb-3">
-                                    <label for="firstname">First Name: </label>
-                                    <label for="firstname"><%= @proposal.lead_organizer.firstname %></label>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="lastname">Last Name: </label>
-                                    <label for="lastname"><%= @proposal.lead_organizer.lastname %></label>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="email">Email: </label>
-                                    <label for="email"><%= @proposal.lead_organizer.email %></label>
-                                  </div>
-                                  <% if @proposal.lead_organizer.affiliation.present? %>
-                                    <div class="mb-3">
-                                      <label>Affiliation: </label>
-                                      <label><%= @proposal.lead_organizer.affiliation %></label>
-                                    </div>
-                                  <% end %>
-                                </div>
-                              </div>
-                            </div>
                             <% if params[:action] == 'edit' %>
                               <%= render partial: 'proposals/lead_organizer' %>
                               <div>
