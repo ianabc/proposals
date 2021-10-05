@@ -36,7 +36,7 @@
         </div>
         <div class="hidden form-group" data-submitted-proposals-target="statusOptions" data-id=<%= proposal.id %> >
           <input type="hidden" id="proposal_id" name="proposal_id" value="<%= proposal.id %>">
-          <%= select_tag :status, options_for_select(specific_proposal_statuses, proposal.status), include_blank: '', class: 'form-select', data: { 'action': 'click->submitted-proposals#proposalStatuses', 'submitted-proposals-target': 'status', 'id': proposal.id }, required: true %>
+          <%= select_tag :status, options_for_select(specific_proposal_statuses, proposal.status), include_blank: '', class: 'form-select', data: { 'action': 'change->submitted-proposals#proposalStatuses', 'submitted-proposals-target': 'status', 'id': proposal.id }, required: true %>
         </div>
       </td>
       <td><%= proposal.outcome&.capitalize %></td>
