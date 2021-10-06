@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_08_190909) do
+ActiveRecord::Schema.define(version: 2021_10_06_123101) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -331,6 +331,8 @@ ActiveRecord::Schema.define(version: 2021_09_08_190909) do
     t.string "code"
     t.datetime "open_date"
     t.datetime "closed_date"
+    t.text "participant_description"
+    t.text "organizer_description"
     t.index ["code"], name: "index_proposal_types_on_code", unique: true
   end
 

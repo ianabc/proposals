@@ -7,5 +7,7 @@ FactoryBot.define do
     closed_date { Time.current.to_date + 1.week }
     participant { 2 }
     co_organizer { 3 }
+    participant_description { Faker::Lorem.paragraph }
+    organizer_description { Faker::Lorem.paragraph }
   end
 end
