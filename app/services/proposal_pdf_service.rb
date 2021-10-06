@@ -160,7 +160,7 @@ class ProposalPdfService
 
   def single_proposal_without_content
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text = "\\section*{\\centering #{code} #{proposal_title(proposal)}"
+    @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }\n\n"
     single_proposal_heading
     @text
   end

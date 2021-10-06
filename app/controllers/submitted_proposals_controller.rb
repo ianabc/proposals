@@ -239,7 +239,7 @@ class SubmittedProposalsController < ApplicationController
     @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
 
     latex = "#{@proposal.macros}\n\\begin{document}\n#{@latex_infile}"
-    pdf_file = render_to_string layout: "application", inline: latex, formats: [:pdf]
+    pdf_file = render_to_string layout: "booklet", inline: latex, formats: [:pdf]
     @pdf_path = Rails.root.join('tmp/booklet-proposals.pdf')
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
