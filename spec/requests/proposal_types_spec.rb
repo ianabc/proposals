@@ -40,7 +40,8 @@ RSpec.describe "/proposal_types", type: :request do
     context "with valid parameters" do
       let(:proposal_type_params) do
         { name: '2 Day Workshop', year: '2015,2016,2017', participant: '1', co_organizer: '1', code: '2021xx2',
-          open_date: Time.current.to_date, closed_date: Time.current.to_date + 1.week }
+          open_date: Time.current.to_date, closed_date: Time.current.to_date + 1.week,
+          participant_description: 'some participants description', organizer_description: 'some organizers description' }
       end
       it "creates a new proposal_type" do
         expect do
@@ -52,7 +53,8 @@ RSpec.describe "/proposal_types", type: :request do
     context "with invalid parameters" do
       let(:proposal_type_params) do
         { name: ' ', participant: '1', co_organizer: '1', code: '2021xx2', open_date: Time.current.to_date,
-          closed_date: Time.current.to_date + 1.week }
+          closed_date: Time.current.to_date + 1.week,
+          participant_description: 'some participants description', organizer_description: 'some organizers description' }
       end
 
       it "does not create a new proposal_type" do
