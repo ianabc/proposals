@@ -209,11 +209,19 @@ class SubmittedProposalsController < ApplicationController
     else
       Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
       flash[:notice] = "#{@proposal&.code} sent to EditFlow!"
+      store_response_id(response)
       @proposal.update(edit_flow: DateTime.current)
       @proposal.progress!
     end
     Rails.logger.info { "\n\n*****************************************\n\n" }
     true
+  end
+
+  def store_response_id(response)
+    response_body = JSON.parse(response.body)
+    article = response_body["data"]["article"]
+    id = article["id"]
+    @proposal.update(editflow_id: id)
   end
 
   def set_proposal
