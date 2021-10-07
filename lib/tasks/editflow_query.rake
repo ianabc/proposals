@@ -12,6 +12,11 @@ namespace :birs do
             }
 END_STRING
 
+    if ENV['EDITFLOW_API_URL'].blank?
+      puts "No EDITFLOW_API_URL is set, aborting."
+      return
+    end
+    
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: query },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
