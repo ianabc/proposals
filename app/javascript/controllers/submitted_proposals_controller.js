@@ -4,9 +4,11 @@ import toastr from 'toastr'
 import Tagify from '@yaireo/tagify'
 
 export default class extends Controller {
-  static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus', 'organizersEmail' ]
+  static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus',
+                     'organizersEmail' ]
 
   connect () {
+    let proposalId = 0
     if(this.hasTocTarget) {
       this.tocTarget.checked = true;
     }
@@ -198,6 +200,37 @@ export default class extends Controller {
           toastr.error("Proposal status cannot be updated!")
         });
       }
+    }
+  }
+
+  storeID() {
+    this.proposalId = event.currentTarget.dataset.value
+  }
+
+  selectAllProposals() {
+    let getId = ''
+    $("input:checkbox").each(function(){
+      getId = document.getElementById(this.id)
+      getId.checked = true
+    });
+  }
+
+  unselectAllProposals() {
+    let getId = ''
+    $("input:checkbox").each(function(){
+      getId = document.getElementById(this.id)
+      getId.checked = false
+    });
+  }
+
+  invertSelectedProposals() {
+    var fieldID = this.proposalId.concat("_checkbox")
+    var getId = document.getElementById(fieldID)
+    if(getId.checked) {
+      getId.checked = false
+    }
+    else {
+      getId.checked = true
     }
   }
 }
