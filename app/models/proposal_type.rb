@@ -1,5 +1,6 @@
 class ProposalType < ApplicationRecord
   validates :name, :participant, :co_organizer, :code, :open_date, :closed_date, presence: true
+  validates :participant_description, :organizer_description, presence: true
   validates :code, uniqueness: true
   has_many :proposals, dependent: :destroy
   has_many :proposal_forms, dependent: :destroy

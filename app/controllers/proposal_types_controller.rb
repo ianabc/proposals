@@ -56,7 +56,7 @@ class ProposalTypesController < ApplicationController
 
   def proposal_type_params
     params.require(:proposal_type).permit(:name, :year, :co_organizer, :participant, :code, :open_date, :closed_date,
-                                          location_ids: [])
+                                          :organizer_description, :participant_description, location_ids: [])
   end
 
   def set_proposal_type
