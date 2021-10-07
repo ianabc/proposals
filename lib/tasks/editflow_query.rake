@@ -14,7 +14,7 @@ END_STRING
 
     if ENV['EDITFLOW_API_URL'].blank?
       puts "No EDITFLOW_API_URL is set, aborting."
-      return
+      next
     end
     
     response = RestClient.post ENV['EDITFLOW_API_URL'],
