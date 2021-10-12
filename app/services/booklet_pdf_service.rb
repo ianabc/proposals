@@ -22,7 +22,7 @@ class BookletPdfService
   def multiple_booklet(table, proposals)
     @table = table
     @proposals = proposals
-    input = multiple_proposals_fields if @input == 'all'
+    multiple_proposals_fields if @input == 'all'
 
     LatexToPdf.config[:arguments].delete('-halt-on-error') if @proposal.is_submission
   end
@@ -51,7 +51,7 @@ class BookletPdfService
 
     line_num = 1
     error_object.src.each_line do |line|
-      error_output << line_num.to_s + " #{line}"
+      error_output << (line_num.to_s + " #{line}")
       line_num += 1
     end
     error_output << "\n</pre>\n\n"
@@ -119,7 +119,6 @@ class BookletPdfService
       code = proposal.code.blank? ? '' : "#{proposal&.code}: "
       @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
       proposals_without_content
-      check_no_latex
     end
     @latex_text
   end
@@ -199,6 +198,10 @@ class BookletPdfService
         io.write(@text)
       end
     end
+    read_file
+  end
+
+  def read_file
     @latex_infile = File.read("#{Rails.root}/tmp/#{temp_file}")
     @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
     @latex_text = @text

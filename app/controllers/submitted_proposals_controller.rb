@@ -221,21 +221,26 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_file
-    temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
+    @temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
     if @counter == 1
-      @proposal = Proposal.find_by(id: @proposal_ids)
-      BookletPdfService.new(@proposal.id, temp_file, 'all', current_user).single_booklet(@table)
-      @fh = File.open("#{Rails.root}/tmp/propfile-#{current_user.id}-#{@proposal_ids}.tex")
-      @latex_infile = @fh.read
-      @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
-      @latex = "#{@proposal.macros}\n\\begin{document}\n#{@latex_infile}"
-      write_file
+      single_proposal_booklet
     else
       multiple_proposals_booklet
     end
   end
 
+  def single_proposal_booklet
+    @proposal = Proposal.find_by(id: @proposal_ids)
+    BookletPdfService.new(@proposal.id, @temp_file, 'all', current_user).single_booklet(@table)
+    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
+    @latex_infile = @fh.read
+    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
+    @proposals_macros = @proposal.macros
+    write_file
+  end
+
   def write_file
+    @latex = "#{@proposals_macros}\n\\begin{document}\n#{@latex_infile}"
     pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
     @pdf_path = Rails.root.join('tmp/booklet-proposals.pdf')
     File.open(@pdf_path, "w:UTF-8") do |file|
@@ -244,12 +249,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def multiple_proposals_booklet
-    temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
-    @proposal = Proposal.find_by(id: @proposal_ids.split(',').first)
-    BookletPdfService.new(@proposal_ids.split(',').first, temp_file, 'all', current_user)
+    BookletPdfService.new(@proposal_ids.split(',').first, @temp_file, 'all', current_user)
                      .multiple_booklet(@table, @proposal_ids)
-    @fh = File.open("#{Rails.root}/tmp/propfile-#{current_user.id}-#{@proposal_ids}.tex")
-    @latex_infile = @fh.read
+    @latex_infile = File.read("#{Rails.root}/tmp/#{@temp_file}")
     @proposals_macros = ''
     @proposal_ids.split(',').each do |id|
       @proposal_object = Proposal.find_by(id: id)
@@ -257,17 +259,19 @@ class SubmittedProposalsController < ApplicationController
 
       check_preambles
     end
-    @latex = "#{@proposals_macros}\n\\begin{document}\n#{@latex_infile}"
-
     write_file
   end
 
   def check_preambles
     newcommands_brackets = @proposal_object.macros.scan(/\\newcommand {\\(\w+)}/).flatten.join
     newcommands = @proposal_object.macros.scan(/\\newcommand \\(\w+)/).flatten.join
-    pre = newcommands.presence || "nothing"
-    pre_brackets = newcommands_brackets.presence || "nothing"
-    if @proposals_macros.scan(pre).present? || @proposals_macros.scan(pre_brackets).present? ||
+    @pre = newcommands.presence || "nothing"
+    @pre_brackets = newcommands_brackets.presence || "nothing"
+    save_preambles
+  end
+
+  def save_preambles
+    if @proposals_macros.scan(@pre).present? || @proposals_macros.scan(@pre_brackets).present? ||
        @proposals_macros.scan(@proposal_object.macros).present?
       macro = @proposal_object.macros
       @proposals_macros << "\n\\begin{comment}\n\n #{macro}\n\\end{comment}\n\n"
