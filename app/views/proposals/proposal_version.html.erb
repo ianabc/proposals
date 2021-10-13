@@ -7,12 +7,13 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb" data-turbo="false">
           <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </a></li>
-          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Submitted Proposals", submitted_proposals_path %></li>
-          <% if params[:action] == 'edit' %>
-            <li class="breadcrumb-item active" aria-current="page">Edit</li>
+          <% if current_user.staff_member? %>
+            <li class="breadcrumb-item active" aria-current="page"><%= link_to "Submitted Proposals", submitted_proposals_path %></li>
           <% else %>
-            <li class="breadcrumb-item active" aria-current="page">Show</li>
+            <li class="breadcrumb-item active" aria-current="page"><%= link_to "Proposals", proposals_path %></li>
           <% end %>
+          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Versions", versions_proposal_url(@proposal) %></li>
+          <li class="breadcrumb-item active" aria-current="page">Proposal Version <%= @version %></li>
         </ol>
       </nav>
     </div>
@@ -29,29 +30,21 @@
                 data-nested-invites-organizer-value="<%= confirmed_participants(@proposal.id, 'Organizer').count %>"
                 data-nested-invites-participant-value="<%= confirmed_participants(@proposal.id, 'Participant').count %>" 
               >
+              <input type="hidden" name="version" data-submit-proposals-target="proposalVersion" value="<%= @version %>" id="proposal_version">
                 <div class="col-12 col-lg-12">
                   <div class="tab">
                     <ul id="tabs" class="nav nav-tabs row" role="tablist">
-                      <li class="nav-item col-1" data-target='submit-proposals.tabs'>
+                      <li class="nav-item col-3" data-target='submit-proposals.tabs'>
                         <a class="nav-link active" href="#tab-1" data-bs-toggle="tab" role="tab" data-target='submit-proposals.tabs'>Step 1</a>
                       </li>
-                      <li class="nav-item col-1" data-target='submit-proposals.tabs'>
+                      <li class="nav-item col-3" data-target='submit-proposals.tabs'>
                         <a class="nav-link" href="#tab-2" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 2</a>
                       </li>
-                      <li class="nav-item col-1" data-target='submit-proposals.tabs'>
+                      <li class="nav-item col-3" data-target='submit-proposals.tabs'>
                         <a class="nav-link" href="#tab-3" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Step 3</a>
                       </li>
-                      <li class="nav-item col-2" data-target='submit-proposals.tabs'>
+                      <li class="nav-item col-3" data-target='submit-proposals.tabs'>
                         <a class="nav-link" href="#tab-4" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Demographic Charts</a>
-                      </li>
-                      <li class="nav-item col-2" data-target='submit-proposals.tabs'>
-                        <a class="nav-link" href="#tab-5" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Staff Discussion</a>
-                      </li>
-                      <li class="nav-item col-2" data-target='submit-proposals.tabs'>
-                        <a class="nav-link" href="#tab-6" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Emails</a>
-                      </li>
-                      <li class="nav-item col-2" data-target='submit-proposals.tabs'>
-                        <a class="nav-link" href="#tab-7" data-target='submit-proposals.tabs' data-bs-toggle="tab" role="tab">Activity Log</a>
                       </li>
                     </ul>
                     <div class="tab-content">
@@ -69,7 +62,7 @@
                           <%= label_tag :title %>
                         </div>
                         <div class="mb-3">
-                          <%= f.text_field :title, class: 'form-control w-100', disabled: action, value: @proposal.title, data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                          <%= f.text_field :title, class: 'form-control w-100', disabled: true, value: @proposal.title %>
                           <% if @submission && @proposal.title.blank? %>
                             <p class="field-validation">Title is required</p>
                           <% end %>
@@ -82,13 +75,13 @@
 
                         <div class="mb-3">
                           <%= label_tag :year %>
-                          <%= select_tag :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                          <%= select_tag :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), disabled: true, class: "form-select w-25" %>
                         </div>
                         <div class="mb-3 row">
                           <h4>Subject Areas</h4>
                           <div class="col-6 mt-2">
                             <label class="required">Subject Area</label>
-                            <%= select_tag :subject_id, options_for_select(subjects_area, @proposal.subject&.id), include_blank: '' , disabled: action, class: "form-select", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <%= select_tag :subject_id, options_for_select(subjects_area, @proposal.subject&.id), include_blank: '' , disabled: true, class: "form-select" %>
                             <% if @submission && @proposal.subject&.id.nil? %>
                               <p class="field-validation">Subject is required</p>
                             <% end %>
@@ -96,7 +89,7 @@
                           <div class="col-6 mt-2">
                             <div class="mb-3">
                               <label class="required">AMS Subject Code 1</label>
-                              <%= select_tag :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code1')), include_blank: '', disabled: action, class: "form-select", name:'ams_subjects[code1]', data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                              <%= select_tag :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code1')), include_blank: '', disabled: true, class: "form-select", name:'ams_subjects[code1]' %>
                               <% if @submission && proposal_ams_subjects_code(@proposal, 'code1').blank? %>
                                 <p class="field-validation">AMS Subject Code 1 is required</p>
                               <% end %>
@@ -104,138 +97,53 @@
 
                             <div class="mb-3">
                               <label class="required">AMS Subject Code 2</label>
-                              <%= select_tag :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), include_blank: '', disabled: action, class: "form-select", name:'ams_subjects[code2]', data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                              <%= select_tag :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), include_blank: '', disabled: true, class: "form-select", name:'ams_subjects[code2]' %>
                               <% if @submission && proposal_ams_subjects_code(@proposal, 'code2').blank? %>
                                 <p class="field-validation">AMS Subject Code 2 is required</p>
                               <% end %>
                             </div>
                           </div>
                           <div>
-                            <% if params[:action] == 'edit' %>
-                              <%= render partial: 'proposals/lead_organizer' %>
+                            <% if params[:action] == 'proposal_version' %>
                               <div>
-                                <h3 class="form-section">Add Supporting Organizers:</h3>
-                                <p><%= @proposal.proposal_type.organizer_description&.html_safe %></p>
-
-                                <% if @proposal.invites %>
-                                  <% @proposal.invites.each do |invite|%>
-                                    <% if invite.invited_as == 'Organizer' %>
-                                      <%= render partial: 'proposals/organizer', locals: { invite: invite } %>
-                                    <% end %>
-                                  <% end %>
-                                <% end %>
+                                <%= render partial: 'lead_organizer' %>
                                 <div>
-                                  <% if max_invitations(@proposal, 'Organizer') %>
-                                    <% date = @proposal.invites.where(invited_as: 'Organizer').first&.deadline_date&.to_date %>
-                                    <% unless date.nil? %>
-                                      <% date = date  < DateTime.current.to_date ? DateTime.current.to_date : @proposal.invites.where(invited_as: 'Organizer').first&.deadline_date&.to_date %>
-                                    <% end %>
-                                    <div class="mb-3">
-                                      <template data-nested-invites-target="template">
-                                        <%= f.fields_for :invites, Invite.new, child_index: 'NEW_RECORD' do |invite| %>
-                                          <%= render partial: 'proposals/invite', locals: { f: invite, invited_as: 'Organizer', date: date } %>
-                                        <% end %>
-                                      </template>
-                                      <div data-nested-invites-target="target"></div>
-                                        <button type="button" class="btn btn-light" data-action="nested-invites#addOrganizers" id="add-more-organizer">
-                                          Queue More Organizer Invitations
-                                        </button>
-                                    </div>
-                                    <div class="mb-3">
-                                      <button id="organizer" data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Organizer(s)</button>
-                                    </div>
-                                  <% end %>
-                                </div>
-                              </div>
-                              <div class="mt-4">
-                                <div class="mb-3">
-                                  <h3 class="form-section">Add Participants:</h3>
-                                  <p><%= @proposal.proposal_type.participant_description&.html_safe %></p>
-
+                                  <h3 class="form-section">Supporting Organizers:</h3>
                                   <% if @proposal.invites %>
                                     <% @proposal.invites.each do |invite|%>
-                                      <% if invite.invited_as == 'Participant' %>
-                                        <%= render partial: 'proposals/organizer', locals: { invite: invite } %>
+                                      <% if invite.invited_as == 'Organizer' %>
+                                        <%= render partial: 'organizer', locals: { invite: invite } %>
                                       <% end %>
                                     <% end %>
                                   <% end %>
-                                  <div>
-                                    <% if max_invitations(@proposal, 'Participant') %>
-                                      <% date = @proposal.invites.where(invited_as: 'Participant').first&.deadline_date&.to_date %>
-                                      <% unless date.nil? %>
-                                        <% date = date < DateTime.current.to_date ? DateTime.current.to_date : @proposal.invites.where(invited_as: 'Participant').first&.deadline_date&.to_date %>
+                                </div>
+                                <div class="mt-4">
+                                  <div class="mb-3">
+                                    <h3 class="form-section">Participants:</h3>
+                                    <% if @proposal.invites %>
+                                      <% @proposal.invites.each do |invite|%>
+                                        <% if invite.invited_as == 'Participant' %>
+                                          <%= render partial: 'organizer', locals: { invite: invite } %>
+                                        <% end %>
                                       <% end %>
-                                      <div class="mb-3">
-                                        <template data-nested-invites-target="templateOne">
-                                          <%= f.fields_for :invites, Invite.new, child_index: 'NEW_RECORD' do |invite| %>
-                                            <%= render partial: 'proposals/invite', locals: { f: invite, invited_as: 'Participant', date: date } %>
-                                          <% end %>
-                                        </template>
-                                        <div data-nested-invites-target="targetOne"></div>
-                                          <button type="button" class="btn btn-light" data-action="nested-invites#addParticipants" id="add-more-participant">
-                                            Queue More Participant Invitations
-                                          </button>
-                                      </div>
-                                      <div class="mb-3">
-                                        <button id="participant" data-action="click->nested-invites#invitePreview" data-id="<%= @proposal.id %>" class="btn btn-primary">Invite Participant(s)</button>
-                                      </div>
+                                    <% end %>
+                                  </div>
+                                </div>
+                                <div class="mt-4">
+                                  <div class="mb-3">
+                                    <% if @careers %>
+                                      <h3 class="form-section">Confirmed Participants:</h3>
+                                      <% @careers.uniq.each do |career| %>
+                                        <h4><%= career %></h4>
+                                          <%= render partial: 'confirm_participant', locals: { confirmed_participants: @proposal.participants_career(career) } %>
+                                      <% end %>
                                     <% end %>
                                   </div>
                                 </div>
                               </div>
                             <% end %>
-                            <div class="mt-4">
-                              <div class="mb-3">
-                                <% unless @careers.blank? %>
-                                  <h3 class="form-section">Confirmed Participants:</h3>
-                                  <% @careers.uniq.each do |career| %>
-                                    <h4><%= career %></h4>
-                                      <%= render partial: 'confirm_participant', locals: { confirmed_participants: @proposal.participants_career(career) } %>
-                                  <% end %>
-                                <% end %>
-                              </div>
-                            </div>
 
-                            <% if params[:action] == 'show' %>
-                            <div>
-                              <%= render partial: 'proposals/lead_organizer' %>
-                              <div>
-                                <h3 class="form-section">Supporting Organizers:</h3>
-                                <% if @proposal.invites %>
-                                  <% @proposal.invites.each do |invite|%>
-                                    <% if invite.invited_as == 'Organizer' %>
-                                      <%= render partial: 'proposals/organizer', locals: { invite: invite } %>
-                                    <% end %>
-                                  <% end %>
-                                <% end %>
-                              </div>
-                              <div class="mt-4">
-                                <div class="mb-3">
-                                  <h3 class="form-section">Participants:</h3>
-                                  <% if @proposal.invites %>
-                                    <% @proposal.invites.each do |invite|%>
-                                      <% if invite.invited_as == 'Participant' %>
-                                        <%= render partial: 'proposals/organizer', locals: { invite: invite } %>
-                                      <% end %>
-                                    <% end %>
-                                  <% end %>
-                                </div>
-                              </div>
-                              <div class="mt-4">
-                                <div class="mb-3">
-                                  <% if @careers %>
-                                    <h3 class="form-section">Confirmed Participants:</h3>
-                                    <% @careers.uniq.each do |career| %>
-                                      <h4><%= career %></h4>
-                                        <%= render partial: 'proposals/confirm_participant', locals: { confirmed_participants: @proposal.participants_career(career) } %>
-                                    <% end %>
-                                  <% end %>
-                                </div>
-                              </div>
-                            </div>
-                            <% end %>
-
-                          <div class="mt-4" data-controller="multi-upload">
+                            <div class="mt-4" data-controller="multi-upload">
                               <h3 class="form-section">Supplementary Files:</h3>
                               <p>
                                 You may upload PDF files by clicking the button below. Uploaded files are considered supplementary documentation, and not part of the main body of the proposal.
@@ -243,7 +151,7 @@
                                 Supported file types: *.pdf
                               </p>
                               <div>
-                                <input type="file" id="file-upload" multiple accept="application/pdf" name="file-upload", data-action="multi-upload#uploadFile" data-proposal-form-id="<%= @proposal&.id %>">
+                                <input type="file" id="file-upload" multiple accept="application/pdf" name="file-upload", data-action="multi-upload#uploadFile" data-proposal-form-id="<%= @proposal&.id %>" disabled="true">
                               </div>
 
                               <% if @proposal&.files&.attached? %>
@@ -252,8 +160,6 @@
                                   <% @proposal.files.each do |file| %>
                                     <li class="list-group-item">
                                       <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
-                                      <span data-proposal-id="<%= @proposal.id %>" data-attachment-id="<%= file.id %>" data-action="click->multi-upload#removeFile" class="btn btn-sm btn-light m-3">
-                                        Remove file
                                       </span>
                                     </li>
                                   <% end %>
@@ -316,9 +222,6 @@
                           <%= link_to "Print Proposal", rendered_proposal_proposal_path(@proposal.id, :format => :pdf), target: '_blank', class: 'p-2 mx-2 btn btn-primary', :'data-action' => 'click->proposal-form#latex', :'data-value' => 'all',  :'data-propid' => @proposal.id %>
                           <div class="float-end">
                             <button id="changeTab" class="p-2 mx-2 btn btn-primary" data-action='click->submit-proposals#previousTab'>Back</button>
-                            <% if params[:action] == 'edit' %>
-                              <%= f.submit 'Submit Proposal', disabled: action, class:'btn btn-primary p-2' %>
-                            <% end %>
                           </div>
                         </div>
                       </div>
@@ -431,26 +334,6 @@
                         </div>
                       </div>
             <% end %>
-
-                      <div class="tab-pane" id="tab-5" role="tabpanel">
-                        <h4 class="tab-title"></h4>
-                        <div class="mb-3">
-                          <%= render partial: "staff_discussion" %>
-                        </div>
-                      </div>
-
-                      <div class="tab-pane" id="tab-6" role="tabpanel">
-                        <h4 class="tab-title"></h4>
-                        <div class="mb-3">
-                          <%= render partial: "emails/form" %>
-                        </div>
-                      </div>
-
-                      <div class="tab-pane" id="tab-7" role="tabpanel">
-                        <h4 class="tab-title"></h4>
-                        <div class="mb-3">
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>

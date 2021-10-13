@@ -1,6 +1,6 @@
 class ProposalsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_proposal, only: %w[show edit destroy ranking locations]
+  before_action :set_proposal, only: %w[show edit destroy ranking locations versions proposal_version]
   before_action :check_status, only: %w[edit]
   before_action :authorize_user, only: %w[show edit]
   before_action :set_careers, only: %w[show edit]
@@ -129,6 +129,12 @@ class ProposalsController < ApplicationController
     else
       redirect_to edit_proposal_path(@proposal)
     end
+  end
+
+  def versions; end
+
+  def proposal_version
+    @version = params[:version].to_i
   end
 
   private

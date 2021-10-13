@@ -16,6 +16,7 @@
     <td><%= proposal.updated_at.to_date %></td>
     <td class="table-action">
       <%= link_to '<i class="align-middle fas fa-fw fa-eye"></i>Show'.html_safe, proposal_url(proposal) %>
+      <%= link_to '<i class="align-middle mr-2 fas fa-fw fa-clone"></i>Versions'.html_safe, versions_proposal_url(proposal) %>
       <% if lead_organizer?(proposal.proposal_roles) %>
         <% unless proposal.submitted? || proposal.revision_submitted? || proposal.approved? || proposal.declined? || proposal.decision_email_sent? || proposal.decision_pending? || proposal.initial_review? %>
          <%= link_to '<i class="align-middle fas fa-fw fa-pen"></i>Edit'.html_safe, edit_proposal_path(proposal) %>

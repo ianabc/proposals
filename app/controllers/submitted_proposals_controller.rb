@@ -155,25 +155,22 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def generate_pdf_string
-    render_to_string layout: "application", inline: @prop_latex, formats: [:pdf]
-  rescue => e
+    pdf_file = render_to_string layout: "application", inline: @prop_latex, formats: [:pdf]
+    write_pdf_file(pdf_file)
+  rescue StandardError => e
     Rails.logger.info { "\n\n#{@proposal.code} LaTeX error:\n #{e.message}\n\n" }
     flash[:alert] = "#{@proposal.code} LaTeX error: #{e.message}"
-    return ''
+    ''
   end
 
   def write_pdf_file(pdf_file)
-    return if pdf_file.blank?
-
-    begin
-      File.open(@pdf_path, "w:UTF-8") do |file|
-        file.write(pdf_file)
-      end
-    rescue => e
-      Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}\n\n" }
-      flash[:alert] = "Error creating #{@proposal&.code} PDF: #{e.message}"
-      return false
+    File.open(@pdf_path, "w:UTF-8") do |file|
+      file.write(pdf_file)
     end
+  rescue StandardError => e
+    Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}\n\n" }
+    flash[:alert] = "Error creating #{@proposal&.code} PDF: #{e.message}"
+    false
   end
 
   def create_pdf_file
@@ -181,11 +178,10 @@ class SubmittedProposalsController < ApplicationController
     @prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
                                     .generate_latex_file.to_s
 
-    @year = @proposal&.year || Date.current.year.to_i + 2
+    @year = @proposal&.year || (Date.current.year.to_i + 2)
     @pdf_path = Rails.root.join('tmp', "#{@proposal&.code}-#{DateTime.now.to_i}.pdf")
 
-    pdf_file = generate_pdf_string
-    write_pdf_file(pdf_file)
+    generate_pdf_string
   end
 
   def post_to_editflow
@@ -213,11 +209,19 @@ class SubmittedProposalsController < ApplicationController
     else
       Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
       flash[:notice] = "#{@proposal&.code} sent to EditFlow!"
+      store_response_id(response)
       @proposal.update(edit_flow: DateTime.current)
       @proposal.progress!
     end
     Rails.logger.info { "\n\n*****************************************\n\n" }
-    return true
+    true
+  end
+
+  def store_response_id(response)
+    response_body = JSON.parse(response.body)
+    article = response_body["data"]["article"]
+    id = article["id"]
+    @proposal.update(editflow_id: id)
   end
 
   def set_proposal
