@@ -140,6 +140,7 @@ class BookletPdfService
       @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
       proposals_heading
     end
+    check_no_latex
   end
 
   def proposals_heading
@@ -149,7 +150,6 @@ class BookletPdfService
       code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
       @text << "\\section*{\\centering #{code} #{proposal_title(proposal)}}"
       single_proposal_heading
-      check_no_latex
     end
   end
 

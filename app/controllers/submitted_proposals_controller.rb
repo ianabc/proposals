@@ -250,54 +250,15 @@ class SubmittedProposalsController < ApplicationController
 
   def multiple_proposals_booklet
     create_booklet
-    @proposal_ids.split(',').each do |id|
-      @proposal_object = Proposal.find_by(id: id)
-      next if @proposal_object.macros.blank?
-
-      check_preamble
-    end
     write_file
   end
 
   def create_booklet
     BookletPdfService.new(@proposal_ids.split(',').first, @temp_file, 'all', current_user)
                      .multiple_booklet(@table, @proposal_ids)
-    @latex_infile = File.read("#{Rails.root}/tmp/#{@temp_file}")
-    @proposals_macros = ''
-  end
-
-  def check_preamble
-    if @proposal_object.macros.start_with?("%")
-      @proposals_macros << "#{@proposal_object.macros}\n\n"
-    else
-      check_same_preambles
-    end
-  end
-
-  def check_same_preambles
-    @without_spaces = @proposal_object.macros.delete(' ')
-    newcommands_preambles
-    save_preambles
-  end
-
-  def newcommands_preambles
-    newcommands_brackets = @without_spaces.scan(/\\newcommand{\\(\w+)}/).flatten.join
-    newcommands = @proposal_object.macros.scan(/\\newcommand \\(\w+)/).flatten.join
-    macro_name = @without_spaces.split('{')
-    macro_name = macro_name[1].split('}')[0]
-    @usepackage_pre = macro_name.presence || "nothing"
-    @pre = newcommands.presence || "nothing"
-    @pre_brackets = newcommands_brackets.presence || "nothing"
-  end
-
-  def save_preambles
-    if @proposals_macros.scan(@pre).present? || @proposals_macros.scan(@pre_brackets).present? ||
-       @proposals_macros.scan(@proposal_object.macros).present? || @proposals_macros.scan(@usepackage_pre).present?
-      macro = @proposal_object.macros
-      @proposals_macros << "\n\\begin{comment}\n\n #{macro}\n\\end{comment}\n\n"
-    else
-      @proposals_macros << "#{@proposal_object.macros}\n\n"
-    end
+    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
+    @latex_infile = @fh.read
+    @proposals_macros = ExtractPreamblesService.new(@proposal_ids).proposal_preambles
   end
 
   def template_params
