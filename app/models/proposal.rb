@@ -117,7 +117,7 @@ class Proposal < ApplicationRecord
     # for persons with more than one demo data record, use the latest one
     DemographicData.where(person_id: invites.where(status: 'confirmed')
                    .pluck(:person_id).uniq).order(:id)
-                   .each_with_object({}) { |d, u| u[d.person_id] = d }.values
+                   .index_by(&:person_id).values
   end
 
   def create_organizer_role(person, organizer)
@@ -151,18 +151,27 @@ class Proposal < ApplicationRecord
     Person.where(id: person_ids).where(academic_status: career)
   end
 
+  def self.supporting_organizer_fullnames(proposal)
+    proposal&.supporting_organizers&.map { |org| "#{org.firstname} #{org.lastname}" }&.join(', ')
+  end
+
   def self.to_csv
-    attributes = ["Code", "Proposal Title", "Proposal Type", "Lead Organizer",
-                  "Preffered Locations", "Status",
-                  "Updated"]
     CSV.generate(headers: true) do |csv|
-      csv << attributes
+      csv << HEADERS
       all.find_each do |proposal|
-        csv << [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
-                proposal&.lead_organizer&.fullname, proposal&.the_locations,
-                proposal&.status, proposal&.updated_at&.to_date]
+        csv << each_row(proposal)
       end
     end
+  end
+
+  HEADERS = ["Code", "Proposal Title", "Proposal Type", "Preffered Locations", "Status",
+             "Updated", "Subject Area", "Lead Organizer", "Supporting Organizers"].freeze
+  
+  def self.each_row(proposal)
+    [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
+     proposal&.the_locations, proposal&.status, proposal&.updated_at&.to_date, 
+     proposal.subject&.title, proposal&.lead_organizer&.fullname, 
+     supporting_organizer_fullnames(proposal)]
   end
 
   def pdf_file_type(file)
