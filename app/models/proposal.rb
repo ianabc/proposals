@@ -38,9 +38,6 @@ class Proposal < ApplicationRecord
   before_save :strip_whitespace
   before_save :create_code, if: :is_submission
 
-  HEADERS = ["Code", "Proposal Title", "Proposal Type", "Lead Organizer", "Preffered Locations", "Status",
-             "Updated", "BIRS Subject", "Supporting Organizers"].freeze
-
   enum status: {
     draft: 0,
     submitted: 1,
@@ -167,10 +164,13 @@ class Proposal < ApplicationRecord
     end
   end
 
+  HEADERS = ["Code", "Proposal Title", "Proposal Type", "Preffered Locations", "Status",
+             "Updated", "Subject Area", "Lead Organizer", "Supporting Organizers"].freeze
+  
   def self.each_row(proposal)
     [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
-     proposal&.lead_organizer&.fullname, proposal&.the_locations,
-     proposal&.status, proposal&.updated_at&.to_date, proposal.subject&.title,
+     proposal&.the_locations, proposal&.status, proposal&.updated_at&.to_date, 
+     proposal.subject&.title, proposal&.lead_organizer&.fullname, 
      supporting_organizer_fullnames(proposal)]
   end
 
