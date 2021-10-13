@@ -20,6 +20,7 @@ class ExtractPreamblesService
     declare_definitions
     @newlines = ''
     @preambles.each do |proposal|
+      @proposal = proposal
       if proposal[:preamble].start_with?("%")
         @newlines << "#{proposal[:preamble]}\n\n"
       else
@@ -43,13 +44,13 @@ class ExtractPreamblesService
   end
 
   def duplicate_preambles
-    @preamble = proposal[:preamble].delete(' ')
+    @preamble = @proposal[:preamble].delete(' ')
     definitions = extract_definitions(@preamble)
-    remove_duplicates(definitions, proposal[:preamble])
+    remove_duplicates(definitions, @proposal[:preamble])
   end
 
   def extract_definitions(preamble)
-    preamble_usepackage
+    preamble_usepackage(preamble)
     {
       'usepackage' => @macro_name,
       'newcommand_with_brackets' => preamble.scan(/\\newcommand{\\(\w+)}/).flatten.join,
@@ -62,7 +63,7 @@ class ExtractPreamblesService
     }
   end
 
-  def preamble_usepackage
+  def preamble_usepackage(preamble)
     @macro_name = preamble.split('{') if preamble.include?("usepackage")
     @macro_name = if @macro_name.present? && @macro_name[1].present?
                     @macro_name[1].split('}')[0]
@@ -78,7 +79,7 @@ class ExtractPreamblesService
       @command = command
       @definition = definition
 
-      if @all_definitions[@command].include?(@definition) or check_condition_newcommand
+      if @all_definitions[@command].include?(@definition) or check_condition
         @newlines << "\n\\begin{comment}\n\n #{preamble}\n\\end{comment}\n\n"
       else
         @all_definitions[command] << definition
