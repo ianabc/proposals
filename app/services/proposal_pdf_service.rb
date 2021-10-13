@@ -20,28 +20,9 @@ class ProposalPdfService
     self
   end
 
-  def single_booklet(table)
-    @table = table
-    input = all_proposal_fields if @input == 'all'
-
-    LatexToPdf.config[:arguments].delete('-halt-on-error') if @proposal.is_submission
-
-    File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-      io.write(input)
-    end
-  end
-
-  def multiple_booklet(table, proposals)
-    @table = table
-    @proposals = proposals
-    input = multiple_proposals_fields if @input == 'all'
-
-    LatexToPdf.config[:arguments].delete('-halt-on-error') if @proposal.is_submission
-
-    File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-      io.write(input)
-    end
-    self
+  def booklet_content
+    @input = pdf_content
+    @input
   end
 
   def to_s
@@ -86,97 +67,12 @@ class ProposalPdfService
   def all_proposal_fields
     return 'Proposal data not found!' if proposal.blank?
 
-    case @table
-    when "toc"
-      proposal_table_of_content
-    when "ntoc"
-      single_proposal_without_content
-    else
-      proposal_details
-    end
-    @text
-  end
-
-  def multiple_proposals_fields
-    case @table
-    when "toc"
-      @number = 0
-      @text = "\\tableofcontents"
-      proposals_with_content
-    when "ntoc"
-      proposals_without_content
-    end
-    @text
-  end
-
-  def proposals_with_content
-    @proposals.split(',').each do |id|
-      @number += 1
-      proposal = Proposal.find_by(id: id)
-      @proposal = proposal
-      @text << "\\addtocontents{toc}{\ #{@number}. #{proposal.subject&.title}}"
-      code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-      @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-      proposals_without_content
-    end
+    proposal_details
     @text
   end
 
   def proposal_title(proposal)
     proposal.no_latex ? delatex(proposal&.title) : proposal&.title
-  end
-
-  def proposals_without_content
-    if @table == "toc"
-      code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
-      single_proposal_heading
-    else
-      @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
-      proposals_heading
-    end
-    @text
-  end
-
-  def proposals_heading
-    @proposals.split(',').each do |id|
-      proposal = Proposal.find_by(id: id)
-      @proposal = proposal
-      code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
-      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)}}"
-      single_proposal_heading
-    end
-  end
-
-  def proposal_table_of_content
-    @text = "\\tableofcontents"
-    @text << "\\addtocontents{toc}{\ 1. #{proposal.subject&.title} }"
-    code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text << "\\addcontentsline{toc}{section}{ #{code} #{proposal_title(proposal)} }"
-    @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
-    single_proposal_heading
-    @text
-  end
-
-  def single_proposal_without_content
-    code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text = "\\section*{\\centering #{code} #{proposal_title(proposal)}"
-    single_proposal_heading
-    @text
-  end
-
-  def lead_organizer_info
-    info = "\\subsection*{Lead Organizer}\n\n"
-    info << "#{proposal.lead_organizer&.fullname} (#{affil(proposal.lead_organizer)}) \\\\ \n\n"
-    info << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
-  end
-
-  def single_proposal_heading
-    @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << participant_confirmed_count
-    @text << lead_organizer_info
-    pdf_content
-    @text
   end
 
   def pdf_content
@@ -258,7 +154,11 @@ class ProposalPdfService
   def proposal_organizers
     return if proposal.supporting_organizers&.count&.zero?
 
-    @text << "\\subsection*{Supporting Organizers}\n\n"
+    if @text.blank?
+      @text = "\\subsection*{Supporting Organizers}\n\n"
+    else
+      @text << "\\subsection*{Supporting Organizers}\n\n"
+    end
     @text << "\\begin{itemize}\n"
     proposal.supporting_organizers.each do |organizer|
       @text << "\\item #{organizer&.person&.fullname}#{affil(organizer&.person)}\n"

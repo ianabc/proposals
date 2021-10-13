@@ -229,29 +229,44 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_file
-    temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
+    @temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
     if @counter == 1
-      @proposal = Proposal.find_by(id: @proposal_ids)
-      ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user).single_booklet(@table)
+      single_proposal_booklet
     else
-      @proposal = Proposal.find_by(id: @proposal_ids.split(',').first)
-      ProposalPdfService.new(@proposal_ids.split(',').first, temp_file, 'all', current_user)
-                        .multiple_booklet(@table, @proposal_ids)
+      multiple_proposals_booklet
     end
-    @fh = File.open("#{Rails.root}/tmp/#{temp_file}")
+  end
+
+  def single_proposal_booklet
+    @proposal = Proposal.find_by(id: @proposal_ids)
+    BookletPdfService.new(@proposal.id, @temp_file, 'all', current_user).single_booklet(@table)
+    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
+    @latex_infile = @fh.read
+    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
+    @proposals_macros = @proposal.macros
     write_file
   end
 
   def write_file
-    @latex_infile = @fh.read
-    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
-
-    latex = "#{@proposal.macros}\n\\begin{document}\n#{@latex_infile}"
-    pdf_file = render_to_string layout: "application", inline: latex, formats: [:pdf]
+    @latex = "#{@proposals_macros}\n\\begin{document}\n#{@latex_infile}"
+    pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
     @pdf_path = Rails.root.join('tmp/booklet-proposals.pdf')
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
+  end
+
+  def multiple_proposals_booklet
+    create_booklet
+    write_file
+  end
+
+  def create_booklet
+    BookletPdfService.new(@proposal_ids.split(',').first, @temp_file, 'all', current_user)
+                     .multiple_booklet(@table, @proposal_ids)
+    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
+    @latex_infile = @fh.read
+    @proposals_macros = ExtractPreamblesService.new(@proposal_ids).proposal_preambles
   end
 
   def template_params
