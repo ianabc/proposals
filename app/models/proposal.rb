@@ -151,16 +151,20 @@ class Proposal < ApplicationRecord
     Person.where(id: person_ids).where(academic_status: career)
   end
 
+  def self.supporting_organizer_fullnames(proposal)
+    proposal.supporting_organizers&.map{ |org| "#{org.firstname} #{org.lastname}"}.join(', ')
+  end
+
   def self.to_csv
     attributes = ["Code", "Proposal Title", "Proposal Type", "Lead Organizer",
                   "Preffered Locations", "Status",
-                  "Updated"]
+                  "Updated", "BIRS Subject", "Supporting Organizers"]
     CSV.generate(headers: true) do |csv|
       csv << attributes
       all.find_each do |proposal|
         csv << [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
                 proposal&.lead_organizer&.fullname, proposal&.the_locations,
-                proposal&.status, proposal&.updated_at&.to_date]
+                proposal&.status, proposal&.updated_at&.to_date, proposal.subject&.title, supporting_organizer_fullnames(proposal)]
       end
     end
   end
