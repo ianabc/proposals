@@ -38,6 +38,9 @@ class Proposal < ApplicationRecord
   before_save :strip_whitespace
   before_save :create_code, if: :is_submission
 
+  HEADERS = ["Code", "Proposal Title", "Proposal Type", "Lead Organizer", "Preffered Locations", "Status",
+             "Updated", "BIRS Subject", "Supporting Organizers"].freeze
+
   enum status: {
     draft: 0,
     submitted: 1,
@@ -117,7 +120,7 @@ class Proposal < ApplicationRecord
     # for persons with more than one demo data record, use the latest one
     DemographicData.where(person_id: invites.where(status: 'confirmed')
                    .pluck(:person_id).uniq).order(:id)
-                   .each_with_object({}) { |d, u| u[d.person_id] = d }.values
+                   .index_by(&:person_id).values
   end
 
   def create_organizer_role(person, organizer)
@@ -152,21 +155,23 @@ class Proposal < ApplicationRecord
   end
 
   def self.supporting_organizer_fullnames(proposal)
-    proposal.supporting_organizers&.map{ |org| "#{org.firstname} #{org.lastname}"}.join(', ')
+    proposal&.supporting_organizers&.map { |org| "#{org.firstname} #{org.lastname}" }&.join(', ')
   end
 
   def self.to_csv
-    attributes = ["Code", "Proposal Title", "Proposal Type", "Lead Organizer",
-                  "Preffered Locations", "Status",
-                  "Updated", "BIRS Subject", "Supporting Organizers"]
     CSV.generate(headers: true) do |csv|
-      csv << attributes
+      csv << HEADERS
       all.find_each do |proposal|
-        csv << [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
-                proposal&.lead_organizer&.fullname, proposal&.the_locations,
-                proposal&.status, proposal&.updated_at&.to_date, proposal.subject&.title, supporting_organizer_fullnames(proposal)]
+        csv << each_row(proposal)
       end
     end
+  end
+
+  def self.each_row(proposal)
+    [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
+     proposal&.lead_organizer&.fullname, proposal&.the_locations,
+     proposal&.status, proposal&.updated_at&.to_date, proposal.subject&.title,
+     supporting_organizer_fullnames(proposal)]
   end
 
   def pdf_file_type(file)
