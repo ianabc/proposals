@@ -56,7 +56,7 @@ class ProposalPdfService
 
     line_num = 1
     error_object.src.each_line do |line|
-      error_output << line_num.to_s + " #{line}"
+      error_output << (line_num.to_s + " #{line}")
       line_num += 1
     end
     error_output << "\n</pre>\n\n"
@@ -504,17 +504,15 @@ class ProposalPdfService
 
   def proposal_supplementary_files
     @proposal.files&.each_with_index do |file, num|
-      begin
-        @text << "\n\\newpage\n\\thispagestyle{empty}\n"
+      @text << "\n\\newpage\n\\thispagestyle{empty}\n"
 
-        filename = file.filename.to_s.tr('_', '-')
-        file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
-        full_filename = write_attachment_file(File.read(file_path), filename)
+      filename = file.filename.to_s.tr('_', '-')
+      file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
+      full_filename = write_attachment_file(File.read(file_path), filename)
 
-        @text << supplementary_file_tex(num, filename, full_filename)
-      rescue
-        next
-      end
+      @text << supplementary_file_tex(num, filename, full_filename)
+    rescue StandardError
+      next
     end
   end
 
