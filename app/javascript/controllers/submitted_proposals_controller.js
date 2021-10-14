@@ -224,13 +224,14 @@ export default class extends Controller {
   }
 
   invertSelectedProposals() {
-    var fieldID = this.proposalId.concat("_checkbox")
-    var getId = document.getElementById(fieldID)
-    if(getId.checked) {
-      getId.checked = false
-    }
-    else {
-      getId.checked = true
-    }
+    let checkbox = ''
+    $("input:checkbox").each(function(){
+      checkbox = document.getElementById(this.id)
+      if(checkbox.checked) {
+        checkbox.checked = false
+      } else {
+        checkbox.checked = true
+      }
+    });
   }
 }
