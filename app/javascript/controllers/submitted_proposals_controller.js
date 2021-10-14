@@ -233,4 +233,19 @@ export default class extends Controller {
       getId.checked = true
     }
   }
+
+  downloadCSV() {
+    var array = [];
+    $("input:checked").each(function() {
+      array.push(this.dataset.value);
+    });
+    if(typeof array[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      let selectedProposals = array.filter(x => x != undefined)
+      window.location = `/submitted_proposals/download_csv.csv?ids=${selectedProposals}`
+    }
+  }
 }
