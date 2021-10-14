@@ -3,15 +3,15 @@
   <div class="col-6 mt-2">
     <div class="mb-3">
       <label for="firstname">First Name: </label>
-      <label for="firstname"><%= @proposal.lead_organizer.firstname %></label>
+      <label for="firstname"><%= @proposal.lead_organizer&.firstname %></label>
     </div>
     <div class="mb-3">
       <label for="lastname">Last Name: </label>
-      <label for="lastname"><%= @proposal.lead_organizer.lastname %></label>
+      <label for="lastname"><%= @proposal.lead_organizer&.lastname %></label>
     </div>
     <div class="mb-3">
       <label for="email">Email: </label>
-      <label for="wmail"><%= @proposal.lead_organizer.email %></label>
+      <label for="wmail"><%= @proposal.lead_organizer&.email %></label>
     </div>
     <% if @proposal.lead_organizer.affiliation.present? %>
       <div class="mb-3">
