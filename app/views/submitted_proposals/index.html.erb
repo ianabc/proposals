@@ -59,7 +59,6 @@
                 <div class="tab-content">
                   <div class="tab-pane active" id="tab-1" role="tabpanel">
                     <div class="text-end m-3">
-                      <span data-action="click->submitted-proposals#tableOfContent" class="btn btn-primary">Create Booklet</span>
                       <%= render 'table_window' %>
                     </div>
                     <%= render partial: "proposals" %>
@@ -74,6 +73,7 @@
                         <%= link_to "Download CSV", download_csv_submitted_proposals_url( {:format => :csv}.merge(params.permit!)), class: "btn btn-primary" %>
                         <span data-action="click->submitted-proposals#emailModal" id="approve" class="btn btn-primary">Approve Selected Proposals</span>
                         <span data-action="click->submitted-proposals#emailModal" id="decline" class="btn btn-primary">Decline Selected Proposals</span>
+                        <span data-action="click->submitted-proposals#tableOfContent" class="btn btn-primary">Create Booklet</span>
                         <%= render 'email_templates' %>
                       </div>
                     </div>
