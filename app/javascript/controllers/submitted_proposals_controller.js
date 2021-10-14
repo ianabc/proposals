@@ -244,7 +244,7 @@ export default class extends Controller {
       toastr.error("Please select any checkbox!")
     }
     else {
-      let selectedProposals = array.filter(x => x != undefined)
+      let selectedProposals = array.filter((x) => typeof x !== "undefined")
       window.location = `/submitted_proposals/download_csv.csv?ids=${selectedProposals}`
     }
   }
