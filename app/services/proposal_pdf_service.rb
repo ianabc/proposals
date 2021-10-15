@@ -57,7 +57,7 @@ class ProposalPdfService
 
     line_num = 1
     error_object.src.each_line do |line|
-      error_output << line_num.to_s + " #{line}"
+      error_output << (line_num.to_s + " #{line}")
       line_num += 1
     end
     error_output << "\n</pre>\n\n"
@@ -77,6 +77,7 @@ class ProposalPdfService
   end
 
   def pdf_content
+    @text = ""
     proposal_organizers
     proposal_locations
     proposal_subjects

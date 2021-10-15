@@ -261,15 +261,21 @@ class SubmittedProposalsController < ApplicationController
 
   def multiple_proposals_booklet
     create_booklet
+    check_file_existence
+    @proposals_macros = ExtractPreamblesService.new(@proposal_ids).proposal_preambles
     write_file
   end
 
   def create_booklet
     BookletPdfService.new(@proposal_ids.split(',').first, @temp_file, 'all', current_user)
                      .multiple_booklet(@table, @proposal_ids)
+  end
+
+  def check_file_existence
+    create_booklet unless File.exist?("#{Rails.root}/tmp/#{@temp_file}")
+
     @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
     @latex_infile = @fh.read
-    @proposals_macros = ExtractPreamblesService.new(@proposal_ids).proposal_preambles
   end
 
   def template_params
