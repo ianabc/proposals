@@ -66,7 +66,7 @@ class ProposalsController < ApplicationController
     @latex_infile = @proposal_pdf.to_s
     errors = @proposal_pdf.file_errors.join(', ')
 
-    flash[:alert] = "#{errors} not attached to proposal, may be broken file(s)."
+    flash[:alert] = "[#{@proposal.code}] #{@proposal.title} - attachment not added: #{errors}."
     @proposal.review! if current_user.staff_member? && @proposal.may_review?
 
     render_latex
