@@ -168,7 +168,9 @@ export default class extends Controller {
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
         function() {
           document.getElementById("proposal_booklet").click();
-          window.location.reload()
+          toastr.success('Booklet successfully created.')
+      }).fail(function() {
+        toastr.error('There is something went wrong.')
       })
     }
   }
