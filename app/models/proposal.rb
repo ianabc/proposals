@@ -155,10 +155,10 @@ class Proposal < ApplicationRecord
     proposal&.supporting_organizers&.map { |org| "#{org.firstname} #{org.lastname}" }&.join(', ')
   end
 
-  def self.to_csv
+  def self.to_csv(proposals)
     CSV.generate(headers: true) do |csv|
       csv << HEADERS
-      all.find_each do |proposal|
+      proposals.find_each do |proposal|
         csv << each_row(proposal)
       end
     end
