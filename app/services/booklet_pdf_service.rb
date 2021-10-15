@@ -157,7 +157,8 @@ class BookletPdfService
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << participant_confirmed_count
     @text << lead_organizer_info
-    @text << ProposalPdfService.new(@proposal.id, @temp_file, 'all', @user).booklet_content
+    all_text = ProposalPdfService.new(@proposal.id, @temp_file, 'all', @user).booklet_content
+    @text << all_text if all_text.present?
     @text
   end
 
