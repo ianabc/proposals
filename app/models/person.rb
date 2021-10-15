@@ -7,6 +7,7 @@ class Person < ApplicationRecord
   has_many :proposal_roles, dependent: :destroy
   has_many :proposals, through: :proposal_roles
   has_one :demographic_data, dependent: :destroy
+  has_many :reviews, dependent: :destroy
   before_save :downcase_email
   before_save :strip_whitespace
 
