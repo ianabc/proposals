@@ -19,7 +19,7 @@ class SubmittedProposalsController < ApplicationController
     @proposals = Proposal.where(id: params[:ids].split(','))
     return if @proposals.empty?
 
-    send_data @proposals.to_csv, filename: "submitted_proposals.csv"
+    send_data Proposal.to_csv(@proposals), filename: "submitted_proposals.csv"
   end
 
   def edit_flow
