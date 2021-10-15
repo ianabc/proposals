@@ -61,8 +61,12 @@ class ProposalsController < ApplicationController
     proposal_id = params[:id]
     @proposal = Proposal.find_by(id: proposal_id)
     @year = @proposal&.year || Date.current.year.to_i + 2
-    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
-                                      .generate_latex_file.to_s
+    @proposal_pdf = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
+                                      .generate_latex_file
+    @latex_infile = @proposal_pdf.to_s
+    errors = @proposal_pdf.file_errors.join(', ')
+
+    flash[:alert] = "[#{@proposal.code}] #{@proposal.title} - attachment not added: #{errors}."
     @proposal.review! if current_user.staff_member? && @proposal.may_review?
 
     render_latex

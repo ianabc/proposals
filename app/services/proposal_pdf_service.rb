@@ -1,11 +1,12 @@
 class ProposalPdfService
-  attr_reader :proposal, :temp_file, :table, :user
+  attr_reader :proposal, :temp_file, :table, :user, :file_errors
 
   def initialize(proposal_id, file, input, user)
     @proposal = Proposal.find(proposal_id)
     @temp_file = file
     @input = input
     @user = user
+    @file_errors = []
     @text = ""
   end
 
@@ -513,6 +514,9 @@ class ProposalPdfService
       full_filename = write_attachment_file(File.read(file_path), filename)
 
       @text << supplementary_file_tex(num, filename, full_filename)
+    rescue StandardError
+      file_errors << filename
+      next
     end
   end
 
