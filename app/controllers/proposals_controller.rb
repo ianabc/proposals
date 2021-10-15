@@ -64,8 +64,9 @@ class ProposalsController < ApplicationController
     @proposal_pdf = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
                                       .generate_latex_file
     @latex_infile = @proposal_pdf.to_s
+    errors = @proposal_pdf.file_errors.join(', ')
 
-    flash[:alert] = @proposal_pdf.file_errors
+    flash[:alert] = "#{errors} not attached to proposal, may be broken file(s)."
     @proposal.review! if current_user.staff_member? && @proposal.may_review?
 
     render_latex

@@ -512,8 +512,8 @@ class ProposalPdfService
       full_filename = write_attachment_file(File.read(file_path), filename)
 
       @text << supplementary_file_tex(num, filename, full_filename)
-    rescue StandardError => e
-      file_errors << "#{filename} will not attached to proposal, it's may be broken file."
+    rescue StandardError
+      file_errors << filename
       next
     end
   end
