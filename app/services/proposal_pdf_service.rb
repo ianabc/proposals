@@ -6,6 +6,7 @@ class ProposalPdfService
     @temp_file = file
     @input = input
     @user = user
+    @text = ""
   end
 
   def generate_latex_file
