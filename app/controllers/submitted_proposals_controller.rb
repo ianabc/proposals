@@ -1,7 +1,7 @@
 class SubmittedProposalsController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_user
-  before_action :set_proposals, only: %i[index download_csv]
+  before_action :set_proposals, only: %i[index]
   before_action :set_proposal, except: %i[index download_csv]
   before_action :template_params, only: %i[approve_decline_proposals]
 
@@ -16,6 +16,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def download_csv
+    @proposals = Proposal.where(id: params[:ids].split(','))
+    return if @proposals.empty?
+
     send_data @proposals.to_csv, filename: "submitted_proposals.csv"
   end
 
