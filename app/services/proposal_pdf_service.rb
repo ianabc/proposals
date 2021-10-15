@@ -7,6 +7,7 @@ class ProposalPdfService
     @input = input
     @user = user
     @file_errors = []
+    @text = ""
   end
 
   def generate_latex_file
@@ -77,6 +78,7 @@ class ProposalPdfService
   end
 
   def pdf_content
+    @text = ""
     proposal_organizers
     proposal_locations
     proposal_subjects

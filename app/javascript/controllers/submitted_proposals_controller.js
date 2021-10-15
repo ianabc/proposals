@@ -168,7 +168,9 @@ export default class extends Controller {
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
         function() {
           document.getElementById("proposal_booklet").click();
-          window.location.reload()
+          toastr.success('Booklet successfully created.')
+      }).fail(function() {
+        toastr.error('There is something went wrong.')
       })
     }
   }
@@ -224,13 +226,29 @@ export default class extends Controller {
   }
 
   invertSelectedProposals() {
-    var fieldID = this.proposalId.concat("_checkbox")
-    var getId = document.getElementById(fieldID)
-    if(getId.checked) {
-      getId.checked = false
+    let checkbox = ''
+    $("input:checkbox").each(function(){
+      checkbox = document.getElementById(this.id)
+      if(checkbox.checked) {
+        checkbox.checked = false
+      } else {
+        checkbox.checked = true
+      }
+    });
+  }
+
+  downloadCSV() {
+    var array = [];
+    $("input:checked").each(function() {
+      array.push(this.dataset.value);
+    });
+    if(typeof array[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
     }
     else {
-      getId.checked = true
+      let selectedProposals = array.filter((x) => typeof x !== "undefined")
+      window.location = `/submitted_proposals/download_csv.csv?ids=${selectedProposals}`
     }
   }
 }

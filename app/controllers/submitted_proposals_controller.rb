@@ -1,7 +1,7 @@
 class SubmittedProposalsController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_user
-  before_action :set_proposals, only: %i[index download_csv]
+  before_action :set_proposals, only: %i[index]
   before_action :set_proposal, except: %i[index download_csv]
   before_action :template_params, only: %i[approve_decline_proposals]
 
@@ -16,6 +16,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def download_csv
+    @proposals = Proposal.where(id: params[:ids].split(','))
+    return if @proposals.empty?
+
     send_data @proposals.to_csv, filename: "submitted_proposals.csv"
   end
 
@@ -258,15 +261,21 @@ class SubmittedProposalsController < ApplicationController
 
   def multiple_proposals_booklet
     create_booklet
+    check_file_existence
+    @proposals_macros = ExtractPreamblesService.new(@proposal_ids).proposal_preambles
     write_file
   end
 
   def create_booklet
     BookletPdfService.new(@proposal_ids.split(',').first, @temp_file, 'all', current_user)
                      .multiple_booklet(@table, @proposal_ids)
+  end
+
+  def check_file_existence
+    create_booklet unless File.exist?("#{Rails.root}/tmp/#{@temp_file}")
+
     @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
     @latex_infile = @fh.read
-    @proposals_macros = ExtractPreamblesService.new(@proposal_ids).proposal_preambles
   end
 
   def template_params
