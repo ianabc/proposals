@@ -23,6 +23,7 @@ Rails.application.routes.draw do
       post :edit_flow
       post :approve_decline_proposals
       post :table_of_content
+      post :import_reviews
     end
     member do
       post :update_status

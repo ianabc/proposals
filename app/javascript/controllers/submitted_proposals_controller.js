@@ -251,4 +251,21 @@ export default class extends Controller {
       window.location = `/submitted_proposals/download_csv.csv?ids=${selectedProposals}`
     }
   }
+
+  importReviews() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      proposalIds = proposalIds.slice(1)
+      $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function() {
+        }
+      )
+    }
+  }
 }

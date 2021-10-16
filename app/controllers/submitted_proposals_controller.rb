@@ -2,7 +2,7 @@ class SubmittedProposalsController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_user
   before_action :set_proposals, only: %i[index]
-  before_action :set_proposal, except: %i[index download_csv]
+  before_action :set_proposal, except: %i[index download_csv import_reviews]
   before_action :template_params, only: %i[approve_decline_proposals]
 
   def index; end
@@ -130,6 +130,18 @@ class SubmittedProposalsController < ApplicationController
     @proposal.update(status: status.to_i)
 
     head :ok
+  end
+
+  def import_reviews
+    proposals = params[:proposals]
+    proposals.split(',').each do |id|
+      @proposal = Proposal.find_by(id: id)
+      next if @proposal.reviews.present?
+
+      proposal_reviews if @proposal.editflow_id.present?
+    end
+  rescue StandardError
+    flash[:alert] = "There is something went wrong."
   end
 
   private
@@ -364,5 +376,63 @@ class SubmittedProposalsController < ApplicationController
     return if params[:organizers_email].blank?
 
     @organizers_email = JSON.parse(params[:organizers_email]).map(&:values).flatten
+  end
+
+  def proposal_reviews
+    edit_flow_query = EditFlowService.new(@proposal).mutation
+
+    response = RestClient.post ENV['EDITFLOW_API_URL'],
+                               { query: edit_flow_query },
+                               { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
+
+    if response.body.include?("errors")
+      display_errors(response)
+    else
+      get_response_body(response)
+      store_proposal_reviews
+    end
+  end
+
+  def display_errors(response)
+    Rails.logger.info { "\n\nError sending #{@proposal.code}: #{response.body}\n\n" }
+    flash[:alert] = "Error sending #{@proposal.code}: #{response.body}"
+    nil
+  end
+
+  def get_response_body(response)
+    response_body = JSON.parse(response.body)
+    article = response_body["data"]["article"]
+    @reviews = article["reviewVersionLatest"]["reviews"]
+  end
+
+  def store_proposal_reviews
+    @reviews.each do |review|
+      reviewer_name = review["reviewer"]["nameFull"]
+      is_quick = review["isQuick"]
+      score = review["score"]
+      review_file_data(review) if review["reports"].present?
+      @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: score, file_id: @file_id,
+                           proposal_id: @proposal, person_id: @proposal.lead_organizer&.id)
+      @review.save
+      @review.files.attach(io: @file, filename: @filename)
+    end
+  end
+
+  def review_file_data(review)
+    @file_id = review["reports"].first["fileID"]
+    file_url_query = EditFlowService.new(@proposal).file_url(@file_id)
+    response = RestClient.post ENV['EDITFLOW_API_URL'],
+                               { query: file_url_query },
+                               { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
+
+    find_store_review_file(response)
+  end
+
+  def find_store_review_file(response)
+    response_body = JSON.parse(response.body)
+    file_url = response_body["data"]["fileURL"]
+    url = file_url["url"]
+    @file = URI.parse(url).open
+    @filename = File.basename(url)
   end
 end
