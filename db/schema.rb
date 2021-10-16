@@ -359,6 +359,20 @@ ActiveRecord::Schema.define(version: 2021_10_07_143939) do
     t.index ["subject_id"], name: "index_proposals_on_subject_id"
   end
 
+  create_table "reviews", force: :cascade do |t|
+    t.datetime "review_date"
+    t.bigint "proposal_id", null: false
+    t.bigint "person_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "reviewer_name"
+    t.integer "score"
+    t.boolean "is_quick"
+    t.string "file_id"
+    t.index ["person_id"], name: "index_reviews_on_person_id"
+    t.index ["proposal_id"], name: "index_reviews_on_proposal_id"
+  end
+
   create_table "role_privileges", force: :cascade do |t|
     t.bigint "role_id", null: false
     t.string "privilege_name"
@@ -505,6 +519,8 @@ ActiveRecord::Schema.define(version: 2021_10_07_143939) do
   add_foreign_key "proposals", "proposal_forms"
   add_foreign_key "proposals", "proposal_types"
   add_foreign_key "proposals", "subjects"
+  add_foreign_key "reviews", "people"
+  add_foreign_key "reviews", "proposals"
   add_foreign_key "role_privileges", "roles"
   add_foreign_key "staff_discussions", "proposals"
   add_foreign_key "subject_area_categories", "subject_categories"
