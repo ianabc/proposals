@@ -268,4 +268,21 @@ export default class extends Controller {
       )
     }
   }
+
+  reviewsBooklet() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      proposalIds = proposalIds.slice(1)
+      $.post(`/submitted_proposals/reviews_booklet?proposals=${proposalIds}`, function() {
+        }
+      )
+    }
+  }
 }
