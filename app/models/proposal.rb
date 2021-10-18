@@ -4,6 +4,10 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposals, against: %i[title code],
                                      associated_against: {
                                        people: %i[firstname lastname]
+                                     }, using: {
+                                       tsearch: {
+                                         prefix: true
+                                       }
                                      }
 
   pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
