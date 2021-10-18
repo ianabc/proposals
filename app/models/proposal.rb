@@ -29,6 +29,7 @@ class Proposal < ApplicationRecord
   belongs_to :subject, optional: true
   has_many :staff_discussions, dependent: :destroy
   has_many :emails, dependent: :destroy
+  has_many :reviews, dependent: :destroy
 
   validates :year, :title, presence: true, if: :is_submission
   validate :subjects, if: :is_submission
@@ -155,10 +156,10 @@ class Proposal < ApplicationRecord
     proposal&.supporting_organizers&.map { |org| "#{org.firstname} #{org.lastname}" }&.join(', ')
   end
 
-  def self.to_csv
+  def self.to_csv(proposals)
     CSV.generate(headers: true) do |csv|
       csv << HEADERS
-      all.find_each do |proposal|
+      proposals.find_each do |proposal|
         csv << each_row(proposal)
       end
     end
@@ -166,11 +167,11 @@ class Proposal < ApplicationRecord
 
   HEADERS = ["Code", "Proposal Title", "Proposal Type", "Preffered Locations", "Status",
              "Updated", "Subject Area", "Lead Organizer", "Supporting Organizers"].freeze
-  
+
   def self.each_row(proposal)
     [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
-     proposal&.the_locations, proposal&.status, proposal&.updated_at&.to_date, 
-     proposal.subject&.title, proposal&.lead_organizer&.fullname, 
+     proposal&.the_locations, proposal&.status, proposal&.updated_at&.to_date,
+     proposal.subject&.title, proposal&.lead_organizer&.fullname,
      supporting_organizer_fullnames(proposal)]
   end
 
