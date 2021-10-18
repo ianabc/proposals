@@ -280,9 +280,13 @@ export default class extends Controller {
     }
     else {
       proposalIds = proposalIds.slice(1)
-      $.post(`/submitted_proposals/reviews_booklet?proposals=${proposalIds}`, function() {
-        }
-      )
+      $.post(`/submitted_proposals/reviews_booklet?proposals=${proposalIds}`,
+        function() {
+          document.getElementById("reviews_booklet").click();
+          toastr.success('Review Booklet successfully created.')
+      }).fail(function() {
+        toastr.error('There is something went wrong.')
+      })
     }
   }
 }

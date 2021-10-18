@@ -149,6 +149,9 @@ class SubmittedProposalsController < ApplicationController
     @no_review_proposal_ids = []
     @review_proposal_ids = []
     check_proposals_reviews
+  end
+
+  def download_review_booklet
     f = File.open(Rails.root.join('tmp/booklet-reviews.pdf'))
     send_file(
       f,
@@ -423,11 +426,10 @@ class SubmittedProposalsController < ApplicationController
       reviewer_name = review["reviewer"]["nameFull"]
       is_quick = review["isQuick"]
       score = review["score"]
-      review_file_data(review) if review["reports"].present?
       @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: score, file_id: @file_id,
-                           proposal_id: @proposal, person_id: @proposal.lead_organizer&.id)
+                           proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id)
       @review.save
-      @review.files.attach(io: @file, filename: @filename)
+      review_file_data(review) if review["reports"].present?
     end
   end
 
@@ -447,6 +449,7 @@ class SubmittedProposalsController < ApplicationController
     url = file_url["url"]
     @file = URI.parse(url).open
     @filename = File.basename(url)
+    @review.files.attach(io: @file, filename: @filename)
   end
 
   def check_proposals_reviews
@@ -470,7 +473,7 @@ class SubmittedProposalsController < ApplicationController
 
   def create_reviews_booklet
     @temp_file = "propfile-#{current_user.id}-#{@review_proposal_ids}.tex"
-    ReviewsBookletPdfService.new(review_proposal_ids, @temp_file).generate_booklet
+    ReviewsBookletPdfService.new(@review_proposal_ids, @temp_file).generate_booklet
     @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
     @latex_infile = @fh.read
     @latex = "\\begin{document}\n#{@latex_infile}"

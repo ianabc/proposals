@@ -25,6 +25,7 @@ Rails.application.routes.draw do
       post :table_of_content
       post :import_reviews
       post :reviews_booklet
+      get :download_review_booklet
     end
     member do
       post :update_status
