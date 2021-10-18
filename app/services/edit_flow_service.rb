@@ -25,9 +25,7 @@ class EditFlowService
   def organizer_country(invite)
     organizer = invite.person
 
-    if organizer.country.blank?
-      raise "Organizer #{organizer.fullname} has no country"
-    end
+    raise "Organizer #{organizer.fullname} has no country" if organizer.country.blank?
 
     find_country(organizer)
   end
@@ -130,6 +128,87 @@ class EditFlowService
                 }
               ) {
                 id
+              }
+            }
+END_STRING
+  end
+
+  def mutation
+    <<END_STRING
+            query {
+              article(id: "#{@proposal.editflow_id}") {
+                  id
+                  identifier
+                  reviewVersionLatest {
+                      number
+                      docMain {
+                          role
+                          fileID
+                      }
+                      docsAll {
+                          role
+                          fileID
+                      }
+                      reviews {
+                          reviewer {
+                              nameFull
+                          }
+                          isQuick
+                          dateRequested
+                          status {
+                              code
+                              description
+                          }
+                          score
+                          reviewVersion {
+                              number
+                          }
+                          reports {
+                              fileID
+                              nickname
+                              isPublic
+                              dateReported
+                              reviewer {
+                                  nameFull
+                              }
+                              review {
+                                  dateRequested
+                              }
+                              reviewVersion {
+                                  number
+                              }
+                              article {
+                                  identifier
+                              }
+                          }
+                          article {
+                              identifier
+                          }
+                      }
+                      article {
+                          identifier
+                      }
+                  }
+                  reviewVersions {
+                      number
+                  }
+              }
+          }
+END_STRING
+  end
+
+  def file_url(file_id)
+    <<END_STRING
+            mutation {
+              fileURL: fileURLPublicWithLifetime(
+                  fileID: "#{file_id}"
+                  expiresAfterSeconds: 120
+                  accessLimit: 1
+              ) {
+                  fileID
+                  url
+                  dateExpires
+                  accessLimit
               }
             }
 END_STRING
