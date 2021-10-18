@@ -114,10 +114,10 @@ RSpec.describe "/submitted_proposals", type: :request do
     end
   end
 
-  describe 'POST /submitted_proposals/:id/update_status' do 
+  describe 'POST /submitted_proposals/:id/update_status' do
     before { post update_status_submitted_proposal_path(id: proposal.id, status: Proposal.statuses[:in_progress]) }
 
-    it 'update proposal status' do 
+    it 'update proposal status' do
       expect(proposal.reload.status).to eq("in_progress")
     end
   end
