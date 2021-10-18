@@ -2,7 +2,7 @@ class SubmittedProposalsController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_user
   before_action :set_proposals, only: %i[index]
-  before_action :set_proposal, except: %i[index download_csv import_reviews]
+  before_action :set_proposal, except: %i[index download_csv import_reviews reviews_booklet]
   before_action :template_params, only: %i[approve_decline_proposals]
 
   def index; end
@@ -142,6 +142,22 @@ class SubmittedProposalsController < ApplicationController
     end
   rescue StandardError
     flash[:alert] = "There is something went wrong."
+  end
+
+  def reviews_booklet
+    @proposal_ids = params[:proposals]
+    @no_review_proposal_ids = []
+    @review_proposal_ids = []
+    check_proposals_reviews
+  end
+
+  def download_review_booklet
+    f = File.open(Rails.root.join('tmp/booklet-reviews.pdf'))
+    send_file(
+      f,
+      filename: "reviews_booklet.pdf",
+      type: "application/pdf"
+    )
   end
 
   private
@@ -410,11 +426,10 @@ class SubmittedProposalsController < ApplicationController
       reviewer_name = review["reviewer"]["nameFull"]
       is_quick = review["isQuick"]
       score = review["score"]
-      review_file_data(review) if review["reports"].present?
       @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: score, file_id: @file_id,
-                           proposal_id: @proposal, person_id: @proposal.lead_organizer&.id)
+                           proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id)
       @review.save
-      @review.files.attach(io: @file, filename: @filename)
+      review_file_data(review) if review["reports"].present?
     end
   end
 
@@ -434,5 +449,38 @@ class SubmittedProposalsController < ApplicationController
     url = file_url["url"]
     @file = URI.parse(url).open
     @filename = File.basename(url)
+    @review.files.attach(io: @file, filename: @filename)
+  end
+
+  def check_proposals_reviews
+    @proposal_ids.split(',').each do |id|
+      @proposal = Proposal.find_by(id: id)
+      reviews_conditions
+    end
+    create_reviews_booklet
+  end
+
+  def reviews_conditions
+    if @proposal.reviews.present?
+      @review_proposal_ids << @proposal.id
+    elsif @proposal.editflow_id.present?
+      proposal_reviews
+      @review_proposal_ids << @proposal.id
+    else
+      @no_review_proposal_ids << @proposal.id
+    end
+  end
+
+  def create_reviews_booklet
+    @temp_file = "propfile-#{current_user.id}-#{@review_proposal_ids}.tex"
+    ReviewsBookletPdfService.new(@review_proposal_ids, @temp_file).generate_booklet
+    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
+    @latex_infile = @fh.read
+    @latex = "\\begin{document}\n#{@latex_infile}"
+    pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
+    @pdf_path = Rails.root.join('tmp/booklet-reviews.pdf')
+    File.open(@pdf_path, "w:UTF-8") do |file|
+      file.write(pdf_file)
+    end
   end
 end
