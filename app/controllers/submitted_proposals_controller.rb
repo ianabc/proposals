@@ -17,8 +17,6 @@ class SubmittedProposalsController < ApplicationController
 
   def download_csv
     @proposals = Proposal.where(id: params[:ids].split(','))
-    return if @proposals.empty?
-
     send_data Proposal.to_csv(@proposals), filename: "submitted_proposals.csv"
   end
 
@@ -38,8 +36,6 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def staff_discussion
-    return unless @ability.can?(:manage, Email)
-
     @staff_discussion = StaffDiscussion.new
     discussion = params[:discussion]
     if @staff_discussion.update(discussion: discussion,
@@ -53,7 +49,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def send_emails
-    return unless @ability.can?(:manage, Email)
+    raise CanCan::AccessDenied unless @ability.can?(:manage, Email)
 
     @email = Email.new(email_params.merge(proposal_id: @proposal.id))
     change_status
@@ -87,6 +83,7 @@ class SubmittedProposalsController < ApplicationController
   def approve_decline_proposals
     params[:proposal_ids]&.split(',')&.each do |id|
       create_birs_email(id)
+      @errors = []
       render_error and return unless @check_status
 
       send_email_proposals
@@ -322,7 +319,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def authorize_user
-    authorize! :manage, current_user
+    authorize! params[:action], SubmittedProposalsController
   end
 
   def check_proposal_status
@@ -336,7 +333,6 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def render_error
-    @errors = []
     @errors << "Proposal status cannot be changed"
     render json: @errors.flatten.to_json, status: :unprocessable_entity
   end
