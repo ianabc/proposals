@@ -166,7 +166,9 @@ END_STRING
                           reports {
                               fileID
                               nickname
-                              isPublic
+                              canShareWith {
+                                  authors
+                              }
                               dateReported
                               reviewer {
                                   nameFull
