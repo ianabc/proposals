@@ -59,11 +59,15 @@ namespace :birs do
       { code: 'ALNT', title: 'Algebraic Number Theory' }
     ]
 
-    # TODO: find or create SubjectCategory and assign accordingly
-    category = SubjectCategory.find_or_create_by!(name: 'none')
     subject_codes.each do |subject|
       puts "Adding BIRS Subject: #{subject[:code]}: #{subject[:title]}"
-      Subject.find_or_create_by(code: subject[:code], title: subject[:title], subject_category: category)
+      subj = Subject.find_by(title: subject[:title])
+
+      if subj
+        subj.update(code: subject[:code])
+      else
+        Subject.create(code: subject[:code], title: subject[:title])
+      end
     end
     puts "Done!"
   end
@@ -139,7 +143,13 @@ namespace :birs do
 
     ams_subject_codes.each do |ams_subject|
       puts "Adding AMS Subject: #{ams_subject[:title]}"
-      AmsSubject.find_or_create_by(code: ams_subject[:code], title: ams_subject[:title])
+      ams_sub = AmsSubject.find_by(title: ams_subject[:title])
+
+      if ams_sub
+        ams_sub.update(code: ams_subject[:code])
+      else
+        AmsSubject.create(code: ams_subject[:code], title: ams_subject[:title])
+      end
     end
     puts "Done!"
   end
@@ -151,10 +161,15 @@ namespace :birs do
       { code: "CE", title: "Commercialization and Entrepreneurship" }
     ]
 
-    category = SubjectCategory.find_or_create_by!(name: 'none')
     new_subjects.each do |subject|
       puts "Adding new subject: #{subject[:code]} => #{subject[:title]}"
-      Subject.find_or_create_by(code: subject[:code], title: subject[:title], subject_category: category)
+      subj = Subject.find_by(title: subject[:title])
+
+      if subj
+        subj.update(code: subject[:code])
+      else
+        Subject.create(code: subject[:code], title: subject[:title])
+      end
     end
   end
 
