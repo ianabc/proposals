@@ -9,17 +9,19 @@ module RoleHelper
     false
   end
 
+  # rubocop:disable Metrics/MethodLength
   def privileges_name
-    privileges = [['Ams Subject', 'AmsSubject'], ['Answer', 'Answer'],
-                  ['Demographic Data', 'DemographicData'], ['Email', 'Email'],
-                  ['EmailTemplate', 'EmailTemplate'], ['Faq', 'Faq'],
-                  ['Feedback', 'Feedback'], ['Invite', 'Invite'], ['Location', 'Location'],
-                  ['Option', 'Option'], ['Page Content', 'PageContent'], ['Person', 'Person'],
-                  ['Proposal', 'Proposal'], ['Proposal Field', 'ProposalField'],
+    privileges = [['Ams Subject', 'AmsSubject'], %w[Answer Answer],
+                  ['Demographic Data', 'DemographicData'], %w[Email Email],
+                  %w[EmailTemplate EmailTemplate], %w[Faq Faq],
+                  %w[Feedback Feedback], %w[Invite Invite], %w[Location Location],
+                  %w[Option Option], ['Page Content', 'PageContent'], %w[Person Person],
+                  %w[Proposal Proposal], ['Proposal Field', 'ProposalField'],
                   ['Proposal Form', 'ProposalForm'], ['Proposal Type', 'ProposalType'],
-                  ['Review', 'Review'], ['Role', 'Role'], ['Staff Discussion', 'StaffDiscussion'],
-                  ['Subject', 'Subject'], ['SubjectCategory', 'SubjectCategory'], ['Survey', 'Survey'],
-                  ['User', 'User'], ['Validation', 'Validation']]
+                  %w[Review Review], %w[Role Role], ['Staff Discussion', 'StaffDiscussion'],
+                  %w[Subject Subject], %w[SubjectCategory SubjectCategory], %w[Survey Survey],
+                  %w[User User], %w[Validation Validation]]
     privileges.map { |disp, _value| disp }
   end
+  # rubocop:enable Metrics/MethodLength
 end

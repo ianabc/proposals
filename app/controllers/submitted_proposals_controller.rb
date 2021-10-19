@@ -131,6 +131,7 @@ class SubmittedProposalsController < ApplicationController
 
   def import_reviews
     raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
+
     proposals = params[:proposals]
     proposals.split(',').each do |id|
       @proposal = Proposal.find_by(id: id)
@@ -144,6 +145,7 @@ class SubmittedProposalsController < ApplicationController
 
   def reviews_booklet
     raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
+
     @proposal_ids = params[:proposals]
     @no_review_proposal_ids = []
     @review_proposal_ids = []
