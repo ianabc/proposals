@@ -37,6 +37,7 @@ class ProposalTypesController < ApplicationController
   end
 
   def location_based_fields
+    @version = params[:proposal_version].to_i if params[:proposal_version].present?
     @proposal = Proposal.find(params[:proposal_id])
     @proposal_fields = @proposal.proposal_form&.proposal_fields&.where(location_id: params[:ids].split(","))
     @submission = session[:is_submission]
@@ -55,7 +56,7 @@ class ProposalTypesController < ApplicationController
 
   def proposal_type_params
     params.require(:proposal_type).permit(:name, :year, :co_organizer, :participant, :code, :open_date, :closed_date,
-                                          location_ids: [])
+                                          :organizer_description, :participant_description, location_ids: [])
   end
 
   def set_proposal_type

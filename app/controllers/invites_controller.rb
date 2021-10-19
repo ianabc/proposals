@@ -1,5 +1,5 @@
 class InvitesController < ApplicationController
-  before_action :authenticate_user!, except: %i[show inviter_response thanks expired]
+  before_action :authenticate_user!, except: %i[show inviter_response thanks cancelled]
   before_action :set_proposal, only: %i[invite_reminder invite_email new_invite]
   before_action :set_invite,
                 only: %i[show inviter_response cancel invite_reminder invite_email new_invite cancel_confirmed_invite]
@@ -8,7 +8,7 @@ class InvitesController < ApplicationController
   def show
     redirect_to root_path, alert: "Invite code is invalid" and return if @invite.nil?
     redirect_to root_path and return if @invite.confirmed?
-    redirect_to expired_path and return if @invite.cancelled?
+    redirect_to cancelled_path and return if @invite.cancelled?
 
     render layout: 'devise'
   end
@@ -48,7 +48,7 @@ class InvitesController < ApplicationController
     if @invite.pending?
       @organizers = @invite.proposal.list_of_organizers
       InviteMailer.with(invite: @invite, organizers: @organizers).invite_reminder.deliver_later
-      redirect_to edit_proposal_path(@proposal), notice: "Invite reminder has been sent to #{@invite.person.fullname}!"
+      check_user
     else
       redirect_to edit_proposal_path(@proposal), notice: "You have already responded to the invite."
     end
@@ -58,14 +58,18 @@ class InvitesController < ApplicationController
     render layout: 'devise'
   end
 
-  def expired
+  def cancelled
     render layout: 'devise'
   end
 
   def cancel
     @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
     @invite.update(status: 'cancelled')
-    redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
+    if current_user.staff_member?
+      redirect_to edit_submitted_proposal_url(@invite.proposal), notice: 'Invite has been cancelled!'
+    else
+      redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
+    end
   end
 
   def cancel_confirmed_invite
@@ -73,13 +77,21 @@ class InvitesController < ApplicationController
     @proposal_role.destroy
     @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
     @invite.update(status: 'cancelled')
-    redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
+    if current_user.staff_member?
+      redirect_to edit_submitted_proposal_url(@invite.proposal), notice: 'Invite has been cancelled!'
+    else
+      redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
+    end
   end
 
   def new_invite
     @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
     @invite.update(status: 'pending')
-    redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has become new invite!'
+    if current_user.staff_member?
+      redirect_to edit_submitted_proposal_url(@invite.proposal), notice: 'Invite has become new invite!'
+    else
+      redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has become new invite!'
+    end
   end
 
   private
@@ -151,6 +163,16 @@ class InvitesController < ApplicationController
       InviteMailer.with(invite: @invite, organizers: @organizers)
                   .invite_acceptance.deliver_later
       redirect_to new_person_path(code: @invite.code)
+    end
+  end
+
+  def check_user
+    if current_user.staff_member?
+      redirect_to edit_submitted_proposal_url(@proposal),
+                  notice: "Invite reminder has been sent to #{@invite.person.fullname}!"
+    else
+      redirect_to edit_proposal_path(@proposal),
+                  notice: "Invite reminder has been sent to #{@invite.person.fullname}!"
     end
   end
 end

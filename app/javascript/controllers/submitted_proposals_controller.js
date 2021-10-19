@@ -1,12 +1,21 @@
 import { Controller } from "stimulus"
 import Rails from '@rails/ujs'
 import toastr from 'toastr'
+import Tagify from '@yaireo/tagify'
 
 export default class extends Controller {
-  static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus' ]
+  static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus',
+                     'organizersEmail' ]
 
   connect () {
-    this.tocTarget.checked = true;
+    let proposalId = 0
+    if(this.hasTocTarget) {
+      this.tocTarget.checked = true;
+    }
+    else if (this.hasOrganizersEmailTarget) {
+      var inputElm = this.organizersEmailTarget,
+      tagify = new Tagify (inputElm);
+    }
   }
 
   editFlow() {
@@ -46,13 +55,13 @@ export default class extends Controller {
         type: "PATCH",
         data,
         success: (data) => {
-          $('#subject').val(data.email_template.subject)
-          $('#body').val(data.email_template.body)
+          $('#birs_email_subject').val(data.email_template.subject)
+          $('#birs_email_body').val(data.email_template.body)
         }
       })
     }else {
-      $('#subject').val('')
-      $('#body').val('')
+      $('#birs_email_subject').val('')
+      $('#birs_email_body').val('')
     }
   }
 
@@ -158,8 +167,10 @@ export default class extends Controller {
     if(table !== '') {
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
         function() {
-          document.getElementById("booklet").click();
-          window.location.reload()
+          document.getElementById("proposal_booklet").click();
+          toastr.success('Booklet successfully created.')
+      }).fail(function() {
+        toastr.error('There is something went wrong.')
       })
     }
   }
@@ -191,6 +202,91 @@ export default class extends Controller {
           toastr.error("Proposal status cannot be updated!")
         });
       }
+    }
+  }
+
+  storeID() {
+    this.proposalId = event.currentTarget.dataset.value
+  }
+
+  selectAllProposals() {
+    let getId = ''
+    $("input:checkbox").each(function(){
+      getId = document.getElementById(this.id)
+      getId.checked = true
+    });
+  }
+
+  unselectAllProposals() {
+    let getId = ''
+    $("input:checkbox").each(function(){
+      getId = document.getElementById(this.id)
+      getId.checked = false
+    });
+  }
+
+  invertSelectedProposals() {
+    let checkbox = ''
+    $("input:checkbox").each(function(){
+      checkbox = document.getElementById(this.id)
+      if(checkbox.checked) {
+        checkbox.checked = false
+      } else {
+        checkbox.checked = true
+      }
+    });
+  }
+
+  downloadCSV() {
+    var array = [];
+    $("input:checked").each(function() {
+      array.push(this.dataset.value);
+    });
+    if(typeof array[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      let selectedProposals = array.filter((x) => typeof x !== "undefined")
+      window.location = `/submitted_proposals/download_csv.csv?ids=${selectedProposals}`
+    }
+  }
+
+  importReviews() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      proposalIds = proposalIds.slice(1)
+      $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function() {
+        }
+      )
+    }
+  }
+
+  reviewsBooklet() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      proposalIds = proposalIds.slice(1)
+      $.post(`/submitted_proposals/reviews_booklet?proposals=${proposalIds}`,
+        function() {
+          document.getElementById("reviews_booklet").click();
+          toastr.success('Review Booklet successfully created.')
+      }).fail(function() {
+        toastr.error('There is something went wrong.')
+      })
     }
   }
 }

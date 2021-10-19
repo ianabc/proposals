@@ -1,11 +1,13 @@
 class ProposalPdfService
-  attr_reader :proposal, :temp_file, :table, :user
+  attr_reader :proposal, :temp_file, :table, :user, :file_errors
 
   def initialize(proposal_id, file, input, user)
     @proposal = Proposal.find(proposal_id)
     @temp_file = file
     @input = input
     @user = user
+    @file_errors = []
+    @text = ""
   end
 
   def generate_latex_file
@@ -20,28 +22,9 @@ class ProposalPdfService
     self
   end
 
-  def single_booklet(table)
-    @table = table
-    input = all_proposal_fields if @input == 'all'
-
-    LatexToPdf.config[:arguments].delete('-halt-on-error') if @proposal.is_submission
-
-    File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-      io.write(input)
-    end
-  end
-
-  def multiple_booklet(table, proposals)
-    @table = table
-    @proposals = proposals
-    input = multiple_proposals_fields if @input == 'all'
-
-    LatexToPdf.config[:arguments].delete('-halt-on-error') if @proposal.is_submission
-
-    File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-      io.write(input)
-    end
-    self
+  def booklet_content
+    @input = pdf_content
+    @input
   end
 
   def to_s
@@ -75,7 +58,7 @@ class ProposalPdfService
 
     line_num = 1
     error_object.src.each_line do |line|
-      error_output << line_num.to_s + " #{line}"
+      error_output << (line_num.to_s + " #{line}")
       line_num += 1
     end
     error_output << "\n</pre>\n\n"
@@ -86,39 +69,7 @@ class ProposalPdfService
   def all_proposal_fields
     return 'Proposal data not found!' if proposal.blank?
 
-    case @table
-    when "toc"
-      proposal_table_of_content
-    when "ntoc"
-      single_proposal_without_content
-    else
-      proposal_details
-    end
-    @text
-  end
-
-  def multiple_proposals_fields
-    case @table
-    when "toc"
-      @number = 0
-      @text = "\\tableofcontents"
-      proposals_with_content
-    when "ntoc"
-      proposals_without_content
-    end
-    @text
-  end
-
-  def proposals_with_content
-    @proposals.split(',').each do |id|
-      @number += 1
-      proposal = Proposal.find_by(id: id)
-      @proposal = proposal
-      @text << "\\addtocontents{toc}{\ #{@number}. #{proposal.subject&.title}}"
-      code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-      @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-      proposals_without_content
-    end
+    proposal_details
     @text
   end
 
@@ -126,72 +77,22 @@ class ProposalPdfService
     proposal.no_latex ? delatex(proposal&.title) : proposal&.title
   end
 
-  def proposals_without_content
-    if @table == "toc"
-      code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
-      single_proposal_heading
-    else
-      @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
-      proposals_heading
-    end
-    @text
-  end
-
-  def proposals_heading
-    @proposals.split(',').each do |id|
-      proposal = Proposal.find_by(id: id)
-      @proposal = proposal
-      code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
-      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)}}"
-      single_proposal_heading
-    end
-  end
-
-  def proposal_table_of_content
-    @text = "\\tableofcontents"
-    @text << "\\addtocontents{toc}{\ 1. #{proposal.subject&.title} }"
-    code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text << "\\addcontentsline{toc}{section}{ #{code} #{proposal_title(proposal)} }"
-    @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
-    single_proposal_heading
-    @text
-  end
-
-  def single_proposal_without_content
-    code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text = "\\section*{\\centering #{code} #{proposal_title(proposal)}"
-    single_proposal_heading
-    @text
-  end
-
-  def lead_organizer_info
-    info = "\\subsection*{Lead Organizer}\n\n"
-    info << "#{proposal.lead_organizer&.fullname} (#{affil(proposal.lead_organizer)}) \\\\ \n\n"
-    info << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
-  end
-
-  def single_proposal_heading
-    @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
-    @text << participant_confirmed_count
-    @text << lead_organizer_info
-    pdf_content
-    @text
-  end
-
   def pdf_content
+    @text = ""
     proposal_organizers
     proposal_locations
     proposal_subjects
     user_defined_fields
     proposal_bibliography
     proposal_participants
-    return @text unless @user.staff_member?
 
-    @text << "\\pagebreak"
-    proposal_organizing_committee
-    @text << "\\pagebreak"
-    organizing_participant_committee
+    if @user.staff_member?
+      @text << "\\pagebreak"
+      proposal_organizing_committee
+      @text << "\\pagebreak"
+      participant_demographics
+    end
+
     proposal_supplementary_files if proposal.files.attached?
     @text
   end
@@ -256,7 +157,11 @@ class ProposalPdfService
   def proposal_organizers
     return if proposal.supporting_organizers&.count&.zero?
 
-    @text << "\\subsection*{Supporting Organizers}\n\n"
+    if @text.blank?
+      @text = "\\subsection*{Supporting Organizers}\n\n"
+    else
+      @text << "\\subsection*{Supporting Organizers}\n\n"
+    end
     @text << "\\begin{itemize}\n"
     proposal.supporting_organizers.each do |organizer|
       @text << "\\item #{organizer&.person&.fullname}#{affil(organizer&.person)}\n"
@@ -444,7 +349,7 @@ class ProposalPdfService
     end
   end
 
-  def organizing_participant_committee
+  def participant_demographics
     @text << "\\section*{\\centering Organizing Committee and Participant Demographics}\n\n"
     set_confirmed_invitations
     @text << "\\subsection*{1) Gender}"
@@ -601,8 +506,37 @@ class ProposalPdfService
   end
 
   def proposal_supplementary_files
-    @text << "\\pagebreak"
-    @text << "\\section*{Supplementry Files}\n\n"
-    @text
+    @proposal.files&.each_with_index do |file, num|
+      @text << "\n\\newpage\n\\thispagestyle{empty}\n"
+
+      filename = file.filename.to_s.tr('_', '-')
+      file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
+      full_filename = write_attachment_file(File.read(file_path), filename)
+
+      @text << supplementary_file_tex(num, filename, full_filename)
+    rescue StandardError
+      file_errors << filename
+      next
+    end
+  end
+
+  def supplementary_file_tex(num, filename, full_filename)
+    # scale first page 0.8 to avoid the page content overlapping the heading
+    tex = "\\includepdf[scale=0.8,pages=1,pagecommand={\\subsection*
+           {Supplementry File #{num += 1}: #{filename}}}]{#{full_filename}}\n"
+
+    # Only include the subsection heading on the 1st page of the attached file
+    if PDF::Reader.new(full_filename).page_count > 1
+      tex << "\\includepdf[scale=1,pages=2-,pagecommand={
+              \\thispagestyle{empty}}]{#{full_filename}}\n"
+    end
+
+    tex
+  end
+
+  def write_attachment_file(file_content, filename)
+    full_path_filename = "#{Rails.root}/tmp/#{@proposal&.code}-#{filename}"
+    File.binwrite(full_path_filename, file_content)
+    full_path_filename
   end
 end
