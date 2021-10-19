@@ -65,7 +65,7 @@ class Email < ApplicationRecord
   end
 
   def update_version
-    version = Answer.maximum(:version).to_i
+    version = proposal.answers.maximum(:version).to_i
     answers = Answer.where(proposal_id: proposal.id, version: version)
     answers.each do |answer|
       answer = answer.dup

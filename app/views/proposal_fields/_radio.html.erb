@@ -16,7 +16,11 @@
   <% end %>
   <% proposal_field_options(field).each do |text,value| %>
     <div>
-      <input type="radio" name="<%= field.id %>" <%= action ? 'disabled' : '' %> value="<%= value %>" <%= answer(field, @proposal) == value ? 'checked' : '' %>  data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur">
+      <% if @version.present? %>
+        <input type="radio" name="<%= field.id %>" <%= action ? 'disabled' : '' %> value="<%= value %>" <%= answer_with_version(field, @proposal, @version) == value ? 'checked' : '' %>  data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur">
+      <% else %>
+        <input type="radio" name="<%= field.id %>" <%= action ? 'disabled' : '' %> value="<%= value %>" <%= answer(field, @proposal) == value ? 'checked' : '' %>  data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur">
+      <% end %>
       <span><%= text %></span>
     </div>
   <% end %>

@@ -4,6 +4,10 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposals, against: %i[title code],
                                      associated_against: {
                                        people: %i[firstname lastname]
+                                     }, using: {
+                                       tsearch: {
+                                         prefix: true
+                                       }
                                      }
 
   pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
@@ -11,7 +15,7 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposal_subject, against: %i[subject_id]
   pg_search_scope :search_proposal_year, against: %i[year]
 
-  attr_accessor :is_submission
+  attr_accessor :is_submission, :allow_late_submission
 
   has_many_attached :files
   has_many :proposal_locations, dependent: :destroy
@@ -29,6 +33,7 @@ class Proposal < ApplicationRecord
   belongs_to :subject, optional: true
   has_many :staff_discussions, dependent: :destroy
   has_many :emails, dependent: :destroy
+  has_many :reviews, dependent: :destroy
 
   validates :year, :title, presence: true, if: :is_submission
   validate :subjects, if: :is_submission
@@ -117,7 +122,7 @@ class Proposal < ApplicationRecord
     # for persons with more than one demo data record, use the latest one
     DemographicData.where(person_id: invites.where(status: 'confirmed')
                    .pluck(:person_id).uniq).order(:id)
-                   .each_with_object({}) { |d, u| u[d.person_id] = d }.values
+                   .index_by(&:person_id).values
   end
 
   def create_organizer_role(person, organizer)
@@ -151,18 +156,27 @@ class Proposal < ApplicationRecord
     Person.where(id: person_ids).where(academic_status: career)
   end
 
-  def self.to_csv
-    attributes = ["Code", "Proposal Title", "Proposal Type", "Lead Organizer",
-                  "Preffered Locations", "Status",
-                  "Updated"]
+  def self.supporting_organizer_fullnames(proposal)
+    proposal&.supporting_organizers&.map { |org| "#{org.firstname} #{org.lastname}" }&.join(', ')
+  end
+
+  def self.to_csv(proposals)
     CSV.generate(headers: true) do |csv|
-      csv << attributes
-      all.find_each do |proposal|
-        csv << [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
-                proposal&.lead_organizer&.fullname, proposal&.the_locations,
-                proposal&.status, proposal&.updated_at&.to_date]
+      csv << HEADERS
+      proposals.find_each do |proposal|
+        csv << each_row(proposal)
       end
     end
+  end
+
+  HEADERS = ["Code", "Proposal Title", "Proposal Type", "Preffered Locations", "Status",
+             "Updated", "Subject Area", "Lead Organizer", "Supporting Organizers"].freeze
+
+  def self.each_row(proposal)
+    [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
+     proposal&.the_locations, proposal&.status, proposal&.updated_at&.to_date,
+     proposal.subject&.title, proposal&.lead_organizer&.fullname,
+     supporting_organizer_fullnames(proposal)]
   end
 
   def pdf_file_type(file)
@@ -192,7 +206,7 @@ class Proposal < ApplicationRecord
   private
 
   def not_before_opening
-    return if draft? || revision_requested?
+    return if draft? || revision_requested? || allow_late_submission
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
     errors.add("Late submission - ", "proposal submissions closed on

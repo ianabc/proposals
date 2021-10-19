@@ -14,7 +14,11 @@
   </a></p>
 <% end %>
 <div>
-  <textarea name="<%= field.id %>" <%= action ? 'disabled' : '' %> id="" data-value='<%= field.id %>' cols="30" rows="5" class="form-control" data-proposal-form-target="textField" data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur"><%= answer(field, @proposal) %></textarea>
+  <% if @version.present? %>
+    <textarea name="<%= field.id %>" <%= action ? 'disabled' : '' %> id="" data-value='<%= field.id %>' cols="30" rows="5" class="form-control" data-proposal-form-target="textField" data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur"><%= answer_with_version(field, @proposal, @version) %></textarea>
+  <% else %>
+    <textarea name="<%= field.id %>" <%= action ? 'disabled' : '' %> id="" data-value='<%= field.id %>' cols="30" rows="5" class="form-control" data-proposal-form-target="textField" data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur"><%= answer(field, @proposal) %></textarea>
+  <% end %>
   <% if @submission %>
     <ul>
       <% validations(field, @proposal).each do |val| %>

@@ -23,6 +23,9 @@ Rails.application.routes.draw do
       post :edit_flow
       post :approve_decline_proposals
       post :table_of_content
+      post :import_reviews
+      post :reviews_booklet
+      get :download_review_booklet
     end
     member do
       post :update_status
@@ -32,13 +35,15 @@ Rails.application.routes.draw do
   end
 
   get :invite, to: 'invites#show'
-  get 'expired' => 'invites#expired'
+  get 'cancelled' => 'invites#cancelled'
   post 'cancel' => 'invites#cancel'
   post 'cancel_confirmed_invite' => 'invites#cancel_confirmed_invite'
 
   resources :proposals do
     post :latex, to: 'proposals#latex_input'
     member do
+      get :versions
+      get :proposal_version
       get :rendered_proposal, to: 'proposals#latex_output'
       get :rendered_field, to: 'proposals#latex_field'
       patch :ranking

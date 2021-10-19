@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_01_075914) do
+ActiveRecord::Schema.define(version: 2021_10_07_143939) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -331,6 +331,8 @@ ActiveRecord::Schema.define(version: 2021_10_01_075914) do
     t.string "code"
     t.datetime "open_date"
     t.datetime "closed_date"
+    t.text "participant_description"
+    t.text "organizer_description"
     t.index ["code"], name: "index_proposal_types_on_code", unique: true
   end
 
@@ -350,10 +352,25 @@ ActiveRecord::Schema.define(version: 2021_10_01_075914) do
     t.text "bibliography"
     t.datetime "edit_flow"
     t.string "outcome"
+    t.string "editflow_id"
     t.index ["code"], name: "index_proposals_on_code", unique: true
     t.index ["proposal_form_id"], name: "index_proposals_on_proposal_form_id"
     t.index ["proposal_type_id"], name: "index_proposals_on_proposal_type_id"
     t.index ["subject_id"], name: "index_proposals_on_subject_id"
+  end
+
+  create_table "reviews", force: :cascade do |t|
+    t.datetime "review_date"
+    t.bigint "proposal_id", null: false
+    t.bigint "person_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "reviewer_name"
+    t.integer "score"
+    t.boolean "is_quick"
+    t.string "file_id"
+    t.index ["person_id"], name: "index_reviews_on_person_id"
+    t.index ["proposal_id"], name: "index_reviews_on_proposal_id"
   end
 
   create_table "role_privileges", force: :cascade do |t|
@@ -502,6 +519,8 @@ ActiveRecord::Schema.define(version: 2021_10_01_075914) do
   add_foreign_key "proposals", "proposal_forms"
   add_foreign_key "proposals", "proposal_types"
   add_foreign_key "proposals", "subjects"
+  add_foreign_key "reviews", "people"
+  add_foreign_key "reviews", "proposals"
   add_foreign_key "role_privileges", "roles"
   add_foreign_key "staff_discussions", "proposals"
   add_foreign_key "subject_area_categories", "subject_categories"

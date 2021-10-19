@@ -71,14 +71,13 @@ class SubmitProposalsController < ApplicationController
 
   def confirm_submission
     if @proposal.may_active?
-      @proposal.active!
-      send_mail
+      change_proposal_status
     elsif @proposal.may_revision?
+      @proposal.allow_late_submission = true if @proposal.revision_requested?
       @proposal.revision!
       send_mail
     else
-      redirect_to edit_proposal_path(@proposal), alert: "Your proposal has
-                  errors: #{@proposal.errors.full_messages}.".squish and return
+      error_page_redirect
     end
   end
 
@@ -176,7 +175,27 @@ class SubmitProposalsController < ApplicationController
       redirect_to edit_submitted_proposal_url(@proposal), alert: "Your submission has
           errors: #{@submission.error_messages}.".squish
     else
-      redirect_to edit_submitted_proposal_url(@proposal), notice: 'Proposal has been updated successfully!'
+      redirect_to submitted_proposals_url(@proposal), notice: 'Proposal has been updated successfully!'
     end
+  end
+
+  def change_proposal_status
+    unless @proposal.active!
+      redirect_to edit_proposal_path(@proposal), alert: "Your proposal has
+                  errors: #{@proposal.errors.full_messages}.".squish and return
+    end
+
+    send_mail
+  end
+
+  def error_page_redirect
+    if @proposal.errors.any?
+      redirect_to edit_proposal_path(@proposal), alert: "Your proposal has
+                  errors: #{@proposal.errors.full_messages}.".squish and return
+    end
+
+    redirect_to edit_proposal_path(@proposal), alert: "The proposal status is
+                #{@proposal.status&.humanize} but expecting Draft or Revision
+                requested.".squish and return
   end
 end

@@ -5,3 +5,4 @@
 
 
 Mime::Type.register "application/pdf", :pdf, ['text/pdf'], ['pdf']
+Mime::Type.register "booklet/pdf", :pdf, ['text/pdf'], ['pdf']

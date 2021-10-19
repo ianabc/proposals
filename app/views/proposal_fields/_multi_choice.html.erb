@@ -15,7 +15,11 @@
       Learn More
     </a></p>
   <% end %>
-  <%= select_tag "Option", options_for_select(proposal_field_options(field),multichoice_answer(field, @proposal)), class: 'form-control', disabled: action,  multiple: true, name: "#{field.id}[]", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+  <% if @version.present? %>
+    <%= select_tag "Option", options_for_select(proposal_field_options(field),multichoice_answer_with_version(field, @proposal, @version)), class: 'form-control', disabled: action,  multiple: true, name: "#{field.id}[]", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+  <% else %>
+    <%= select_tag "Option", options_for_select(proposal_field_options(field),multichoice_answer(field, @proposal)), class: 'form-control', disabled: action,  multiple: true, name: "#{field.id}[]", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+  <% end %>
 
  <% if @submission %>
     <ul>
