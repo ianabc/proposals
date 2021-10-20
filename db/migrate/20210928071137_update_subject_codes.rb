@@ -1,15 +1,13 @@
 class UpdateSubjectCodes < ActiveRecord::Migration[6.1]
   def change
-    subject_category = SubjectCategory.first
-
-    subject_category = SubjectCategory.create!(name: 'None', code: 'none') unless subject_category
-
+    SubjectCategory.find_or_create_by(name: 'None', code: 'none')
+    
     subject = Subject.find_by(title: 'Arithmetic Number Theory')
-
-    if subject
-      subject.update(code: 'ARNT')
+    
+    if subject.blank?
+      Subject.create(title: 'Arithmetic Number Theory', code: 'ARNT')
     else
-      Subject.find_or_create_by(code: 'ARNT', title: 'Arithmetic Number Theory', subject_category_id: subject_category.id)
+      subject.update(code: 'ARNT')
     end
   end
 end
