@@ -15,6 +15,20 @@ export default class extends Controller {
     this.targetOneTarget.insertAdjacentHTML('beforebegin', contentOne)
   }
 
+  remove (e) {
+    e.preventDefault()
+
+    let wrapper = e.target.closest(this.wrapperSelector)
+    if (wrapper.dataset.newRecord === 'true') {
+      wrapper.remove()
+    } else {
+      wrapper.style.display = 'none'
+
+      let input = wrapper.querySelector("input[name*='_destroy']")
+      input.value = '1'
+    }
+  }
+
   usersPreview() {
     event.preventDefault()
 

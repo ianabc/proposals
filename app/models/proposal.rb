@@ -4,11 +4,14 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposals, against: %i[title code],
                                      associated_against: {
                                        people: %i[firstname lastname]
+                                     }, using: {
+                                       tsearch: {
+                                         prefix: true
+                                       }
                                      }
 
   pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
   pg_search_scope :search_proposal_status, against: %i[status]
-  pg_search_scope :search_proposal_subject, against: %i[subject_id]
   pg_search_scope :search_proposal_year, against: %i[year]
 
   attr_accessor :is_submission, :allow_late_submission
@@ -29,6 +32,7 @@ class Proposal < ApplicationRecord
   belongs_to :subject, optional: true
   has_many :staff_discussions, dependent: :destroy
   has_many :emails, dependent: :destroy
+  has_many :reviews, dependent: :destroy
 
   validates :year, :title, presence: true, if: :is_submission
   validate :subjects, if: :is_submission
@@ -155,10 +159,10 @@ class Proposal < ApplicationRecord
     proposal&.supporting_organizers&.map { |org| "#{org.firstname} #{org.lastname}" }&.join(', ')
   end
 
-  def self.to_csv
+  def self.to_csv(proposals)
     CSV.generate(headers: true) do |csv|
       csv << HEADERS
-      all.find_each do |proposal|
+      proposals.find_each do |proposal|
         csv << each_row(proposal)
       end
     end
@@ -166,11 +170,11 @@ class Proposal < ApplicationRecord
 
   HEADERS = ["Code", "Proposal Title", "Proposal Type", "Preffered Locations", "Status",
              "Updated", "Subject Area", "Lead Organizer", "Supporting Organizers"].freeze
-  
+
   def self.each_row(proposal)
     [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
-     proposal&.the_locations, proposal&.status, proposal&.updated_at&.to_date, 
-     proposal.subject&.title, proposal&.lead_organizer&.fullname, 
+     proposal&.the_locations, proposal&.status, proposal&.updated_at&.to_date,
+     proposal.subject&.title, proposal&.lead_organizer&.fullname,
      supporting_organizer_fullnames(proposal)]
   end
 

@@ -29,6 +29,7 @@ RSpec.describe Person, type: :model do
 
   describe 'associations' do
     it { should belong_to(:user).optional(true) }
+    it { should have_many(:reviews).dependent(:destroy) }
     it { should have_many(:proposals).through(:proposal_roles) }
   end
 

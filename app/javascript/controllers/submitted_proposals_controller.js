@@ -168,7 +168,9 @@ export default class extends Controller {
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
         function() {
           document.getElementById("proposal_booklet").click();
-          window.location.reload()
+          toastr.success('Booklet successfully created.')
+      }).fail(function() {
+        toastr.error('There is something went wrong.')
       })
     }
   }
@@ -224,13 +226,69 @@ export default class extends Controller {
   }
 
   invertSelectedProposals() {
-    var fieldID = this.proposalId.concat("_checkbox")
-    var getId = document.getElementById(fieldID)
-    if(getId.checked) {
-      getId.checked = false
+    let checkbox = ''
+    $("input:checkbox").each(function(){
+      checkbox = document.getElementById(this.id)
+      if(checkbox.checked) {
+        checkbox.checked = false
+      } else {
+        checkbox.checked = true
+      }
+    });
+  }
+
+  downloadCSV() {
+    var array = [];
+    $("input:checked").each(function() {
+      array.push(this.dataset.value);
+    });
+    if(typeof array[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
     }
     else {
-      getId.checked = true
+      let selectedProposals = array.filter((x) => typeof x !== "undefined")
+      window.location = `/submitted_proposals/download_csv.csv?ids=${selectedProposals}`
+    }
+  }
+
+  importReviews() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      proposalIds = proposalIds.slice(1)
+      $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function() {
+        toastr.success('Import Reviews successfully.')
+      }).fail(function() {
+        toastr.error('There is something went wrong.')
+      })
+    }
+  }
+
+  reviewsBooklet() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      proposalIds = proposalIds.slice(1)
+      $.post(`/submitted_proposals/reviews_booklet?proposals=${proposalIds}`,
+        function() {
+          document.getElementById("reviews_booklet").click();
+          toastr.success('Review Booklet successfully created.')
+      }).fail(function() {
+        toastr.error('There is something went wrong.')
+      })
     }
   }
 }

@@ -38,7 +38,7 @@
               <div class="row">
                 <div class="col-xs-6 col-md-6">
                   <label class="form-label">Subject Area</label><br>
-                  <%= select_tag "subject_area", options_for_select(subjects_area, params[:subject_area]), { include_blank: '', class: 'form-select p-1' }%>
+                  <%= select_tag "subject_area", options_for_select(subjects_area, params[:subject_area]), { include_blank: '', class: 'form-select p-1', multiple: true }%>
                 </div>
                 <div class="text-end col-xs-6 col-md-6">
                   <button class="btn btn-primary">Search</button>
@@ -59,7 +59,6 @@
                 <div class="tab-content">
                   <div class="tab-pane active" id="tab-1" role="tabpanel">
                     <div class="text-end m-3">
-                      <span data-action="click->submitted-proposals#tableOfContent" class="btn btn-primary">Create Booklet</span>
                       <%= render 'table_window' %>
                     </div>
                     <%= render partial: "proposals" %>
@@ -70,8 +69,15 @@
                     </div>
                     <div>
                       <div class="text-end m-3">
+                        <% if check_review_privilege %>
+                          <a target="_blank" hidden="true" id="reviews_booklet" href="/submitted_proposals/download_review_booklet.pdf">Download Booklet</a>
+                          <span data-action="click->submitted-proposals#reviewsBooklet" class="btn btn-primary">Create Reviews Booklet</span>
+                          <span data-action="click->submitted-proposals#importReviews" class="btn btn-primary">Import Reviews</span>
+                        <% end %>
+                        <span data-action="click->submitted-proposals#tableOfContent" class="btn btn-primary">Create Booklet</span>
                         <span data-action="click->submitted-proposals#editFlow" class="btn btn-primary">Send to EditFlow</span>
-                        <%= link_to "Download CSV", download_csv_submitted_proposals_url( {:format => :csv}.merge(params.permit!)), class: "btn btn-primary" %>
+                       <!--  <%= link_to "Download CSV", download_csv_submitted_proposals_url( {:format => :csv}.merge(params.permit!)), class: "btn btn-primary" %> -->
+                        <button data-action="click->submitted-proposals#downloadCSV" class="btn btn-primary">Download CSV</button>
                         <span data-action="click->submitted-proposals#emailModal" id="approve" class="btn btn-primary">Approve Selected Proposals</span>
                         <span data-action="click->submitted-proposals#emailModal" id="decline" class="btn btn-primary">Decline Selected Proposals</span>
                         <%= render 'email_templates' %>

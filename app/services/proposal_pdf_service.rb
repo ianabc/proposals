@@ -1,11 +1,13 @@
 class ProposalPdfService
-  attr_reader :proposal, :temp_file, :table, :user
+  attr_reader :proposal, :temp_file, :table, :user, :file_errors
 
   def initialize(proposal_id, file, input, user)
     @proposal = Proposal.find(proposal_id)
     @temp_file = file
     @input = input
     @user = user
+    @file_errors = []
+    @text = ""
   end
 
   def generate_latex_file
@@ -56,7 +58,7 @@ class ProposalPdfService
 
     line_num = 1
     error_object.src.each_line do |line|
-      error_output << line_num.to_s + " #{line}"
+      error_output << (line_num.to_s + " #{line}")
       line_num += 1
     end
     error_output << "\n</pre>\n\n"
@@ -511,6 +513,9 @@ class ProposalPdfService
       full_filename = write_attachment_file(File.read(file_path), filename)
 
       @text << supplementary_file_tex(num, filename, full_filename)
+    rescue StandardError
+      file_errors << filename
+      next
     end
   end
 
