@@ -1,7 +1,6 @@
 class SubmitProposalsController < ApplicationController
   before_action :set_proposal, only: %i[create invitation_template]
   before_action :authorize_user, only: %w[create create_invite]
-
   def new
     @proposals = ProposalForm.new
   end
@@ -11,7 +10,6 @@ class SubmitProposalsController < ApplicationController
     update_proposal_ams_subject_code
     @submission = SubmitProposalService.new(@proposal, params)
     @submission.save_answers
-
     create_invite and return if params[:create_invite]
 
     if current_user.staff_member?
@@ -24,12 +22,10 @@ class SubmitProposalsController < ApplicationController
             errors: #{@submission.error_messages}.".squish
         return
       end
-
       unless @proposal.is_submission
         redirect_to edit_proposal_path(@proposal), notice: 'Draft saved.'
         return
       end
-
       @attachment = generate_proposal_pdf || return
       confirm_submission
     end
@@ -46,7 +42,6 @@ class SubmitProposalsController < ApplicationController
       @email_template = EmailTemplate.find_by(email_type: "participant_invitation_type")
     end
     preview_placeholders
-
     render json: { subject: @email_template.subject, body: @template_body },
            status: :ok
   end
@@ -65,7 +60,6 @@ class SubmitProposalsController < ApplicationController
 
       invalid_email_error_message
     end
-
     render json: { errors: @errors, counter: counter }, status: :ok
   end
 
@@ -83,10 +77,8 @@ class SubmitProposalsController < ApplicationController
 
   def send_mail
     session[:is_submission] = nil
-
     ProposalMailer.with(proposal: @proposal, file: @attachment)
                   .proposal_submission.deliver_later
-
     redirect_to thanks_submit_proposals_path, notice: 'Your proposal has
         been submitted. A copy of your proposal has been emailed to
         you.'.squish
@@ -96,7 +88,6 @@ class SubmitProposalsController < ApplicationController
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
     @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user)
                                       .generate_latex_file.to_s
-
     begin
       render_to_string(layout: "application", inline: @latex_infile,
                        formats: [:pdf])
@@ -105,7 +96,6 @@ class SubmitProposalsController < ApplicationController
                       Please see the error messages, and generated LaTeX
                       docmument, then edit your submission to fix the
                       errors".squish
-
       redirect_to rendered_proposal_proposal_path(@proposal, format: :pdf),
                   alert: error_message and return
     end
@@ -114,7 +104,6 @@ class SubmitProposalsController < ApplicationController
   def proposal_params
     params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
                   :no_latex, :preamble, :bibliography)
-          .merge(ams_subject_ids: proposal_ams_subjects)
           .merge(no_latex: params[:no_latex] == 'on')
   end
 
@@ -133,10 +122,29 @@ class SubmitProposalsController < ApplicationController
   end
 
   def update_proposal_ams_subject_code
-    ProposalAmsSubject.create(ams_subject_id: @code1, proposal: @proposal,
-                              code: 'code1')
-    ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
-                              code: 'code2')
+    proposal_ams_subjects
+    proposal_ams_subject_one
+    proposal_ams_subject_two
+  end
+
+  def proposal_ams_subject_one
+    ams_subject_one = ProposalAmsSubject.find_by(proposal: @proposal, code: 'code1')
+    if ams_subject_one
+      ams_subject_one.update(ams_subject_id: @code1)
+    else
+      ProposalAmsSubject.create(ams_subject_id: @code1, proposal: @proposal,
+                                code: 'code1')
+    end
+  end
+
+  def proposal_ams_subject_two
+    ams_subject_two = ProposalAmsSubject.find_by(proposal: @proposal, code: 'code2')
+    if ams_subject_two
+      ams_subject_two.update(ams_subject_id: @code2)
+    else
+      ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
+                                code: 'code2')
+    end
   end
 
   def invite_params(invite)
@@ -158,12 +166,10 @@ class SubmitProposalsController < ApplicationController
 
   def preview_placeholders
     @template_body = @email_template&.body
-
     if @template_body.blank?
       redirect_to new_email_template_path, alert: 'No email template found!'
       return
     end
-
     placeholders = { "Proposal_lead_organizer_name" => @proposal&.lead_organizer&.fullname,
                      "proposal_type" => @proposal.proposal_type&.name,
                      "proposal_title" => @proposal&.title }
