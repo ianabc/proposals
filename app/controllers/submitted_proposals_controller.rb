@@ -242,7 +242,6 @@ class SubmittedProposalsController < ApplicationController
       Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
       flash[:notice] = "#{@proposal&.code} sent to EditFlow!"
       store_response_id(response)
-      @proposal.update(edit_flow: DateTime.current)
       @proposal.progress!
     end
     Rails.logger.info { "\n\n*****************************************\n\n" }
@@ -253,7 +252,7 @@ class SubmittedProposalsController < ApplicationController
     response_body = JSON.parse(response.body)
     article = response_body["data"]["article"]
     id = article["id"]
-    @proposal.update(editflow_id: id)
+    @proposal.update(editflow_id: id, edit_flow: DateTime.current)
   end
 
   def set_proposal
@@ -261,7 +260,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_file
-    @temp_file = "propfile-#{current_user.id}-#{@proposal_ids}.tex"
+    @temp_file = "propfile-#{current_user.id}-proposals-booklet.tex"
     if @counter == 1
       single_proposal_booklet
     else
@@ -425,22 +424,35 @@ class SubmittedProposalsController < ApplicationController
     @reviews.each do |review|
       reviewer_name = review["reviewer"]["nameFull"]
       is_quick = review["isQuick"]
-      score = review["score"]
-      @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: score, file_id: @file_id,
+      @score = review["score"]
+      review_file(review)
+
+      @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: @score, file_id: @file_id,
                            proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id)
       @review.save
-      review_file_data(review) if review["reports"].present?
+      review_file_url if review["reports"].present?
     end
   end
 
-  def review_file_data(review)
-    @file_id = review["reports"].first["fileID"]
+  def review_file(review)
+    @file_id = if @score.eql?(0) || @score.nil?
+                 nil
+               else
+                 review["reports"].first["fileID"]
+               end
+  end
+
+  def review_file_url
     file_url_query = EditFlowService.new(@proposal).file_url(@file_id)
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: file_url_query },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
 
-    find_store_review_file(response)
+    if response.body.include?("errors")
+      display_errors(response)
+    else
+      find_store_review_file(response)
+    end
   end
 
   def find_store_review_file(response)
@@ -449,7 +461,7 @@ class SubmittedProposalsController < ApplicationController
     url = file_url["url"]
     @file = URI.parse(url).open
     @filename = File.basename(url)
-    @review.files.attach(io: @file, filename: @filename)
+    @review.file.attach(io: @file, filename: @filename)
   end
 
   def check_proposals_reviews
@@ -472,7 +484,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_reviews_booklet
-    @temp_file = "propfile-#{current_user.id}-#{@review_proposal_ids}.tex"
+    @temp_file = "propfile-#{current_user.id}-review-booklet.tex"
     ReviewsBookletPdfService.new(@review_proposal_ids, @temp_file).generate_booklet
     @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
     @latex_infile = @fh.read

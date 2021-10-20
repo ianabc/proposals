@@ -9,9 +9,10 @@ class ReviewsBookletPdfService
 
   def generate_booklet
     @text = "\\tableofcontents"
-    @proposals_id.split(',').each do |_id|
-      @proposal = Proposal.find_by(id: @proposals_id)
-      @text = pdf_contents
+    @number = 0
+    @proposals_id.each do |id|
+      @proposal = Proposal.find_by(id: id)
+      pdf_contents
     end
 
     File.open("#{Rails.root}/tmp/#{@temp_file}", "w:UTF-8") do |io|
@@ -22,12 +23,10 @@ class ReviewsBookletPdfService
   private
 
   def pdf_contents
-    @number = 0
     table_of_content
     organizers_list
     average_grade
     proposal_review
-    @text
   end
 
   def proposal_title(proposal)
@@ -79,7 +78,7 @@ class ReviewsBookletPdfService
     scores.each do |s|
       score += s
     end
-    scientific_grade = score / @reviewers_count unless score.eql?(0)
+    scientific_grade = score / @reviewers_count unless @reviewers_count.eql?(0)
     @text << "\\subsection*{Overall Average Scientific Grade: #{scientific_grade}}\n\n\n"
     graded_reviews
   end
@@ -91,7 +90,7 @@ class ReviewsBookletPdfService
   def proposal_review
     @table = 0
     @proposal.reviews.each do |review|
-      next if review.score.nil? || review.score.eql?(0)
+      next if review.score.nil? || review.score.eql?(0) || review.file_id.nil?
 
       @table += 1
       @text << "\\subsection*{#{@table}. Grade: #{review.score} (#{review.reviewer_name})}\n\n"
@@ -101,7 +100,9 @@ class ReviewsBookletPdfService
 
   def review_comments(review)
     @text << "\\subsection*{Comments:}\n\n\n"
-    file = review.files.first
+    return unless review.file.attached?
+
+    file = review.file
     file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
     @text << "\\noindent #{File.read(file_path)} \n\n\n"
   end
