@@ -10,8 +10,8 @@ class ReviewsBookletPdfService
   def generate_booklet
     @text = "\\tableofcontents"
     @number = 0
-    @proposals_id.each do |_id|
-      @proposal = Proposal.find_by(id: _id)
+    @proposals_id.each do |id|
+      @proposal = Proposal.find_by(id: id)
       pdf_contents
     end
 
