@@ -346,27 +346,6 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
-  def proposal_params
-    params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
-                  :no_latex, :preamble, :bibliography)
-          .merge(ams_subject_ids: proposal_ams_subjects)
-          .merge(no_latex: params[:no_latex] == 'on')
-  end
-
-  def proposal_ams_subjects
-    @code1 = params.dig(:ams_subjects, :code1)
-    @code2 = params.dig(:ams_subjects, :code2)
-    update_proposal_ams_subject_code
-    [@code1, @code2]
-  end
-
-  def update_proposal_ams_subject_code
-    ProposalAmsSubject.create(ams_subject_id: @code1, proposal: @proposal,
-                              code: 'code1')
-    ProposalAmsSubject.create(ams_subject_id: @code2, proposal: @proposal,
-                              code: 'code2')
-  end
-
   def page_redirect
     if params[:action] == "show"
       redirect_to submitted_proposal_url(@proposal),
