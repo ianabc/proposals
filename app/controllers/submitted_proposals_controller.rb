@@ -424,18 +424,18 @@ class SubmittedProposalsController < ApplicationController
     @reviews.each do |review|
       reviewer_name = review["reviewer"]["nameFull"]
       is_quick = review["isQuick"]
-      score = review["score"]
-      review_file
+      @score = review["score"]
+      review_file(review)
 
-      @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: score, file_id: @file_id,
+      @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: @score, file_id: @file_id,
                            proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id)
       @review.save
       review_file_url if review["reports"].present?
     end
   end
 
-  def review_file
-    @file_id = if score.eql?(0) || score.nil?
+  def review_file(review)
+    @file_id = if @score.eql?(0) || @score.nil?
                  nil
                else
                  review["reports"].first["fileID"]

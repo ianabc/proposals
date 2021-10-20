@@ -264,8 +264,10 @@ export default class extends Controller {
     else {
       proposalIds = proposalIds.slice(1)
       $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function() {
-        }
-      )
+        toastr.success('Import Reviews successfully.')
+      }).fail(function() {
+        toastr.error('There is something went wrong.')
+      })
     }
   }
 
