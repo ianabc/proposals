@@ -28,7 +28,7 @@ class ProposalFiltersQuery
   end
 
   def filter_by_subject_area(subject_area)
-    return @result if subject_area.reject(&:blank?).blank?
+    return @result if subject_area&.reject(&:blank?)&.blank?
 
     @result.where(subject_id: subject_area)
   end
