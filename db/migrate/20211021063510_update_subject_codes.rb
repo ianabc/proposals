@@ -2,7 +2,7 @@ class UpdateSubjectCodes < ActiveRecord::Migration[6.1]
   def change
     subject = Subject.find_by(title: 'Arithmetic Number Theory')
 
-    if subject
+    if subject.blank?
       Subject.create(title: 'Arithmetic Number Theory', code: 'ARNT')
     else
       subject.update(code: 'ARNT')
