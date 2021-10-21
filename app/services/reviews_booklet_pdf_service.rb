@@ -90,20 +90,21 @@ class ReviewsBookletPdfService
   def proposal_review
     @table = 0
     @proposal.reviews.each do |review|
-      next if review.score.nil? || review.score.eql?(0) || review.file_id.nil?
+      next if review.score.nil? || review.score.eql?(0)
 
       @table += 1
       @text << "\\subsection*{#{@table}. Grade: #{review.score} (#{review.reviewer_name})}\n\n"
-      review_comments(review)
+      review_comments(review) if review.file_ids.present?
     end
   end
 
   def review_comments(review)
     @text << "\\subsection*{Comments:}\n\n\n"
-    return unless review.file.attached?
-
-    file = review.file
-    file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
-    @text << "\\noindent #{File.read(file_path)} \n\n\n"
+    return unless review.files.attached?
+    
+    review.files.each do |file|
+      file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
+      @text << "\\noindent #{File.read(file_path)} \n\n\n"
+    end
   end
 end

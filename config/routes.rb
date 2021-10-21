@@ -31,6 +31,13 @@ Rails.application.routes.draw do
       post :update_status
       post :staff_discussion
       post :send_emails
+      get :reviews
+    end
+  end
+
+  resources :reviews, only: [] do 
+    member do 
+      delete :remove_file
     end
   end
 

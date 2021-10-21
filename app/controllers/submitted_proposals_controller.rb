@@ -132,15 +132,15 @@ class SubmittedProposalsController < ApplicationController
   def import_reviews
     raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
 
+    @reviews_not_imported = []
+
     proposals = params[:proposals]
     proposals.split(',').each do |id|
-      @proposal = Proposal.find_by(id: id)
-      next if @proposal.reviews.present?
-
-      proposal_reviews if @proposal.editflow_id.present?
+      import_proposal_reviews(id)
     end
-  rescue StandardError
-    flash[:alert] = "There is something went wrong."
+    import_message
+  rescue StandardError => e
+    render json: e.message, status: :internal_server_error
   end
 
   def reviews_booklet
@@ -161,10 +161,38 @@ class SubmittedProposalsController < ApplicationController
     )
   end
 
+  def reviews; end
+
   private
 
   def query_params?
     params.values.any?(&:present?)
+  end
+
+  def import_proposal_reviews(id)
+    @proposal = Proposal.find_by(id: id)
+    @proposal.reviews.destroy_all
+
+    if @proposal.editflow_id.present?
+      proposal_reviews
+    else
+      @reviews_not_imported << @proposal.status
+    end
+  end
+
+  def import_message
+    message_type = 'success'
+    if @reviews_not_imported.present?
+      message = "Review cannot be imported for proposal with status #{@reviews_not_imported.uniq.join(', ')}.
+                may be you have to sent to EditFlow before importing".squish
+      message_type = 'alert'
+    else
+      message = "Reviews successfully imported."
+    end
+
+    respond_to do |format|
+      format.js { render json: { message: message, type: message_type }, status: :ok }
+    end
   end
 
   def email_params
@@ -404,25 +432,25 @@ class SubmittedProposalsController < ApplicationController
       reviewer_name = review["reviewer"]["nameFull"]
       is_quick = review["isQuick"]
       @score = review["score"]
-      review_file(review)
 
-      @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: @score, file_id: @file_id,
+      @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: @score,
                            proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id)
       @review.save
-      review_file_url if review["reports"].present?
+      review_file(review)
     end
   end
 
   def review_file(review)
-    @file_id = if @score.eql?(0) || @score.nil?
-                 nil
-               else
-                 review["reports"].first["fileID"]
-               end
+    @review_files = []
+    review["reports"]&.each do |report|
+      review_file_url(report["fileID"])
+      @review_files << report["fileID"]
+    end
+    @review.update(file_ids: @review_files.join(', '))
   end
 
-  def review_file_url
-    file_url_query = EditFlowService.new(@proposal).file_url(@file_id)
+  def review_file_url(file_id)
+    file_url_query = EditFlowService.new(@proposal).file_url(file_id)
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: file_url_query },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
@@ -440,7 +468,7 @@ class SubmittedProposalsController < ApplicationController
     url = file_url["url"]
     @file = URI.parse(url).open
     @filename = File.basename(url)
-    @review.file.attach(io: @file, filename: @filename)
+    @review.files.attach(io: @file, filename: @filename)
   end
 
   def check_proposals_reviews
