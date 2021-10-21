@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_21_063510) do
+ActiveRecord::Schema.define(version: 2021_10_21_101532) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -368,7 +368,7 @@ ActiveRecord::Schema.define(version: 2021_10_21_063510) do
     t.string "reviewer_name"
     t.integer "score"
     t.boolean "is_quick"
-    t.string "file_id"
+    t.string "file_ids"
     t.index ["person_id"], name: "index_reviews_on_person_id"
     t.index ["proposal_id"], name: "index_reviews_on_proposal_id"
   end
