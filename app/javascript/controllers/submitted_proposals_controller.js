@@ -265,10 +265,12 @@ export default class extends Controller {
       proposalIds = proposalIds.slice(1)
       $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function(response) {
         let res = JSON.parse(response)
-        if(res.type === "alert")
+        if(res.type === "alert") {
           toastr.error(res.message)
-        else
+        }
+        else{
           toastr.success(res.message)
+        }
       }).fail(function(response) {
         toastr.error(response.responseText)
       })
@@ -305,11 +307,11 @@ export default class extends Controller {
       data: {
         'attachment_id': dataset.attachmentId
       },
-      success: function() {
+      success: () => {
         $(`#review-file${dataset.attachmentId}`).remove()
         toastr.success('Comment has successfully been removed.')
       },
-      error: function() {
+      error: () => {
         toastr.error('There is something went wrong.')
       }
     })

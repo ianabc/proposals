@@ -101,7 +101,7 @@ class ReviewsBookletPdfService
   def review_comments(review)
     @text << "\\subsection*{Comments:}\n\n\n"
     return unless review.files.attached?
-    
+
     review.files.each do |file|
       file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
       @text << "\\noindent #{File.read(file_path)} \n\n\n"
