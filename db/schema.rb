@@ -417,7 +417,7 @@ ActiveRecord::Schema.define(version: 2021_10_21_101532) do
   create_table "subjects", force: :cascade do |t|
     t.string "code"
     t.string "title"
-    t.bigint "subject_category_id", null: false
+    t.bigint "subject_category_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["code"], name: "index_subjects_on_code", unique: true
