@@ -60,6 +60,6 @@ class RolesController < ApplicationController
   end
 
   def role_params
-    params.require(:role).permit(:name, role_privileges_attributes: %i[id permission_type privilege_name])
+    params.require(:role).permit(:name, role_privileges_attributes: %i[id permission_type privilege_name _destroy])
   end
 end

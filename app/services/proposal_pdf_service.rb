@@ -78,7 +78,6 @@ class ProposalPdfService
   end
 
   def pdf_content
-    @text = ""
     proposal_organizers
     proposal_locations
     proposal_subjects

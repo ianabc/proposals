@@ -184,12 +184,10 @@ namespace :birs do
           first_code = subject.title.split.first
           first_code += "-XX"
           subject.update(code: first_code)
-          ProposalAmsSubject.find_or_create_by(ams_subject: subject, proposal: proposal, code: 'code1')
         when 'code2'
-          first_code = subject.title.split.first
-          first_code += "-XX"
-          subject.update(code: first_code)
-          ProposalAmsSubject.find_or_create_by(ams_subject: subject, proposal: proposal, code: 'code2')
+          second_code = subject.title.split.first
+          second_code += "-XX"
+          subject.update(code: second_code)
         end
       end
     end
