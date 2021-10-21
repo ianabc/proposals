@@ -8,8 +8,8 @@ class ReviewsBookletPdfService
   end
 
   def generate_booklet
-    @text = "\\tableofcontents"
     @number = 0
+    booklet_title_page
     @proposals_id.each do |id|
       @proposal = Proposal.find_by(id: id)
       pdf_contents
@@ -50,15 +50,28 @@ class ReviewsBookletPdfService
     delatex(affil)
   end
 
+  def booklet_title_page
+    @text = "\\thispagestyle{empty}"
+    @text << "\\begin{center}"
+    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\n\n\n"
+    @text << "{\\writeblue\\titlefont Banff International
+                Research Station}\n\n\n"
+    @text << "{\\writeblue\\titlefont 2022 Proposals}\n\n\n"
+    @text << "\\end{center}\n\n\n"
+    @text << "\\pagebreak"
+    @text << "\\tableofcontents"
+  end
+
   def table_of_content
     @number += 1
-    @text << "\\addtocontents{toc}{\ #{@number}. #{@proposal.subject&.title}}"
-    code = @proposal.code.blank? ? '' : "#{@proposal&.code}: "
-    @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(@proposal&.title)}}"
-    @text << "\\section*{\\centering #{code} #{proposal_title(@proposal)} }"
+    @text << "\\addtocontents{toc}{\ \\textbf{#{@number}. #{@proposal.subject&.title}}}"
+    @code = @proposal.code.blank? ? '' : "#{@proposal&.code}: "
+    @text << "\\addcontentsline{toc}{section}{ #{@code} #{LatexToPdf.escape_latex(@proposal&.title)}}"
   end
 
   def organizers_list
+    @text << "\\pagebreak"
+    @text << "\\section*{\\centering #{@code} #{proposal_title(@proposal)} }"
     @text << "\\subsection*{Organizers}\n\n"
     @text << "\\textbf{#{@proposal.lead_organizer&.fullname} (#{affil(@proposal.lead_organizer)})} \\\\ \n"
     confirmed_organizers

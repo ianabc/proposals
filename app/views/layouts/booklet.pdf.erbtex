@@ -31,6 +31,8 @@
 \hypersetup{pdfborder={0 0 0 [0 0]}}
 \usepackage{comment}
 \usepackage{pdfpages}
+\usepackage{graphicx}
+\graphicspath{{/home/hassan/projects/proposals/app/assets/images/}}
 
 
 \DeclareMathOperator{\Gal}{Gal}
