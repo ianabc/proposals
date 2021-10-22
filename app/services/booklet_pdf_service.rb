@@ -12,8 +12,6 @@ class BookletPdfService
     @table = table
     input = all_proposal_fields if @input == 'all'
 
-    LatexToPdf.config[:arguments].delete('-halt-on-error') if @proposal.is_submission
-
     File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
       io.write(input)
     end
@@ -21,10 +19,8 @@ class BookletPdfService
 
   def multiple_booklet(table, proposals)
     @table = table
-    @proposals = proposals
+    @proposals_ids = proposals
     multiple_proposals_fields if @input == 'all'
-
-    LatexToPdf.config[:arguments].delete('-halt-on-error') if @proposal.is_submission
   end
 
   def self.format_errors(error)
@@ -70,6 +66,7 @@ class BookletPdfService
   def all_proposal_fields
     return 'Proposal data not found!' if proposal.blank?
 
+    title_page
     case @table
     when "toc"
       proposal_table_of_content
@@ -89,28 +86,39 @@ class BookletPdfService
     LatexToPdf.escape_latex(string)
   end
 
+  def title_page
+    @text = "\\thispagestyle{empty}"
+    @text << "\\begin{center}"
+    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\n\n\n"
+    @text << "{\\writeblue\\titlefont Banff International
+                Research Station}\n\n\n"
+    @text << "{\\writeblue\\titlefont #{@proposal&.year} Proposals}\n\n\n"
+    @text << "\\end{center}\n\n\n"
+    @text << "\\pagebreak"
+  end
+
   def proposal_table_of_content
-    @text = "\\tableofcontents"
-    @text << "\\addtocontents{toc}{\ 1. #{proposal.subject&.title} }"
-    code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text << "\\addcontentsline{toc}{section}{ #{code} #{proposal_title(proposal)} }"
-    @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
+    @text << "\\tableofcontents"
+    @text << "\\addtocontents{toc}{\ \\textbf{1. #{proposal.subject&.title}} }"
+    @code = proposal.code.blank? ? '' : "#{proposal&.code}: "
+    @text << "\\addcontentsline{toc}{section}{ #{@code} #{proposal_title(proposal)} }"
     single_proposal_heading
     @text
   end
 
   def single_proposal_without_content
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }\n\n"
+    @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }\n\n"
     single_proposal_heading
     @text
   end
 
   def multiple_proposals_fields
+    title_page
     case @table
     when "toc"
       @number = 0
-      @text = "\\tableofcontents"
+      @text << "\\tableofcontents"
       proposals_with_content
     when "ntoc"
       proposals_without_content
@@ -119,47 +127,65 @@ class BookletPdfService
   end
 
   def proposals_with_content
-    @proposals.split(',').each do |id|
-      @number += 1
-      proposal = Proposal.find_by(id: id)
-      @proposal = proposal
-      @text << "\\addtocontents{toc}{\ #{@number}. #{proposal.subject&.title}}"
-      code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-      @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-      proposals_without_content
+    proposals = Proposal.where(id: @proposals_ids.split(','))
+    @subjects_with_proposals = proposals.group_by(&:subject_id)
+    @proposals = @subjects_with_proposals.first[1][0].id
+    @subjects_with_proposals.each do |subject|
+      @subject = Subject.find_by(id: subject.first)
+      check_subject
+      @proposals_objects = subject.last
+      subject_proposals
     end
     @latex_text
   end
 
+  def check_subject
+    return if @subject.blank?
+
+    @number += 1
+    @text << "\\addtocontents{toc}{\ \\textbf{#{@number}. #{@subject&.title}}}"
+  end
+
+  def subject_proposals
+    @proposals_objects.each do |proposal|
+      @proposal = proposal
+      code = proposal.code.blank? ? '' : "#{proposal&.code}: "
+      @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+      proposals_without_content
+      check_no_latex
+    end
+  end
+
   def proposals_without_content
+    @text << "\\pagebreak"
     if @table == "toc"
       code = proposal.code.blank? ? '' : "#{proposal&.code}: "
       @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
       single_proposal_heading
     else
-      @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
       proposals_heading
     end
-    check_no_latex
   end
 
   def proposals_heading
-    @proposals.split(',').each do |id|
+    @proposals = @proposals_ids.split(",").first.to_i
+    @proposals_ids.split(',').each do |id|
       proposal = Proposal.find_by(id: id)
       @proposal = proposal
       code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
       @text << "\\section*{\\centering #{code} #{proposal_title(proposal)}}"
       single_proposal_heading
+      check_no_latex
     end
   end
 
   def single_proposal_heading
+    @text << "\\section*{\\centering #{@code} #{proposal_title(proposal)} }"
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << participant_confirmed_count
     @text << lead_organizer_info
     all_text = ProposalPdfService.new(@proposal.id, @temp_file, 'all', @user).booklet_content
     @text << all_text if all_text.present?
-    @text
   end
 
   def lead_organizer_info
@@ -198,7 +224,7 @@ class BookletPdfService
   end
 
   def check_no_latex
-    if @proposal.id == @proposals.split(",").first.to_i
+    if @proposal.id == @proposals
       File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
         io.write(@text)
       end
