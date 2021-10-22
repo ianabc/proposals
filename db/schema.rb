@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_07_143939) do
+ActiveRecord::Schema.define(version: 2021_10_21_101532) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -368,7 +368,7 @@ ActiveRecord::Schema.define(version: 2021_10_07_143939) do
     t.string "reviewer_name"
     t.integer "score"
     t.boolean "is_quick"
-    t.string "file_id"
+    t.string "file_ids"
     t.index ["person_id"], name: "index_reviews_on_person_id"
     t.index ["proposal_id"], name: "index_reviews_on_proposal_id"
   end
@@ -417,7 +417,7 @@ ActiveRecord::Schema.define(version: 2021_10_07_143939) do
   create_table "subjects", force: :cascade do |t|
     t.string "code"
     t.string "title"
-    t.bigint "subject_category_id", null: false
+    t.bigint "subject_category_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["code"], name: "index_subjects_on_code", unique: true
