@@ -32,7 +32,7 @@
 \usepackage{comment}
 \usepackage{pdfpages}
 \usepackage{graphicx}
-\graphicspath{{/home/hassan/projects/proposals/app/assets/images/}}
+\graphicspath{{Rails.root}{/app/assets/images/}}
 
 
 \DeclareMathOperator{\Gal}{Gal}

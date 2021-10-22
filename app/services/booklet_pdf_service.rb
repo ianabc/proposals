@@ -92,7 +92,7 @@ class BookletPdfService
     @text << "\\includegraphics[width=4in]{birs_logo.jpg}\n\n\n"
     @text << "{\\writeblue\\titlefont Banff International
                 Research Station}\n\n\n"
-    @text << "{\\writeblue\\titlefont 2022 Proposals}\n\n\n"
+    @text << "{\\writeblue\\titlefont #{@proposal&.year} Proposals}\n\n\n"
     @text << "\\end{center}\n\n\n"
     @text << "\\pagebreak"
   end
