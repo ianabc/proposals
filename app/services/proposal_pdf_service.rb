@@ -156,14 +156,12 @@ class ProposalPdfService
   def proposal_organizers
     return if proposal.supporting_organizers&.count&.zero?
 
-    if @text.blank?
-      @text = "\\subsection*{Supporting Organizers}\n\n"
-    else
-      @text << "\\subsection*{Supporting Organizers}\n\n"
-    end
+    @text = '' if @text.blank?
+    @text << "\\subsection*{Supporting Organizers}\n\n"
+
     @text << "\\begin{itemize}\n"
     proposal.supporting_organizers.each do |organizer|
-      @text << "\\item #{organizer&.person&.fullname}#{affil(organizer&.person)}\n"
+      @text << "\\item #{organizer&.person&.fullname} #{affil(organizer&.person)}\n"
     end
     @text << "\\end{itemize}\n\n"
   end

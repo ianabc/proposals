@@ -12,6 +12,8 @@ namespace :birs do
             }
 END_STRING
 
+    next unless Rails.env.production?
+
     if ENV['EDITFLOW_API_URL'].blank?
       puts "No EDITFLOW_API_URL is set, aborting."
       next

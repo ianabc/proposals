@@ -174,14 +174,14 @@
 \end{itemize}}
 
 \fancyhf{}
-\fancyhead[CO,CE]{\bfseries Banff International Research Station <%= @year %> Proposal Submission}
+\fancyhead[CO,CE]{\bfseries Banff International Research Station <%= @year %> Proposals}
 \pagestyle{fancy}
 \renewcommand{\thepage}{\arabic{page}}
 \rfoot{\thepage}
 
 
-%---------------------------- begin proposal contents ----------------------------%
+%---------------------------- begin book contents ----------------------------%
 <%= yield %>
-%---------------------------- end proposal contents ----------------------------%
+%---------------------------- end book contents ----------------------------%
 
 \end{document}

@@ -67,11 +67,10 @@ class BookletPdfService
     return 'Proposal data not found!' if proposal.blank?
 
     title_page
-    case @table
-    when "toc"
-      proposal_table_of_content
-    when "ntoc"
-      single_proposal_without_content
+    if @table == "toc"
+      proposal_table_of_contents
+    else
+      single_proposal_without_toc
     end
     @text
   end
@@ -87,26 +86,52 @@ class BookletPdfService
   end
 
   def title_page
-    @text = "\\thispagestyle{empty}"
-    @text << "\\begin{center}"
-    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\n\n\n"
-    @text << "{\\writeblue\\titlefont Banff International
-                Research Station}\n\n\n"
-    @text << "{\\writeblue\\titlefont #{@proposal&.year} Proposals}\n\n\n"
-    @text << "\\end{center}\n\n\n"
-    @text << "\\pagebreak"
+    @text << %Q[
+\\thispagestyle{empty}
+
+% Title page
+\\begin{center}
+  \\includegraphics[width=4in]{birs_logo.jpg}\\\\[30pt]
+  {\\writeblue\titlefont Banff International\\\\[10pt]
+  Research Station\\[0.5in]
+  #{@proposal&.year} Proposals}
+\\end{center}
+
+\\newpage
+\\thispagestyle{empty}
+
+\\cleardoublepage
+
+    ]
   end
 
-  def proposal_table_of_content
-    @text << "\\tableofcontents"
-    @text << "\\addtocontents{toc}{\ \\textbf{1. #{proposal.subject&.title}} }"
-    @code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text << "\\addcontentsline{toc}{section}{ #{@code} #{proposal_title(proposal)} }"
-    single_proposal_heading
-    @text
+  def proposal_table_of_contents
+    @text << %Q[
+\\setcounter{page}{1}
+\\renewcommand{\\thepage}{\\roman{page}}
+
+\\newpage
+
+\\cleardoublepage
+
+\\tableofcontents
+
+\\cleardoublepage
+
+\\setcounter{page}{1}
+\\renewcommand{\thepage}{\arabic{page}}
+
+    ]
+
+    # @text << "\\tableofcontents"
+    # @text << "\\addtocontents{toc}{\ \\textbf{1. #{proposal.subject&.title}} }"
+    # @code = proposal.code.blank? ? '' : "#{proposal&.code}: "
+    # @text << "\\addcontentsline{toc}{section}{ #{@code} #{proposal_title(proposal)} }"
+    # single_proposal_heading
+    # @text
   end
 
-  def single_proposal_without_content
+  def single_proposal_without_toc
     code = proposal.code.blank? ? '' : "#{proposal&.code}: "
     @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }\n\n"
     single_proposal_heading
@@ -114,49 +139,77 @@ class BookletPdfService
   end
 
   def multiple_proposals_fields
+    @text = ''
     title_page
     case @table
     when "toc"
       @number = 0
-      @text << "\\tableofcontents"
-      proposals_with_content
+      proposals_with_toc
     when "ntoc"
-      proposals_without_content
+      proposals_without_toc
     end
     @text
   end
 
-  def proposals_with_content
+  def proposals_with_toc
+    @text << "\n%%%%%%%%% Start event data %%%%%%%%%%%\n\n"
     proposals = Proposal.where(id: @proposals_ids.split(','))
-    @subjects_with_proposals = proposals.group_by(&:subject_id)
-    @proposals = @subjects_with_proposals.first[1][0].id
-    @subjects_with_proposals.each do |subject|
-      @subject = Subject.find_by(id: subject.first)
-      check_subject
-      @proposals_objects = subject.last
-      subject_proposals
+
+    proposals.group_by(&:subject_id).each do |chapter|
+      subject = Subject.find_by(id: chapter.first)
+      props = chapter.last
+
+      add_chapter_heading(subject, props)
+      add_chapter_contents(subject, props)
     end
     @latex_text
   end
 
-  def check_subject
-    return if @subject.blank?
+  def add_chapter_heading(subject, proposals)
+    if subject.blank?
+      @text << "\\birschapter{Unknown Subject}\n{\n"
+    else
+      @text << "\\birschapter{#{subject&.title}}\n{\n"
+    end
 
-    @number += 1
-    @text << "\\addtocontents{toc}{\ \\textbf{#{@number}. #{@subject&.title}}}"
+    proposals.each do |prop|
+      @text << "\t\\item \\nohyphens{#{prop&.code}: #{prop&.title}}\n"
+    end
+    @text << "}\n\n"
+  end
+
+  def add_chapter_contents(subject, props)
+    props.each do |prop|
+      @text << "%%%%%%%%%% Event #{prop&.code} Start %%%%%%%%%\n"
+      @text << "\\newpage\n"
+      @text << "\\section*{\\centering #{subject&.code} : #{prop&.code} \\\\\n"
+      title = prop.no_latex ? delatex(prop&.title) : prop&.title
+      @text << "#{title}}\n\n"
+
+      @text << "\\addcontentsline{toc}{section}{\\normalsize "
+      @text << "\\nohyphens{#{prop&.code}: #{title}}}\n\n"
+
+      proposal_type = ProposalType.find_by(id: prop.proposal_type_id)
+      @text << "\\subsection*{ #{proposal_type} }\n"
+      @text << "{\\small {\\em #{prop.max_total_participants} participants}}\n\n"
+      @text << lead_organizer_info(prop)
+      all_text = ProposalPdfService.new(prop.id, @temp_file, 'all', @user).booklet_content
+      @text << all_text if all_text.present?
+      @text << "%%%%%%%%%% Event #{prop&.code} End %%%%%%%%%\n\n\n"
+    end
   end
 
   def subject_proposals
     @proposals_objects.each do |proposal|
       @proposal = proposal
       code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-      @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
-      proposals_without_content
+      #@text << "\\addcontentsline{toc}{section}{ #{code} #{delatex(proposal&.title)}}"
+      proposals_without_toc
       check_no_latex
     end
   end
 
-  def proposals_without_content
+  def proposals_without_toc
     @text << "\\pagebreak"
     if @table == "toc"
       code = proposal.code.blank? ? '' : "#{proposal&.code}: "
@@ -183,15 +236,18 @@ class BookletPdfService
     @text << "\\section*{\\centering #{@code} #{proposal_title(proposal)} }"
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << participant_confirmed_count
-    @text << lead_organizer_info
+    @text << lead_organizer_info(proposal)
     all_text = ProposalPdfService.new(@proposal.id, @temp_file, 'all', @user).booklet_content
     @text << all_text if all_text.present?
   end
 
-  def lead_organizer_info
+  def lead_organizer_info(prop)
     info = "\\subsection*{Lead Organizer}\n\n"
-    info << "#{proposal.lead_organizer&.fullname} (#{affil(proposal.lead_organizer)}) \\\\ \n\n"
-    info << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
+    info << "#{prop.lead_organizer&.fullname}\n\n"
+    info << "\\vskip{5mm}\n\n"
+    info << "\\noindent #{affil(prop.lead_organizer)} \\\\ \n\n"
+    info << "\\vskip{5mm}\n\n"
+    info << "\\noindent #{delatex(prop.lead_organizer&.email)}\n\n"
   end
 
   def affil(person)
@@ -205,8 +261,8 @@ class BookletPdfService
     delatex(affil)
   end
 
-  def confirmed_organizers
-    proposal.invites.where(status: "confirmed", invited_as: "Organizer")
+  def confirmed_organizers(prop)
+    prop.invites.where(status: "confirmed", invited_as: "Organizer")
   end
 
   def confirmed_participants
@@ -214,7 +270,7 @@ class BookletPdfService
   end
 
   def remove_organizers_from_participants
-    confirmed_participants.pluck(:person_id) - confirmed_organizers.pluck(:person_id)
+    confirmed_participants.pluck(:person_id) - confirmed_organizers(proposal).pluck(:person_id)
   end
 
   def participant_confirmed_count
@@ -238,7 +294,7 @@ class BookletPdfService
 
   def read_file
     @latex_infile = File.read("#{Rails.root}/tmp/#{temp_file}")
-    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
+    @latex_infile = delatex(@latex_infile) if @proposal.no_latex
     @latex_text = @text
     @text = ''
   end

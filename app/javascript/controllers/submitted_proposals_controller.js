@@ -170,7 +170,7 @@ export default class extends Controller {
           document.getElementById("proposal_booklet").click();
           toastr.success('Booklet successfully created.')
       }).fail(function() {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       })
     }
   }
@@ -293,7 +293,7 @@ export default class extends Controller {
           document.getElementById("reviews_booklet").click();
           toastr.success('Review Booklet successfully created.')
       }).fail(function() {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       })
     }
   }
@@ -312,7 +312,7 @@ export default class extends Controller {
         toastr.success('Comment has successfully been removed.')
       },
       error: () => {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       }
     })
   }
