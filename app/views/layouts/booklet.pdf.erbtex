@@ -32,8 +32,7 @@
 \usepackage{comment}
 \usepackage{pdfpages}
 \usepackage{graphicx}
-\graphicspath{<%= "#{Rails.root}/app/assets/images/" %>}
-
+\graphicspath{{<%= "#{Rails.root}/app/assets/images/" %>}}
 
 \DeclareMathOperator{\Gal}{Gal}
 \DeclareMathOperator{\SL}{SL}
