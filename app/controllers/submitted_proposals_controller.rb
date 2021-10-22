@@ -133,6 +133,7 @@ class SubmittedProposalsController < ApplicationController
     raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
 
     @reviews_not_imported = []
+    @statuses = []
 
     proposals = params[:proposals]
     proposals.split(',').each do |id|
@@ -181,18 +182,27 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def import_message
-    message_type = 'success'
+    @message_type = 'success'
     if @reviews_not_imported.present?
-      message = "Review cannot be imported for proposal with status #{@reviews_not_imported.uniq.join(', ')}.
-                may be you have to sent to EditFlow before importing".squish
-      message_type = 'alert'
+      error_messages
     else
-      message = "Reviews successfully imported."
+      @message = "Reviews successfully imported."
     end
 
     respond_to do |format|
-      format.js { render json: { message: message, type: message_type }, status: :ok }
+      format.js { render json: { message: @message, type: @message_type }, status: :ok }
     end
+  end
+
+  def error_messages
+    @message = if @statuses.present?
+                 "Proposal status cannot be changed, if proposal status is not in 'in_progress' or
+                  'revision_submitted'"
+               else
+                 "Review cannot be imported for proposal with status #{@reviews_not_imported.uniq.join(', ')}.
+                  may be you have to sent to EditFlow before importing".squish
+               end
+    @message_type = 'alert'
   end
 
   def email_params
@@ -435,8 +445,19 @@ class SubmittedProposalsController < ApplicationController
 
       @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: @score,
                            proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id)
-      @review.save
+      change_proposal_review_status
       review_file(review)
+    end
+  end
+
+  def change_proposal_review_status
+    return unless @review.save
+
+    if @proposal.may_pending?
+      @proposal.pending!
+    else
+      @reviews_not_imported << @proposal.status
+      @statuses << @proposal.status
     end
   end
 
