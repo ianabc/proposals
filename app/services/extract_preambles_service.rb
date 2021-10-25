@@ -64,7 +64,9 @@ class ExtractPreamblesService
   end
 
   def preamble_usepackage(preamble)
-    @macro_name = preamble.split('{') if preamble.include?("usepackage")
+    return unless preamble.include?("usepackage")
+
+    @macro_name = preamble.split('{')
     @macro_name = if @macro_name.present? && @macro_name[1].present?
                     @macro_name[1].split('}')[0]
                   else

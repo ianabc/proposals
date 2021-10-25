@@ -263,10 +263,16 @@ export default class extends Controller {
     }
     else {
       proposalIds = proposalIds.slice(1)
-      $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function() {
-        toastr.success('Import Reviews successfully.')
-      }).fail(function() {
-        toastr.error('There is something went wrong.')
+      $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function(response) {
+        let res = JSON.parse(response)
+        if(res.type === "alert") {
+          toastr.error(res.message)
+        }
+        else{
+          toastr.success(res.message)
+        }
+      }).fail(function(response) {
+        toastr.error(response.responseText)
       })
     }
   }
@@ -289,6 +295,40 @@ export default class extends Controller {
       }).fail(function() {
         toastr.error('There is something went wrong.')
       })
+    }
+  }
+
+  removeFile(evt) {
+    let dataset = evt.currentTarget.dataset
+    
+    $.ajax({
+      url: `/reviews/${dataset.reviewId}/remove_file?attachment_id=${dataset.attachmentId}`,
+      type: 'DELETE',
+      data: {
+        'attachment_id': dataset.attachmentId
+      },
+      success: () => {
+        $(`#review-file${dataset.attachmentId}`).remove()
+        toastr.success('Comment has successfully been removed.')
+      },
+      error: () => {
+        toastr.error('There is something went wrong.')
+      }
+    })
+  }
+
+  reviewsExcelBooklet() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      proposalIds = proposalIds.slice(1)
+      window.location = `/submitted_proposals/reviews_excel_booklet.xlsx?proposals=${proposalIds}`
     }
   }
 }

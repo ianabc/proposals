@@ -26,11 +26,19 @@ Rails.application.routes.draw do
       post :import_reviews
       post :reviews_booklet
       get :download_review_booklet
+      get :reviews_excel_booklet
     end
     member do
       post :update_status
       post :staff_discussion
       post :send_emails
+      get :reviews
+    end
+  end
+
+  resources :reviews, only: [] do 
+    member do 
+      delete :remove_file
     end
   end
 

@@ -8,6 +8,8 @@ gem 'acts_as_list'
 gem 'bcrypt_pbkdf'
 gem 'bootsnap', '>= 1.4.4', require: false
 gem 'cancancan'
+gem 'caxlsx'
+gem 'caxlsx_rails'
 gem 'countries', require: 'countries/global'
 gem 'deep_cloneable', '~> 3.1.0'
 gem 'devise'

@@ -8,12 +8,14 @@ class ReviewsBookletPdfService
   end
 
   def generate_booklet
-    @text = "\\tableofcontents"
     @number = 0
-    @proposals_id.each do |id|
-      @proposal = Proposal.find_by(id: id)
-      pdf_contents
-    end
+    
+    proposals = Proposal.where(id: @proposals_id.split(','))
+    year = proposals&.first&.year || Date.current.year + 2
+    booklet_title_page(year)
+    
+    @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
+    subject_review_proposals
 
     File.open("#{Rails.root}/tmp/#{@temp_file}", "w:UTF-8") do |io|
       io.write(@text)
@@ -22,8 +24,32 @@ class ReviewsBookletPdfService
 
   private
 
+  def subject_review_proposals
+    @subjects_with_proposals.each do |subject|
+      @subject = Subject.find_by(id: subject.first)
+      check_subject
+      @proposals_objects = subject.last
+      subject_proposals
+    end
+  end
+
+  def check_subject
+    return if @subject.blank?
+
+    @number += 1
+    @text << "\\addcontentsline{toc}{chapter}{\ \\large{#{@number}. #{@subject&.title}}}"
+  end
+
+  def subject_proposals
+    @proposals_objects&.sort_by { |p| p.code }&.each do |proposal|
+      @proposal = proposal
+      @code = proposal.code.blank? ? '' : "#{proposal.code}: "
+      @text << "\\addcontentsline{toc}{section}{ #{@code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+      pdf_contents
+    end
+  end
+
   def pdf_contents
-    table_of_content
     organizers_list
     average_grade
     proposal_review
@@ -50,17 +76,24 @@ class ReviewsBookletPdfService
     delatex(affil)
   end
 
-  def table_of_content
-    @number += 1
-    @text << "\\addtocontents{toc}{\ #{@number}. #{@proposal.subject&.title}}"
-    code = @proposal.code.blank? ? '' : "#{@proposal&.code}: "
-    @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(@proposal&.title)}}"
-    @text << "\\section*{\\centering #{code} #{proposal_title(@proposal)} }"
+  def booklet_title_page(year)
+    @proposal = Proposal.find_by(id: @proposals_id.first)
+    @text = "\\thispagestyle{empty}"
+    @text << "\\begin{center}"
+    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\\\\ \n"
+    @text << "{\\writeblue\\titlefont Banff International\\\\
+                Research Station}\\\\ \n"
+    @text << "{\\writeblue\\titlefont #{year} Proposal Reviews}\\\\\n"
+    @text << "\\end{center}\n\n\n"
+    @text << "\\pagebreak"
+    @text << "\\tableofcontents"
   end
 
   def organizers_list
+    @text << "\\pagebreak"
+    @text << "\\section*{\\centering #{@code} #{proposal_title(@proposal)} }"
     @text << "\\subsection*{Organizers}\n\n"
-    @text << "\\textbf{#{@proposal.lead_organizer&.fullname} (#{affil(@proposal.lead_organizer)})} \\\\ \n"
+    @text << "\\textbf{#{@proposal.lead_organizer&.fullname} #{affil(@proposal.lead_organizer)}} \\\\ \n"
     confirmed_organizers
   end
 
@@ -90,20 +123,21 @@ class ReviewsBookletPdfService
   def proposal_review
     @table = 0
     @proposal.reviews.each do |review|
-      next if review.score.nil? || review.score.eql?(0) || review.file_id.nil?
+      next if review.score.nil? || review.score.eql?(0)
 
       @table += 1
       @text << "\\subsection*{#{@table}. Grade: #{review.score} (#{review.reviewer_name})}\n\n"
-      review_comments(review)
+      review_comments(review) if review.file_ids.present?
     end
   end
 
   def review_comments(review)
     @text << "\\subsection*{Comments:}\n\n\n"
-    return unless review.file.attached?
+    return unless review.files.attached?
 
-    file = review.file
-    file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
-    @text << "\\noindent #{File.read(file_path)} \n\n\n"
+    review.files.each do |file|
+      file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
+      @text << "\\noindent #{File.read(file_path)} \n\n\n"
+    end
   end
 end

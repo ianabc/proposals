@@ -1,0 +1,55 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Proposals
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %> </a></li>
+          <li class="breadcrumb-item" aria-current="page"><%= link_to "Submitted Proposals", submitted_proposals_path %></li>
+          <li class="breadcrumb-item active">Reviews</li>
+        </ol>
+      </nav>
+    </div>
+      <div class="row" data-controller="submitted-proposals">
+        <div class="col-16">
+          <div class="card">
+            <div class="card-body">
+              <% if @proposal.reviews.empty? %>
+                <h1>There is no review added yet.</h1>
+              <% else %>
+                <% @proposal.reviews.each do |review| %>
+                  <div class="mt-4">
+                    <h3>
+                      <span style="font-weight: bold;"> Reviewer Name: </span>
+                      <%= review.reviewer_name %>
+                    </h3>
+                    <h3>
+                      <span style="font-weight: bold;">Score: </span>
+                      <%= review.score %>
+                    </h3>
+                    <h3>
+                      <span style="font-weight: bold;">EDI Review: </span>
+                      <%= review.is_quick %>
+                    </h3>
+                    <% review.files.each do |file| %>
+                      <h3 id="<%= "review-file#{file.id}" %>">
+                        <span style="font-weight: bold;">Comment: </span>
+                        <%= link_to file.filename, rails_blob_path(file) %>
+                        <span data-review-id="<%= review.id %>" data-attachment-id="<%= file.id %>" 
+                          data-action="click->submitted-proposals#removeFile" class="btn btn-sm btn-light">
+                            Remove file
+                        </span>
+                      </h3>
+                    <% end %>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
