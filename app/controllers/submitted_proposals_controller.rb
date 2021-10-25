@@ -2,7 +2,8 @@ class SubmittedProposalsController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_user
   before_action :set_proposals, only: %i[index]
-  before_action :set_proposal, except: %i[index download_csv import_reviews reviews_booklet]
+  before_action :set_proposal, except: %i[index download_csv import_reviews
+                                          reviews_booklet reviews_excel_booklet]
   before_action :template_params, only: %i[approve_decline_proposals]
 
   def index; end
@@ -146,10 +147,8 @@ class SubmittedProposalsController < ApplicationController
   def reviews_booklet
     raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
 
-    @proposal_ids = params[:proposals]
-    @no_review_proposal_ids = []
-    @review_proposal_ids = []
-    check_proposals_reviews
+    check_selected_proposals
+    create_reviews_booklet
   end
 
   def download_review_booklet
@@ -162,6 +161,16 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def reviews; end
+
+  def reviews_excel_booklet
+    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
+
+    check_selected_proposals
+    @proposals = Proposal.where(id: params[:proposals].split(','))
+    respond_to do |format|
+      format.xlsx
+    end
+  end
 
   private
 
@@ -471,12 +480,18 @@ class SubmittedProposalsController < ApplicationController
     @review.files.attach(io: @file, filename: @filename)
   end
 
+  def check_selected_proposals
+    @proposal_ids = params[:proposals]
+    @no_review_proposal_ids = []
+    @review_proposal_ids = []
+    check_proposals_reviews
+  end
+
   def check_proposals_reviews
     @proposal_ids.split(',').each do |id|
       @proposal = Proposal.find_by(id: id)
       reviews_conditions
     end
-    create_reviews_booklet
   end
 
   def reviews_conditions
