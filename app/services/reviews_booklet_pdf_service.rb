@@ -1,10 +1,13 @@
 class ReviewsBookletPdfService
-  attr_reader :proposals_id, :text, :temp_file
+  attr_reader :proposals_id, :text, :temp_file, :errors
+
+  include LatexAttachments
 
   def initialize(proposals_id, temp_file)
     @proposals_id = proposals_id
     @text = ""
     @temp_file = temp_file
+    @errors = []
   end
 
   def generate_booklet
@@ -123,21 +126,21 @@ class ReviewsBookletPdfService
   def proposal_review
     @table = 0
     @proposal.reviews.each do |review|
-      next if review.score.nil? || review.score.eql?(0)
+      grade = (review.score.nil? || review.score.eql?(0)) ? 'N/A' : review.score
 
       @table += 1
-      @text << "\\subsection*{#{@table}. Grade: #{review.score} (#{review.reviewer_name})}\n\n"
+      @text << "\\subsection*{#{@table}. Grade: #{grade} (#{review.reviewer_name})}\n\n"
       review_comments(review) if review.file_ids.present?
     end
   end
 
   def review_comments(review)
-    @text << "\\subsection*{Comments:}\n\n\n"
+    @text << "\\subsection*{Reviews:}\n\n\n"
     return unless review.files.attached?
 
-    review.files.each do |file|
-      file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
-      @text << "\\noindent #{File.read(file_path)} \n\n\n"
-    end
+    latex, file_errors = add_review_attachments(review, @text, @proposal,
+                                                @errors)
+    @errors = file_errors unless file_errors.blank?
+    @text = latex unless latex.blank?
   end
 end

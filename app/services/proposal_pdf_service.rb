@@ -1,7 +1,7 @@
 class ProposalPdfService
   attr_reader :proposal, :temp_file, :table, :user, :file_errors
 
-  include ProposalAttachments
+  include LatexAttachments
 
   def initialize(proposal_id, file, input, user)
     @proposal = Proposal.find(proposal_id)
@@ -95,7 +95,8 @@ class ProposalPdfService
     end
 
     if proposal.files.attached?
-      @text, file_errors = proposal_attachments(proposal, @text, file_errors)
+      @text, file_errors = add_proposal_attachments(proposal, @text,
+                                                    file_errors)
     end
 
     @text
