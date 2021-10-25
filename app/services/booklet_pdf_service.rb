@@ -92,7 +92,7 @@ class BookletPdfService
     @text << "\\includegraphics[width=4in]{birs_logo.jpg}\n\n\n"
     @text << "{\\writeblue\\titlefont Banff International
                 Research Station}\n\n\n"
-    @text << "{\\writeblue\\titlefont #{@proposal&.year} Proposals}\n\n\n"
+    @text << "{\\writeblue\\titlefont 2023 Proposals}\n\n\n"
     @text << "\\end{center}\n\n\n"
     @text << "\\pagebreak"
   end
@@ -128,7 +128,7 @@ class BookletPdfService
 
   def proposals_with_content
     proposals = Proposal.where(id: @proposals_ids.split(','))
-    @subjects_with_proposals = proposals.group_by(&:subject_id)
+    @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
     @proposals = @subjects_with_proposals.first[1][0].id
     @subjects_with_proposals.each do |subject|
       @subject = Subject.find_by(id: subject.first)
@@ -143,11 +143,11 @@ class BookletPdfService
     return if @subject.blank?
 
     @number += 1
-    @text << "\\addtocontents{toc}{\ \\textbf{#{@number}. #{@subject&.title}}}"
+    @text << "\\addcontentsline{toc}{chapter}{\ \\large{#{@number}. #{@subject&.title}}}"
   end
 
   def subject_proposals
-    @proposals_objects.each do |proposal|
+    @proposals_objects&.sort_by { |p| p.title }&.each do |proposal|
       @proposal = proposal
       code = proposal.code.blank? ? '' : "#{proposal&.code}: "
       @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
