@@ -183,7 +183,6 @@ class BookletPdfService
   end
 
   def single_proposal_heading
-    @text << "\\section*{\\centering #{@code} #{proposal_title(proposal)} }"
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << participant_confirmed_count
     @text << lead_organizer_info
