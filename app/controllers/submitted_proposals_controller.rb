@@ -541,7 +541,7 @@ class SubmittedProposalsController < ApplicationController
     @temp_file = "propfile-#{current_user.id}-review-booklet.tex"
     book = ReviewsBook.new(@review_proposal_ids, @temp_file)
     book.generate_booklet
-    year = book.year || Date.current.year + 2
+    year = book.year || (Date.current.year + 2)
     report_errors(book.errors) if book.errors.present?
 
     @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
