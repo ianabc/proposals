@@ -115,7 +115,9 @@ class BookletPdfService
   end
 
   def multiple_proposals_fields
-    title_page
+    year = proposal&.year || Date.current.year + 2
+
+    title_page(year)
     case @table
     when "toc"
       @number = 0
@@ -181,7 +183,6 @@ class BookletPdfService
   end
 
   def single_proposal_heading
-    @text << "\\section*{\\centering #{@code} #{proposal_title(proposal)} }"
     @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << participant_confirmed_count
     @text << lead_organizer_info
