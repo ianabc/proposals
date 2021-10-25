@@ -316,4 +316,19 @@ export default class extends Controller {
       }
     })
   }
+
+  reviewsExcelBooklet() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[1] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      proposalIds = proposalIds.slice(1)
+      window.location = `/submitted_proposals/reviews_excel_booklet.xlsx?proposals=${proposalIds}`
+    }
+  }
 }

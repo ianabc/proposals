@@ -1,0 +1,69 @@
+wb = xlsx_package.workbook
+s = wb.styles
+wrap_text = s.add_style(b: true, sz: 36, alignment: { horizontal: :center, vertical: :center, wrap_text: true })
+bold = s.add_style(b: true, sz: 16)
+font_size = s.add_style(sz: 16)
+
+wb.add_worksheet(:name => "2022") do |sheet|
+  sheet.add_row([''], height: 60)
+  sheet.add_row([''], :height => 60)
+  sheet.add_row ['BANFF INTERNATIONAL'], style: wrap_text, height: 60
+  sheet.add_row ['RESEARCH STATION'], style: wrap_text, height: 60
+  sheet.add_row([''], :height => 60)
+  sheet.add_row ['2022 PROPOSAL SELECTIONS'], style: wrap_text, height: 60
+
+  sheet.merge_cells('A3:G3')
+  sheet.merge_cells('A4:G4')
+  sheet.merge_cells('A6:G6')
+  sheet.add_row [''], height: 60
+  sheet.add_row [''], height: 60
+  sheet.add_row [''], height: 60
+  sheet.add_row [''], height: 60
+  sheet.add_row [''], height: 60
+  @number = 0
+  @proposals.sort_by{|p| p.subject.title }.group_by(&:subject_id).each do |chapter|
+    subject = Subject.find_by(id: chapter.first)
+    props = chapter.last
+    @number += 1
+    if subject.blank?
+      subject = "#{@number}. Unknown Subject"
+    else
+      subject = "#{@number}. #{subject&.title}"
+    end
+
+    sheet.add_row [subject, 'Site', 'Rank', 'Scientific Reviews', 'Past Reviews',
+                      'EDI Reviews'], style: bold, height: 30
+    props&.sort_by{ |p| p.title }&.each do |proposal|
+      code_title = "#{proposal&.code}: #{proposal&.title} (#{proposal.lead_organizer&.fullname})"
+      reviews = proposal.reviews&.where(is_quick: false)
+      sc = Axlsx::RichText.new
+      sc.add_run("Total reviews: #{reviews.count}")
+      sc.add_run("\n")
+      reviewer_number = 0
+      reviews.each do |review|
+        next if review.score.nil? || review.score.eql?(0)
+
+        reviewer_number += 1
+        sc.add_run("Reviewer #{reviewer_number}: #{review.score}")
+        sc.add_run("\n")
+      end
+
+      reviews = proposal.reviews.where(is_quick: true)
+      edi = Axlsx::RichText.new
+      edi.add_run("Total reviews: #{reviews.count}")
+      edi.add_run("\n")
+      reviewer_number = 0
+      reviews.each do |review|
+        next if review.score.nil? || review.score.eql?(0)
+
+        reviewer_number += 1
+        edi.add_run("Reviewer #{reviewer_number}: #{review.score}")
+        edi.add_run("\n")
+      end
+      sheet.add_row [code_title, 'BIRS', '', sc, '', edi], style: font_size, height: 65
+    end
+    sheet.add_row ['']
+    sheet.add_row ['']
+    sheet.add_row ['']
+  end
+end
