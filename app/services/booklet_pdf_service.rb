@@ -65,12 +65,13 @@ class BookletPdfService
 
   def all_proposal_fields
     return 'Proposal data not found!' if proposal.blank?
-
-    title_page
-    case @table
-    when "toc"
+    
+    year = proposal&.year || Date.current.year + 2
+    title_page(year)
+    
+    if @table == "toc"
       proposal_table_of_content
-    when "ntoc"
+    else
       single_proposal_without_content
     end
     @text
@@ -86,13 +87,13 @@ class BookletPdfService
     LatexToPdf.escape_latex(string)
   end
 
-  def title_page
+  def title_page(year)
     @text = "\\thispagestyle{empty}"
     @text << "\\begin{center}"
-    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\n\n\n"
-    @text << "{\\writeblue\\titlefont Banff International
-                Research Station}\n\n\n"
-    @text << "{\\writeblue\\titlefont #{@proposal&.year} Proposals}\n\n\n"
+    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\\\\\n"
+    @text << "{\\writeblue\\titlefont Banff International\\\\
+                Research Station\\\\}"
+    @text << "{\\writeblue\\titlefont #{year} Proposals}\n\n\n"
     @text << "\\end{center}\n\n\n"
     @text << "\\pagebreak"
   end
@@ -128,7 +129,7 @@ class BookletPdfService
 
   def proposals_with_content
     proposals = Proposal.where(id: @proposals_ids.split(','))
-    @subjects_with_proposals = proposals.group_by(&:subject_id)
+    @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
     @proposals = @subjects_with_proposals.first[1][0].id
     @subjects_with_proposals.each do |subject|
       @subject = Subject.find_by(id: subject.first)
@@ -143,13 +144,13 @@ class BookletPdfService
     return if @subject.blank?
 
     @number += 1
-    @text << "\\addtocontents{toc}{\ \\textbf{#{@number}. #{@subject&.title}}}"
+    @text << "\\addcontentsline{toc}{chapter}{\ \\large{#{@number}. #{@subject&.title}}}"
   end
 
   def subject_proposals
-    @proposals_objects.each do |proposal|
+    @proposals_objects&.sort_by { |p| p.code }&.each do |proposal|
       @proposal = proposal
-      code = proposal.code.blank? ? '' : "#{proposal&.code}: "
+      code = proposal.code.blank? ? '' : "#{proposal.code}: "
       @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
       proposals_without_content
       check_no_latex
@@ -190,7 +191,7 @@ class BookletPdfService
 
   def lead_organizer_info
     info = "\\subsection*{Lead Organizer}\n\n"
-    info << "#{proposal.lead_organizer&.fullname} (#{affil(proposal.lead_organizer)}) \\\\ \n\n"
+    info << "#{proposal.lead_organizer&.fullname} #{affil(proposal.lead_organizer)} \\\\ \n\n"
     info << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
   end
 
