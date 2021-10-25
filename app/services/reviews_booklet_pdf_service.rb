@@ -90,7 +90,7 @@ class ReviewsBookletPdfService
     @text << "\\pagebreak"
     @text << "\\section*{\\centering #{@code} #{proposal_title(@proposal)} }"
     @text << "\\subsection*{Organizers}\n\n"
-    @text << "\\textbf{#{@proposal.lead_organizer&.fullname} (#{affil(@proposal.lead_organizer)})} \\\\ \n"
+    @text << "\\textbf{#{@proposal.lead_organizer&.fullname} #{affil(@proposal.lead_organizer)}} \\\\ \n"
     confirmed_organizers
   end
 

@@ -147,7 +147,7 @@ class ProposalPdfService
 
   def proposal_lead_organizer
     @text << "\\subsection*{Lead Organizer}\n\n"
-    @text << "#{proposal.lead_organizer&.fullname} (#{affil(proposal.lead_organizer)}) \\\\ \n"
+    @text << "#{proposal.lead_organizer&.fullname} #{affil(proposal.lead_organizer)} \\\\ \n"
     @text << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
     pdf_content
     @text
