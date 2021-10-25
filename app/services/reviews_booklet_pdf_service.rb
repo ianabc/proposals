@@ -9,9 +9,12 @@ class ReviewsBookletPdfService
 
   def generate_booklet
     @number = 0
-    booklet_title_page
+    
     proposals = Proposal.where(id: @proposals_id.split(','))
-    @subjects_with_proposals = proposals.group_by(&:subject_id)
+    year = proposals&.first&.year || Date.current.year + 2
+    booklet_title_page(year)
+    
+    @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
     subject_review_proposals
 
     File.open("#{Rails.root}/tmp/#{@temp_file}", "w:UTF-8") do |io|
@@ -34,13 +37,13 @@ class ReviewsBookletPdfService
     return if @subject.blank?
 
     @number += 1
-    @text << "\\addtocontents{toc}{\ \\textbf{#{@number}. #{@subject&.title}}}"
+    @text << "\\addcontentsline{toc}{chapter}{\ \\large{#{@number}. #{@subject&.title}}}"
   end
 
   def subject_proposals
-    @proposals_objects.each do |proposal|
+    @proposals_objects&.sort_by { |p| p.code }&.each do |proposal|
       @proposal = proposal
-      @code = proposal.code.blank? ? '' : "#{proposal&.code}: "
+      @code = proposal.code.blank? ? '' : "#{proposal.code}: "
       @text << "\\addcontentsline{toc}{section}{ #{@code} #{LatexToPdf.escape_latex(proposal&.title)}}"
       pdf_contents
     end
@@ -73,14 +76,14 @@ class ReviewsBookletPdfService
     delatex(affil)
   end
 
-  def booklet_title_page
+  def booklet_title_page(year)
     @proposal = Proposal.find_by(id: @proposals_id.first)
     @text = "\\thispagestyle{empty}"
     @text << "\\begin{center}"
-    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\n\n\n"
-    @text << "{\\writeblue\\titlefont Banff International
-                Research Station}\n\n\n"
-    @text << "{\\writeblue\\titlefont #{@proposal&.year} Proposals}\n\n\n"
+    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\\\\ \n"
+    @text << "{\\writeblue\\titlefont Banff International\\\\
+                Research Station}\\\\ \n"
+    @text << "{\\writeblue\\titlefont #{year} Proposal Reviews}\\\\\n"
     @text << "\\end{center}\n\n\n"
     @text << "\\pagebreak"
     @text << "\\tableofcontents"
