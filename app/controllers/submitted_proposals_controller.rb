@@ -159,7 +159,7 @@ class SubmittedProposalsController < ApplicationController
       file = File.open(@pdf_path)
       send_file(
         file,
-        filename: "#{filename}",
+        filename: filename,
         type: "application/pdf"
       )
     else
@@ -534,20 +534,21 @@ class SubmittedProposalsController < ApplicationController
 
   def report_errors(errors)
     StaffMailer.with(staff_email: current_user&.email, errors: errors)
-                  .review_file_problems.deliver_later
+               .review_file_problems.deliver_later
   end
 
   def create_reviews_booklet
     @temp_file = "propfile-#{current_user.id}-review-booklet.tex"
     book = ReviewsBook.new(@review_proposal_ids, @temp_file)
     book.generate_booklet
-    year = book.year
+    year = book.year || Date.current.year + 2
     report_errors(book.errors) if book.errors.present?
 
     @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
     @latex_infile = @fh.read
     @latex = "\\begin{document}\n#{@latex_infile}"
     pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
+
     @pdf_path = Rails.root.join("tmp/#{year}-reviews-#{current_user.id}.pdf")
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
