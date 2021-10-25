@@ -28,7 +28,7 @@ module LatexAttachments
       filename = file.filename.to_s.tr('_', '-')
       file_extension = filename.split('.').last.downcase
       file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
-      unless File.exist?(filepath)
+      unless File.exist?(file_path)
         file_errors << "File missing: #{filename}"
         next
       end

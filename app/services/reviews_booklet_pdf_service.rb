@@ -1,5 +1,5 @@
-class ReviewsBookletPdfService
-  attr_reader :proposals_id, :text, :temp_file, :errors
+class ReviewsBook
+  attr_reader :proposals_id, :text, :temp_file, :errors, :year
 
   include LatexAttachments
 
@@ -14,7 +14,7 @@ class ReviewsBookletPdfService
     @number = 0
     
     proposals = Proposal.where(id: @proposals_id.split(','))
-    year = proposals&.first&.year || Date.current.year + 2
+    @year = proposals&.first&.year || Date.current.year + 2
     booklet_title_page(year)
     
     @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
