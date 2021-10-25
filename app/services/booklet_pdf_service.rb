@@ -190,7 +190,7 @@ class BookletPdfService
 
   def lead_organizer_info
     info = "\\subsection*{Lead Organizer}\n\n"
-    info << "#{proposal.lead_organizer&.fullname} (#{affil(proposal.lead_organizer)}) \\\\ \n\n"
+    info << "#{proposal.lead_organizer&.fullname} #{affil(proposal.lead_organizer)} \\\\ \n\n"
     info << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
   end
 
