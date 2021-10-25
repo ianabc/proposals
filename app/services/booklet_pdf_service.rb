@@ -115,7 +115,9 @@ class BookletPdfService
   end
 
   def multiple_proposals_fields
-    title_page
+    year = proposal&.year || Date.current.year + 2
+
+    title_page(year)
     case @table
     when "toc"
       @number = 0
