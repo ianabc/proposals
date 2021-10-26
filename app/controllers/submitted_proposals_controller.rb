@@ -191,6 +191,7 @@ class SubmittedProposalsController < ApplicationController
 
     if @proposal.editflow_id.present?
       proposal_reviews
+      change_proposal_review_status if @proposal.reload.reviews.present?
     else
       @reviews_not_imported << @proposal.status
     end
@@ -460,13 +461,13 @@ class SubmittedProposalsController < ApplicationController
 
       @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: @score,
                            proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id)
-      change_proposal_review_status
+      @review.save
       review_file(review)
     end
   end
 
   def change_proposal_review_status
-    return unless @review.save
+    return if @proposal.decision_pending?
 
     if @proposal.may_pending?
       @proposal.pending!

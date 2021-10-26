@@ -270,6 +270,9 @@ export default class extends Controller {
         }
         else{
           toastr.success(res.message)
+          setTimeout(function() {
+            window.location.reload();
+          }, 1000)
         }
       }).fail(function(response) {
         toastr.error(response.responseText)
