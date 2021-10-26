@@ -88,21 +88,21 @@ class BookletPdfService
   end
 
   def title_page(year)
-    @text = "\\thispagestyle{empty}"
-    @text << "\\begin{center}"
-    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\\\\\n"
-    @text << "{\\writeblue\\titlefont Banff International\\\\
-                Research Station\\\\}"
-    @text << "{\\writeblue\\titlefont #{year} Proposals}\n\n\n"
-    @text << "\\end{center}\n\n\n"
-    @text << "\\pagebreak"
+    @text = "\n\\thispagestyle{empty}\n"
+    @text << "\\begin{center}\n"
+    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\\\\[30pt]\n"
+    @text << "{\\writeblue\\titlefont Banff International\\\\[10pt]
+                Research Station\\\\[0.5in]\n"
+    @text << "#{year} Proposals}\n"
+    @text << "\\end{center}\n\n"
+    @text << "\\newpage\n\n"
   end
 
   def proposal_table_of_content
-    @text << "\\tableofcontents"
-    @text << "\\addtocontents{toc}{\ \\textbf{1. #{proposal.subject&.title}} }"
+    @text << "\\tableofcontents\n"
+    @text << "\\addtocontents{toc}{ \\textbf{1. #{proposal.subject&.title}} }\n"
     @code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-    @text << "\\addcontentsline{toc}{section}{ #{@code} #{proposal_title(proposal)} }"
+    @text << "\\addcontentsline{toc}{section}{ #{@code} #{proposal_title(proposal)} }\n"
     single_proposal_heading
     @text
   end
@@ -163,7 +163,7 @@ class BookletPdfService
     @text << "\\pagebreak"
     if @table == "toc"
       code = proposal.code.blank? ? '' : "#{proposal&.code}: "
-      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }"
+      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)} }\n"
       single_proposal_heading
     else
       proposals_heading
@@ -176,14 +176,14 @@ class BookletPdfService
       proposal = Proposal.find_by(id: id)
       @proposal = proposal
       code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
-      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)}}"
+      @text << "\\section*{\\centering #{code} #{proposal_title(proposal)}}\n "
       single_proposal_heading
       check_no_latex
     end
   end
 
   def single_proposal_heading
-    @text << "\\subsection*{#{proposal.proposal_type&.name} }\n\n"
+    @text << "\n\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << participant_confirmed_count
     @text << lead_organizer_info
     all_text = ProposalPdfService.new(@proposal.id, @temp_file, 'all', @user).booklet_content
@@ -191,7 +191,7 @@ class BookletPdfService
   end
 
   def lead_organizer_info
-    info = "\\subsection*{Lead Organizer}\n\n"
+    info = "\n\\subsection*{Lead Organizer}\n\n"
     info << "#{proposal.lead_organizer&.fullname} #{affil(proposal.lead_organizer)} \\\\ \n\n"
     info << "\\noindent #{delatex(proposal.lead_organizer&.email)}\n\n"
   end
@@ -221,8 +221,7 @@ class BookletPdfService
 
   def participant_confirmed_count
     num_participants = remove_organizers_from_participants&.count || 0
-    "#{num_participants} confirmed /
-     #{proposal.proposal_type&.participant} maximum participants \\\\ \n".squish
+    "#{num_participants} confirmed / #{proposal.proposal_type&.participant} maximum participants \\\\ \n"
   end
 
   def check_no_latex

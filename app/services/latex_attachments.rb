@@ -34,7 +34,8 @@ module LatexAttachments
       end
 
       if file_extension == 'txt' || file_extension == 'text'
-        text << "\\noindent File Attachment #{num += 1}: #{File.read(file_path)} \n\n\n"
+        text_content = LatexToPdf.escape_latex(File.read(file_path))
+        text << "\\noindent File Attachment #{num += 1}: #{text_content} \n\n\n"
       elsif file_extension == 'pdf'
         full_filename = write_attachment_file(File.read(file_path), filename,
                                               proposal)
