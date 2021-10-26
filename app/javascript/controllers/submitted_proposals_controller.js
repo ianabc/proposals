@@ -317,6 +317,34 @@ export default class extends Controller {
     })
   }
 
+  addFile(evt) {
+    let dataset = evt.currentTarget.dataset
+    if(evt.target.files) {
+      var data = new FormData()
+      var f = evt.target.files[0]
+      var ext = f.name.split('.').pop();
+      if ( ext == "pdf" || ext == "txt" || ext == "text") {
+        data.append("file", f)
+        var url = `/reviews/${dataset.reviewId}/add_file`
+        Rails.ajax({
+          url,
+          type: "POST",
+          data,
+          success: () => {
+            location.reload(true)
+            toastr.success('File is attached successfully.')
+          },
+          error: (response) => {
+            toastr.error(response.errors)
+          }
+        })
+      }
+      else {
+        toastr.error('Only .pdf and .text will be attached')
+      }
+    }
+  }
+
   reviewsExcelBooklet() {
     var proposalIds = [];
     $("input:checked").each(function() {

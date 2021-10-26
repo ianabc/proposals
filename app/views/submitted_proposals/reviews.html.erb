@@ -43,6 +43,9 @@
                         </span>
                       </h3>
                     <% end %>
+                    <div class="float-end">
+                      <input type="file" id="review-file" name="review-file", data-action="submitted-proposals#addFile" data-review-id="<%= review.id %>" >
+                    </div>
                   </div>
                 <% end %>
               <% end %>
