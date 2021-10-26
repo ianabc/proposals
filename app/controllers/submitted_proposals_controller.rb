@@ -479,6 +479,8 @@ class SubmittedProposalsController < ApplicationController
   def review_file(review)
     @review_files = []
     review["reports"]&.each do |report|
+      next if report["fileID"].blank?
+
       review_file_url(report["fileID"])
       @review_files << report["fileID"]
     end
