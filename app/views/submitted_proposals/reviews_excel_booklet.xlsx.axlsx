@@ -49,8 +49,19 @@ wb.add_worksheet(:name => "2022") do |sheet|
       end
 
       reviews = proposal.reviews.where(is_quick: true)
+      scores = reviews.map(&:score)
+      scores.compact!
+      reviewers_count = reviews.count
+      score = 0
+      scores.each do |s|
+        score += s
+      end
+      scientific_grade = 0
+      scientific_grade = score / reviewers_count unless reviewers_count.eql?(0)
       edi = Axlsx::RichText.new
-      edi.add_run("Total reviews: #{reviews.count}")
+      edi.add_run("Total reviews: #{reviewers_count}")
+      edi.add_run("\n")
+      edi.add_run("Average EDI Score: #{scientific_grade}")
       edi.add_run("\n")
       reviewer_number = 0
       reviews.each do |review|
