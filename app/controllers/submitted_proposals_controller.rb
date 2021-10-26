@@ -153,17 +153,17 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def download_review_booklet
-    # @pdf_path is set in create_reviews_booklet
-    if File.exist?(@pdf_path)
-      filename = @pdf_path.split('/').last
-      file = File.open(@pdf_path)
+    pdf_file = Rails.root.join('tmp/booklet-reviews.pdf')
+    filename = '2023-proposal-reviews.pdf' # temp
+    if File.exist?(pdf_file)
+      file = File.open(pdf_file)
       send_file(
         file,
         filename: filename,
         type: "application/pdf"
       )
     else
-      render json: "File not found: #{@pdf_path}"
+      render json: "File not found: #{pdf_file}"
     end
   end
 
@@ -541,7 +541,7 @@ class SubmittedProposalsController < ApplicationController
     @temp_file = "propfile-#{current_user.id}-review-booklet.tex"
     book = ReviewsBook.new(@review_proposal_ids, @temp_file)
     book.generate_booklet
-    year = book.year || (Date.current.year + 2)
+    #year = book.year || (Date.current.year + 2)
     report_errors(book.errors) if book.errors.present?
 
     @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
@@ -549,7 +549,8 @@ class SubmittedProposalsController < ApplicationController
     @latex = "\\begin{document}\n#{@latex_infile}"
     pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
 
-    @pdf_path = Rails.root.join("tmp/#{year}-reviews-#{current_user.id}.pdf")
+    #@pdf_path = Rails.root.join("tmp/#{year}-reviews-#{current_user.id}.pdf")
+    @pdf_path = Rails.root.join('tmp/booklet-reviews.pdf')
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
