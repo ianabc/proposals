@@ -168,9 +168,9 @@ export default class extends Controller {
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
         function() {
           document.getElementById("proposal_booklet").click();
-          toastr.success('Booklet successfully created.')
+          toastr.success('Proposals book successfully created.')
       }).fail(function() {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       })
     }
   }
@@ -270,6 +270,9 @@ export default class extends Controller {
         }
         else{
           toastr.success(res.message)
+          setTimeout(function() {
+            window.location.reload();
+          }, 1000)
         }
       }).fail(function(response) {
         toastr.error(response.responseText)
@@ -293,7 +296,7 @@ export default class extends Controller {
           document.getElementById("reviews_booklet").click();
           toastr.success('Review Booklet successfully created.')
       }).fail(function() {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       })
     }
   }
@@ -312,9 +315,19 @@ export default class extends Controller {
         toastr.success('Comment has successfully been removed.')
       },
       error: () => {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       }
     })
+  }
+
+  addFile(evt) {
+    let dataset = evt.currentTarget.dataset
+    if(evt.target.files) {
+      var data = new FormData()
+      var f = evt.target.files[0]
+      var ext = f.name.split('.').pop();
+      this.sendRequest(ext, data, f, dataset)
+    }
   }
 
   reviewsExcelBooklet() {
@@ -329,6 +342,28 @@ export default class extends Controller {
     else {
       proposalIds = proposalIds.slice(1)
       window.location = `/submitted_proposals/reviews_excel_booklet.xlsx?proposals=${proposalIds}`
+    }
+  }
+
+  sendRequest(ext, data, f, dataset) {
+    if( ext === "pdf" || ext === "txt" || ext === "text") {
+      data.append("file", f)
+      var url = `/reviews/${dataset.reviewId}/add_file`
+      Rails.ajax({
+        url,
+        type: "POST",
+        data,
+        success: () => {
+          location.reload(true)
+          toastr.success('File is attached successfully.')
+        },
+        error: (response) => {
+          toastr.error(response.errors)
+        }
+      })
+    }
+    else {
+      toastr.error('Only .pdf and .txt files are allowed.')
     }
   }
 }

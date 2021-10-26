@@ -153,17 +153,17 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def download_review_booklet
-    # @pdf_path is set in create_reviews_booklet
-    if File.exist?(@pdf_path)
-      filename = @pdf_path.split('/').last
-      file = File.open(@pdf_path)
+    pdf_file = Rails.root.join('tmp/booklet-reviews.pdf')
+    filename = '2023-proposal-reviews.pdf' # temp
+    if File.exist?(pdf_file)
+      file = File.open(pdf_file)
       send_file(
         file,
         filename: filename,
         type: "application/pdf"
       )
     else
-      render json: "File not found: #{@pdf_path}"
+      render json: "File not found: #{pdf_file}"
     end
   end
 
@@ -191,6 +191,7 @@ class SubmittedProposalsController < ApplicationController
 
     if @proposal.editflow_id.present?
       proposal_reviews
+      change_proposal_review_status if @proposal.reload.reviews.present?
     else
       @reviews_not_imported << @proposal.status
     end
@@ -460,25 +461,27 @@ class SubmittedProposalsController < ApplicationController
 
       @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: @score,
                            proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id)
-      change_proposal_review_status
+      @review.save
       review_file(review)
     end
   end
 
   def change_proposal_review_status
-    return unless @review.save
+    return if @proposal.decision_pending?
 
     if @proposal.may_pending?
       @proposal.pending!
     else
-      @reviews_not_imported << @proposal.status
-      @statuses << @proposal.status
+      @reviews_not_imported << @proposal.status if @reviews_not_imported.present?
+      @statuses << @proposal.status if @statuses.present?
     end
   end
 
   def review_file(review)
     @review_files = []
     review["reports"]&.each do |report|
+      next if report["fileID"].blank?
+
       review_file_url(report["fileID"])
       @review_files << report["fileID"]
     end
@@ -541,7 +544,7 @@ class SubmittedProposalsController < ApplicationController
     @temp_file = "propfile-#{current_user.id}-review-booklet.tex"
     book = ReviewsBook.new(@review_proposal_ids, @temp_file)
     book.generate_booklet
-    year = book.year || (Date.current.year + 2)
+    # year = book.year || (Date.current.year + 2)
     report_errors(book.errors) if book.errors.present?
 
     @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
@@ -549,7 +552,8 @@ class SubmittedProposalsController < ApplicationController
     @latex = "\\begin{document}\n#{@latex_infile}"
     pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
 
-    @pdf_path = Rails.root.join("tmp/#{year}-reviews-#{current_user.id}.pdf")
+    # @pdf_path = Rails.root.join("tmp/#{year}-reviews-#{current_user.id}.pdf")
+    @pdf_path = Rails.root.join('tmp/booklet-reviews.pdf')
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
