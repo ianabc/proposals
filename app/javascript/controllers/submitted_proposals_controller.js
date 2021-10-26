@@ -323,25 +323,7 @@ export default class extends Controller {
       var data = new FormData()
       var f = evt.target.files[0]
       var ext = f.name.split('.').pop();
-      if ( ext == "pdf" || ext == "txt" || ext == "text") {
-        data.append("file", f)
-        var url = `/reviews/${dataset.reviewId}/add_file`
-        Rails.ajax({
-          url,
-          type: "POST",
-          data,
-          success: () => {
-            location.reload(true)
-            toastr.success('File is attached successfully.')
-          },
-          error: (response) => {
-            toastr.error(response.errors)
-          }
-        })
-      }
-      else {
-        toastr.error('Only .pdf and .text will be attached')
-      }
+      this.sendRequest(ext, data, f, dataset)
     }
   }
 
@@ -357,6 +339,28 @@ export default class extends Controller {
     else {
       proposalIds = proposalIds.slice(1)
       window.location = `/submitted_proposals/reviews_excel_booklet.xlsx?proposals=${proposalIds}`
+    }
+  }
+
+  sendRequest(ext, data, f, dataset) {
+    if( ext === "pdf" || ext === "txt" || ext === "text") {
+      data.append("file", f)
+      var url = `/reviews/${dataset.reviewId}/add_file`
+      Rails.ajax({
+        url,
+        type: "POST",
+        data,
+        success: () => {
+          location.reload(true)
+          toastr.success('File is attached successfully.')
+        },
+        error: (response) => {
+          toastr.error(response.errors)
+        }
+      })
+    }
+    else {
+      toastr.error('Only .pdf and .text will be attached')
     }
   }
 }
