@@ -168,9 +168,9 @@ export default class extends Controller {
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
         function() {
           document.getElementById("proposal_booklet").click();
-          toastr.success('Booklet successfully created.')
+          toastr.success('Proposals book successfully created.')
       }).fail(function() {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       })
     }
   }
@@ -293,7 +293,7 @@ export default class extends Controller {
           document.getElementById("reviews_booklet").click();
           toastr.success('Review Booklet successfully created.')
       }).fail(function() {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       })
     }
   }
@@ -312,7 +312,7 @@ export default class extends Controller {
         toastr.success('Comment has successfully been removed.')
       },
       error: () => {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       }
     })
   }
@@ -360,7 +360,7 @@ export default class extends Controller {
       })
     }
     else {
-      toastr.error('Only .pdf and .text will be attached')
+      toastr.error('Only .pdf and .txt files are allowed.')
     }
   }
 }
