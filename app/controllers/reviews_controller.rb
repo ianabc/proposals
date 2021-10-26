@@ -10,6 +10,16 @@ class ReviewsController < ApplicationController
     end
   end
 
+  def add_file
+    file = params[:file]
+    if @review.file_type(file)
+      @review.files.attach(file)
+      render json: {}, status: :ok
+    else
+      render json: { errors: "File format not supported" }, status: :bad_request
+    end
+  end
+
   private
 
   def set_review
