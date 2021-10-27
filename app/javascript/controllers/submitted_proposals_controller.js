@@ -5,14 +5,11 @@ import Tagify from '@yaireo/tagify'
 
 export default class extends Controller {
   static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus',
-                     'organizersEmail' ]
+                     'organizersEmail', 'bothReviews', 'scientificReviews', 'ediReviews' ]
 
   connect () {
     let proposalId = 0
-    if(this.hasTocTarget) {
-      this.tocTarget.checked = true;
-    }
-    else if (this.hasOrganizersEmailTarget) {
+    if (this.hasOrganizersEmailTarget) {
       var inputElm = this.organizersEmailTarget,
       tagify = new Tagify (inputElm);
     }
@@ -137,6 +134,9 @@ export default class extends Controller {
   }
 
   tableOfContent() {
+    if(this.hasTocTarget) {
+      this.tocTarget.checked = true;
+    }
     var array = [];
     $("input:checked").each(function() {
       array.push(this.dataset.value);
@@ -280,24 +280,60 @@ export default class extends Controller {
     }
   }
 
+  reviewsContent() {
+    if(this.hasBothReviewsTarget) {
+      this.bothReviewsTarget.checked = true;
+    }
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[0] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      $("#review-window").modal('show')
+    }
+  }
+
   reviewsBooklet() {
     var proposalIds = [];
     $("input:checked").each(function() {
       proposalIds.push(this.dataset.value);
     });
-    if(typeof proposalIds[1] === "undefined")
-    {
-      toastr.error("Please select any checkbox!")
+    let content = ''
+    if(this.bothReviewsTarget.checked) {
+      content = "both"
+    }
+    else if(this.scientificReviewsTarget.checked) {
+      content = "scientific"
     }
     else {
-      proposalIds = proposalIds.slice(1)
-      $.post(`/submitted_proposals/reviews_booklet?proposals=${proposalIds}`,
-        function() {
+      content = "edi"
+    }
+    this.createReviewsBooklet(content, proposalIds)
+  }
+
+  createReviewsBooklet(content, proposalIds) {
+    if(content !== '') {
+      $.ajax({
+        url: `/submitted_proposals/reviews_booklet?content=${content}`,
+        type: 'POST',
+        data: {
+          'proposals': proposalIds
+        },
+        success: () => {
           document.getElementById("reviews_booklet").click();
           toastr.success('Review Booklet successfully created.')
-      }).fail(function() {
-        toastr.error('Something went wrong.')
+        },
+        error: () => {
+          toastr.error('Something went wrong.')
+        }
       })
+    }
+    else {
+      toastr.error('Something went wrong.')
     }
   }
 
