@@ -102,6 +102,10 @@ class SubmittedProposalsController < ApplicationController
     @counter = @proposal_ids.split(',').count
     create_file
     head :ok
+  rescue ActionView::Template::Error => e
+    render json: { message: e.cause.log.lines.last(20).first(10).join("\n") }, status: :internal_server_error
+  rescue StandardError => e
+    render json: backtrace_error(e), status: :internal_server_error
   end
 
   def download_booklet
