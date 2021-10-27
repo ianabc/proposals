@@ -9,15 +9,9 @@ export default class extends Controller {
 
   connect () {
     let proposalId = 0
-    if(this.hasTocTarget) {
-      this.tocTarget.checked = true;
-    }
-    else if (this.hasOrganizersEmailTarget) {
+    if (this.hasOrganizersEmailTarget) {
       var inputElm = this.organizersEmailTarget,
       tagify = new Tagify (inputElm);
-    }
-    if(this.hasBothReviewsTarget) {
-      this.bothReviewsTarget.checked = true;
     }
   }
 
@@ -140,6 +134,9 @@ export default class extends Controller {
   }
 
   tableOfContent() {
+    if(this.hasTocTarget) {
+      this.tocTarget.checked = true;
+    }
     var array = [];
     $("input:checked").each(function() {
       array.push(this.dataset.value);
@@ -284,11 +281,14 @@ export default class extends Controller {
   }
 
   reviewsContent() {
+    if(this.hasBothReviewsTarget) {
+      this.bothReviewsTarget.checked = true;
+    }
     var proposalIds = [];
     $("input:checked").each(function() {
       proposalIds.push(this.dataset.value);
     });
-    if(typeof proposalIds[1] === "undefined")
+    if(typeof proposalIds[0] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
@@ -317,7 +317,6 @@ export default class extends Controller {
 
   createReviewsBooklet(content, proposalIds) {
     if(content !== '') {
-      proposalIds = proposalIds.slice(1)
       $.ajax({
         url: `/submitted_proposals/reviews_booklet?content=${content}`,
         type: 'POST',
