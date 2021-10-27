@@ -1,16 +1,17 @@
 wb = xlsx_package.workbook
 s = wb.styles
 wrap_text = s.add_style(b: true, sz: 36, alignment: { horizontal: :center, vertical: :center, wrap_text: true })
+wrap_reviews_text = s.add_style(sz: 16, alignment: { vertical: :center, wrap_text: true })
 bold = s.add_style(b: true, sz: 16)
-font_size = s.add_style(sz: 16)
 
-wb.add_worksheet(:name => "2022") do |sheet|
+@year = @proposals&.first&.year || Date.current.year + 2
+wb.add_worksheet(:name => "#{@year}") do |sheet|
   sheet.add_row([''], height: 60)
   sheet.add_row([''], :height => 60)
   sheet.add_row ['BANFF INTERNATIONAL'], style: wrap_text, height: 60
   sheet.add_row ['RESEARCH STATION'], style: wrap_text, height: 60
   sheet.add_row([''], :height => 60)
-  sheet.add_row ['2022 PROPOSAL SELECTIONS'], style: wrap_text, height: 60
+  sheet.add_row ["#{@year} PROPOSAL SELECTIONS"], style: wrap_text, height: 60
 
   sheet.merge_cells('A3:G3')
   sheet.merge_cells('A4:G4')
@@ -32,12 +33,24 @@ wb.add_worksheet(:name => "2022") do |sheet|
     end
 
     sheet.add_row [subject, 'Site', 'Rank', 'Scientific Reviews', 'Past Reviews',
-                      'EDI Reviews'], style: bold, height: 30
+                      'EDI Reviews', 'Comments'], style: bold, height: 30
     props&.sort_by{ |p| p.title }&.each do |proposal|
       code_title = "#{proposal&.code}: #{proposal&.title} (#{proposal.lead_organizer&.fullname})"
+
       reviews = proposal.reviews&.where(is_quick: false)
+      scores = reviews.map(&:score)
+      scores&.compact!
+      reviewers_count = scores&.count
+      score = 0
+      scores.each do |s|
+        score += s
+      end
+      scientific_grade = 0
+      scientific_grade = score / reviewers_count unless reviewers_count.eql?(0)
       sc = Axlsx::RichText.new
-      sc.add_run("Total reviews: #{reviews.count}")
+      sc.add_run("Average Scientific Score: #{scientific_grade}")
+      sc.add_run("\n")
+      sc.add_run("Total reviews: #{reviewers_count}")
       sc.add_run("\n")
       reviewer_number = 0
       reviews.each do |review|
@@ -50,18 +63,18 @@ wb.add_worksheet(:name => "2022") do |sheet|
 
       reviews = proposal.reviews.where(is_quick: true)
       scores = reviews.map(&:score)
-      scores.compact!
-      reviewers_count = reviews.count
+      scores&.compact!
+      reviewers_count = scores&.count
       score = 0
       scores.each do |s|
         score += s
       end
-      scientific_grade = 0
-      scientific_grade = score / reviewers_count unless reviewers_count.eql?(0)
+      edi_grade = 0
+      edi_grade = score / reviewers_count unless reviewers_count.eql?(0)
       edi = Axlsx::RichText.new
-      edi.add_run("Total reviews: #{reviewers_count}")
+      edi.add_run("Average EDI Score: #{edi_grade}")
       edi.add_run("\n")
-      edi.add_run("Average EDI Score: #{scientific_grade}")
+      edi.add_run("Total reviews: #{reviewers_count}")
       edi.add_run("\n")
       reviewer_number = 0
       reviews.each do |review|
@@ -71,7 +84,8 @@ wb.add_worksheet(:name => "2022") do |sheet|
         edi.add_run("Reviewer #{reviewer_number}: #{review.score}")
         edi.add_run("\n")
       end
-      sheet.add_row [code_title, 'BIRS', '', sc, '', edi], style: font_size, height: 65
+      location = proposal.locations&.first
+      sheet.add_row [code_title, location&.name, '', sc, '', edi], style: wrap_reviews_text, height: 90
     end
     sheet.add_row ['']
     sheet.add_row ['']
