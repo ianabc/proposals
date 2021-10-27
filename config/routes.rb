@@ -36,9 +36,10 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :reviews, only: [] do 
-    member do 
+  resources :reviews, only: [] do
+    member do
       delete :remove_file
+      post :add_file
     end
   end
 

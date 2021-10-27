@@ -14,7 +14,7 @@
 
                 <div class="tab-content">
                   <div class="tab-pane active" id="tab-1" role="tabpanel">
-                    <%= render partial: "person_data" %>
+                    <%= render partial: "person_data" if @person %>
                   </div>
                   
                   <div class="tab-pane" id="tab-2" role="tabpanel">

@@ -1,0 +1,32 @@
+<div class="modal fade" id="review-window" tabindex="-1" aria-labelledby="review-windowLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reviews Booklet Content</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-justify" style="text-align: justify;">
+        <div class="mb-3">
+          <h4> Do you want? </h4>
+        </div>
+        <div>
+          <input type="radio" name="toc" data-submitted-proposals-target="bothReviews" id="both">
+          <label for="both">Both Scientific and EDI Reviews</label>
+        </div>
+        <div>
+          <input type="radio" name="toc" data-submitted-proposals-target="scientificReviews" id="scientific">
+          <label for="scientific">Scientific Reviews</label>
+        </div>
+        <div>
+          <input type="radio" name="toc" data-submitted-proposals-target="ediReviews" id="edi">
+          <label for="edi">EDI Reviews</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-secondary my-2" data-action="click->submitted-proposals#reviewsBooklet">Ok</a>
+        <a target="_blank" hidden="true" id="reviews_booklet" href="/submitted_proposals/download_review_booklet.pdf">Download Reviews Booklet</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

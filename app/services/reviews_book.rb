@@ -1,22 +1,23 @@
 class ReviewsBook
-  attr_reader :proposals_id, :text, :temp_file, :errors, :year
+  attr_reader :proposals_id, :text, :temp_file, :errors, :year, :content_type
 
   include LatexAttachments
 
-  def initialize(proposals_id, temp_file)
+  def initialize(proposals_id, temp_file, content_type)
     @proposals_id = proposals_id
     @text = ""
     @temp_file = temp_file
     @errors = []
+    @content_type = content_type
   end
 
   def generate_booklet
     @number = 0
-    
+
     proposals = Proposal.where(id: @proposals_id.split(','))
-    @year = proposals&.first&.year || Date.current.year + 2
+    @year = proposals&.first&.year || (Date.current.year + 2)
     booklet_title_page(year)
-    
+
     @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
     subject_review_proposals
 
@@ -55,7 +56,6 @@ class ReviewsBook
   def pdf_contents
     organizers_list
     average_grade
-    proposal_review
   end
 
   def proposal_title(proposal)
@@ -80,16 +80,14 @@ class ReviewsBook
   end
 
   def booklet_title_page(year)
-    @proposal = Proposal.find_by(id: @proposals_id.first)
-    @text = "\\thispagestyle{empty}"
-    @text << "\\begin{center}"
-    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\\\\ \n"
-    @text << "{\\writeblue\\titlefont Banff International\\\\
-                Research Station}\\\\ \n"
-    @text << "{\\writeblue\\titlefont #{year} Proposal Reviews}\\\\\n"
-    @text << "\\end{center}\n\n\n"
-    @text << "\\pagebreak"
-    @text << "\\tableofcontents"
+    @text = "\n\\thispagestyle{empty}\n"
+    @text << "\\begin{center}\n"
+    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\\\\[30pt]\n"
+    @text << "{\\writeblue\\titlefont Banff International\\\\[10pt]
+                Research Station\\\\[0.5in]\n"
+    @text << "#{year} Proposals}\n"
+    @text << "\\end{center}\n\n"
+    @text << "\\newpage\n\n"
   end
 
   def organizers_list
@@ -107,29 +105,53 @@ class ReviewsBook
   end
 
   def average_grade
-    scores = @proposal.reviews.map(&:score)
-    scores.compact!
-    @reviewers_count = @proposal.reviews.count
+    scientific_grade_reviews if @content_type == "both" || @content_type == "scientific"
+    edi_grade_reviews if @content_type == "both" || @content_type == "edi"
+  end
+
+  def scientific_grade_reviews
+    reviews = @proposal.reviews&.where(is_quick: false)
+    score = reviews_scores(reviews)
+    scientific_grade = 0
+    scientific_grade = score / @reviewers_count unless @reviewers_count.eql?(0)
+    @text << "\\subsection*{Overall Average Scientific Grade: #{scientific_grade}}\n\n\n"
+    graded_reviews
+    proposal_review(reviews)
+  end
+
+  def edi_grade_reviews
+    reviews = @proposal.reviews&.where(is_quick: true)
+    score = reviews_scores(reviews)
+    edi_grade = 0
+    edi_grade = score / @reviewers_count unless @reviewers_count.eql?(0)
+    @text << "\\subsection*{Overall Average EDI Grade: #{edi_grade}}\n\n\n"
+    graded_reviews
+    proposal_review(reviews)
+  end
+
+  def reviews_scores(reviews)
+    scores = reviews.map(&:score)
+    scores&.compact!
+    @reviewers_count = 0
+    @reviewers_count = scores&.count
     score = 0
     scores.each do |s|
       score += s
     end
-    scientific_grade = score / @reviewers_count unless @reviewers_count.eql?(0)
-    @text << "\\subsection*{Overall Average Scientific Grade: #{scientific_grade}}\n\n\n"
-    graded_reviews
+    score
   end
 
   def graded_reviews
     @text << "\\noindent Total number of graded reviews: #{@reviewers_count}\n\n\n"
   end
 
-  def proposal_review
+  def proposal_review(reviews)
     @table = 0
-    @proposal.reviews.each do |review|
-      grade = (review.score.nil? || review.score.eql?(0)) ? 'N/A' : review.score
+    reviews.each do |review|
+      next if review.score.nil? || review.score.eql?(0)
 
       @table += 1
-      @text << "\\subsection*{#{@table}. Grade: #{grade} (#{review.reviewer_name})}\n\n"
+      @text << "\\subsection*{#{@table}. Grade: #{review.score} (#{review.reviewer_name})}\n\n"
       review_comments(review) if review.file_ids.present?
     end
   end
@@ -140,7 +162,7 @@ class ReviewsBook
 
     latex, file_errors = add_review_attachments(review, @text, @proposal,
                                                 @errors)
-    @errors = file_errors unless file_errors.blank?
-    @text = latex unless latex.blank?
+    @errors = file_errors if file_errors.present?
+    @text = latex if latex.present?
   end
 end

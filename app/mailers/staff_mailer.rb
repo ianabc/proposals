@@ -6,10 +6,10 @@ class StaffMailer < ApplicationMailer
     @body = "The Proposals software can only build a review book out of reviews
              that are in PDF or TXT format. Other files will need to be
               re-uploaded to EditFlow as PDF files of the same name.\n\n".squish
-    @body << "Problem files:\n"
+    @body << " Problem files:\n"
 
     errors.each do |error|
-      @body << "* #{error}"
+      @body << "* #{error}\n"
     end
 
     mail(to: to_email, subject: "BIRS Proposal Reviews file problems")

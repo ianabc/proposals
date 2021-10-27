@@ -5,14 +5,11 @@ import Tagify from '@yaireo/tagify'
 
 export default class extends Controller {
   static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus',
-                     'organizersEmail' ]
+                     'organizersEmail', 'bothReviews', 'scientificReviews', 'ediReviews' ]
 
   connect () {
     let proposalId = 0
-    if(this.hasTocTarget) {
-      this.tocTarget.checked = true;
-    }
-    else if (this.hasOrganizersEmailTarget) {
+    if (this.hasOrganizersEmailTarget) {
       var inputElm = this.organizersEmailTarget,
       tagify = new Tagify (inputElm);
     }
@@ -137,6 +134,9 @@ export default class extends Controller {
   }
 
   tableOfContent() {
+    if(this.hasTocTarget) {
+      this.tocTarget.checked = true;
+    }
     var array = [];
     $("input:checked").each(function() {
       array.push(this.dataset.value);
@@ -168,9 +168,9 @@ export default class extends Controller {
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
         function() {
           document.getElementById("proposal_booklet").click();
-          toastr.success('Booklet successfully created.')
+          toastr.success('Proposals book successfully created.')
       }).fail(function() {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       })
     }
   }
@@ -270,10 +270,30 @@ export default class extends Controller {
         }
         else{
           toastr.success(res.message)
+          setTimeout(function() {
+            window.location.reload();
+          }, 1000)
         }
       }).fail(function(response) {
         toastr.error(response.responseText)
       })
+    }
+  }
+
+  reviewsContent() {
+    if(this.hasBothReviewsTarget) {
+      this.bothReviewsTarget.checked = true;
+    }
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[0] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      $("#review-window").modal('show')
     }
   }
 
@@ -282,19 +302,38 @@ export default class extends Controller {
     $("input:checked").each(function() {
       proposalIds.push(this.dataset.value);
     });
-    if(typeof proposalIds[1] === "undefined")
-    {
-      toastr.error("Please select any checkbox!")
+    let content = ''
+    if(this.bothReviewsTarget.checked) {
+      content = "both"
+    }
+    else if(this.scientificReviewsTarget.checked) {
+      content = "scientific"
     }
     else {
-      proposalIds = proposalIds.slice(1)
-      $.post(`/submitted_proposals/reviews_booklet?proposals=${proposalIds}`,
-        function() {
+      content = "edi"
+    }
+    this.createReviewsBooklet(content, proposalIds)
+  }
+
+  createReviewsBooklet(content, proposalIds) {
+    if(content !== '') {
+      $.ajax({
+        url: `/submitted_proposals/reviews_booklet?content=${content}`,
+        type: 'POST',
+        data: {
+          'proposals': proposalIds
+        },
+        success: () => {
           document.getElementById("reviews_booklet").click();
           toastr.success('Review Booklet successfully created.')
-      }).fail(function() {
-        toastr.error('There is something went wrong.')
+        },
+        error: () => {
+          toastr.error('Something went wrong.')
+        }
       })
+    }
+    else {
+      toastr.error('Something went wrong.')
     }
   }
 
@@ -312,9 +351,19 @@ export default class extends Controller {
         toastr.success('Comment has successfully been removed.')
       },
       error: () => {
-        toastr.error('There is something went wrong.')
+        toastr.error('Something went wrong.')
       }
     })
+  }
+
+  addFile(evt) {
+    let dataset = evt.currentTarget.dataset
+    if(evt.target.files) {
+      var data = new FormData()
+      var f = evt.target.files[0]
+      var ext = f.name.split('.').pop();
+      this.sendRequest(ext, data, f, dataset)
+    }
   }
 
   reviewsExcelBooklet() {
@@ -329,6 +378,28 @@ export default class extends Controller {
     else {
       proposalIds = proposalIds.slice(1)
       window.location = `/submitted_proposals/reviews_excel_booklet.xlsx?proposals=${proposalIds}`
+    }
+  }
+
+  sendRequest(ext, data, f, dataset) {
+    if( ext === "pdf" || ext === "txt" || ext === "text") {
+      data.append("file", f)
+      var url = `/reviews/${dataset.reviewId}/add_file`
+      Rails.ajax({
+        url,
+        type: "POST",
+        data,
+        success: () => {
+          location.reload(true)
+          toastr.success('File is attached successfully.')
+        },
+        error: (response) => {
+          toastr.error(response.errors)
+        }
+      })
+    }
+    else {
+      toastr.error('Only .pdf and .txt files are allowed.')
     }
   }
 }
