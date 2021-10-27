@@ -518,7 +518,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def check_proposals_reviews
-    @proposal_ids.each do |id|
+    @proposal_ids&.split(',')&.each do |id|
       @proposal = Proposal.find_by(id: id)
       reviews_conditions
     end

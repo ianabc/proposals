@@ -80,16 +80,14 @@ class ReviewsBook
   end
 
   def booklet_title_page(year)
-    @proposal = Proposal.find_by(id: @proposals_id.first)
-    @text = "\\thispagestyle{empty}"
-    @text << "\\begin{center}"
-    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\\\\ \n"
-    @text << "{\\writeblue\\titlefont Banff International\\\\
-                Research Station}\\\\ \n"
-    @text << "{\\writeblue\\titlefont #{year} Proposal Reviews}\\\\\n"
-    @text << "\\end{center}\n\n\n"
-    @text << "\\pagebreak"
-    @text << "\\tableofcontents"
+    @text = "\n\\thispagestyle{empty}\n"
+    @text << "\\begin{center}\n"
+    @text << "\\includegraphics[width=4in]{birs_logo.jpg}\\\\[30pt]\n"
+    @text << "{\\writeblue\\titlefont Banff International\\\\[10pt]
+                Research Station\\\\[0.5in]\n"
+    @text << "#{year} Proposals}\n"
+    @text << "\\end{center}\n\n"
+    @text << "\\newpage\n\n"
   end
 
   def organizers_list
@@ -115,7 +113,7 @@ class ReviewsBook
     reviews = @proposal.reviews&.where(is_quick: false)
     score = reviews_scores(reviews)
     scientific_grade = 0
-    scientific_grade = score / @reviewers_count unless @reviewers_count.eql?(0)
+    scientific_grade = score / @reviewers_count.to_f unless @reviewers_count.eql?(0)
     @text << "\\subsection*{Overall Average Scientific Grade: #{scientific_grade}}\n\n\n"
     graded_reviews
     proposal_review(reviews)
@@ -125,7 +123,7 @@ class ReviewsBook
     reviews = @proposal.reviews&.where(is_quick: true)
     score = reviews_scores(reviews)
     edi_grade = 0
-    edi_grade = score / @reviewers_count unless @reviewers_count.eql?(0)
+    edi_grade = score / @reviewers_count.to_f unless @reviewers_count.eql?(0)
     @text << "\\subsection*{Overall Average EDI Grade: #{edi_grade}}\n\n\n"
     graded_reviews
     proposal_review(reviews)
