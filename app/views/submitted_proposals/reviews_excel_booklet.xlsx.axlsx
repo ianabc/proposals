@@ -46,7 +46,7 @@ wb.add_worksheet(:name => "#{@year}") do |sheet|
         score += s
       end
       scientific_grade = 0
-      scientific_grade = score / reviewers_count unless reviewers_count.eql?(0)
+      scientific_grade = score / reviewers_count.to_f unless reviewers_count.eql?(0)
       sc = Axlsx::RichText.new
       sc.add_run("Average Scientific Score: #{scientific_grade}")
       sc.add_run("\n")
@@ -70,7 +70,7 @@ wb.add_worksheet(:name => "#{@year}") do |sheet|
         score += s
       end
       edi_grade = 0
-      edi_grade = score / reviewers_count unless reviewers_count.eql?(0)
+      edi_grade = score / reviewers_count.to_f unless reviewers_count.eql?(0)
       edi = Axlsx::RichText.new
       edi.add_run("Average EDI Score: #{edi_grade}")
       edi.add_run("\n")
@@ -84,8 +84,15 @@ wb.add_worksheet(:name => "#{@year}") do |sheet|
         edi.add_run("Reviewer #{reviewer_number}: #{review.score}")
         edi.add_run("\n")
       end
-      location = proposal.locations&.first
-      sheet.add_row [code_title, location&.name, '', sc, '', edi], style: wrap_reviews_text, height: 90
+
+      location = Axlsx::RichText.new
+
+      proposal.locations&.each do |loc|
+       location.add_run(loc.name)
+       location.add_run("\n")
+      end
+
+      sheet.add_row [code_title, location, '', sc, '', edi], style: wrap_reviews_text, height: 90
     end
     sheet.add_row ['']
     sheet.add_row ['']
