@@ -154,6 +154,10 @@ class SubmittedProposalsController < ApplicationController
 
     check_selected_proposals
     create_reviews_booklet
+  rescue ActionView::Template::Error => e
+    render json: { message: e.cause.log.lines.last(20).first(10).join("\n") }, status: :internal_server_error
+  rescue StandardError => e
+    render json: backtrace_error(e), status: :internal_server_error
   end
 
   def download_review_booklet

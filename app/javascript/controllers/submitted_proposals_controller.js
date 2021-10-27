@@ -295,8 +295,8 @@ export default class extends Controller {
         function() {
           document.getElementById("reviews_booklet").click();
           toastr.success('Review Booklet successfully created.')
-      }).fail(function() {
-        toastr.error('Something went wrong.')
+      }).fail(function(res) {
+        toastr.error(res.responseJSON.message)
       })
     }
   }
