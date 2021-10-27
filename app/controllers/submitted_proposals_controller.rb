@@ -518,7 +518,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def check_proposals_reviews
-    @proposal_ids.split(',').each do |id|
+    @proposal_ids.each do |id|
       @proposal = Proposal.find_by(id: id)
       reviews_conditions
     end
@@ -542,11 +542,16 @@ class SubmittedProposalsController < ApplicationController
 
   def create_reviews_booklet
     @temp_file = "propfile-#{current_user.id}-review-booklet.tex"
-    book = ReviewsBook.new(@review_proposal_ids, @temp_file)
+    content_type = params[:content]
+    book = ReviewsBook.new(@review_proposal_ids, @temp_file, content_type)
     book.generate_booklet
     # year = book.year || (Date.current.year + 2)
     report_errors(book.errors) if book.errors.present?
 
+    read_write_file
+  end
+
+  def read_write_file
     @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
     @latex_infile = @fh.read
     @latex = "\\begin{document}\n#{@latex_infile}"

@@ -59,6 +59,7 @@
                 <div class="tab-content">
                   <div class="tab-pane active" id="tab-1" role="tabpanel">
                     <div class="text-end m-3">
+                      <%= render 'review_booklet_window' %>
                       <%= render 'table_window' %>
                     </div>
                     <%= render partial: "proposals" %>
@@ -79,8 +80,7 @@
                     <div class="text-end m-3">
                       <% if check_review_privilege %>
                         <span data-action="click->submitted-proposals#reviewsExcelBooklet" class="btn btn-primary">Create Reviews Excel Booklet</span>
-                        <a target="_blank" hidden="true" id="reviews_booklet" href="/submitted_proposals/download_review_booklet.pdf">Download Booklet</a>
-                        <span data-action="click->submitted-proposals#reviewsBooklet" class="btn btn-primary">Create Reviews Booklet</span>
+                        <span data-action="click->submitted-proposals#reviewsContent" class="btn btn-primary">Create Reviews Booklet</span>
                         <span data-action="click->submitted-proposals#importReviews" class="btn btn-primary">Import Reviews</span>
                       <% end %>
                     </div>

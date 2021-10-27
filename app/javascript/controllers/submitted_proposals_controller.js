@@ -5,7 +5,7 @@ import Tagify from '@yaireo/tagify'
 
 export default class extends Controller {
   static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus',
-                     'organizersEmail' ]
+                     'organizersEmail', 'bothReviews', 'scientificReviews', 'ediReviews' ]
 
   connect () {
     let proposalId = 0
@@ -15,6 +15,9 @@ export default class extends Controller {
     else if (this.hasOrganizersEmailTarget) {
       var inputElm = this.organizersEmailTarget,
       tagify = new Tagify (inputElm);
+    }
+    if(this.hasBothReviewsTarget) {
+      this.bothReviewsTarget.checked = true;
     }
   }
 
@@ -280,7 +283,7 @@ export default class extends Controller {
     }
   }
 
-  reviewsBooklet() {
+  reviewsContent() {
     var proposalIds = [];
     $("input:checked").each(function() {
       proposalIds.push(this.dataset.value);
@@ -290,14 +293,48 @@ export default class extends Controller {
       toastr.error("Please select any checkbox!")
     }
     else {
+      $("#review-window").modal('show')
+    }
+  }
+
+  reviewsBooklet() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    let content = ''
+    if(this.bothReviewsTarget.checked) {
+      content = "both"
+    }
+    else if(this.scientificReviewsTarget.checked) {
+      content = "scientific"
+    }
+    else {
+      content = "edi"
+    }
+    this.createReviewsBooklet(content, proposalIds)
+  }
+
+  createReviewsBooklet(content, proposalIds) {
+    if(content !== '') {
       proposalIds = proposalIds.slice(1)
-      $.post(`/submitted_proposals/reviews_booklet?proposals=${proposalIds}`,
-        function() {
+      $.ajax({
+        url: `/submitted_proposals/reviews_booklet?content=${content}`,
+        type: 'POST',
+        data: {
+          'proposals': proposalIds
+        },
+        success: () => {
           document.getElementById("reviews_booklet").click();
           toastr.success('Review Booklet successfully created.')
-      }).fail(function() {
-        toastr.error('Something went wrong.')
+        },
+        error: () => {
+          toastr.error('Something went wrong.')
+        }
       })
+    }
+    else {
+      toastr.error('Something went wrong.')
     }
   }
 
