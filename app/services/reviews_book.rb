@@ -113,7 +113,7 @@ class ReviewsBook
     reviews = @proposal.reviews&.where(is_quick: false)
     score = reviews_scores(reviews)
     scientific_grade = 0
-    scientific_grade = score / @reviewers_count unless @reviewers_count.eql?(0)
+    scientific_grade = score / @reviewers_count.to_f unless @reviewers_count.eql?(0)
     @text << "\\subsection*{Overall Average Scientific Grade: #{scientific_grade}}\n\n\n"
     graded_reviews
     proposal_review(reviews)
@@ -123,7 +123,7 @@ class ReviewsBook
     reviews = @proposal.reviews&.where(is_quick: true)
     score = reviews_scores(reviews)
     edi_grade = 0
-    edi_grade = score / @reviewers_count unless @reviewers_count.eql?(0)
+    edi_grade = score / @reviewers_count.to_f unless @reviewers_count.eql?(0)
     @text << "\\subsection*{Overall Average EDI Grade: #{edi_grade}}\n\n\n"
     graded_reviews
     proposal_review(reviews)
