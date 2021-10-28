@@ -479,13 +479,16 @@ class SubmittedProposalsController < ApplicationController
 
   def review_file(review)
     @review_files = []
+    @review_dates = []
     review["reports"]&.each do |report|
       next if report["fileID"].blank?
 
       review_file_url(report["fileID"])
       @review_files << report["fileID"]
+      date = Time.at(report["dateReported"])
+      @review_dates << date
     end
-    @review.update(file_ids: @review_files.join(', '))
+    @review.update(file_ids: @review_files.join(', '), review_date: @review_dates.join(', '))
   end
 
   def review_file_url(file_id)
