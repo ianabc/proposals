@@ -34,6 +34,16 @@
 \usepackage{graphicx}
 \graphicspath{{<%= "#{Rails.root}/app/assets/images/" %>}}
 
+% problem unicode characters
+\DeclareUnicodeCharacter{2028}{\linebreak}
+\DeclareUnicodeCharacter{03B5}{$\epsilon$}
+\DeclareUnicodeCharacter{03B4}{$\delta$}
+\DeclareUnicodeCharacter{2264}{$\leq$}
+\DeclareUnicodeCharacter{6731}{}
+\DeclareUnicodeCharacter{6625}{}
+\DeclareUnicodeCharacter{94A2}{}
+
+
 \DeclareMathOperator{\Gal}{Gal}
 \DeclareMathOperator{\SL}{SL}
 \DeclareMathOperator\ed{\mathrm{ed}}
