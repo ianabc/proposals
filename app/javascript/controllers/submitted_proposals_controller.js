@@ -338,8 +338,8 @@ export default class extends Controller {
         type: 'POST',
         data: {
           'proposals': proposalIds,
-          'table': table,
-          'reviewContentType': reviewContentType
+          table,
+          reviewContentType
         },
         success: () => {
           document.getElementById("reviews_booklet").click();
