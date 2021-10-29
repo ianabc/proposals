@@ -96,6 +96,6 @@ module SubmittedProposalsHelper
 
   def review_dates(review)
     date = review.review_date
-    date.split(', ').join("<br>\n").html_safe
+    date.split(', ')
   end
 end

@@ -485,7 +485,7 @@ class SubmittedProposalsController < ApplicationController
 
       review_file_url(report["fileID"])
       @review_files << report["fileID"]
-      date = Time.at(report["dateReported"])
+      date = Time.zone.at(report["dateReported"])
       @review_dates << date
     end
     @review.update(file_ids: @review_files.join(', '), review_date: @review_dates.join(', '))
