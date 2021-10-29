@@ -5,7 +5,8 @@ import Tagify from '@yaireo/tagify'
 
 export default class extends Controller {
   static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus',
-                     'organizersEmail', 'bothReviews', 'scientificReviews', 'ediReviews' ]
+                     'organizersEmail', 'bothReviews', 'scientificReviews', 'ediReviews',
+                     'reviewToc', 'reviewNToc' ]
 
   connect () {
     let proposalId = 0
@@ -257,12 +258,11 @@ export default class extends Controller {
     $("input:checked").each(function() {
       proposalIds.push(this.dataset.value);
     });
-    if(typeof proposalIds[1] === "undefined")
+    if(typeof proposalIds[0] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
     else {
-      proposalIds = proposalIds.slice(1)
       $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function(response) {
         let res = JSON.parse(response)
         if(res.type === "alert") {
@@ -281,8 +281,9 @@ export default class extends Controller {
   }
 
   reviewsContent() {
-    if(this.hasBothReviewsTarget) {
+    if(this.hasBothReviewsTarget && this.hasReviewTocTarget) {
       this.bothReviewsTarget.checked = true;
+      this.reviewTocTarget.checked = true;
     }
     var proposalIds = [];
     $("input:checked").each(function() {
@@ -302,26 +303,43 @@ export default class extends Controller {
     $("input:checked").each(function() {
       proposalIds.push(this.dataset.value);
     });
-    let content = ''
-    if(this.bothReviewsTarget.checked) {
-      content = "both"
-    }
-    else if(this.scientificReviewsTarget.checked) {
-      content = "scientific"
-    }
-    else {
-      content = "edi"
-    }
-    this.createReviewsBooklet(content, proposalIds)
+    this.checkReviewType(proposalIds)
   }
 
-  createReviewsBooklet(content, proposalIds) {
-    if(content !== '') {
+  checkReviewType(proposalIds) {
+    let reviewContentType = ''
+    if(this.bothReviewsTarget.checked) {
+      reviewContentType = "both"
+    }
+    else if(this.scientificReviewsTarget.checked) {
+      reviewContentType = "scientific"
+    }
+    else {
+      reviewContentType = "edi"
+    }
+    this.checkTableContentType(reviewContentType, proposalIds)
+  }
+
+  checkTableContentType(reviewContentType, proposalIds) {
+    let table = ''
+    if(this.reviewTocTarget.checked) {
+      table = "toc"
+    }
+    else {
+      table = "ntoc"
+    }
+    this.createReviewsBooklet(reviewContentType, proposalIds, table)
+  }
+
+  createReviewsBooklet(reviewContentType, proposalIds, table) {
+    if(reviewContentType !== '') {
       $.ajax({
-        url: `/submitted_proposals/reviews_booklet?content=${content}`,
+        url: `/submitted_proposals/reviews_booklet`,
         type: 'POST',
         data: {
-          'proposals': proposalIds
+          'proposals': proposalIds,
+          'table': table,
+          'reviewContentType': reviewContentType
         },
         success: () => {
           document.getElementById("reviews_booklet").click();
@@ -371,12 +389,11 @@ export default class extends Controller {
     $("input:checked").each(function() {
       proposalIds.push(this.dataset.value);
     });
-    if(typeof proposalIds[1] === "undefined")
+    if(typeof proposalIds[0] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
     else {
-      proposalIds = proposalIds.slice(1)
       window.location = `/submitted_proposals/reviews_excel_booklet.xlsx?proposals=${proposalIds}`
     }
   }
