@@ -16,18 +16,17 @@ export default class extends Controller {
   }
 
   editFlow() {
-    var array = [];
+    var proposalIds = [];
     $("input:checked").each(function() {
-      array.push(this.dataset.value);
+      proposalIds.push(this.dataset.value);
     });
-    if(typeof array[1] === "undefined")
+    if(typeof proposalIds[0] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
     else {
-      array = array.slice(1)
       let data = new FormData()
-      data.append("ids", array)
+      data.append("ids", proposalIds)
       var url = `/submitted_proposals/edit_flow`
       Rails.ajax({
         url,
@@ -65,11 +64,11 @@ export default class extends Controller {
   emailModal() {
     event.preventDefault()
 
-    var array = [];
+    var proposalIds = [];
     $("input:checked").each(function() {
-      array.push(this.dataset.value);
+      proposalIds.push(this.dataset.value);
     });
-    if(typeof array[1] === "undefined")
+    if(typeof proposalIds[0] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
@@ -95,14 +94,12 @@ export default class extends Controller {
   sendEmails(event) {
     event.preventDefault();
 
-    var array = [];
+    var proposalIds = [];
     $("input:checked").each(function() {
-      array.push(this.dataset.value);
+      proposalIds.push(this.dataset.value);
     });
     if(this.templatesTarget.value) {
-      array = array.slice(1)
-      array = this.checkArray(array)
-      $.post(`/submitted_proposals/approve_decline_proposals?proposal_ids=${array}`,
+      $.post(`/submitted_proposals/approve_decline_proposals?proposal_ids=${proposalIds}`,
         $("#approve_decline_proposals").serialize(), function() {
           toastr.success("Emails have been sent!")
           setTimeout(function() {
@@ -122,31 +119,20 @@ export default class extends Controller {
     }
   }
 
-  checkArray(array) {
-    let length = array.length
-    if(typeof array [`${length - 1}`] === "undefined" && typeof array [`${length - 2}`] === "undefined") {
-      array = array.slice(0, length-2)
-    }
-    else if(length > 1 && typeof array [`${length - 1}`] === "undefined") {
-      array = array.slice(0, length-1)
-    }
-    return array
-  }
-
   tableOfContent() {
     if(this.hasTocTarget) {
       this.tocTarget.checked = true;
     }
-    var array = [];
+    var proposalIds = [];
     $("input:checked").each(function() {
-      array.push(this.dataset.value);
+      proposalIds.push(this.dataset.value);
     });
-    if(typeof array[1] === "undefined")
+    if(typeof proposalIds[1] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
     else {
-      $.post(`/submitted_proposals/table_of_content?proposals=${array}`,
+      $.post(`/submitted_proposals/table_of_content?proposals=${proposalIds}`,
         $('form#submitted-proposal').serialize(), function(data) {
           $('#proposals').text(data.proposals)
           $("#table-window").modal('show')
@@ -242,16 +228,16 @@ export default class extends Controller {
   }
 
   downloadCSV() {
-    var array = [];
+    var proposalIds = [];
     $("input:checked").each(function() {
-      array.push(this.dataset.value);
+      proposalIds.push(this.dataset.value);
     });
-    if(typeof array[1] === "undefined")
+    if(typeof proposalIds[0] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
     else {
-      let selectedProposals = array.filter((x) => typeof x !== "undefined")
+      let selectedProposals = proposalIds.filter((x) => typeof x !== "undefined")
       window.location = `/submitted_proposals/download_csv.csv?ids=${selectedProposals}`
     }
   }
@@ -261,12 +247,11 @@ export default class extends Controller {
     $("input:checked").each(function() {
       proposalIds.push(this.dataset.value);
     });
-    if(typeof proposalIds[1] === "undefined")
+    if(typeof proposalIds[0] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
     else {
-      proposalIds = proposalIds.slice(1)
       $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function(response) {
         let res = JSON.parse(response)
         if(res.type === "alert") {
@@ -379,12 +364,11 @@ export default class extends Controller {
     $("input:checked").each(function() {
       proposalIds.push(this.dataset.value);
     });
-    if(typeof proposalIds[1] === "undefined")
+    if(typeof proposalIds[0] === "undefined")
     {
       toastr.error("Please select any checkbox!")
     }
     else {
-      proposalIds = proposalIds.slice(1)
       window.location = `/submitted_proposals/reviews_excel_booklet.xlsx?proposals=${proposalIds}`
     }
   }

@@ -93,4 +93,9 @@ module SubmittedProposalsHelper
   def organizers_email(proposal)
     proposal.invites.where(invited_as: 'Organizer').map(&:person).map(&:email)
   end
+
+  def review_dates(review)
+    date = review.review_date
+    date.split(', ')
+  end
 end

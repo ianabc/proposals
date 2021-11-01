@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_21_101532) do
+ActiveRecord::Schema.define(version: 2021_10_28_083305) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -360,7 +360,7 @@ ActiveRecord::Schema.define(version: 2021_10_21_101532) do
   end
 
   create_table "reviews", force: :cascade do |t|
-    t.datetime "review_date"
+    t.string "review_date"
     t.bigint "proposal_id", null: false
     t.bigint "person_id", null: false
     t.datetime "created_at", precision: 6, null: false
