@@ -519,7 +519,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def check_proposals_reviews
-    return unless @proposal_ids.present?
+    return if @proposal_ids.blank?
 
     pids = @proposal_ids.is_a?(String) ? @proposal_ids.split(',') : @proposal_ids
     pids.each do |id|
@@ -559,8 +559,6 @@ class SubmittedProposalsController < ApplicationController
     @latex = "\\begin{document}\n#{@latex_infile}"
     pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
     @pdf_path = Rails.root.join("tmp/proposal-reviews-#{current_user.id}.pdf")
-
-    File.delete(@pdf_path) if File.exist?(@pdf_path)
 
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
