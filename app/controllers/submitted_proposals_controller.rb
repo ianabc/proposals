@@ -480,13 +480,16 @@ class SubmittedProposalsController < ApplicationController
 
   def review_file(review)
     @review_files = []
+    @review_dates = []
     review["reports"]&.each do |report|
       next if report["fileID"].blank?
 
       review_file_url(report["fileID"])
       @review_files << report["fileID"]
+      date = Time.zone.at(report["dateReported"])
+      @review_dates << date
     end
-    @review.update(file_ids: @review_files.join(', '))
+    @review.update(file_ids: @review_files.join(', '), review_date: @review_dates.join(', '))
   end
 
   def review_file_url(file_id)
@@ -545,9 +548,10 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def create_reviews_booklet
-    @temp_file = "review-booklet-#{current_user.id}.tex"
-    content_type = params[:content]
-    book = ReviewsBook.new(@review_proposal_ids, @temp_file, content_type)
+    @temp_file = "propfile-#{current_user.id}-review-booklet.tex"
+    content_type = params[:reviewContentType]
+    table = params[:table]
+    book = ReviewsBook.new(@review_proposal_ids, @temp_file, content_type, table)
     book.generate_booklet
     report_errors(book.errors) if book.errors.present?
     read_write_file
