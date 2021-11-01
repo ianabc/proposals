@@ -62,9 +62,6 @@ module LatexAttachments
     [text, file_errors]
   end
 
-  def has_pdf_version?(review, filename)
-
-
   def add_file_to_tex(num, filename, full_filename)
     # scale first page 0.8 to avoid the page content overlapping the heading
     tex = "\\includepdf[scale=0.8,pages=1,pagecommand={\\subsection*
