@@ -154,7 +154,7 @@ class SubmittedProposalsController < ApplicationController
 
   def download_review_booklet
     pdf_file = Rails.root.join("tmp/proposal-reviews-#{current_user.id}.pdf")
-    year = Date.current.year
+    year = Date.current.year + 2
     filename = "#{year}-proposal-reviews.pdf"
     if File.exist?(pdf_file)
       file = File.open(pdf_file)
