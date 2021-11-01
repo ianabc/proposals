@@ -165,12 +165,16 @@ export default class extends Controller {
       table = "ntoc"
     }
     if(table !== '') {
+      document.getElementById('spinner').classList.add("active")
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
         function() {
           document.getElementById("proposal_booklet").click();
           toastr.success('Proposals book successfully created.')
       }).fail(function() {
         toastr.error('Something went wrong.')
+      })
+      .always(function() {
+        document.getElementById('spinner').classList.remove("active")
       })
     }
   }
@@ -317,6 +321,7 @@ export default class extends Controller {
 
   createReviewsBooklet(content, proposalIds) {
     if(content !== '') {
+      document.getElementById('spinner').classList.add("active")
       $.ajax({
         url: `/submitted_proposals/reviews_booklet?content=${content}`,
         type: 'POST',
@@ -329,6 +334,9 @@ export default class extends Controller {
         },
         error: () => {
           toastr.error('Something went wrong.')
+        },
+        complete: ()=> {
+          document.getElementById('spinner').classList.remove("active")
         }
       })
     }
