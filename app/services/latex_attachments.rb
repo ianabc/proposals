@@ -20,16 +20,26 @@ module LatexAttachments
     [text, file_errors]
   end
 
+  def file_extension(filename)
+    filename.split('.').last.downcase
+  end
+
+  # e.g. is there a PDF version of BIRS-210925-Smith-v1-Report-129020.docx?
+  def pdf_version?(filename, base_name)
+    (filename.gsub(/-(\d+)\.(.+)$/, '') == base_name) &&
+    (file_extension(filename) == 'pdf')
+  end
+
   def add_review_attachments(review, text, proposal, file_errors)
     file_errors ||= []
     text ||= ''
 
     review.files.each_with_index do |file, num|
       filename = file.filename.to_s.tr('_', '-')
-      file_extension = filename.split('.').last.downcase
+      file_extension = file_extension(filename)
       file_path = ActiveStorage::Blob.service.send(:path_for, file.key)
       unless File.exist?(file_path)
-        file_errors << "File missing: #{filename}"
+        file_errors << "#{proposal.code} file missing: #{file.filename}"
         next
       end
 
@@ -41,13 +51,19 @@ module LatexAttachments
                                               proposal)
         text << add_file_to_tex(num, filename, full_filename)
       else
-        # warn user of non-pdf file
-        file_errors << "Non-PDF file: #{filename}"
+        # warn user of non-pdf file, if there is no corresponding pdf version
+        fname = file.filename.to_s.gsub(/-(\d+)\.(.+)$/, '')
+        unless review.files.detect { |f| pdf_version?(f.filename.to_s, fname) }
+          file_errors << "#{proposal.code} non-PDF file: #{file.filename}"
+        end
       end
     end
 
     [text, file_errors]
   end
+
+  def has_pdf_version?(review, filename)
+
 
   def add_file_to_tex(num, filename, full_filename)
     # scale first page 0.8 to avoid the page content overlapping the heading
