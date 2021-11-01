@@ -1,25 +1,29 @@
 class ReviewsBook
-  attr_reader :proposals_id, :text, :temp_file, :errors, :year, :content_type
+  attr_reader :proposals_id, :text, :temp_file, :errors, :year, :content_type, :table
 
   include LatexAttachments
 
-  def initialize(proposals_id, temp_file, content_type)
+  def initialize(proposals_id, temp_file, content_type, table)
     @proposals_id = proposals_id
     @text = ""
     @temp_file = temp_file
     @errors = []
     @content_type = content_type
+    @table = table
   end
 
   def generate_booklet
     @number = 0
 
-    proposals = Proposal.where(id: @proposals_id.split(','))
-    @year = proposals&.first&.year || (Date.current.year + 2)
+    @proposals = Proposal.where(id: @proposals_id)
+    @year = @proposals&.first&.year || (Date.current.year + 2)
     booklet_title_page(year)
 
-    @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
-    subject_review_proposals
+    if @table == "toc"
+      reviews_with_contents
+    else
+      reviews_without_contents
+    end
 
     File.open("#{Rails.root}/tmp/#{@temp_file}", "w:UTF-8") do |io|
       io.write(@text)
@@ -28,8 +32,10 @@ class ReviewsBook
 
   private
 
-  def subject_review_proposals
-    @subjects_with_proposals.each do |subject|
+  def reviews_with_contents
+    @text << "\\tableofcontents"
+    subjects_with_proposals = @proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
+    subjects_with_proposals.each do |subject|
       @subject = Subject.find_by(id: subject.first)
       check_subject
       @proposals_objects = subject.last
@@ -37,18 +43,25 @@ class ReviewsBook
     end
   end
 
+  def reviews_without_contents
+    @proposals.each do |proposal|
+      @proposal = proposal
+      pdf_contents
+    end
+  end
+
   def check_subject
     return if @subject.blank?
 
     @number += 1
-    @text << "\\addcontentsline{toc}{chapter}{\ \\large{#{@number}. #{@subject&.title}}}"
+    @text << "\\addcontentsline{toc}{chapter}{\ \\large{#{@number}. #{@subject&.title}}}\n\n"
   end
 
   def subject_proposals
     @proposals_objects&.sort_by { |p| p.code }&.each do |proposal|
       @proposal = proposal
       @code = proposal.code.blank? ? '' : "#{proposal.code}: "
-      @text << "\\addcontentsline{toc}{section}{ #{@code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+      @text << "\\addcontentsline{toc}{section}{ #{@code} #{delatex(proposal&.title)}}\n\n"
       pdf_contents
     end
   end
@@ -91,8 +104,8 @@ class ReviewsBook
   end
 
   def organizers_list
-    @text << "\\pagebreak"
-    @text << "\\section*{\\centering #{@code} #{proposal_title(@proposal)} }"
+    @text << "\\pagebreak\n\n"
+    @text << "\\section*{\\centering #{@code} #{delatex(proposal_title(@proposal))} }\n\n"
     @text << "\\subsection*{Organizers}\n\n"
     @text << "\\textbf{#{@proposal.lead_organizer&.fullname} #{affil(@proposal.lead_organizer)}} \\\\ \n"
     confirmed_organizers
@@ -113,7 +126,7 @@ class ReviewsBook
     reviews = @proposal.reviews&.where(is_quick: false)
     score = reviews_scores(reviews)
     scientific_grade = 0
-    scientific_grade = score / @reviewers_count unless @reviewers_count.eql?(0)
+    scientific_grade = (score / @reviewers_count.to_f).round(2) unless @reviewers_count.eql?(0)
     @text << "\\subsection*{Overall Average Scientific Grade: #{scientific_grade}}\n\n\n"
     graded_reviews
     proposal_review(reviews)
@@ -123,7 +136,7 @@ class ReviewsBook
     reviews = @proposal.reviews&.where(is_quick: true)
     score = reviews_scores(reviews)
     edi_grade = 0
-    edi_grade = score / @reviewers_count unless @reviewers_count.eql?(0)
+    edi_grade = (score / @reviewers_count.to_f).round(2) unless @reviewers_count.eql?(0)
     @text << "\\subsection*{Overall Average EDI Grade: #{edi_grade}}\n\n\n"
     graded_reviews
     proposal_review(reviews)
