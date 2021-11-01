@@ -98,7 +98,7 @@ class ReviewsBook
     @text << "\\includegraphics[width=4in]{birs_logo.jpg}\\\\[30pt]\n"
     @text << "{\\writeblue\\titlefont Banff International\\\\[10pt]
                 Research Station\\\\[0.5in]\n"
-    @text << "#{year} Proposals}\n"
+    @text << "#{year} Proposal Reviews}\n"
     @text << "\\end{center}\n\n"
     @text << "\\newpage\n\n"
   end

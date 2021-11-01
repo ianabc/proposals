@@ -55,6 +55,15 @@
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{corollary}[theorem]{Corollary}
 
+% problem unicode characters
+\DeclareUnicodeCharacter{2028}{\linebreak}
+\DeclareUnicodeCharacter{03B5}{$\epsilon$}
+\DeclareUnicodeCharacter{03B4}{$\delta$}
+\DeclareUnicodeCharacter{2264}{$\leq$}
+\DeclareUnicodeCharacter{6731}{}
+\DeclareUnicodeCharacter{6625}{}
+\DeclareUnicodeCharacter{94A2}{}
+
 % 22w5057
 \usepackage[table]{xcolor}
 \usepackage{geometry}
