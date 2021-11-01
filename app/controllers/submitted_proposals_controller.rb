@@ -153,8 +153,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def download_review_booklet
-    pdf_file = Rails.root.join('tmp/booklet-reviews.pdf')
-    filename = '2023-proposal-reviews.pdf' # temp
+    pdf_file = Rails.root.join("tmp/proposal-reviews-#{current_user.id}.pdf")
+    year = Date.current.year + 2
+    filename = "#{year}-proposal-reviews.pdf"
     if File.exist?(pdf_file)
       file = File.open(pdf_file)
       send_file(
@@ -521,6 +522,8 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def check_proposals_reviews
+    return if @proposal_ids.blank?
+
     pids = @proposal_ids.is_a?(String) ? @proposal_ids.split(',') : @proposal_ids
     pids.each do |id|
       @proposal = Proposal.find_by(id: id)
@@ -550,9 +553,7 @@ class SubmittedProposalsController < ApplicationController
     table = params[:table]
     book = ReviewsBook.new(@review_proposal_ids, @temp_file, content_type, table)
     book.generate_booklet
-    # year = book.year || (Date.current.year + 2)
     report_errors(book.errors) if book.errors.present?
-
     read_write_file
   end
 
@@ -561,9 +562,8 @@ class SubmittedProposalsController < ApplicationController
     @latex_infile = @fh.read
     @latex = "\\begin{document}\n#{@latex_infile}"
     pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
+    @pdf_path = Rails.root.join("tmp/proposal-reviews-#{current_user.id}.pdf")
 
-    # @pdf_path = Rails.root.join("tmp/#{year}-reviews-#{current_user.id}.pdf")
-    @pdf_path = Rails.root.join('tmp/booklet-reviews.pdf')
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
