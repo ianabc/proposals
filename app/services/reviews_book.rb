@@ -54,14 +54,14 @@ class ReviewsBook
     return if @subject.blank?
 
     @number += 1
-    @text << "\\addcontentsline{toc}{chapter}{\ \\large{#{@number}. #{@subject&.title}}}"
+    @text << "\\addcontentsline{toc}{chapter}{\ \\large{#{@number}. #{@subject&.title}}}\n\n"
   end
 
   def subject_proposals
     @proposals_objects&.sort_by { |p| p.code }&.each do |proposal|
       @proposal = proposal
       @code = proposal.code.blank? ? '' : "#{proposal.code}: "
-      @text << "\\addcontentsline{toc}{section}{ #{@code} #{LatexToPdf.escape_latex(proposal&.title)}}"
+      @text << "\\addcontentsline{toc}{section}{ #{@code} #{delatex(proposal&.title)}}\n\n"
       pdf_contents
     end
   end
@@ -104,8 +104,8 @@ class ReviewsBook
   end
 
   def organizers_list
-    @text << "\\pagebreak"
-    @text << "\\section*{\\centering #{@code} #{proposal_title(@proposal)} }"
+    @text << "\\pagebreak\n\n"
+    @text << "\\section*{\\centering #{@code} #{delatex(proposal_title(@proposal))} }\n\n"
     @text << "\\subsection*{Organizers}\n\n"
     @text << "\\textbf{#{@proposal.lead_organizer&.fullname} #{affil(@proposal.lead_organizer)}} \\\\ \n"
     confirmed_organizers
