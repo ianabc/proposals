@@ -27,7 +27,7 @@ module LatexAttachments
   # e.g. is there a PDF version of BIRS-210925-Smith-v1-Report-129020.docx?
   def pdf_version?(filename, base_name)
     (filename.gsub(/-(\d+)\.(.+)$/, '') == base_name) &&
-    (file_extension(filename) == 'pdf')
+      (file_extension(filename) == 'pdf')
   end
 
   def add_review_attachments(review, text, proposal, file_errors)
