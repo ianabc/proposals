@@ -335,7 +335,7 @@ export default class extends Controller {
         error: () => {
           toastr.error('Something went wrong.')
         },
-        complete: ()=> {
+        complete: () => {
           document.getElementById('spinner').classList.remove("active")
         }
       })
