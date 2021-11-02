@@ -10,6 +10,7 @@ class SubmittedProposalsController < ApplicationController
 
   def show
     @proposal.review! if @proposal.may_review?
+    log_activity(@proposal)
   end
 
   def edit
@@ -18,6 +19,7 @@ class SubmittedProposalsController < ApplicationController
 
   def download_csv
     @proposals = Proposal.where(id: params[:ids].split(','))
+    log_activities(@proposals)
     send_data Proposal.to_csv(@proposals), filename: "submitted_proposals.csv"
   end
 
@@ -139,6 +141,7 @@ class SubmittedProposalsController < ApplicationController
     proposals = params[:proposals]
     proposals.split(',').each do |id|
       import_proposal_reviews(id)
+      log_activity(Proposal.find(id))
     end
     import_message
   rescue StandardError => e
@@ -175,6 +178,7 @@ class SubmittedProposalsController < ApplicationController
 
     check_selected_proposals
     @proposals = Proposal.where(id: params[:proposals].split(','))
+    log_activities(@proposals)
     respond_to do |format|
       format.xlsx
     end
@@ -567,5 +571,22 @@ class SubmittedProposalsController < ApplicationController
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
+  end
+
+  def log_activities(proposals)
+    proposals.each do |proposal|
+     log_activity(proposal)
+    end
+  end
+
+  def log_activity(proposal)
+    data = {
+      logable: proposal,
+      user: current_user,
+      data: {
+        action: params[:action].humanize
+      }
+    }
+    Log.create!(data)
   end
 end

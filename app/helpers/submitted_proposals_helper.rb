@@ -98,4 +98,9 @@ module SubmittedProposalsHelper
     date = review.review_date
     date.split(', ')
   end
+
+  def proposal_logs(proposal)
+    logs = proposal.answers.map(&:logs).reject { |x| x.empty? } + proposal.logs
+    logs.flatten.sort_by{|log| -log.created_at.to_i} 
+  end
 end

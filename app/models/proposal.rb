@@ -1,6 +1,8 @@
 class Proposal < ApplicationRecord
   include AASM
   include PgSearch::Model
+  include Logable
+
   pg_search_scope :search_proposals, against: %i[title code],
                                      associated_against: {
                                        people: %i[firstname lastname]
@@ -15,6 +17,7 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposal_year, against: %i[year]
 
   attr_accessor :is_submission, :allow_late_submission
+  after_commit :log_activity
 
   has_many_attached :files
   has_many :proposal_locations, dependent: :destroy
@@ -252,5 +255,11 @@ class Proposal < ApplicationRecord
     attributes.each do |key, value|
       self[key] = value.strip if value.respond_to?(:strip)
     end
+  end
+
+  def log_activity
+    return if previous_changes.empty?
+
+    audit!(user: User.current)
   end
 end
