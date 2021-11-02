@@ -100,6 +100,6 @@ module SubmittedProposalsHelper
 
   def proposal_logs(proposal)
     logs = proposal.answers.map(&:logs).reject(&:empty?) + proposal.logs
-    logs.flatten.sort_by{ |log| -log.created_at.to_i }/answer.rb
+    logs.flatten.sort_by{ |log| -log.created_at.to_i }
   end
 end
