@@ -5,11 +5,15 @@ class SubmittedProposalsController < ApplicationController
   before_action :set_proposal, except: %i[index download_csv import_reviews
                                           reviews_booklet reviews_excel_booklet]
   before_action :template_params, only: %i[approve_decline_proposals]
+  before_action :check_reviews_permissions, only: %i[import_reviews
+                                                     reviews_booklet
+                                                     reviews_excel_booklet]
 
   def index; end
 
   def show
     @proposal.review! if @proposal.may_review?
+    log_activity(@proposal)
   end
 
   def edit
@@ -18,6 +22,7 @@ class SubmittedProposalsController < ApplicationController
 
   def download_csv
     @proposals = Proposal.where(id: params[:ids].split(','))
+    log_activities(@proposals)
     send_data Proposal.to_csv(@proposals), filename: "submitted_proposals.csv"
   end
 
@@ -131,14 +136,12 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def import_reviews
-    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
-
     @reviews_not_imported = []
     @statuses = []
 
-    proposals = params[:proposals]
-    proposals.split(',').each do |id|
+    params[:proposals].split(',').each do |id|
       import_proposal_reviews(id)
+      log_activity(Proposal.find(id))
     end
     import_message
   rescue StandardError => e
@@ -146,8 +149,6 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def reviews_booklet
-    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
-
     check_selected_proposals
     create_reviews_booklet
   end
@@ -171,10 +172,9 @@ class SubmittedProposalsController < ApplicationController
   def reviews; end
 
   def reviews_excel_booklet
-    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
-
     check_selected_proposals
     @proposals = Proposal.where(id: params[:proposals].split(','))
+    log_activities(@proposals)
     respond_to do |format|
       format.xlsx
     end
@@ -567,5 +567,24 @@ class SubmittedProposalsController < ApplicationController
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
+  end
+
+  def log_activities(proposals)
+    proposals.map { |proposal| log_activity(proposal) }
+  end
+
+  def log_activity(proposal)
+    data = {
+      logable: proposal,
+      user: current_user,
+      data: {
+        action: params[:action].humanize
+      }
+    }
+    Log.create!(data)
+  end
+
+  def check_reviews_permissions
+    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
   end
 end

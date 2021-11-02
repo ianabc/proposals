@@ -36,7 +36,9 @@ class ProposalsController < ApplicationController
     end
   end
 
-  def show; end
+  def show
+    log_activity(@proposal)
+  end
 
   def edit
     @proposal.invites.build
@@ -209,5 +211,16 @@ class ProposalsController < ApplicationController
               (current_user.staff_member? || current_user.lead_organizer?(@proposal))
 
     raise CanCan::AccessDenied
+  end
+
+  def log_activity(proposal)
+    data = {
+      logable: proposal,
+      user: current_user,
+      data: {
+        action: params[:action].humanize
+      }
+    }
+    Log.create!(data)
   end
 end
