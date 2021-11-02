@@ -36,7 +36,6 @@ module SubmittedProposalsHelper
     data.values
   end
 
-  # rubocop:disable Metrics/AbcSize
   def submitted_career_data(param, param2, proposals)
     data = Hash.new(0)
     proposals&.each do |proposal|
@@ -53,7 +52,6 @@ module SubmittedProposalsHelper
     data
   end
 
-  # rubocop:enable Metrics/AbcSize
   def submitted_career_labels(proposals)
     data = submitted_career_data("academic_status", "other_academic_status",
                                  proposals)
@@ -69,7 +67,8 @@ module SubmittedProposalsHelper
   def submitted_stem_graph_data(proposals)
     data = Hash.new(0)
     proposals&.each do |proposal|
-      citizenships = proposal.demographics_data.pluck(:result).pluck("stem").flatten.reject do |s|
+      citizenships = proposal.demographics_data.pluck(:result).pluck("stem")
+                             .flatten.reject do |s|
         s.blank? || s.eql?("Other")
       end
 
@@ -100,7 +99,7 @@ module SubmittedProposalsHelper
   end
 
   def proposal_logs(proposal)
-    logs = proposal.answers.map(&:logs).reject { |x| x.empty? } + proposal.logs
-    logs.flatten.sort_by{|log| -log.created_at.to_i} 
+    logs = proposal.answers.map(&:logs).reject(&:empty?) + proposal.logs
+    logs.flatten.sort_by{ |log| -log.created_at.to_i }/answer.rb
   end
 end

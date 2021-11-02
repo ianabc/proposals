@@ -5,6 +5,9 @@ class SubmittedProposalsController < ApplicationController
   before_action :set_proposal, except: %i[index download_csv import_reviews
                                           reviews_booklet reviews_excel_booklet]
   before_action :template_params, only: %i[approve_decline_proposals]
+  before_action :check_reviews_permissions, only: %i[import_reviews
+                                                     reviews_booklet
+                                                     reviews_excel_booklet]
 
   def index; end
 
@@ -133,13 +136,10 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def import_reviews
-    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
-
     @reviews_not_imported = []
     @statuses = []
 
-    proposals = params[:proposals]
-    proposals.split(',').each do |id|
+    params[:proposals].split(',').each do |id|
       import_proposal_reviews(id)
       log_activity(Proposal.find(id))
     end
@@ -149,8 +149,6 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def reviews_booklet
-    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
-
     check_selected_proposals
     create_reviews_booklet
   end
@@ -174,8 +172,6 @@ class SubmittedProposalsController < ApplicationController
   def reviews; end
 
   def reviews_excel_booklet
-    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
-
     check_selected_proposals
     @proposals = Proposal.where(id: params[:proposals].split(','))
     log_activities(@proposals)
@@ -574,9 +570,7 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def log_activities(proposals)
-    proposals.each do |proposal|
-     log_activity(proposal)
-    end
+    proposals.map { |proposal| log_activity(proposal) }
   end
 
   def log_activity(proposal)
@@ -588,5 +582,9 @@ class SubmittedProposalsController < ApplicationController
       }
     }
     Log.create!(data)
+  end
+
+  def check_reviews_permissions
+    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
   end
 end

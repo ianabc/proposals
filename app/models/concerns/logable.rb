@@ -9,7 +9,7 @@ module Logable
     def audit!(user:)
       data = previous_changes
       data = data.except("updated_at")
-      
+
       data = {
         logable: self,
         user: user,

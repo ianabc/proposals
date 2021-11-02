@@ -17,7 +17,7 @@ class Answer < ApplicationRecord
   end
 
   def log_activity
-    return if previous_changes.empty? or User.current.nil?
+    return if previous_changes.empty? || User.current.nil?
 
     audit!(user: User.current)
   end
