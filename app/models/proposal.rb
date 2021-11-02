@@ -258,7 +258,7 @@ class Proposal < ApplicationRecord
   end
 
   def log_activity
-    return if previous_changes.empty?
+    return if previous_changes.empty? or User.current.nil?
 
     audit!(user: User.current)
   end
