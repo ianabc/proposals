@@ -1,0 +1,11 @@
+<ul>
+  <% proposal_logs(@proposal).each do |log| %>
+    <% log.data.keys.each do |key| %>
+      <% if key == "action" %>
+        <li><%= log.user&.fullname %> performed <%= log.data[key.to_s] %> action at <%= log.created_at %></li>
+      <% else %>
+        <li> <%= log.user&.fullname %> updated <%= key %> from "<%= log.data[key.to_s].first %>" to  "<%= log.data[key.to_s].last %>" at <%= log.created_at %></li>
+      <% end %>
+    <% end %>
+  <% end %>
+</ul>

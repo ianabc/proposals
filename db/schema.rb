@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_21_101532) do
+ActiveRecord::Schema.define(version: 2021_11_02_064853) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -154,6 +154,17 @@ ActiveRecord::Schema.define(version: 2021_10_21_101532) do
     t.string "code"
     t.string "city"
     t.string "country"
+  end
+
+  create_table "logs", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "logable_type"
+    t.bigint "logable_id"
+    t.json "data", default: "{}"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["logable_type", "logable_id"], name: "index_logs_on_logable"
+    t.index ["user_id"], name: "index_logs_on_user_id"
   end
 
   create_table "options", force: :cascade do |t|
@@ -360,7 +371,7 @@ ActiveRecord::Schema.define(version: 2021_10_21_101532) do
   end
 
   create_table "reviews", force: :cascade do |t|
-    t.datetime "review_date"
+    t.string "review_date"
     t.bigint "proposal_id", null: false
     t.bigint "person_id", null: false
     t.datetime "created_at", precision: 6, null: false

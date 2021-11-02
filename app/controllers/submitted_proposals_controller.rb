@@ -5,11 +5,15 @@ class SubmittedProposalsController < ApplicationController
   before_action :set_proposal, except: %i[index download_csv import_reviews
                                           reviews_booklet reviews_excel_booklet]
   before_action :template_params, only: %i[approve_decline_proposals]
+  before_action :check_reviews_permissions, only: %i[import_reviews
+                                                     reviews_booklet
+                                                     reviews_excel_booklet]
 
   def index; end
 
   def show
     @proposal.review! if @proposal.may_review?
+    log_activity(@proposal)
   end
 
   def edit
@@ -18,6 +22,7 @@ class SubmittedProposalsController < ApplicationController
 
   def download_csv
     @proposals = Proposal.where(id: params[:ids].split(','))
+    log_activities(@proposals)
     send_data Proposal.to_csv(@proposals), filename: "submitted_proposals.csv"
   end
 
@@ -131,14 +136,12 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def import_reviews
-    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
-
     @reviews_not_imported = []
     @statuses = []
 
-    proposals = params[:proposals]
-    proposals.split(',').each do |id|
+    params[:proposals].split(',').each do |id|
       import_proposal_reviews(id)
+      log_activity(Proposal.find(id))
     end
     import_message
   rescue StandardError => e
@@ -146,15 +149,14 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def reviews_booklet
-    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
-
     check_selected_proposals
     create_reviews_booklet
   end
 
   def download_review_booklet
-    pdf_file = Rails.root.join('tmp/booklet-reviews.pdf')
-    filename = '2023-proposal-reviews.pdf' # temp
+    pdf_file = Rails.root.join("tmp/proposal-reviews-#{current_user.id}.pdf")
+    year = Date.current.year + 2
+    filename = "#{year}-proposal-reviews.pdf"
     if File.exist?(pdf_file)
       file = File.open(pdf_file)
       send_file(
@@ -170,10 +172,9 @@ class SubmittedProposalsController < ApplicationController
   def reviews; end
 
   def reviews_excel_booklet
-    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
-
     check_selected_proposals
     @proposals = Proposal.where(id: params[:proposals].split(','))
+    log_activities(@proposals)
     respond_to do |format|
       format.xlsx
     end
@@ -479,13 +480,16 @@ class SubmittedProposalsController < ApplicationController
 
   def review_file(review)
     @review_files = []
+    @review_dates = []
     review["reports"]&.each do |report|
       next if report["fileID"].blank?
 
       review_file_url(report["fileID"])
       @review_files << report["fileID"]
+      date = Time.zone.at(report["dateReported"])
+      @review_dates << date
     end
-    @review.update(file_ids: @review_files.join(', '))
+    @review.update(file_ids: @review_files.join(', '), review_date: @review_dates.join(', '))
   end
 
   def review_file_url(file_id)
@@ -518,7 +522,10 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def check_proposals_reviews
-    @proposal_ids&.split(',')&.each do |id|
+    return if @proposal_ids.blank?
+
+    pids = @proposal_ids.is_a?(String) ? @proposal_ids.split(',') : @proposal_ids
+    pids.each do |id|
       @proposal = Proposal.find_by(id: id)
       reviews_conditions
     end
@@ -542,12 +549,11 @@ class SubmittedProposalsController < ApplicationController
 
   def create_reviews_booklet
     @temp_file = "propfile-#{current_user.id}-review-booklet.tex"
-    content_type = params[:content]
-    book = ReviewsBook.new(@review_proposal_ids, @temp_file, content_type)
+    content_type = params[:reviewContentType]
+    table = params[:table]
+    book = ReviewsBook.new(@review_proposal_ids, @temp_file, content_type, table)
     book.generate_booklet
-    # year = book.year || (Date.current.year + 2)
     report_errors(book.errors) if book.errors.present?
-
     read_write_file
   end
 
@@ -556,11 +562,29 @@ class SubmittedProposalsController < ApplicationController
     @latex_infile = @fh.read
     @latex = "\\begin{document}\n#{@latex_infile}"
     pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
+    @pdf_path = Rails.root.join("tmp/proposal-reviews-#{current_user.id}.pdf")
 
-    # @pdf_path = Rails.root.join("tmp/#{year}-reviews-#{current_user.id}.pdf")
-    @pdf_path = Rails.root.join('tmp/booklet-reviews.pdf')
     File.open(@pdf_path, "w:UTF-8") do |file|
       file.write(pdf_file)
     end
+  end
+
+  def log_activities(proposals)
+    proposals.map { |proposal| log_activity(proposal) }
+  end
+
+  def log_activity(proposal)
+    data = {
+      logable: proposal,
+      user: current_user,
+      data: {
+        action: params[:action].humanize
+      }
+    }
+    Log.create!(data)
+  end
+
+  def check_reviews_permissions
+    raise CanCan::AccessDenied unless @ability.can?(:manage, Review)
   end
 end
