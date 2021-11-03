@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  before_action :assign_ability
+  before_action :assign_ability, :set_current_user
 
   def assign_ability
     @ability = Ability.new(current_user)
@@ -11,6 +11,10 @@ class ApplicationController < ActionController::Base
       format.html { redirect_to new_proposal_or_list(current_user), alert: exception.message }
       format.js   { head :forbidden, content_type: 'text/html' }
     end
+  end
+
+  def set_current_user
+    User.current = current_user
   end
 
   def new_proposal_or_list(user)

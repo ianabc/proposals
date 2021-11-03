@@ -4,13 +4,13 @@ wrap_text = s.add_style(b: true, sz: 36, alignment: { horizontal: :center, verti
 wrap_reviews_text = s.add_style(sz: 16, alignment: { vertical: :center, wrap_text: true })
 bold = s.add_style(b: true, sz: 16)
 
-@year = @proposals&.first&.year || Date.current.year + 2
-wb.add_worksheet(:name => "#{@year}") do |sheet|
+@year = @proposals&.first&.year || (Date.current.year + 2)
+wb.add_worksheet(name: @year.to_s) do |sheet|
   sheet.add_row([''], height: 60)
-  sheet.add_row([''], :height => 60)
+  sheet.add_row([''], height: 60)
   sheet.add_row ['BANFF INTERNATIONAL'], style: wrap_text, height: 60
   sheet.add_row ['RESEARCH STATION'], style: wrap_text, height: 60
-  sheet.add_row([''], :height => 60)
+  sheet.add_row([''], height: 60)
   sheet.add_row ["#{@year} PROPOSAL SELECTIONS"], style: wrap_text, height: 60
 
   sheet.merge_cells('A3:G3')
@@ -22,31 +22,31 @@ wb.add_worksheet(:name => "#{@year}") do |sheet|
   sheet.add_row [''], height: 60
   sheet.add_row [''], height: 60
   @number = 0
-  @proposals.sort_by{|p| p.subject.title }.group_by(&:subject_id).each do |chapter|
+  @proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id).each do |chapter|
     subject = Subject.find_by(id: chapter.first)
     props = chapter.last
     @number += 1
-    if subject.blank?
-      subject = "#{@number}. Unknown Subject"
-    else
-      subject = "#{@number}. #{subject&.title}"
-    end
+    subject = if subject.blank?
+                "#{@number}. Unknown Subject"
+              else
+                "#{@number}. #{subject&.title}"
+              end
 
     sheet.add_row [subject, 'Site', 'Rank', 'Scientific Reviews', 'Past Reviews',
-                      'EDI Reviews', 'Comments'], style: bold, height: 30
-    props&.sort_by{ |p| p.title }&.each do |proposal|
+                   'EDI Reviews', 'Comments'], style: bold, height: 30
+    props&.sort_by { |p| p.title }&.each do |proposal|
       code_title = "#{proposal&.code}: #{proposal&.title} (#{proposal.lead_organizer&.fullname})"
 
       reviews = proposal.reviews&.where(is_quick: false)
       scores = reviews.map(&:score)
       scores&.compact!
       reviewers_count = scores&.count
-      score = 0
-      scores.each do |s|
-        score += s
+      scientific_score = 0
+      scores.each do |score|
+        scientific_score += score
       end
       scientific_grade = 0
-      scientific_grade = score / reviewers_count.to_f unless reviewers_count.eql?(0)
+      scientific_grade = (scientific_score / reviewers_count.to_f).round(2) unless reviewers_count.eql?(0)
       sc = Axlsx::RichText.new
       sc.add_run("Average Scientific Score: #{scientific_grade}")
       sc.add_run("\n")
@@ -65,12 +65,12 @@ wb.add_worksheet(:name => "#{@year}") do |sheet|
       scores = reviews.map(&:score)
       scores&.compact!
       reviewers_count = scores&.count
-      score = 0
-      scores.each do |s|
-        score += s
+      edi_score = 0
+      scores.each do |score|
+        edi_score += score
       end
       edi_grade = 0
-      edi_grade = score / reviewers_count.to_f unless reviewers_count.eql?(0)
+      edi_grade = (edi_score / reviewers_count.to_f).round(2) unless reviewers_count.eql?(0)
       edi = Axlsx::RichText.new
       edi.add_run("Average EDI Score: #{edi_grade}")
       edi.add_run("\n")
@@ -88,8 +88,8 @@ wb.add_worksheet(:name => "#{@year}") do |sheet|
       location = Axlsx::RichText.new
 
       proposal.locations&.each do |loc|
-       location.add_run(loc.name)
-       location.add_run("\n")
+        location.add_run(loc.name)
+        location.add_run("\n")
       end
 
       sheet.add_row [code_title, location, '', sc, '', edi], style: wrap_reviews_text, height: 90

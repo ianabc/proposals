@@ -1,18 +1,7 @@
 class Proposal < ApplicationRecord
   include AASM
   include PgSearch::Model
-  pg_search_scope :search_proposals, against: %i[title code],
-                                     associated_against: {
-                                       people: %i[firstname lastname]
-                                     }, using: {
-                                       tsearch: {
-                                         prefix: true
-                                       }
-                                     }
-
-  pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
-  pg_search_scope :search_proposal_status, against: %i[status]
-  pg_search_scope :search_proposal_year, against: %i[year]
+  include Logable
 
   attr_accessor :is_submission, :allow_late_submission
 
@@ -35,13 +24,29 @@ class Proposal < ApplicationRecord
   has_many :reviews, dependent: :destroy
   has_many :proposal_versions, dependent: :destroy
 
+  before_save :strip_whitespace
+  before_save :create_code, if: :is_submission
+  after_commit :log_activity
+
   validates :year, :title, presence: true, if: :is_submission
   validate :subjects, if: :is_submission
   validate :minimum_organizers, if: :is_submission
   validate :preferred_locations, if: :is_submission
   validate :not_before_opening, if: :is_submission
-  before_save :strip_whitespace
-  before_save :create_code, if: :is_submission
+  validate :cover_letter_field, if: :is_submission
+
+  pg_search_scope :search_proposals, against: %i[title code],
+                                     associated_against: {
+                                       people: %i[firstname lastname]
+                                     }, using: {
+                                       tsearch: {
+                                         prefix: true
+                                       }
+                                     }
+
+  pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
+  pg_search_scope :search_proposal_status, against: %i[status]
+  pg_search_scope :search_proposal_year, against: %i[year]
 
   enum status: {
     draft: 0,
@@ -53,7 +58,10 @@ class Proposal < ApplicationRecord
     decision_pending: 6,
     decision_email_sent: 7,
     approved: 8,
-    declined: 9
+    declined: 9,
+    revision_requested_2: 10,
+    revision_submitted_2: 11,
+    in_progress_2: 12
   }
 
   aasm column: :status, enum: true do
@@ -61,8 +69,11 @@ class Proposal < ApplicationRecord
     state :submitted
     state :initial_review
     state :revision_requested
+    state :revision_requested_2
     state :revision_submitted
+    state :revision_submitted_2
     state :in_progress
+    state :in_progress_2
     state :decision_pending
     state :decision_email_sent
 
@@ -75,19 +86,27 @@ class Proposal < ApplicationRecord
     end
 
     event :progress do
-      transitions from: %i[initial_review revision_submitted], to: :in_progress
+      transitions from: %i[initial_review revision_submitted revision_submitted_2], to: :in_progress
     end
 
     event :pending do
-      transitions from: %i[in_progress revision_submitted], to: :decision_pending
+      transitions from: %i[in_progress revision_submitted revision_submitted_2], to: :decision_pending
     end
 
     event :requested do
       transitions from: %i[initial_review decision_pending revision_submitted], to: :revision_requested
     end
 
+    event :requested_two do
+      transitions from: %i[initial_review decision_pending revision_submitted_2], to: :revision_requested_2
+    end
+
     event :revision do
       transitions from: :revision_requested, to: :revision_submitted
+    end
+
+    event :revision_two do
+      transitions from: :revision_requested_2, to: :revision_submitted_2
     end
 
     event :decision do
@@ -109,7 +128,7 @@ class Proposal < ApplicationRecord
   }
 
   def editable?
-    draft? || revision_requested?
+    draft? || revision_requested? || revision_requested_2?
   end
 
   def demographics_data
@@ -206,7 +225,7 @@ class Proposal < ApplicationRecord
   private
 
   def not_before_opening
-    return if draft? || revision_requested? || allow_late_submission
+    return if draft? || revision_requested? || revision_requested_2? || allow_late_submission
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
     errors.add("Late submission - ", "proposal submissions closed on
@@ -224,6 +243,12 @@ class Proposal < ApplicationRecord
   def subjects
     errors.add('Subject Area:', "please select a subject area") if subject.nil?
     errors.add('AMS Subjects:', 'please select 2 AMS Subjects') unless ams_subjects.pluck(:code).count == 2
+  end
+
+  def cover_letter_field
+    return unless revision_requested_2?
+
+    errors.add('Cover Letter:', "shouldn't be empty.") if cover_letter.blank?
   end
 
   def next_number
@@ -253,5 +278,11 @@ class Proposal < ApplicationRecord
     attributes.each do |key, value|
       self[key] = value.strip if value.respond_to?(:strip)
     end
+  end
+
+  def log_activity
+    return if previous_changes.empty? || User.current.nil?
+
+    audit!(user: User.current)
   end
 end

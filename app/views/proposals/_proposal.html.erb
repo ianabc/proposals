@@ -57,6 +57,15 @@
                     <div class="tab-content">
                       <div class="tab-pane <%= active_tab(@proposal, 'one', params[:tab]) %>" id="tab-1" role="tabpanel">
                         <h4 class="tab-title"></h4>
+                        <% if @proposal.revision_requested_2? %>
+                          <div class="mb-3">
+                            <h3 class="required">Cover Letter</h3>
+                            <p>
+                              This field explains the changes in proposal.
+                            </p>
+                            <%= f.text_area(:cover_letter, size: '5x5', class:'form-control', value: @proposal&.cover_letter, disabled: action)%>
+                          </div>
+                        <% end %>
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
                         </div>

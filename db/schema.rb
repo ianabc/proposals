@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_29_133702) do
+ActiveRecord::Schema.define(version: 2021_11_03_120456) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -154,6 +154,17 @@ ActiveRecord::Schema.define(version: 2021_10_29_133702) do
     t.string "code"
     t.string "city"
     t.string "country"
+  end
+
+  create_table "logs", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "logable_type"
+    t.bigint "logable_id"
+    t.json "data", default: "{}"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["logable_type", "logable_id"], name: "index_logs_on_logable"
+    t.index ["user_id"], name: "index_logs_on_user_id"
   end
 
   create_table "options", force: :cascade do |t|
@@ -372,6 +383,7 @@ ActiveRecord::Schema.define(version: 2021_10_29_133702) do
     t.datetime "edit_flow"
     t.string "outcome"
     t.string "editflow_id"
+    t.text "cover_letter"
     t.index ["code"], name: "index_proposals_on_code", unique: true
     t.index ["proposal_form_id"], name: "index_proposals_on_proposal_form_id"
     t.index ["proposal_type_id"], name: "index_proposals_on_proposal_type_id"
@@ -379,7 +391,7 @@ ActiveRecord::Schema.define(version: 2021_10_29_133702) do
   end
 
   create_table "reviews", force: :cascade do |t|
-    t.datetime "review_date"
+    t.string "review_date"
     t.bigint "proposal_id", null: false
     t.bigint "person_id", null: false
     t.datetime "created_at", precision: 6, null: false
