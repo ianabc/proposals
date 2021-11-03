@@ -41,6 +41,7 @@ RSpec.describe Proposal, type: :model do
     it { should have_many(:proposal_roles).dependent(:destroy) }
     it { should have_many(:people).through(:proposal_roles) }
     it { should have_many(:reviews).dependent(:destroy) }
+    it { should have_many(:proposal_versions).dependent(:destroy) }
   end
 
   describe '#lead_organizer' do

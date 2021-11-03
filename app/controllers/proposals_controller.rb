@@ -60,7 +60,7 @@ class ProposalsController < ApplicationController
   def latex_output
     proposal_id = params[:id]
     @proposal = Proposal.find_by(id: proposal_id)
-    @year = @proposal&.year || Date.current.year.to_i + 2
+    @year = @proposal&.year || (Date.current.year.to_i + 2)
     @proposal_pdf = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
                                       .generate_latex_file
     @latex_infile = @proposal_pdf.to_s
@@ -78,7 +78,7 @@ class ProposalsController < ApplicationController
     return if prop_id.blank?
 
     @proposal = Proposal.find_by(id: prop_id)
-    @year = @proposal&.year || Date.current.year.to_i + 2
+    @year = @proposal&.year || (Date.current.year.to_i + 2)
 
     @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, field_input, current_user)
                                       .generate_latex_file.to_s
@@ -139,6 +139,7 @@ class ProposalsController < ApplicationController
 
   def proposal_version
     @version = params[:version].to_i
+    @proposal_version = ProposalVersion.find_by(proposal_id: @proposal.id, version: @version)
   end
 
   private

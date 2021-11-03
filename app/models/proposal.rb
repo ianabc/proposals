@@ -33,6 +33,7 @@ class Proposal < ApplicationRecord
   has_many :staff_discussions, dependent: :destroy
   has_many :emails, dependent: :destroy
   has_many :reviews, dependent: :destroy
+  has_many :proposal_versions, dependent: :destroy
 
   validates :year, :title, presence: true, if: :is_submission
   validate :subjects, if: :is_submission

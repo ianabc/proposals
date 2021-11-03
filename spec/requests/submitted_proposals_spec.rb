@@ -51,6 +51,17 @@ RSpec.describe "/submitted_proposals", type: :request do
       get submitted_proposal_path(proposal)
     end
 
+    context 'when proposal status is submitted' do
+      before do
+        proposal.update(status: "submitted")
+        get submitted_proposal_path(proposal)
+      end
+
+      it 'update proposal status' do
+        expect(proposal.reload.status).to eq("initial_review")
+      end
+    end
+
     it { expect(response).to have_http_status(:ok) }
   end
 
@@ -117,8 +128,29 @@ RSpec.describe "/submitted_proposals", type: :request do
   describe 'POST /submitted_proposals/:id/update_status' do
     before { post update_status_submitted_proposal_path(id: proposal.id, status: Proposal.statuses[:in_progress]) }
 
+    context 'when status is blank' do
+      before { post update_status_submitted_proposal_path(id: proposal.id, status: '') }
+
+      it 'does not update proposal status' do
+        expect(response).to have_http_status(422)
+      end
+    end
+
     it 'update proposal status' do
       expect(proposal.reload.status).to eq("in_progress")
+    end
+  end
+
+  describe 'POST /submitted_proposals/table_of_content' do
+    let(:params) do
+      { proposal_ids: proposal.id }
+    end
+    before do
+      post table_of_content_submitted_proposals_path(params: params)
+    end
+
+    it 'will return proposals' do
+      expect(response).to have_http_status(200)
     end
   end
 
@@ -127,5 +159,39 @@ RSpec.describe "/submitted_proposals", type: :request do
       delete submitted_proposal_url(proposal)
     end
     it { expect(Proposal.all.count).to eq(0) }
+  end
+
+  describe "POST /revise_proposal_editflow" do
+    let(:params) do
+      { proposal_id: proposal.id,
+        version: 1 }
+    end
+    before do
+      proposal.update(status: "initial_review", editflow_id: "anything12")
+      post revise_proposal_editflow_submitted_proposals_url(params: params)
+    end
+
+    context 'when proposal status is not initial_review' do
+      before do
+        proposal.update(status: "submitted")
+        post revise_proposal_editflow_submitted_proposals_url(params: params)
+      end
+
+      it 'does not update proposal status' do
+        expect(response).to redirect_to(versions_proposal_url(proposal))
+      end
+    end
+
+    context 'when proposal has not editflow_id' do
+      before do
+        post revise_proposal_editflow_submitted_proposals_url(params: params)
+      end
+
+      it 'will return to versions path' do
+        expect(response).to redirect_to(versions_proposal_url(proposal))
+      end
+    end
+
+    it { expect(response).to redirect_to(versions_proposal_url(proposal)) }
   end
 end

@@ -3,13 +3,17 @@ class ProposalPdfService
 
   include LatexAttachments
 
-  def initialize(proposal_id, file, input, user)
+  def initialize(proposal_id, file, input, user, version = nil)
     @proposal = Proposal.find(proposal_id)
     @temp_file = file
     @input = input
     @user = user
     @file_errors = []
     @text = ""
+    return if version.blank?
+
+    @answers = @proposal.answers.where(version: version)
+    @proposal_version = @proposal.proposal_versions.find_by(version: version)
   end
 
   def generate_latex_file
@@ -75,14 +79,22 @@ class ProposalPdfService
     @text
   end
 
-  def proposal_title(proposal)
-    proposal.no_latex ? delatex(proposal&.title) : proposal&.title
+  def proposal_title(proposal, proposal_version = nil)
+    if proposal_version
+      proposal.no_latex ? delatex(proposal_version&.title) : proposal_version&.title
+    else
+      proposal.no_latex ? delatex(proposal&.title) : proposal&.title
+    end
   end
 
   def pdf_content
     proposal_organizers
     proposal_locations
-    proposal_subjects
+    if @proposal_version
+      proposal_version_subjects(@proposal_version)
+    else
+      proposal_subjects
+    end
     user_defined_fields
     proposal_bibliography
     proposal_participants
@@ -115,7 +127,11 @@ class ProposalPdfService
 
   def proposal_details
     code = proposal.code.blank? ? '' : "#{proposal.code}: "
-    @text = "\\section*{\\centering #{code} #{proposal_title(proposal)} }\n\n"
+    @text = if @proposal_version
+              "\\section*{\\centering #{code} #{proposal_title(proposal, @proposal_version)} }\n\n"
+            else
+              "\\section*{\\centering #{code} #{proposal_title(proposal)} }\n\n"
+            end
     proposal_participants_count
     proposal_organizers_count
     proposal_lead_organizer
@@ -199,6 +215,23 @@ class ProposalPdfService
     @text << "\\noindent #{ams_subject2&.title} \\\\ \n" if ams_subject2.present?
   end
 
+  def proposal_version_subjects(proposal_version)
+    subject_id = proposal_version.subject.to_i
+    subject = Subject.find_by(id: subject_id)
+    @text << "\\subsection*{Subject Areas}\n\n"
+    @text << "#{subject&.title} \\\\ \n" if subject.present?
+
+    ams_subjects(proposal_version)
+  end
+
+  def ams_subjects(proposal_version)
+    ams_subject1 = AmsSubject.find_by(id: proposal_version.ams_subject_one)
+    @text << "\\noindent #{ams_subject1&.title} \\\\ \n" if ams_subject1.present?
+
+    ams_subject2 = AmsSubject.find_by(id: proposal_version.ams_subject_two)
+    @text << "\\noindent #{ams_subject2&.title} \\\\ \n" if ams_subject2.present?
+  end
+
   def add_bibliography_heading(bibliography)
     text = "\n\n\\subsection*{Bibliography}\n\n"
     if proposal.no_latex
@@ -221,7 +254,9 @@ class ProposalPdfService
   end
 
   def user_defined_fields
-    proposal.answers&.each do |field|
+    @answers = proposal.answers if @answers.blank?
+
+    @answers&.each do |field|
       if field.proposal_field&.fieldable_type == "ProposalFields::PreferredImpossibleDate"
         preferred_impossible_dates(field)
         next

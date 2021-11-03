@@ -136,7 +136,7 @@ END_STRING
   def mutation
     <<END_STRING
             query {
-              article(id: "#{@proposal.editflow_id}") {
+              article(id: "#{@proposal&.editflow_id}") {
                   id
                   identifier
                   reviewVersionLatest {
@@ -211,6 +211,36 @@ END_STRING
                   url
                   dateExpires
                   accessLimit
+              }
+            }
+END_STRING
+  end
+
+  def revise_article
+    <<END_STRING
+            mutation {
+              articleReviewVersion: reviseArticle(
+                revision: {
+                  articleID: "#{@proposal.editflow_id}"
+                  mainMultipartFormName: "fileMain"
+                  revisionLetterMultipartFormName: "fileRevisionLetter"
+                }
+              ) {
+                id
+                number
+                docMain {
+                  fileID
+                  role
+                }
+                docsAll {
+                  fileID
+                  role
+                }
+                article {
+                  id
+                  identifier
+                  title
+                }
               }
             }
 END_STRING
