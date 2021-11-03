@@ -52,7 +52,10 @@ class Proposal < ApplicationRecord
     decision_pending: 6,
     decision_email_sent: 7,
     approved: 8,
-    declined: 9
+    declined: 9,
+    revision_requested_2: 10,
+    revision_submitted_2: 11,
+    in_progress_2: 12
   }
 
   aasm column: :status, enum: true do
@@ -60,8 +63,11 @@ class Proposal < ApplicationRecord
     state :submitted
     state :initial_review
     state :revision_requested
+    state :revision_requested_2
     state :revision_submitted
+    state :revision_submitted_2
     state :in_progress
+    state :in_progress_2
     state :decision_pending
     state :decision_email_sent
 
@@ -74,19 +80,27 @@ class Proposal < ApplicationRecord
     end
 
     event :progress do
-      transitions from: %i[initial_review revision_submitted], to: :in_progress
+      transitions from: %i[initial_review revision_submitted revision_submitted_2], to: :in_progress
     end
 
     event :pending do
-      transitions from: %i[in_progress revision_submitted], to: :decision_pending
+      transitions from: %i[in_progress revision_submitted revision_submitted_2], to: :decision_pending
     end
 
     event :requested do
       transitions from: %i[initial_review decision_pending revision_submitted], to: :revision_requested
     end
 
+    event :requested_two do
+      transitions from: %i[initial_review decision_pending revision_submitted_2], to: :revision_requested_2
+    end
+
     event :revision do
       transitions from: :revision_requested, to: :revision_submitted
+    end
+
+    event :revision_two do
+      transitions from: :revision_requested_2, to: :revision_submitted_2
     end
 
     event :decision do
@@ -108,7 +122,7 @@ class Proposal < ApplicationRecord
   }
 
   def editable?
-    draft? || revision_requested?
+    draft? || revision_requested? || revision_requested_2?
   end
 
   def demographics_data

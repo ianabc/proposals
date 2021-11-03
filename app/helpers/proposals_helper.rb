@@ -108,8 +108,11 @@ module ProposalsHelper
       "submitted" => "text-proposal-submitted",
       "initial_review" => "text-warning",
       "revision_requested" => "text-danger",
+      "revision_requested_2" => "text-danger",
       "revision_submitted" => "text-revision-submitted",
+      "revision_submitted_2" => "text-revision-submitted",
       "in_progress" => "text-success",
+      "in_progress_2" => "text-success",
       "decision_pending" => "text-info",
       "decision_email_sent" => "text-primary"
     }
@@ -167,7 +170,8 @@ module ProposalsHelper
 
   def career_data(param, param2, proposal)
     person = Person.where.not(id: proposal.lead_organizer.id)
-    career_stage = person.where(id: proposal.invites.where(invited_as: 'Participant').pluck(:person_id)).pluck(param, param2).flatten.reject do |s|
+    career_stage = person.where(id: proposal.invites.where(invited_as: 'Participant').pluck(:person_id)).pluck(param,
+                                                                                                               param2).flatten.reject do |s|
       s.blank? || s.eql?("Other")
     end
     data = Hash.new(0)

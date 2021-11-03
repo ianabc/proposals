@@ -231,9 +231,19 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def change_status
-    @check_status = @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
+    revision_template
     @check_status = @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
     @check_status = @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
+  end
+
+  def revision_template
+    if params[:templates].split(':').first == "Revision Round 1"
+      @check_status = @email.update_status(@proposal,
+                                           'Revision One')
+    end
+    return unless params[:templates].split(':').first == "Revision Round 2"
+
+    @check_status = @email.update_status(@proposal, 'Revision Two')
   end
 
   def latex_temp_file
