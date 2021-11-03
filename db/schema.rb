@@ -156,6 +156,17 @@ ActiveRecord::Schema.define(version: 2021_11_03_120456) do
     t.string "country"
   end
 
+  create_table "logs", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "logable_type"
+    t.bigint "logable_id"
+    t.json "data", default: "{}"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["logable_type", "logable_id"], name: "index_logs_on_logable"
+    t.index ["user_id"], name: "index_logs_on_user_id"
+  end
+
   create_table "options", force: :cascade do |t|
     t.string "text"
     t.datetime "created_at", precision: 6, null: false
@@ -361,7 +372,7 @@ ActiveRecord::Schema.define(version: 2021_11_03_120456) do
   end
 
   create_table "reviews", force: :cascade do |t|
-    t.datetime "review_date"
+    t.string "review_date"
     t.bigint "proposal_id", null: false
     t.bigint "person_id", null: false
     t.datetime "created_at", precision: 6, null: false

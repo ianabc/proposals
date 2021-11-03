@@ -1,18 +1,7 @@
 class Proposal < ApplicationRecord
   include AASM
   include PgSearch::Model
-  pg_search_scope :search_proposals, against: %i[title code],
-                                     associated_against: {
-                                       people: %i[firstname lastname]
-                                     }, using: {
-                                       tsearch: {
-                                         prefix: true
-                                       }
-                                     }
-
-  pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
-  pg_search_scope :search_proposal_status, against: %i[status]
-  pg_search_scope :search_proposal_year, against: %i[year]
+  include Logable
 
   attr_accessor :is_submission, :allow_late_submission
 
@@ -34,13 +23,28 @@ class Proposal < ApplicationRecord
   has_many :emails, dependent: :destroy
   has_many :reviews, dependent: :destroy
 
+  before_save :strip_whitespace
+  before_save :create_code, if: :is_submission
+  after_commit :log_activity
+
   validates :year, :title, presence: true, if: :is_submission
   validate :subjects, if: :is_submission
   validate :minimum_organizers, if: :is_submission
   validate :preferred_locations, if: :is_submission
   validate :not_before_opening, if: :is_submission
-  before_save :strip_whitespace
-  before_save :create_code, if: :is_submission
+
+  pg_search_scope :search_proposals, against: %i[title code],
+                                     associated_against: {
+                                       people: %i[firstname lastname]
+                                     }, using: {
+                                       tsearch: {
+                                         prefix: true
+                                       }
+                                     }
+
+  pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
+  pg_search_scope :search_proposal_status, against: %i[status]
+  pg_search_scope :search_proposal_year, against: %i[year]
 
   enum status: {
     draft: 0,
@@ -266,5 +270,11 @@ class Proposal < ApplicationRecord
     attributes.each do |key, value|
       self[key] = value.strip if value.respond_to?(:strip)
     end
+  end
+
+  def log_activity
+    return if previous_changes.empty? || User.current.nil?
+
+    audit!(user: User.current)
   end
 end
