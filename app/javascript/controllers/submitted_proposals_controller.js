@@ -189,8 +189,8 @@ export default class extends Controller {
             window.location.reload();
           }, 1000)
         })
-        .fail(function() {
-          toastr.error("Proposal status cannot be updated!")
+        .fail(function(res) {
+          res.responseJSON.forEach((msg) => toastr.error(msg))
         });
       }
     }

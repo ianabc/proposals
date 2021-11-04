@@ -125,14 +125,11 @@ class SubmittedProposalsController < ApplicationController
 
   def update_status
     status = params[:status]
-    if status.blank?
-      render json: {}, status: :unprocessable_entity
-      return
+    if @proposal.update(status: status.to_i)
+      render json: {}, status: :ok
+    else
+      render json: @proposal.errors.full_messages, status: :unprocessable_entity
     end
-
-    @proposal.update(status: status.to_i)
-
-    head :ok
   end
 
   def import_reviews
@@ -238,13 +235,12 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def revision_template
-    if params[:templates].split(':').first == "Revision Round 1"
-      @check_status = @email.update_status(@proposal,
-                                           'Revision One')
+    case params[:templates].split(':').first
+    when "Revision"
+      @check_status = @email.update_status(@proposal, 'Revision')
+    when "Revision SPC"
+      @check_status = @email.update_status(@proposal, 'Revision SPC')
     end
-    return unless params[:templates].split(':').first == "Revision Round 2"
-
-    @check_status = @email.update_status(@proposal, 'Revision Two')
   end
 
   def latex_temp_file

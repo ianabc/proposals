@@ -57,9 +57,10 @@ class Proposal < ApplicationRecord
     decision_email_sent: 7,
     approved: 8,
     declined: 9,
-    revision_requested_2: 10,
-    revision_submitted_2: 11,
-    in_progress_2: 12
+    revision_requested_spc: 10,
+    revision_submitted_spc: 11,
+    in_progress_spc: 12,
+    shortlisted: 13
   }
 
   aasm column: :status, enum: true do
@@ -67,13 +68,14 @@ class Proposal < ApplicationRecord
     state :submitted
     state :initial_review
     state :revision_requested
-    state :revision_requested_2
+    state :revision_requested_spc
     state :revision_submitted
-    state :revision_submitted_2
+    state :revision_submitted_spc
     state :in_progress
-    state :in_progress_2
+    state :in_progress_spc
     state :decision_pending
     state :decision_email_sent
+    state :shortlisted
 
     event :active do
       transitions from: :draft, to: :submitted
@@ -84,31 +86,35 @@ class Proposal < ApplicationRecord
     end
 
     event :progress do
-      transitions from: %i[initial_review revision_submitted revision_submitted_2], to: :in_progress
+      transitions from: %i[initial_review revision_submitted], to: :in_progress
     end
 
     event :pending do
-      transitions from: %i[in_progress revision_submitted revision_submitted_2], to: :decision_pending
+      transitions from: %i[in_progress revision_submitted revision_submitted_spc], to: :decision_pending
     end
 
     event :requested do
       transitions from: %i[initial_review decision_pending revision_submitted], to: :revision_requested
     end
 
-    event :requested_two do
-      transitions from: %i[initial_review decision_pending revision_submitted_2], to: :revision_requested_2
+    event :requested_spc do
+      transitions from: %i[initial_review decision_pending revision_submitted_spc shortlisted],
+                  to: :revision_requested_spc
     end
 
     event :revision do
       transitions from: :revision_requested, to: :revision_submitted
     end
 
-    event :revision_two do
-      transitions from: :revision_requested_2, to: :revision_submitted_2
+    event :revision_spc do
+      transitions from: :revision_requested_spc, to: :revision_submitted_spc
     end
 
     event :decision do
-      transitions from: :decision_pending, to: :decision_email_sent
+      transitions from: %i[decision_pending shortlisted], to: :decision_email_sent
+    end
+    event :progress_spc do
+      transitions from: %i[initial_review revision_submitted_spc], to: :in_progress_spc
     end
   end
 
@@ -126,7 +132,7 @@ class Proposal < ApplicationRecord
   }
 
   def editable?
-    draft? || revision_requested? || revision_requested_2?
+    draft? || revision_requested? || revision_requested_spc?
   end
 
   def demographics_data
@@ -223,7 +229,7 @@ class Proposal < ApplicationRecord
   private
 
   def not_before_opening
-    return if draft? || revision_requested? || allow_late_submission
+    return if draft? || revision_requested? || revision_requested_spc? || allow_late_submission
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
     errors.add("Late submission - ", "proposal submissions closed on
