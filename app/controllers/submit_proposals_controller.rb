@@ -72,10 +72,10 @@ class SubmitProposalsController < ApplicationController
       change_proposal_version
       @proposal.revision!
       send_mail
-    elsif @proposal.may_revision_two?
-      @proposal.allow_late_submission = true if @proposal.revision_requested_2?
+    elsif @proposal.may_revision_spc?
+      @proposal.allow_late_submission = true if @proposal.revision_requested_spc?
       change_proposal_version
-      @proposal.revision_two!
+      @proposal.revision_spc!
       send_mail
     else
       error_page_redirect

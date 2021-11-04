@@ -6,15 +6,15 @@ class Email < ApplicationRecord
 
   def update_status(proposal, status)
     case status
-    when 'Revision One'
+    when 'Revision'
       if proposal.may_requested?
         proposal.requested!
         update_version
         return true
       end
-    when 'Revision Two'
-      if proposal.may_requested_two?
-        proposal.requested_two!
+    when 'Revision SPC'
+      if proposal.may_requested_spc?
+        proposal.requested_spc!
         update_version
         return true
       end

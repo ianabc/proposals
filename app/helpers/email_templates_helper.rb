@@ -4,11 +4,11 @@ module EmailTemplatesHelper
       [
         case k&.split('_')&.first&.capitalize
         when 'Revision'
-          arr = k.split('_')
-          if arr[2] == '1'
-            "#{k&.split('_')&.first&.capitalize} - Round 1"
+          arr = k.split("_")
+          if arr[1] == 'spc'
+            "#{k&.split('_')&.first&.capitalize} SPC"
           else
-            "#{k&.split('_')&.first&.capitalize} - Round 2"
+            k&.split('_')&.first&.capitalize
           end
         when 'Decision'
           "#{k&.split('_')&.first&.capitalize} Email"
@@ -27,10 +27,10 @@ module EmailTemplatesHelper
       case email_type
       when 'Revision'
         arr = template.email_type.split('_')
-        if arr[2] == '1'
-          "#{email_type} Round 1: #{template&.title}"
+        if arr[1] == 'spc'
+          "#{email_type} SPC: #{template&.title}"
         else
-          "#{email_type} Round 2: #{template&.title}"
+          "#{email_type}: #{template&.title}"
         end
       when 'Decision'
         "#{email_type} Email: #{template&.title}"

@@ -43,9 +43,9 @@ class SubmittedProposalsController < ApplicationController
 
   def revise_proposal_editflow
     @proposal = Proposal.find_by(id: params[:proposal_id].to_i)
-    unless @proposal.may_progress?
+    unless @proposal.may_progress_spc?
       redirect_to versions_proposal_url(@proposal),
-                  alert: "Proposal status should be initial_review or revision_submitted."
+                  alert: "Proposal status should be initial_review or revision_submitted_spc."
       return
     end
     check_proposal_editflow_id
@@ -136,14 +136,11 @@ class SubmittedProposalsController < ApplicationController
 
   def update_status
     status = params[:status]
-    if status.blank?
-      render json: {}, status: :unprocessable_entity
-      return
+    if @proposal.update(status: status.to_i)
+      render json: {}, status: :ok
+    else
+      render json: @proposal.errors.full_messages, status: :unprocessable_entity
     end
-
-    @proposal.update(status: status.to_i)
-
-    head :ok
   end
 
   def import_reviews
@@ -249,13 +246,12 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def revision_template
-    if params[:templates].split(':').first == "Revision Round 1"
-      @check_status = @email.update_status(@proposal,
-                                           'Revision One')
+    case params[:templates].split(':').first
+    when "Revision"
+      @check_status = @email.update_status(@proposal, 'Revision')
+    when "Revision SPC"
+      @check_status = @email.update_status(@proposal, 'Revision SPC')
     end
-    return unless params[:templates].split(':').first == "Revision Round 2"
-
-    @check_status = @email.update_status(@proposal, 'Revision Two')
   end
 
   def latex_temp_file
@@ -361,9 +357,10 @@ class SubmittedProposalsController < ApplicationController
     return if @errors.present?
 
     return unless cover_letter_file
+
     response = RestClient.post ENV['EDITFLOW_API_URL'],
                                { query: revise_query, fileMain: File.open(@pdf_path),
-                                 fileRevisionLetter: File.open(@cover_letter_path) },
+                                 fileRevisionLetter: File.open(@letter_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
 
     mutation_response_body(response)
@@ -391,7 +388,7 @@ class SubmittedProposalsController < ApplicationController
       return
     else
       Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
-      @proposal.progress!
+      @proposal.progress_spc!
     end
     Rails.logger.info { "\n\n*****************************************\n\n" }
   end
@@ -406,16 +403,16 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def cover_letter_file
+    @latex = if @proposal.cover_letter
+               "\\begin{document}\n#{@proposal.cover_letter}"
+             else
+               "\\begin{document}\n"
+             end
     begin
-      @cover_letter_path = Rails.root.join('tmp', "cover_letter.pdf")
-      if @proposal.cover_letter
-        File.open(@cover_letter_path, "w:UTF-8") do |file|
-          file.write(@proposal.cover_letter)
-        end
-      else
-        File.open(@cover_letter_path, "w:UTF-8") do |file|
-          file.write('')
-        end
+      pdf_file = render_to_string layout: "application", inline: @latex, formats: [:pdf]
+      @letter_path = Rails.root.join('tmp', "#{@proposal&.code}-cover_letter.pdf")
+      File.open(@letter_path, "w:UTF-8") do |file|
+        file.write(pdf_file)
       end
     rescue StandardError => e
       Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}\n\n" }
