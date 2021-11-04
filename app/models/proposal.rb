@@ -116,7 +116,7 @@ class Proposal < ApplicationRecord
       transitions from: %i[decision_pending shortlisted], to: :decision_email_sent
     end
     event :progress_spc do
-      transitions from: %i[initial_review revision_submitted_spc], to: :in_progress_spc
+      transitions from: :revision_submitted_spc, to: :in_progress_spc
     end
   end
 
