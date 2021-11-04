@@ -70,6 +70,10 @@ class SubmitProposalsController < ApplicationController
       @proposal.allow_late_submission = true if @proposal.revision_requested?
       @proposal.revision!
       send_mail
+    elsif @proposal.may_revision_spc?
+      @proposal.allow_late_submission = true if @proposal.revision_requested_spc?
+      @proposal.revision_spc!
+      send_mail
     else
       error_page_redirect
     end
@@ -103,7 +107,7 @@ class SubmitProposalsController < ApplicationController
 
   def proposal_params
     params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
-                  :no_latex, :preamble, :bibliography)
+                  :no_latex, :preamble, :bibliography, :cover_letter)
           .merge(no_latex: params[:no_latex] == 'on')
   end
 

@@ -12,6 +12,12 @@ class Email < ApplicationRecord
         update_version
         return true
       end
+    when 'Revision SPC'
+      if proposal.may_requested_spc?
+        proposal.requested_spc!
+        update_version
+        return true
+      end
     when 'Reject'
       if proposal.may_decision?
         proposal.decision!
