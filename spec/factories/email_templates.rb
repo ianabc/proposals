@@ -7,6 +7,6 @@ FactoryBot.define do
     subject { Faker::Lorem.sentence }
     body { Faker::Lorem.paragraph }
 
-    email_type { %w[revision_type reject_type approval_type decision_email_type].sample }
+    email_type { %w[revision_type reject_type approval_type decision_email_type revision_spc_type].sample }
   end
 end

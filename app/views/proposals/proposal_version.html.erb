@@ -61,48 +61,75 @@
                         <div>
                           <%= label_tag :title %>
                         </div>
-                        <div class="mb-3">
-                          <%= f.text_field :title, class: 'form-control w-100', disabled: true, value: @proposal.title %>
-                          <% if @submission && @proposal.title.blank? %>
-                            <p class="field-validation">Title is required</p>
-                          <% end %>
-                        </div>
+                        <% if @proposal_version.present? %>
+                          <div class="mb-3">
+                            <%= f.text_field :title, class: 'form-control w-100', disabled: true, value: @proposal_version.title %>
+                          </div>
+                        <% else %>
+                          <div class="mb-3">
+                            <%= f.text_field :title, class: 'form-control w-100', disabled: true, value: @proposal.title %>
+                          </div>
+                        <% end %>
 
                         <div class="mb-3">
                           <label>Type of Meeting</label>
                           <p class="form-select w-25"><%= @proposal.proposal_type.name.titleize %></p>
                         </div>
 
-                        <div class="mb-3">
-                          <%= label_tag :year %>
-                          <%= select_tag :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), disabled: true, class: "form-select w-25" %>
-                        </div>
-                        <div class="mb-3 row">
-                          <h4>Subject Areas</h4>
-                          <div class="col-6 mt-2">
-                            <label class="required">Subject Area</label>
-                            <%= select_tag :subject_id, options_for_select(subjects_area, @proposal.subject&.id), include_blank: '' , disabled: true, class: "form-select" %>
-                            <% if @submission && @proposal.subject&.id.nil? %>
-                              <p class="field-validation">Subject is required</p>
-                            <% end %>
+                        <% if @proposal_version.present? %>
+                          <div class="mb-3">
+                            <%= label_tag :year %>
+                            <%= select_tag :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal_version.year), disabled: true, class: "form-select w-25" %>
                           </div>
-                          <div class="col-6 mt-2">
-                            <div class="mb-3">
-                              <label class="required">AMS Subject Code 1</label>
-                              <%= select_tag :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code1')), include_blank: '', disabled: true, class: "form-select", name:'ams_subjects[code1]' %>
-                              <% if @submission && proposal_ams_subjects_code(@proposal, 'code1').blank? %>
-                                <p class="field-validation">AMS Subject Code 1 is required</p>
-                              <% end %>
+                          <div class="mb-3 row">
+                            <h4>Subject Areas</h4>
+                            <div class="col-6 mt-2">
+                              <label class="required">Subject Area</label>
+                              <%= select_tag :subject_id, options_for_select(subjects_area, @proposal_version.subject), include_blank: '' , disabled: true, class: "form-select" %>
                             </div>
+                            <div class="col-6 mt-2">
+                              <div class="mb-3">
+                                <label class="required">AMS Subject Code 1</label>
+                                <%= select_tag :ams_subjects, options_for_select(ams_subjects_code, @proposal_version.ams_subject_one), include_blank: '', disabled: true, class: "form-select", name:'ams_subjects[code1]' %>
+                              </div>
 
+                              <div class="mb-3">
+                                <label class="required">AMS Subject Code 2</label>
+                                <%= select_tag :ams_subjects, options_for_select(ams_subjects_code, @proposal_version.ams_subject_two), include_blank: '', disabled: true, class: "form-select", name:'ams_subjects[code2]' %>
+                              </div>
+                            </div>
+                          <% else %>
                             <div class="mb-3">
-                              <label class="required">AMS Subject Code 2</label>
-                              <%= select_tag :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), include_blank: '', disabled: true, class: "form-select", name:'ams_subjects[code2]' %>
-                              <% if @submission && proposal_ams_subjects_code(@proposal, 'code2').blank? %>
-                                <p class="field-validation">AMS Subject Code 2 is required</p>
+                            <%= label_tag :year %>
+                            <%= select_tag :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), disabled: true, class: "form-select w-25" %>
+                          </div>
+                          <div class="mb-3 row">
+                            <h4>Subject Areas</h4>
+                            <div class="col-6 mt-2">
+                              <label class="required">Subject Area</label>
+                              <%= select_tag :subject_id, options_for_select(subjects_area, @proposal.subject&.id), include_blank: '' , disabled: true, class: "form-select" %>
+                              <% if @submission && @proposal.subject&.id.nil? %>
+                                <p class="field-validation">Subject is required</p>
                               <% end %>
                             </div>
-                          </div>
+                            <div class="col-6 mt-2">
+                              <div class="mb-3">
+                                <label class="required">AMS Subject Code 1</label>
+                                <%= select_tag :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code1')), include_blank: '', disabled: true, class: "form-select", name:'ams_subjects[code1]' %>
+                                <% if @submission && proposal_ams_subjects_code(@proposal, 'code1').blank? %>
+                                  <p class="field-validation">AMS Subject Code 1 is required</p>
+                                <% end %>
+                              </div>
+
+                              <div class="mb-3">
+                                <label class="required">AMS Subject Code 2</label>
+                                <%= select_tag :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), include_blank: '', disabled: true, class: "form-select", name:'ams_subjects[code2]' %>
+                                <% if @submission && proposal_ams_subjects_code(@proposal, 'code2').blank? %>
+                                  <p class="field-validation">AMS Subject Code 2 is required</p>
+                                <% end %>
+                              </div>
+                            </div>
+                          <% end %>
                           <div>
                             <% if params[:action] == 'proposal_version' %>
                               <div>

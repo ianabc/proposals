@@ -65,10 +65,17 @@ class SubmitProposalsController < ApplicationController
 
   def confirm_submission
     if @proposal.may_active?
+      change_proposal_version
       change_proposal_status
     elsif @proposal.may_revision?
       @proposal.allow_late_submission = true if @proposal.revision_requested?
+      change_proposal_version
       @proposal.revision!
+      send_mail
+    elsif @proposal.may_revision_spc?
+      @proposal.allow_late_submission = true if @proposal.revision_requested_spc?
+      change_proposal_version
+      @proposal.revision_spc!
       send_mail
     else
       error_page_redirect
@@ -103,7 +110,7 @@ class SubmitProposalsController < ApplicationController
 
   def proposal_params
     params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
-                  :no_latex, :preamble, :bibliography)
+                  :no_latex, :preamble, :bibliography, :cover_letter)
           .merge(no_latex: params[:no_latex] == 'on')
   end
 
@@ -203,5 +210,38 @@ class SubmitProposalsController < ApplicationController
     redirect_to edit_proposal_path(@proposal), alert: "The proposal status is
                 #{@proposal.status&.humanize} but expecting Draft or Revision
                 requested.".squish and return
+  end
+
+  def change_proposal_version
+    if @proposal.draft?
+      @proposal_version = ProposalVersion.new(title: @proposal.title, year: @proposal.year, proposal_id: @proposal.id,
+                                              subject: @proposal.subject.id,
+                                              ams_subject_one: @proposal.ams_subjects.first.id,
+                                              ams_subject_two: @proposal.ams_subjects.last.id)
+      @proposal_version.save
+    else
+      revision_proposal_version
+    end
+  end
+
+  def revision_proposal_version
+    version = @proposal.proposal_versions&.maximum(:version)&.to_i
+    @proposal_version = ProposalVersion.find_by(proposal_id: @proposal.id, version: version) if version.present?
+
+    return if @proposal_version.blank?
+
+    update_proposal_version
+  end
+
+  def update_proposal_version
+    proposal_version = @proposal_version.dup
+    proposal_version.save
+    version = proposal_version.version + 1
+    proposal_version.update(title: @proposal.title, year: @proposal.year,
+                            proposal_id: @proposal.id,
+                            subject: @proposal.subject.id,
+                            ams_subject_one: @proposal.ams_subjects.first.id,
+                            ams_subject_two: @proposal.ams_subjects.last.id,
+                            version: version)
   end
 end

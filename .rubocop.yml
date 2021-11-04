@@ -36,3 +36,5 @@ Style/StringLiterals:
 Metrics/BlockLength:
   Exclude:
     - "**/*_spec.rb"
+Naming/VariableNumber:
+  Enabled: false

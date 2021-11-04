@@ -81,4 +81,16 @@ RSpec.describe "Proposals", type: :request do
 
     it { expect(Proposal.all.count).to eq(2) }
   end
+
+  describe "GET /versions" do
+    before { get versions_proposal_path(proposal) }
+
+    it { expect(response).to have_http_status(:ok) }
+  end
+
+  describe "GET /proposal_version" do
+    before { get proposal_version_proposal_path(proposal) }
+
+    it { expect(response).to have_http_status(:ok) }
+  end
 end
