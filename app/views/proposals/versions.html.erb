@@ -32,12 +32,16 @@
                 <th>Preferred Location</th>
                 <th>Status</th>
                 <th width="125">Updated</th>
+                <th>Submitted to EditFlow</th>
                 <th>Version</th>
                 <th>Actions</th>
+                <% if current_user.staff_member? %>
+                  <th></th>
+                <% end %>
               </tr>
             </thead>
             <tbody>
-              <% @proposal.answers&.pluck(:version)&.uniq&.each do |version| %>
+              <% @proposal.proposal_versions&.pluck(:version)&.uniq&.each do |version| %>
                 <tr>
                   <td><%= @proposal.code %></td>
                   <td><%= @proposal.title %></td>
@@ -52,10 +56,16 @@
                     <%= proposal_status(@proposal.status) %>
                   </td>
                   <td><%= @proposal.updated_at.to_date %></td>
+                  <td><%= @proposal&.edit_flow %></td>
                   <td><%= version %></td>
                   <td class="table-action">
                     <%= link_to '<i class="align-middle fas fa-fw fa-eye"></i>Show'.html_safe, proposal_version_proposal_url(@proposal, version: version) %>
                   </td>
+                  <% if current_user.staff_member? %>
+                    <td>
+                      <%= link_to "Send to EditFlow", revise_proposal_editflow_submitted_proposals_path(proposal_id: @proposal.id, version: version), method: :post, class: "btn btn-primary" %>
+                    </td>
+                  <% end %>
                 </tr>
               <% end %>
             </tbody>

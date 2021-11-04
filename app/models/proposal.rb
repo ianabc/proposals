@@ -22,6 +22,7 @@ class Proposal < ApplicationRecord
   has_many :staff_discussions, dependent: :destroy
   has_many :emails, dependent: :destroy
   has_many :reviews, dependent: :destroy
+  has_many :proposal_versions, dependent: :destroy
 
   before_save :strip_whitespace
   before_save :create_code, if: :is_submission
@@ -32,6 +33,7 @@ class Proposal < ApplicationRecord
   validate :minimum_organizers, if: :is_submission
   validate :preferred_locations, if: :is_submission
   validate :not_before_opening, if: :is_submission
+  validate :cover_letter_field, if: :is_submission
 
   pg_search_scope :search_proposals, against: %i[title code],
                                      associated_against: {
@@ -114,7 +116,7 @@ class Proposal < ApplicationRecord
       transitions from: %i[decision_pending shortlisted], to: :decision_email_sent
     end
     event :progress_spc do
-      transitions from: %i[initial_review revision_submitted_spc], to: :in_progress_spc
+      transitions from: :revision_submitted_spc, to: :in_progress_spc
     end
   end
 
@@ -230,6 +232,7 @@ class Proposal < ApplicationRecord
 
   def not_before_opening
     return if draft? || revision_requested? || revision_requested_spc? || allow_late_submission
+
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
     errors.add("Late submission - ", "proposal submissions closed on
@@ -247,6 +250,12 @@ class Proposal < ApplicationRecord
   def subjects
     errors.add('Subject Area:', "please select a subject area") if subject.nil?
     errors.add('AMS Subjects:', 'please select 2 AMS Subjects') unless ams_subjects.pluck(:code).count == 2
+  end
+
+  def cover_letter_field
+    return unless revision_requested_spc?
+
+    errors.add('Cover Letter:', "shouldn't be empty.") if cover_letter.blank?
   end
 
   def next_number
