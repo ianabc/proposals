@@ -166,4 +166,8 @@ module ProposalFieldsHelper
 
     Answer.find_by(proposal_field_id: field.id, proposal_id: proposal.id)
   end
+
+  def can_edit(proposal_form)
+    current_user&.staff_member? && (proposal_form&.active? || proposal_form&.draft?) && params[:action] == 'edit'
+  end
 end
