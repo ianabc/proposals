@@ -57,6 +57,18 @@
                     <div class="tab-content">
                       <div class="tab-pane active" id="tab-1" role="tabpanel">
                         <h4 class="tab-title"></h4>
+                        <% if @proposal.cover_letter.present? %>
+                          <div class="mb-3">
+                            <h3 class="required">Cover Letter</h3>
+                            <p>
+                              Please list all the changes you have made to your proposal here.
+                            </p>
+                            <p>
+                              For example, you could say, "As requested by the BIRS program committee, we have increased our number of early-career participants by inviting the following people ... ". 
+                            </p>
+                            <%= f.text_area(:cover_letter, size: '5x5', class:'form-control', value: @proposal&.cover_letter, disabled: action) %>
+                          </div>
+                        <% end %>
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
                         </div>
