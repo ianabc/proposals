@@ -92,7 +92,7 @@ class Proposal < ApplicationRecord
     end
 
     event :pending do
-      transitions from: %i[in_progress revision_submitted revision_submitted_spc], to: :decision_pending
+      transitions from: %i[in_progress in_progress_spc revision_submitted revision_submitted_spc], to: :decision_pending
     end
 
     event :requested do

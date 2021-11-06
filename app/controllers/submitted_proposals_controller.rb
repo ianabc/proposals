@@ -322,6 +322,15 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
+  def store_response_id(response)
+    response_body = JSON.parse(response.body)
+    article = response_body["data"]["article"]
+    @id = article["id"]
+    @proposal.update(editflow_id: @id, edit_flow: DateTime.current)
+    @proposal_version = @proposal.proposal_versions.find_by(version: 1)
+    @proposal_version.update(editflow_id: @id, send_to_editflow: DateTime.current)
+  end
+
   def check_proposal_editflow_id
     if @proposal.editflow_id.blank?
       redirect_to versions_proposal_url(@proposal), alert: "Proposal has not editflow_id!"
@@ -344,15 +353,7 @@ class SubmittedProposalsController < ApplicationController
   def revise_post_to_editflow
     log_info
     @errors = ""
-    version = params[:version].to_i
-    return unless create_revise_proposal_file(version)
-
-    begin
-      revise_query = EditFlowService.new(@proposal).revise_article
-    rescue RuntimeError => e
-      Rails.logger.info { "\n\nErrors in #{@proposal.code}: #{e.message}\n\n" }
-      @errors = "Errors in #{@proposal.code}: #{e.message}"
-    end
+    revise_query = create_file_revise_query
 
     return if @errors.present?
 
@@ -363,7 +364,20 @@ class SubmittedProposalsController < ApplicationController
                                  fileRevisionLetter: File.open(@letter_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
 
-    mutation_response_body(response)
+    mutation_response_body(response, params[:version].to_i)
+  end
+
+  def create_file_revise_query
+    version = params[:version].to_i
+    return unless create_revise_proposal_file(version)
+
+    begin
+      revise_query = EditFlowService.new(@proposal).revise_article
+    rescue RuntimeError => e
+      Rails.logger.info { "\n\nErrors in #{@proposal.code}: #{e.message}\n\n" }
+      @errors = "Errors in #{@proposal.code}: #{e.message}"
+    end
+    revise_query
   end
 
   def create_revise_proposal_file(version)
@@ -381,44 +395,46 @@ class SubmittedProposalsController < ApplicationController
     Rails.logger.info { "\n\nCreating PDF for #{@proposal&.code}...\n\n" }
   end
 
-  def mutation_response_body(response)
+  def mutation_response_body(response, version)
     if response.body.include?("errors")
       Rails.logger.info { "\n\nError sending #{@proposal.code}: #{response.body}\n\n" }
       @errors = "Error sending #{@proposal.code}: #{response.body}"
       return
     else
       Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
+      store_revised_response_id(response, version)
       @proposal.progress_spc!
     end
     Rails.logger.info { "\n\n*****************************************\n\n" }
   end
 
-  def store_response_id(response)
-    response_body = JSON.parse(response.body)
-    article = response_body["data"]["article"]
-    @id = article["id"]
-    @proposal.update(editflow_id: @id, edit_flow: DateTime.current)
-    @proposal_version = @proposal.proposal_versions.find_by(version: 1)
-    @proposal_version.update(editflow_id: @id, send_to_editflow: DateTime.current)
+  def cover_letter_file
+    cover_letter_pdf = cover_letter_field_pdf
+    @letter_path = Rails.root.join('tmp', "#{@proposal&.code}-cover_letter.pdf")
+    File.open(@letter_path, "w:UTF-8") do |file|
+      file.write(cover_letter_pdf)
+    end
+  rescue StandardError => e
+    Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}\n\n" }
+    @errors = "Error creating #{@proposal&.code} PDF: #{e.message}"
+    false
   end
 
-  def cover_letter_file
-    @latex = if @proposal.cover_letter
-               "\\begin{document}\n#{@proposal.cover_letter}"
-             else
-               "\\begin{document}\n"
-             end
-    begin
-      pdf_file = render_to_string layout: "application", inline: @latex, formats: [:pdf]
-      @letter_path = Rails.root.join('tmp', "#{@proposal&.code}-cover_letter.pdf")
-      File.open(@letter_path, "w:UTF-8") do |file|
-        file.write(pdf_file)
-      end
-    rescue StandardError => e
-      Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}\n\n" }
-      @errors = "Error creating #{@proposal&.code} PDF: #{e.message}"
-      false
-    end
+  def cover_letter_field_pdf
+    latex = if @proposal.cover_letter
+              "\\begin{document}\n#{LatexToPdf.escape_latex(@proposal.cover_letter)}"
+            else
+              "\\begin{document}\n"
+            end
+    render_to_string layout: "application", inline: latex, formats: [:pdf]
+  end
+
+  def store_revised_response_id(response, version)
+    response_body = JSON.parse(response.body)
+    article = response_body["data"]["articleReviewVersion"]
+    id = article["id"]
+    proposal_version = @proposal.proposal_versions.find_by(version: version)
+    proposal_version&.update(editflow_id: id, send_to_editflow: DateTime.current)
   end
 
   def set_proposal
