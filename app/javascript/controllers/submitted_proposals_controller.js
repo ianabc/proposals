@@ -53,12 +53,12 @@ export default class extends Controller {
         data,
         success: (data) => {
           $('#birs_email_subject').val(data.email_template.subject)
-          $('#birs_email_body').val(data.email_template.body)
+          tinyMCE.activeEditor.setContent(data.email_template.body)
         }
       })
     }else {
       $('#birs_email_subject').val('')
-      $('#birs_email_body').val('')
+      tinyMCE.activeEditor.setContent('')
     }
   }
 
