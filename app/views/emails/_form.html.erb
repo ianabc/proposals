@@ -38,7 +38,7 @@
       </div>
       <div>
         <%= f.label :body, class: 'form-label' %>
-        <%= f.text_area(:body, required: true, size: '3x5', class:'form-control tinymce', id:'birs_email_body') %>
+        <%= f.text_area(:body, size: '3x5', class:'form-control tinymce', id:'birs_email_body') %>
       </div>
       <div class="text-end m-3">
         <%= f.submit "Submit", class:  'btn btn-primary' %>
@@ -53,7 +53,7 @@
     <div class="mb-3 row border m-1 p-1">
       <div class="mb-3 col-md-6">
         <p> Subject: <%= email.subject %></p>
-        <p> Body: <%= email.body %></p>
+        <p> Body: <%= email.body.html_safe %></p>
       </div>
       <div class="mb-3 col-md-6">
         <p> Sent at: <%= email.created_at %></p>
