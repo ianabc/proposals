@@ -144,16 +144,17 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def import_reviews
-    @reviews_not_imported = []
-    @statuses = []
-
     params[:proposals].split(',').each do |id|
       import_proposal_reviews(id)
       log_activity(Proposal.find(id))
     end
     import_message
   rescue StandardError => e
-    render json: e.message, status: :internal_server_error
+    if request.xhr?
+      render json: e.message, status: :internal_server_error
+    else
+      redirect_to versions_proposal_url(@proposal), alert: e.message
+    end
   end
 
   def reviews_booklet
@@ -195,8 +196,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def import_proposal_reviews(id)
+    @reviews_not_imported = []
+    @statuses = []
     @proposal = Proposal.find_by(id: id)
-    @proposal.reviews.destroy_all
 
     if @proposal.editflow_id.present?
       proposal_reviews
@@ -207,15 +209,24 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def import_message
+    alert_success_message
+
+    if request.xhr?
+      respond_to do |format|
+        format.js { render json: { message: @message, type: @message_type }, status: :ok }
+      end
+    else
+      redirect_to versions_proposal_url(@proposal), notice: @message if @message_type == "success"
+      redirect_to versions_proposal_url(@proposal), alert: @message if @message_type == "alert"
+    end
+  end
+
+  def alert_success_message
     @message_type = 'success'
     if @reviews_not_imported.present?
       error_messages
     else
       @message = "Reviews successfully imported."
-    end
-
-    respond_to do |format|
-      format.js { render json: { message: @message, type: @message_type }, status: :ok }
     end
   end
 
@@ -564,31 +575,44 @@ class SubmittedProposalsController < ApplicationController
     if response.body.include?("errors")
       display_errors(response)
     else
-      get_response_body(response)
-      store_proposal_reviews
+      review_version = get_response_body(response)
+      store_proposal_reviews(review_version)
     end
   end
 
   def display_errors(response)
+    @errors = []
     Rails.logger.info { "\n\nError sending #{@proposal.code}: #{response.body}\n\n" }
     flash[:alert] = "Error sending #{@proposal.code}: #{response.body}"
+    @errors << "Error sending #{@proposal.code}: #{response.body}"
     nil
   end
 
   def get_response_body(response)
     response_body = JSON.parse(response.body)
     article = response_body["data"]["article"]
+    review_version = article["reviewVersionLatest"]["number"]
+    check_review_version(review_version)
     @reviews = article["reviewVersionLatest"]["reviews"]
+    review_version
   end
 
-  def store_proposal_reviews
+  def check_review_version(review_version)
+    return unless @proposal.reviews&.pluck(:version)&.uniq&.include? review_version
+
+    reviews = @proposal.reviews.where(version: review_version)
+    reviews.destroy_all
+  end
+
+  def store_proposal_reviews(review_version)
     @reviews.each do |review|
       reviewer_name = review["reviewer"]["nameFull"]
       is_quick = review["isQuick"]
       @score = review["score"]
 
       @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: @score,
-                           proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id)
+                           proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id,
+                           version: review_version)
       @review.save
       review_file(review)
     end
