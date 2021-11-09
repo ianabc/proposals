@@ -50,7 +50,7 @@ RSpec.feature "Proposal edit", type: :feature do
 
   scenario "the Suporting Organizers' information is shown" do
     create(:invite, proposal: @proposal, status: 'confirmed',
-                      invited_as: 'Organizer')
+                    invited_as: 'Organizer')
 
     @proposal = Proposal.find(@proposal.id)
     expect(@proposal.supporting_organizers).not_to be_empty
@@ -67,7 +67,7 @@ RSpec.feature "Proposal edit", type: :feature do
 
     within("form#submit_proposal") do
       expect(have_field('#file-upload')).to be_truthy
-      upload_file = "#{Rails.root.join('spec/fixtures/file.pdf')}"
+      upload_file = Rails.root.join('spec/fixtures/file.pdf').to_s
       find_field('file-upload').attach_file(upload_file)
     end
 

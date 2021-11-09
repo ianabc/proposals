@@ -5,7 +5,7 @@ module EmailTemplatesHelper
         case k&.split('_')&.first&.capitalize
         when 'Revision'
           arr = k.split("_")
-          if arr[1] == 'spc'
+          if arr.first == 'spc'
             "#{k&.split('_')&.first&.capitalize} SPC"
           else
             k&.split('_')&.first&.capitalize
