@@ -47,27 +47,13 @@ class Person < ApplicationRecord
   def common_fields
     return if skip_person_validation
 
-    errors.add('Main Affiliation/Institution', "can't be blank") if affiliation.blank?
-    errors.add('Department', "can't be blank") if department.blank?
-    errors.add('Academic Status', "can't be blank") if academic_status.blank?
-    errors.add('Year of', "PhD can't be blank") if first_phd_year.blank?
+    person_academic_data
     errors.add('Country', "can't be blank") if country.blank?
-
     self.first_phd_year = nil if first_phd_year == "N/A"
-
-    if academic_status == 'Other' && other_academic_status.blank?
-      errors.add(:other_academic_status, "Please indicate your academic status.")
-    end
-
+    check_academic_status
     return unless country == 'Canada' || country == 'United States of America'
 
-    case country
-    when "Canada"
-      self.region = province if province.present?
-    when "United States of America"
-      self.region = state if state.present?
-    end
-    errors.add("Missing data: ", "You must select a #{region_type}") if region.blank?
+    region_for_countries
   end
 
   def draft_proposals?
@@ -80,5 +66,29 @@ class Person < ApplicationRecord
     attributes.each do |key, value|
       self[key] = value.strip if value.respond_to?(:strip)
     end
+  end
+
+  def person_academic_data
+    errors.add('Main Affiliation/Institution', "can't be blank") if affiliation.blank?
+    errors.add('Department', "can't be blank") if department.blank?
+    errors.add('Academic Status', "can't be blank") if academic_status.blank?
+    errors.add('Year of', "PhD can't be blank") if first_phd_year.blank?
+  end
+
+  def region_for_countries
+    case country
+    when "Canada"
+      self.region = province if province.present?
+    when "United States of America"
+      self.region = state if state.present?
+    end
+
+    errors.add("Missing data: ", "You must select a #{region_type}") if region.blank?
+  end
+
+  def check_academic_status
+    return unless academic_status == 'Other' && other_academic_status.blank?
+
+    errors.add(:other_academic_status, "Please indicate your academic status.")
   end
 end
