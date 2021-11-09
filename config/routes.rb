@@ -21,6 +21,7 @@ Rails.application.routes.draw do
       post :proposals_booklet
       get :download_booklet
       post :edit_flow
+      post :revise_proposal_editflow
       post :approve_decline_proposals
       post :table_of_content
       post :import_reviews

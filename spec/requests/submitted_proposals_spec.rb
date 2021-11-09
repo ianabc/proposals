@@ -51,6 +51,17 @@ RSpec.describe "/submitted_proposals", type: :request do
       get submitted_proposal_path(proposal)
     end
 
+    context 'when proposal status is submitted' do
+      before do
+        proposal.update(status: "submitted")
+        get submitted_proposal_path(proposal)
+      end
+
+      it 'update proposal status' do
+        expect(proposal.reload.status).to eq("initial_review")
+      end
+    end
+
     it { expect(response).to have_http_status(:ok) }
   end
 
@@ -117,8 +128,29 @@ RSpec.describe "/submitted_proposals", type: :request do
   describe 'POST /submitted_proposals/:id/update_status' do
     before { post update_status_submitted_proposal_path(id: proposal.id, status: Proposal.statuses[:in_progress]) }
 
+    context 'when status is blank' do
+      before { post update_status_submitted_proposal_path(id: proposal.id, status: '') }
+
+      it 'does not update proposal status' do
+        expect(response).to have_http_status(200)
+      end
+    end
+
     it 'update proposal status' do
       expect(proposal.reload.status).to eq("in_progress")
+    end
+  end
+
+  describe 'POST /submitted_proposals/table_of_content' do
+    let(:params) do
+      { proposal_ids: proposal.id }
+    end
+    before do
+      post table_of_content_submitted_proposals_path(params: params)
+    end
+
+    it 'will return proposals' do
+      expect(response).to have_http_status(200)
     end
   end
 

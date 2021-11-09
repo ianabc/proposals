@@ -41,6 +41,17 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
+  def revise_proposal_editflow
+    @proposal = Proposal.find_by(id: params[:proposal_id].to_i)
+    unless @proposal.may_progress_spc?
+      redirect_to versions_proposal_url(@proposal),
+                  alert: "Proposal status should be initial_review or revision_submitted_spc."
+      return
+    end
+    check_proposal_editflow_id
+    nil
+  end
+
   def staff_discussion
     @staff_discussion = StaffDiscussion.new
     discussion = params[:discussion]
@@ -125,27 +136,25 @@ class SubmittedProposalsController < ApplicationController
 
   def update_status
     status = params[:status]
-    if status.blank?
-      render json: {}, status: :unprocessable_entity
-      return
+    if @proposal.update(status: status.to_i)
+      render json: {}, status: :ok
+    else
+      render json: @proposal.errors.full_messages, status: :unprocessable_entity
     end
-
-    @proposal.update(status: status.to_i)
-
-    head :ok
   end
 
   def import_reviews
-    @reviews_not_imported = []
-    @statuses = []
-
     params[:proposals].split(',').each do |id|
       import_proposal_reviews(id)
       log_activity(Proposal.find(id))
     end
     import_message
   rescue StandardError => e
-    render json: e.message, status: :internal_server_error
+    if request.xhr?
+      render json: e.message, status: :internal_server_error
+    else
+      redirect_to versions_proposal_url(@proposal), alert: e.message
+    end
   end
 
   def reviews_booklet
@@ -187,8 +196,9 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def import_proposal_reviews(id)
+    @reviews_not_imported = []
+    @statuses = []
     @proposal = Proposal.find_by(id: id)
-    @proposal.reviews.destroy_all
 
     if @proposal.editflow_id.present?
       proposal_reviews
@@ -199,15 +209,24 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def import_message
+    alert_success_message
+
+    if request.xhr?
+      respond_to do |format|
+        format.js { render json: { message: @message, type: @message_type }, status: :ok }
+      end
+    else
+      redirect_to versions_proposal_url(@proposal), notice: @message if @message_type == "success"
+      redirect_to versions_proposal_url(@proposal), alert: @message if @message_type == "alert"
+    end
+  end
+
+  def alert_success_message
     @message_type = 'success'
     if @reviews_not_imported.present?
       error_messages
     else
       @message = "Reviews successfully imported."
-    end
-
-    respond_to do |format|
-      format.js { render json: { message: @message, type: @message_type }, status: :ok }
     end
   end
 
@@ -232,9 +251,18 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def change_status
-    @check_status = @email.update_status(@proposal, 'Revision') if params[:templates].split(':').first == "Revision"
+    revision_template
     @check_status = @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
     @check_status = @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
+  end
+
+  def revision_template
+    case params[:templates].split(':').first
+    when "Revision"
+      @check_status = @email.update_status(@proposal, 'Revision')
+    when "Revision SPC"
+      @check_status = @email.update_status(@proposal, 'Revision SPC')
+    end
   end
 
   def latex_temp_file
@@ -260,20 +288,8 @@ class SubmittedProposalsController < ApplicationController
     false
   end
 
-  def create_pdf_file
-    Rails.logger.info { "\n\nCreating PDF for #{@proposal&.code}...\n\n" }
-    @prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
-                                    .generate_latex_file.to_s
-
-    @year = @proposal&.year || (Date.current.year.to_i + 2)
-    @pdf_path = Rails.root.join('tmp', "#{@proposal&.code}-#{DateTime.now.to_i}.pdf")
-
-    generate_pdf_string
-  end
-
   def post_to_editflow
-    Rails.logger.info { "\n\n*****************************************\n\n" }
-    Rails.logger.info { "\n\nPosting #{@proposal.code} to EditFlow...\n\n" }
+    log_info
     return unless create_pdf_file
 
     begin
@@ -289,25 +305,147 @@ class SubmittedProposalsController < ApplicationController
                                { query: edit_flow_query, fileMain: File.open(@pdf_path) },
                                { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
 
+    query_response_body(response)
+    Rails.logger.info { "\n\n*****************************************\n\n" }
+    true
+  end
+
+  def create_pdf_file
+    @prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
+                                    .generate_latex_file.to_s
+
+    @year = @proposal&.year || (Date.current.year.to_i + 2)
+    @pdf_path = Rails.root.join('tmp', "#{@proposal&.code}-#{DateTime.now.to_i}.pdf")
+
+    generate_pdf_string
+  end
+
+  def query_response_body(response)
     if response.body.include?("errors")
       Rails.logger.info { "\n\nError sending #{@proposal.code}: #{response.body}\n\n" }
       flash[:alert] = "Error sending #{@proposal.code}: #{response.body}"
-      return
+      nil
     else
       Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
       flash[:notice] = "#{@proposal&.code} sent to EditFlow!"
       store_response_id(response)
       @proposal.progress!
     end
-    Rails.logger.info { "\n\n*****************************************\n\n" }
-    true
   end
 
   def store_response_id(response)
     response_body = JSON.parse(response.body)
     article = response_body["data"]["article"]
+    @id = article["id"]
+    @proposal.update(editflow_id: @id, edit_flow: DateTime.current)
+    @proposal_version = @proposal.proposal_versions.find_by(version: 1)
+    @proposal_version.update(editflow_id: @id, send_to_editflow: DateTime.current)
+  end
+
+  def check_proposal_editflow_id
+    if @proposal.editflow_id.blank?
+      redirect_to versions_proposal_url(@proposal), alert: "Proposal has not editflow_id!"
+    else
+      revision_proposal
+    end
+    nil
+  end
+
+  def revision_proposal
+    revise_post_to_editflow
+    if @errors.present?
+      redirect_to versions_proposal_url(@proposal), alert: @errors
+    else
+      redirect_to versions_proposal_url(@proposal), notice: "Proposal is successfully sent to EditFlow!"
+    end
+    nil
+  end
+
+  def revise_post_to_editflow
+    log_info
+    @errors = ""
+    revise_query = create_file_revise_query
+
+    return if @errors.present?
+
+    return unless cover_letter_file
+
+    response = RestClient.post ENV['EDITFLOW_API_URL'],
+                               { query: revise_query, fileMain: File.open(@pdf_path),
+                                 fileRevisionLetter: File.open(@letter_path) },
+                               { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
+
+    mutation_response_body(response, params[:version].to_i)
+  end
+
+  def create_file_revise_query
+    version = params[:version].to_i
+    return unless create_revise_proposal_file(version)
+
+    begin
+      revise_query = EditFlowService.new(@proposal).revise_article
+    rescue RuntimeError => e
+      Rails.logger.info { "\n\nErrors in #{@proposal.code}: #{e.message}\n\n" }
+      @errors = "Errors in #{@proposal.code}: #{e.message}"
+    end
+    revise_query
+  end
+
+  def create_revise_proposal_file(version)
+    @prop_latex = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user, version)
+                                    .generate_latex_file.to_s
+
+    # @year = @proposal&.year || (Date.current.year.to_i + 2)
+    @pdf_path = Rails.root.join('tmp', "#{@proposal&.code}-#{DateTime.now.to_i}.pdf")
+    generate_pdf_string
+  end
+
+  def log_info
+    Rails.logger.info { "\n\n*****************************************\n\n" }
+    Rails.logger.info { "\n\nPosting #{@proposal.code} to EditFlow...\n\n" }
+    Rails.logger.info { "\n\nCreating PDF for #{@proposal&.code}...\n\n" }
+  end
+
+  def mutation_response_body(response, version)
+    if response.body.include?("errors")
+      Rails.logger.info { "\n\nError sending #{@proposal.code}: #{response.body}\n\n" }
+      @errors = "Error sending #{@proposal.code}: #{response.body}"
+      return
+    else
+      Rails.logger.info { "\n\nEditFlow response: #{response.inspect}\n\n" }
+      store_revised_response_id(response, version)
+      @proposal.progress_spc!
+    end
+    Rails.logger.info { "\n\n*****************************************\n\n" }
+  end
+
+  def cover_letter_file
+    cover_letter_pdf = cover_letter_field_pdf
+    @letter_path = Rails.root.join('tmp', "#{@proposal&.code}-cover_letter.pdf")
+    File.open(@letter_path, "w:UTF-8") do |file|
+      file.write(cover_letter_pdf)
+    end
+  rescue StandardError => e
+    Rails.logger.info { "\n\nError creating #{@proposal&.code} PDF: #{e.message}\n\n" }
+    @errors = "Error creating #{@proposal&.code} PDF: #{e.message}"
+    false
+  end
+
+  def cover_letter_field_pdf
+    latex = if @proposal.cover_letter
+              "\\begin{document}\n#{LatexToPdf.escape_latex(@proposal.cover_letter)}"
+            else
+              "\\begin{document}\n"
+            end
+    render_to_string layout: "application", inline: latex, formats: [:pdf]
+  end
+
+  def store_revised_response_id(response, version)
+    response_body = JSON.parse(response.body)
+    article = response_body["data"]["articleReviewVersion"]
     id = article["id"]
-    @proposal.update(editflow_id: id, edit_flow: DateTime.current)
+    proposal_version = @proposal.proposal_versions.find_by(version: version)
+    proposal_version&.update(editflow_id: id, send_to_editflow: DateTime.current)
   end
 
   def set_proposal
@@ -437,31 +575,44 @@ class SubmittedProposalsController < ApplicationController
     if response.body.include?("errors")
       display_errors(response)
     else
-      get_response_body(response)
-      store_proposal_reviews
+      review_version = get_response_body(response)
+      store_proposal_reviews(review_version)
     end
   end
 
   def display_errors(response)
+    @errors = []
     Rails.logger.info { "\n\nError sending #{@proposal.code}: #{response.body}\n\n" }
     flash[:alert] = "Error sending #{@proposal.code}: #{response.body}"
+    @errors << "Error sending #{@proposal.code}: #{response.body}"
     nil
   end
 
   def get_response_body(response)
     response_body = JSON.parse(response.body)
     article = response_body["data"]["article"]
+    review_version = article["reviewVersionLatest"]["number"]
+    check_review_version(review_version)
     @reviews = article["reviewVersionLatest"]["reviews"]
+    review_version
   end
 
-  def store_proposal_reviews
+  def check_review_version(review_version)
+    return unless @proposal.reviews&.pluck(:version)&.uniq&.include? review_version
+
+    reviews = @proposal.reviews.where(version: review_version)
+    reviews.destroy_all
+  end
+
+  def store_proposal_reviews(review_version)
     @reviews.each do |review|
       reviewer_name = review["reviewer"]["nameFull"]
       is_quick = review["isQuick"]
       @score = review["score"]
 
       @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: @score,
-                           proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id)
+                           proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id,
+                           version: review_version)
       @review.save
       review_file(review)
     end

@@ -31,7 +31,7 @@
 
             <div class="mb-3">
               <h4>Body: </h4>
-              <label class="form-control"> <%= @email_template.body %> </label>
+              <%= text_area_tag :body, "#{@email_template.body}", { class: 'tinymce' } %>
             </div>
           </div>
         </div>

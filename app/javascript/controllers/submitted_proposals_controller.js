@@ -53,12 +53,12 @@ export default class extends Controller {
         data,
         success: (data) => {
           $('#birs_email_subject').val(data.email_template.subject)
-          $('#birs_email_body').val(data.email_template.body)
+          tinyMCE.activeEditor.setContent(data.email_template.body)
         }
       })
     }else {
       $('#birs_email_subject').val('')
-      $('#birs_email_body').val('')
+      tinyMCE.activeEditor.setContent('')
     }
   }
 
@@ -189,8 +189,8 @@ export default class extends Controller {
             window.location.reload();
           }, 1000)
         })
-        .fail(function() {
-          toastr.error("Proposal status cannot be updated!")
+        .fail(function(res) {
+          res.responseJSON.forEach((msg) => toastr.error(msg))
         });
       }
     }

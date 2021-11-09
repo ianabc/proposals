@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_02_064853) do
+ActiveRecord::Schema.define(version: 2021_11_05_091631) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -347,6 +347,25 @@ ActiveRecord::Schema.define(version: 2021_11_02_064853) do
     t.index ["code"], name: "index_proposal_types_on_code", unique: true
   end
 
+  create_table "proposal_versions", force: :cascade do |t|
+    t.string "title"
+    t.integer "year"
+    t.string "subject"
+    t.string "ams_subject_one"
+    t.string "ams_subject_two"
+    t.integer "version", default: 1
+    t.datetime "send_to_editflow"
+    t.string "editflow_id"
+    t.text "preamble"
+    t.text "bibliography"
+    t.boolean "no_latex"
+    t.string "file_ids"
+    t.bigint "proposal_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["proposal_id"], name: "index_proposal_versions_on_proposal_id"
+  end
+
   create_table "proposals", force: :cascade do |t|
     t.bigint "proposal_type_id", null: false
     t.jsonb "submission"
@@ -364,6 +383,7 @@ ActiveRecord::Schema.define(version: 2021_11_02_064853) do
     t.datetime "edit_flow"
     t.string "outcome"
     t.string "editflow_id"
+    t.text "cover_letter"
     t.index ["code"], name: "index_proposals_on_code", unique: true
     t.index ["proposal_form_id"], name: "index_proposals_on_proposal_form_id"
     t.index ["proposal_type_id"], name: "index_proposals_on_proposal_type_id"
@@ -380,6 +400,7 @@ ActiveRecord::Schema.define(version: 2021_11_02_064853) do
     t.integer "score"
     t.boolean "is_quick"
     t.string "file_ids"
+    t.integer "version", default: 1
     t.index ["person_id"], name: "index_reviews_on_person_id"
     t.index ["proposal_id"], name: "index_reviews_on_proposal_id"
   end
@@ -527,6 +548,7 @@ ActiveRecord::Schema.define(version: 2021_11_02_064853) do
   add_foreign_key "proposal_roles", "roles"
   add_foreign_key "proposal_type_locations", "locations"
   add_foreign_key "proposal_type_locations", "proposal_types"
+  add_foreign_key "proposal_versions", "proposals"
   add_foreign_key "proposals", "proposal_forms"
   add_foreign_key "proposals", "proposal_types"
   add_foreign_key "proposals", "subjects"

@@ -25,9 +25,9 @@ gem 'rails-latex'
 gem 'rest-client'
 gem 'rollbar'
 gem 'sass-rails', '>= 6'
+gem 'tinymce-rails'
 gem 'turbo-rails'
 gem 'webpacker', '~> 5.0'
-
 group :development, :test do
   gem 'byebug'
   gem 'capybara', '>= 3.26'

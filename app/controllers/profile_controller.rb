@@ -1,4 +1,6 @@
 class ProfileController < ApplicationController
+  before_action :authenticate_user!
+  before_action :authorize_user
   before_action :person, only: %i[edit update demographic_data]
 
   def edit
@@ -39,5 +41,9 @@ class ProfileController < ApplicationController
 
   def person
     @person = current_user&.person
+  end
+
+  def authorize_user
+    raise CanCan::AccessDenied if current_user.staff_member?
   end
 end
