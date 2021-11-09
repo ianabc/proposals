@@ -104,7 +104,7 @@ export default class extends Controller {
       if(textField.dataset.value === data.value) {
         $.post("/proposals/" + data.propid + "/latex",
           { latex: textField.value },
-          function(data, status) {});
+          function() {});
       }
     }
   }

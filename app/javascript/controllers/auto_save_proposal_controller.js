@@ -23,8 +23,7 @@ export default class extends Controller {
 
   submitProposal (id) {
    $.post(`/submit_proposals?proposal=${id}`,
-      $('form#submit_proposal').serialize(), function(data) {
-    }) 
+      $('form#submit_proposal').serialize(), function() {}) 
   }
 
   onFocus () {
