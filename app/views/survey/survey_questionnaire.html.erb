@@ -6,7 +6,7 @@
           <div class="card-body">
             <div class="m-sm-4">
               <div data-controller="survey">
-                <%= form_for :survey, url: submit_survey_survey_index_path(code: params[:code]), method: :post do |f| %>
+                <%= form_for :survey, url: submit_survey_survey_index_path(code: params[:code], response: params[:response]), method: :post do |f| %>
                   <div class="col-lg-8">
                     <div class="mb-3"> 
                       <div>
