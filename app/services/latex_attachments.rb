@@ -42,7 +42,9 @@ module LatexAttachments
         next
       end
 
-      if %w[txt text].include?(file_extension)
+      EXTENSIONS = %w[txt text]
+
+      if EXTENSIONS.include?(file_extension)
         text_content = LatexToPdf.escape_latex(File.read(file_path))
         text << "\\noindent File Attachment #{num += 1}: #{text_content} \n\n\n"
       elsif file_extension == 'pdf'
