@@ -16,8 +16,8 @@ class SubmitProposalsController < ApplicationController
       staff_redirect
       nil
     else
-      session[:is_submission] = @proposal.is_submission = @submission.is_final?
-      if @proposal.is_submission && @submission.has_errors?
+      session[:is_submission] = @proposal.is_submission = @submission.final?
+      if @proposal.is_submission && @submission.errors?
         redirect_to edit_proposal_path(@proposal), alert: "Your submission has
             errors: #{@submission.error_messages}.".squish
         return
@@ -184,7 +184,7 @@ class SubmitProposalsController < ApplicationController
   end
 
   def staff_redirect
-    if @submission.has_errors?
+    if @submission.errors?
       redirect_to edit_submitted_proposal_url(@proposal), alert: "Your submission has
           errors: #{@submission.error_messages}.".squish
     else

@@ -18,10 +18,8 @@ class SubmitProposalService
     proposal_locations
   end
 
-  def has_errors?
-    unless @proposal.valid?
-      @errors << @proposal.errors.full_messages
-    end
+  def errors?
+    @errors << @proposal.errors.full_messages unless @proposal.valid?
 
     !@errors.flatten.empty?
   end
@@ -30,10 +28,9 @@ class SubmitProposalService
     @errors.uniq.flatten.join(', ')
   end
 
-  def is_final?
+  def final?
     params[:commit] == 'Submit Proposal'
   end
-
 
   private
 
