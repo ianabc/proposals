@@ -50,13 +50,11 @@ class SubmitProposalService
   end
 
   def check_field_validations(id)
-    if @errors.flatten.count.zero?
-      field = ProposalField.find(id)
-      if field.location_id
-        return unless @proposal.locations.include?(field.location)
-      end
+    return unless @errors.flatten.count.zero?
 
-      @errors << ProposalFieldValidationsService.new(field, proposal).validations
-    end
+    field = ProposalField.find(id)
+    return if field.location_id && @proposal.locations.exclude?(field.location)
+
+    @errors << ProposalFieldValidationsService.new(field, proposal).validations
   end
 end
