@@ -1,6 +1,7 @@
 import { Controller } from 'stimulus'
 import Sortable from "sortablejs"
 import Rails from '@rails/ujs'
+import toastr from 'toastr'
 
 export default class extends Controller {
   connect(){
@@ -18,10 +19,10 @@ export default class extends Controller {
       url,
       type: 'PATCH',
       data,
-      success: function (res) {
+      success: (res) => {
         toastr.success(res)
       },
-      error: function (err) {
+      error: (err) => {
         toastr.error(err)
       }
     })
