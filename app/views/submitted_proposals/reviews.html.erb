@@ -48,7 +48,7 @@
                           <td>False</td>
                         <% end %>
                         <td><%= review&.version %></td>
-                        <td><%= review_dates(review).join('<br>').html_safe %></td>
+                        <td><%= review_dates(review)&.join('<br>')&.html_safe %></td>
                         <td>
                           <% review.files&.each do |file| %>
                             <div>

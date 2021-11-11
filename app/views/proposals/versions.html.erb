@@ -44,7 +44,7 @@
               <% @proposal.proposal_versions&.pluck(:version)&.uniq&.each do |version| %>
                 <tr>
                   <td><%= @proposal.code %></td>
-                  <td><%= @proposal.title %></td>
+                  <td><%= proposal_version_title(version, @proposal) %></td>
                   <td><%= @proposal.proposal_type.name %></td>
                   <td><%= @proposal.lead_organizer&.fullname %></td>
                   <td>
