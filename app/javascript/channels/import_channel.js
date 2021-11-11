@@ -3,7 +3,6 @@ import toastr from 'toastr'
 
 consumer.subscriptions.create("ImportChannel", {
   connected() {
-    console.log("Start importing reviews")
   },
 
   disconnected() {
@@ -12,7 +11,7 @@ consumer.subscriptions.create("ImportChannel", {
   received(data) {
     $(".import-reviews-btn").html("Import Reviews")
     $(".import-reviews-btn").removeClass("disabled");
-    if ( data["success"] == undefined ){
+    if ( typeof data["success"] === "undefined" ){
       this.showErrorMessage(data)
     }
     else {
@@ -21,10 +20,10 @@ consumer.subscriptions.create("ImportChannel", {
   },
 
   showErrorMessage(data) {
-    if( data["alert"]["errors"] == null || data["alert"]["errors"] == "" ) {
+    if( data["alert"]["errors"] === null || data["alert"]["errors"] === "" ) {
       toastr.error(data["alert"]["message"])
     }
-    else if( data["alert"]["message"] == null || data["alert"]["message"] == "" ) {
+    else if( data["alert"]["message"] === null || data["alert"]["message"] === "" ) {
       toastr.error(data["alert"]["errors"])
     }
     else {
