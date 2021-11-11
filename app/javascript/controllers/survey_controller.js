@@ -12,10 +12,10 @@ export default class extends Controller {
     if(this.ethnicityTarget.value) {
       this.handleEthnicityOptions(this.ethnicityTarget.value)
     }
-    this.check_conditions()
+    this.checkConditions()
   }
 
-  check_conditions() {
+  checkConditions() {
     if(this.genderTarget.value) {
       this.handleGenderOptions(this.genderTarget.value)
     }
