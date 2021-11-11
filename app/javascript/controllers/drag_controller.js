@@ -13,12 +13,17 @@ export default class extends Controller {
     let id = event.item.dataset.id
     let data = new FormData()
     data.append("position", event.newIndex + 1)
-    data.append("faq_id", id)
     let url = "/faqs/" + id + "/move";
     Rails.ajax({
       url,
       type: 'PATCH',
-      data
+      data,
+      success: function (res) {
+        toastr.success(res)
+      },
+      error: function (err) {
+        toastr.error(err)
+      }
     })
   }
 }
