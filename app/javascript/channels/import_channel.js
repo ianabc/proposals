@@ -36,8 +36,6 @@ consumer.subscriptions.create("ImportChannel", {
     if ( error === null || error === "" ) {
       return true
     }
-    else {
-      return false
-    }
+    return false
   }
 });
