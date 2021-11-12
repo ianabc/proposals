@@ -16,21 +16,21 @@ export default class extends Controller {
     let DisableRole = 'participant'
     let role = event.target.dataset.role
     if( role === 'participant' ) { DisableRole = 'organizer' }
-    let disable_value = true
+    let disableValue = true
     let RoleValues = []
 
     $.each(['firstname', 'lastname', 'email', 'invited_as', 'deadline'], function(index, element) {
       let length = $('#' + role + '_' + element)[0].value.length
       RoleValues.push(length)
     })
-    if( RoleValues.every( (e) => e === 0 ) ) { disable_value = false }
+    if( RoleValues.every( (e) => e === 0 ) ) { disableValue = false }
 
     $.each(['firstname', 'lastname', 'email', 'deadline', 'invited_as'],
       function(index, element) {
-        $('#' + DisableRole + '_' + element).prop("disabled", disable_value);
+        $('#' + DisableRole + '_' + element).prop("disabled", disableValue);
     })
 
-    $('#' + DisableRole).prop("hidden", disable_value);
+    $('#' + DisableRole).prop("hidden", disableValue);
   }
 
   presentDate () {
