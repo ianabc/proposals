@@ -20,15 +20,24 @@ consumer.subscriptions.create("ImportChannel", {
   },
 
   showErrorMessage(data) {
-    if( data["alert"]["errors"] === null || data["alert"]["errors"] === "" ) {
+    if( this.checkErrorCondition(data["alert"]["errors"]) ) {
       toastr.error(data["alert"]["message"])
     }
-    else if( data["alert"]["message"] === null || data["alert"]["message"] === "" ) {
+    else if( this.checkErrorCondition(data["alert"]["message"]) ) {
       toastr.error(data["alert"]["errors"])
     }
     else {
       toastr.error(data["alert"]["message"])
       toastr.error(data["alert"]["errors"])
+    }
+  },
+
+  checkErrorCondition(error) {
+    if ( error === null || error === "" ) {
+      return true
+    }
+    else {
+      return false
     }
   }
 });
