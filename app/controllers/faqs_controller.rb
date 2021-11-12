@@ -1,7 +1,6 @@
 class FaqsController < ApplicationController
   load_and_authorize_resource
   before_action :set_faq, only: %i[edit update destroy move]
-  before_action :require_staff_member
 
   def index
     @faqs = Faq.all
@@ -23,7 +22,11 @@ class FaqsController < ApplicationController
   def edit; end
 
   def update
-    redirect_to faqs_path, notice: "Faq has been updated!" if @faq.update(faq_params)
+    if @faq.update(faq_params)
+      redirect_to faqs_path, notice: "Faq has been updated!"
+    else
+      redirect_to faqs_path, alert: @faq.errors.full_messages.join(' ,')
+    end
   end
 
   def destroy
@@ -31,22 +34,17 @@ class FaqsController < ApplicationController
   end
 
   def move
-    @faq = Faq.find_by(id: params[:faq_id])
     @faq.update(position: params[:position].to_i)
-    head :ok
+    render json: "Position updated!", status: :ok
   end
 
   private
 
   def set_faq
-    @faq = Faq.find(params[:id])
+    @faq = Faq.find_by(id: params[:id])
   end
 
   def faq_params
     params.require(:faq).permit(:question, :answer)
-  end
-
-  def require_staff_member
-    redirect_to root_path unless current_user.staff_member?
   end
 end
