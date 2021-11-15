@@ -27,6 +27,7 @@ module Users
     def after_sign_in_path_for(resource)
       return proposal_types_path if resource&.staff_member?
       return new_person_path if resource.person&.demographic_data.blank?
+
       new_proposal_or_list(resource)
     end
   end

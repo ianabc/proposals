@@ -5,13 +5,14 @@ class PeopleController < ApplicationController
   def new
     @invited_as = invite&.invited_as
     @proposal = invite&.proposal
+    @response = params[:response]
 
     redirect_to root_path, alert: 'Something went wrong.' unless @person
   end
 
   def update
     if @person.update(person_params)
-      redirect_to new_survey_path(code: params[:code]), notice: "Thank you!"
+      redirect_to new_survey_path(code: params[:code], response: params[:response]), notice: "Thank you!"
     else
       @invited_as = invite&.invited_as
       render :new

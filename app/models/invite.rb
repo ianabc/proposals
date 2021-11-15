@@ -30,18 +30,7 @@ class Invite < ApplicationRecord
     return if [firstname, lastname, email].map(&:blank?).any?
 
     email.downcase!
-    person = Person.where(email: email).first
-
-    if person.blank?
-      begin
-        person = Person.create(email: email, firstname: firstname,
-                               lastname: lastname)
-      rescue ActiveRecord::RecordNotUnique
-        person = Person.find_by(email: email)
-      end
-    end
-
-    self.person = person
+    self.person = find_or_create_person
   end
 
   def assign_person
@@ -88,5 +77,19 @@ class Invite < ApplicationRecord
     attributes.each do |key, value|
       self[key] = value.strip if value.respond_to?(:strip)
     end
+  end
+
+  def find_or_create_person
+    person = Person.where(email: email).first
+
+    if person.blank?
+      begin
+        person = Person.create(email: email, firstname: firstname,
+                               lastname: lastname)
+      rescue ActiveRecord::RecordNotUnique
+        person = Person.find_by(email: email)
+      end
+    end
+    person
   end
 end

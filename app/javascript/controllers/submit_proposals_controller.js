@@ -114,8 +114,7 @@ export default class extends Controller {
 
   saveProposal (id) {
    $.post(`/submit_proposals?proposal=${id}`,
-      $('form#submit_proposal').serialize(), function(data) {
-    })
+      $('form#submit_proposal').serialize(), function() {})
   }
 
   hideAndSave() {

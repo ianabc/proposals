@@ -22,14 +22,14 @@ class FeedbacksController < ApplicationController
   end
 
   def update
-    return unless can? :manage, @feedback
+    raise CanCan::AccessDenied unless can? :manage, @feedback
 
     @feedback.toggle!(:reviewed)
     redirect_to feedback_path
   end
 
   def add_reply
-    return unless can? :manage, @feedback
+    raise CanCan::AccessDenied unless can? :manage, @feedback
 
     if @feedback.update(reply: params[:feedback_reply])
       render json: {}, status: :ok

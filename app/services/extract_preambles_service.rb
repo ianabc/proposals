@@ -81,7 +81,7 @@ class ExtractPreamblesService
       @command = command
       @definition = definition
 
-      if @all_definitions[@command].include?(@definition) or check_condition
+      if @all_definitions[@command].include?(@definition) || check_condition
         @newlines << "\n\\begin{comment}\n\n #{preamble}\n\\end{comment}\n\n"
       else
         @all_definitions[command] << definition

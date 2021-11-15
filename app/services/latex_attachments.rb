@@ -1,6 +1,5 @@
 # methods for handling attachments to proposals
 module LatexAttachments
-
   def add_proposal_attachments(proposal, text, file_errors)
     text ||= ''
     proposal.files&.each_with_index do |file, num|
@@ -43,7 +42,9 @@ module LatexAttachments
         next
       end
 
-      if file_extension == 'txt' || file_extension == 'text'
+      extentions = %w[txt text]
+
+      if extentions.include?(file_extension)
         text_content = LatexToPdf.escape_latex(File.read(file_path))
         text << "\\noindent File Attachment #{num += 1}: #{text_content} \n\n\n"
       elsif file_extension == 'pdf'

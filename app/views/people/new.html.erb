@@ -11,6 +11,7 @@
                   <%= render partial: 'layouts/errors', locals: {errors: @person.errors} %>
                   <% end %>
                   <%= hidden_field_tag 'code', params[:code] %>
+                  <%= hidden_field_tag 'response', @response %>
                   <div class="form-group mb-2">
                     <p class="lead">
                       Please provide some information about yourself by filling out the form below. This information will be helpful to the review process: It will be available to the proposal organizers and review panelists and will not be shared outside BIRS.

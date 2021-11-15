@@ -1,6 +1,7 @@
 import { Controller } from 'stimulus'
 import Sortable from "sortablejs"
 import Rails from '@rails/ujs'
+import toastr from 'toastr'
 
 export default class extends Controller {
   connect(){
@@ -13,12 +14,17 @@ export default class extends Controller {
     let id = event.item.dataset.id
     let data = new FormData()
     data.append("position", event.newIndex + 1)
-    data.append("faq_id", id)
     let url = "/faqs/" + id + "/move";
     Rails.ajax({
       url,
       type: 'PATCH',
-      data
+      data,
+      success: (res) => {
+        toastr.success(res)
+      },
+      error: (err) => {
+        toastr.error(err)
+      }
     })
   }
 }
