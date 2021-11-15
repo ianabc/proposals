@@ -305,13 +305,14 @@ export default class extends Controller {
     else {
       table = "ntoc"
     }
+    $('.reviews-booklet-btn').html("Creating Reviews Booklet...")
+    $('.reviews-booklet-btn').addClass('disabled');
+    $(".reviews-booklet-ok-btn").addClass("disabled");
     this.createReviewsBooklet(reviewContentType, proposalIds, table)
   }
 
   createReviewsBooklet(reviewContentType, proposalIds, table) {
     if(reviewContentType !== '') {
-      document.getElementById('spinner').classList.add("active")
-
       $.ajax({
         url: `/submitted_proposals/reviews_booklet`,
         type: 'POST',
@@ -321,14 +322,7 @@ export default class extends Controller {
           reviewContentType
         },
         success: () => {
-          document.getElementById("reviews_booklet").click();
-          toastr.success('Review Booklet successfully created.')
-        },
-        error: () => {
-          toastr.error('Something went wrong.')
-        },
-        complete: () => {
-          document.getElementById('spinner').classList.remove("active")
+          toastr.success('Creating Reviews Booklet In progress. You will be notified once its done.')
         }
       })
     }

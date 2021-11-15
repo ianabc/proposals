@@ -16,7 +16,7 @@ consumer.subscriptions.create("ProposalBookletChannel", {
       toastr.error(data["alert"])
     }
     else {
-      $(".download-button").removeClass("disabled")
+      document.getElementById("proposal_booklet").click();
       toastr.success(data["success"])
     }
   }
