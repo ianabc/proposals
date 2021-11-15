@@ -9,7 +9,7 @@ class ProposalBookletJob < ApplicationJob
           @errors })
     else
       ActionCable.server.broadcast("proposal_booklet_channel", { success:
-          "Created proposals booklet. Now, you can download it." })
+          "Created proposals booklet. Now, it will download itself." })
     end
   end
 

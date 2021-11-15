@@ -81,7 +81,7 @@ class ReviewJob < ApplicationJob
           book.errors })
     else
       ActionCable.server.broadcast("review_channel", { success:
-          "Created reviews booklet. Now, you can download it." })
+          "Created reviews booklet. Now, it will download itself." })
     end
   end
 end
