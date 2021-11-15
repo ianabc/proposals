@@ -253,6 +253,7 @@ class SubmittedProposalsController < ApplicationController
   def change_status
     revision_template
     @check_status = @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
+    @check_status = @email.update_status(@proposal, 'Reject') if params[:templates].split(':').first == "Reject"
     @check_status = @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
   end
 
@@ -510,7 +511,7 @@ class SubmittedProposalsController < ApplicationController
   def send_email_proposals
     add_files
     organizers_email = @proposal.invites.where(invited_as: 'Organizer')&.pluck(:email)
-    @email.email_organizers(organizers_email) if @email.save
+    @email.new_email_organizers(organizers_email) if @email.save
     @errors << @email.errors.full_messages unless @email.errors.empty?
   end
 
