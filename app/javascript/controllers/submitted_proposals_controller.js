@@ -100,6 +100,7 @@ export default class extends Controller {
       proposalIds.push(this.dataset.value);
     });
     if(this.templatesTarget.value) {
+      $('#birs_email_body').val(tinyMCE.get('birs_email_body').getContent())
       $.post(`/submitted_proposals/approve_decline_proposals?proposal_ids=${proposalIds}`,
         $("#approve_decline_proposals").serialize(), function() {
           toastr.success("Emails have been sent!")

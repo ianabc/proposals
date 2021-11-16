@@ -268,7 +268,12 @@ module ProposalsHelper
     invite.person&.lastname || invite.lastname
   end
 
+
   def proposal_version_title(version, proposal)
     ProposalVersion.find_by(version: version, proposal_id: proposal.id).title
+  end
+
+  def proposal_version(version, proposal)
+    ProposalVersion.find_by(version: version, proposal_id: proposal.id)
   end
 end
