@@ -113,11 +113,11 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def proposals_booklet
-    @proposal_ids = params[:proposal_ids]
-    @table = params[:table]
-    @counter = @proposal_ids.split(',').count
-    create_file
-    head :ok
+    proposal_ids = params[:proposal_ids]
+    table = params[:table]
+    counter = proposal_ids.split(',').count
+    ProposalBookletJob.perform_later(proposal_ids, table, counter, current_user)
+    head :accepted
   end
 
   def download_booklet
@@ -397,53 +397,6 @@ class SubmittedProposalsController < ApplicationController
 
   def set_proposal
     @proposal = Proposal.find_by(id: params[:id])
-  end
-
-  def create_file
-    @temp_file = "propfile-#{current_user.id}-proposals-booklet.tex"
-    if @counter == 1
-      single_proposal_booklet
-    else
-      multiple_proposals_booklet
-    end
-  end
-
-  def single_proposal_booklet
-    @proposal = Proposal.find_by(id: @proposal_ids)
-    BookletPdfService.new(@proposal.id, @temp_file, 'all', current_user).single_booklet(@table)
-    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
-    @latex_infile = @fh.read
-    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
-    @proposals_macros = @proposal.macros
-    write_file
-  end
-
-  def write_file
-    @latex = "#{@proposals_macros}\n\\begin{document}\n#{@latex_infile}"
-    pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
-    @pdf_path = Rails.root.join('tmp/booklet-proposals.pdf')
-    File.open(@pdf_path, "w:UTF-8") do |file|
-      file.write(pdf_file)
-    end
-  end
-
-  def multiple_proposals_booklet
-    create_booklet
-    check_file_existence
-    @proposals_macros = ExtractPreamblesService.new(@proposal_ids).proposal_preambles
-    write_file
-  end
-
-  def create_booklet
-    BookletPdfService.new(@proposal_ids.split(',').first, @temp_file, 'all', current_user)
-                     .multiple_booklet(@table, @proposal_ids)
-  end
-
-  def check_file_existence
-    create_booklet unless File.exist?("#{Rails.root}/tmp/#{@temp_file}")
-
-    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
-    @latex_infile = @fh.read
   end
 
   def template_params

@@ -153,16 +153,12 @@ export default class extends Controller {
       table = "ntoc"
     }
     if(table !== '') {
-      document.getElementById('spinner').classList.add("active")
+      $('.proposal-booklet-btn').html("Creating Booklet...")
+      $('.proposal-booklet-btn').addClass('disabled');
+      $(".proposal-booklet-ok-btn").addClass("disabled");
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
         function() {
-          document.getElementById("proposal_booklet").click();
-          toastr.success('Proposals book successfully created.')
-      }).fail(function() {
-        toastr.error('Something went wrong.')
-      })
-      .always(function() {
-        document.getElementById('spinner').classList.remove("active")
+          toastr.success('Creating Proposal Booklet In progress. You will be notified once its done.')
       })
     }
   }
