@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe "/subjects", type: :request do
   let(:subject_category) { create(:subject_category) }
   let(:subject) { create(:subject, subject_category_id: subject_category.id) }
+  let(:subject_area_category) { create(:subject_area_categories, subject_category_id: subject_category.id) }
 
   describe "GET /edit" do
     it "render a successful response" do
@@ -42,4 +43,11 @@ RSpec.describe "/subjects", type: :request do
       end
     end
   end
+
+  # describe "DELETE /destroy" do
+  #   before do
+  #     delete subject_category_subject_url(subject_category, subject)
+  #   end
+  #   it { expect(Subject.subject_categories.count).to eq(0) }
+  # end
 end

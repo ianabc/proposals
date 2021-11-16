@@ -4,6 +4,7 @@ class EmailsController < ApplicationController
   def new
     @email_templates = EmailTemplate.all
     @email = Email.new
+    @proposal = Proposal.find(params[:id])
   end
 
   def email_template
