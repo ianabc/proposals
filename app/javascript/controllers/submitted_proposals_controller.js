@@ -254,19 +254,10 @@ export default class extends Controller {
       toastr.error("Please select any checkbox!")
     }
     else {
+      $('.import-reviews-btn').html("Importing...")
+      $('.import-reviews-btn').addClass('disabled');
       $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function(response) {
-        let res = JSON.parse(response)
-        if(res.type === "alert") {
-          toastr.error(res.message)
-        }
-        else{
-          toastr.success(res.message)
-          setTimeout(function() {
-            window.location.reload();
-          }, 1000)
-        }
-      }).fail(function(response) {
-        toastr.error(response.responseText)
+        toastr.success("Import reviews In progress. You will be notified once its done.")
       })
     }
   }

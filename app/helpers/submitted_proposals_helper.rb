@@ -89,7 +89,7 @@ module SubmittedProposalsHelper
 
   def review_dates(review)
     date = review.review_date
-    date.split(', ')
+    date&.split(', ')
   end
 
   def proposal_logs(proposal)
