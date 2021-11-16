@@ -9,7 +9,7 @@ class ProposalBookletJob < ApplicationJob
           @errors })
     else
       ActionCable.server.broadcast("proposal_booklet_channel", { success:
-          "Created proposals booklet. Now, you can download it." })
+          "Created proposals booklet. Now, it will download itself." })
     end
   end
 
@@ -41,7 +41,7 @@ class ProposalBookletJob < ApplicationJob
     write_new_file(pdf_file)
   rescue StandardError => e
     Rails.logger.info { "\n\nLaTeX error:\n #{e.message}\n\n" }
-    @errors = "LaTeX error: #{e.message}"
+    @errors << "LaTeX error: #{e.message}"
   end
 
   def write_new_file(pdf_file)
@@ -61,6 +61,9 @@ class ProposalBookletJob < ApplicationJob
   def create_booklet(proposal_ids, temp_file, table, current_user)
     BookletPdfService.new(proposal_ids.split(',').first, temp_file, 'all', current_user)
                      .multiple_booklet(table, proposal_ids)
+  rescue StandardError => e
+    Rails.logger.info { "\n\nLaTeX error:\n #{e.message}\n\n" }
+    @errors << "LaTeX error: #{e.message}"
   end
 
   def check_file_existence(temp_file)

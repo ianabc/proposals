@@ -149,8 +149,10 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def reviews_booklet
-    check_selected_proposals
-    create_reviews_booklet
+    temp_file = "propfile-#{current_user.id}-review-booklet.tex"
+    ReviewJob.perform_now(params[:proposals], params[:reviewContentType],
+                          params[:table], current_user, temp_file)
+    head :accepted
   end
 
   def download_review_booklet
@@ -486,37 +488,10 @@ class SubmittedProposalsController < ApplicationController
     if @proposal.reviews.present?
       @review_proposal_ids << @proposal.id
     elsif @proposal.editflow_id.present?
-      proposal_reviews
+      ImportReviewsService.new(@proposal).proposal_reviews
       @review_proposal_ids << @proposal.id
     else
       @no_review_proposal_ids << @proposal.id
-    end
-  end
-
-  def report_errors(errors)
-    StaffMailer.with(staff_email: current_user&.email, errors: errors)
-               .review_file_problems.deliver_later
-  end
-
-  def create_reviews_booklet
-    @temp_file = "propfile-#{current_user.id}-review-booklet.tex"
-    content_type = params[:reviewContentType]
-    table = params[:table]
-    book = ReviewsBook.new(@review_proposal_ids, @temp_file, content_type, table)
-    book.generate_booklet
-    report_errors(book.errors) if book.errors.present?
-    read_write_file
-  end
-
-  def read_write_file
-    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
-    @latex_infile = @fh.read
-    @latex = "\\begin{document}\n#{@latex_infile}"
-    pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
-    @pdf_path = Rails.root.join("tmp/proposal-reviews-#{current_user.id}.pdf")
-
-    File.open(@pdf_path, "w:UTF-8") do |file|
-      file.write(pdf_file)
     end
   end
 
