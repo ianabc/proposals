@@ -276,6 +276,7 @@ class SubmittedProposalsController < ApplicationController
   rescue StandardError => e
     Rails.logger.info { "\n\n#{@proposal.code} LaTeX error:\n #{e.message}\n\n" }
     flash[:alert] = "#{@proposal.code} LaTeX error: #{e.message}"
+    @errors = "#{@proposal.code} LaTeX error: #{e.message}"
     ''
   end
 
