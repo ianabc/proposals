@@ -15,6 +15,13 @@ RSpec.describe User, type: :model do
     expect(user.valid?).to be_falsey
   end
 
+  describe 'associations' do
+    it { should have_many(:user_roles).dependent(:destroy) }
+    it { should have_many(:roles).through(:user_roles) }
+    it { should have_one(:person) }
+    it { should have_many(:feedback) }
+  end
+
   describe 'when created' do
     let(:staff_user) { create(:user, email: 'staff.user@birs.ca') }
     let(:user) { create(:user) }

@@ -65,10 +65,10 @@ class BookletPdfService
 
   def all_proposal_fields
     return 'Proposal data not found!' if proposal.blank?
-    
-    year = proposal&.year || Date.current.year + 2
+
+    year = proposal&.year || (Date.current.year + 2)
     title_page(year)
-    
+
     if @table == "toc"
       proposal_table_of_content
     else
@@ -115,7 +115,7 @@ class BookletPdfService
   end
 
   def multiple_proposals_fields
-    year = proposal&.year || Date.current.year + 2
+    year = proposal&.year || (Date.current.year + 2)
 
     title_page(year)
     case @table

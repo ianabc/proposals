@@ -31,17 +31,9 @@ class InvitesController < ApplicationController
       return
     end
 
-    @invite.response = response_params
-    @invite.status = set_invite_status
-    @invite.skip_deadline_validation = true
+    invite_response_status
 
-    if @invite.save
-      create_role
-      send_email_on_response
-    else
-      redirect_to invite_url(code: @invite&.code),
-                  alert: "Problem saving response: #{@invite.errors.full_messages}"
-    end
+    redirect_on_response
   end
 
   def invite_reminder
@@ -112,18 +104,21 @@ class InvitesController < ApplicationController
     %w[yes no maybe].none?(response_params)
   end
 
-  def create_role
-    return if @invite.no?
-
-    proposal_role
-    create_user if @invite.invited_as == 'Organizer' && !@invite.person.user
+  def invite_response_status
+    @invite.response = response_params
+    @invite.status = set_invite_status
+    @invite.skip_deadline_validation = true
   end
 
-  def create_user
-    user = User.new(email: @invite.person.email,
-                    password: SecureRandom.urlsafe_base64(20), confirmed_at: Time.zone.now)
-    user.person = @invite.person
-    user.save
+  def redirect_on_response
+    if @invite.no? && @invite.save
+      send_email_on_response
+    elsif %(yes maybe).include? @invite.response
+      redirect_to new_person_path(code: @invite.code, response: @invite.response)
+    else
+      redirect_to invite_url(code: @invite&.code),
+                  alert: "Problem saving response: #{@invite.errors.full_messages}"
+    end
   end
 
   def set_invite
@@ -148,22 +143,11 @@ class InvitesController < ApplicationController
     end
   end
 
-  def proposal_role
-    role = Role.find_or_create_by!(name: @invite.invited_as)
-    @invite.proposal.proposal_roles.create(role: role, person: @invite.person)
-  end
-
   def send_email_on_response
-    @organizers = @invite.proposal.list_of_organizers.remove(@invite.person&.fullname)
+    return unless @invite.no?
 
-    if @invite.no?
-      InviteMailer.with(invite: @invite).invite_decline.deliver_later
-      redirect_to thanks_proposal_invites_path(@invite.proposal)
-    else
-      InviteMailer.with(invite: @invite, organizers: @organizers)
-                  .invite_acceptance.deliver_later
-      redirect_to new_person_path(code: @invite.code)
-    end
+    InviteMailer.with(invite: @invite).invite_decline.deliver_later
+    redirect_to thanks_proposal_invites_path(@invite.proposal)
   end
 
   def check_user

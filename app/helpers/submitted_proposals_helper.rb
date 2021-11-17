@@ -11,9 +11,7 @@ module SubmittedProposalsHelper
         s.blank? || s.eql?("Other")
       end
 
-      citizenships.each do |c|
-        data[c] += 1
-      end
+      citizenships.each { |c| data[c] += 1 }
     end
     data
   end
@@ -45,9 +43,7 @@ module SubmittedProposalsHelper
         s.blank? || s.eql?("Other")
       end
 
-      career_stage.each do |s|
-        data[s] += 1
-      end
+      career_stage.each { |s| data[s] += 1 }
     end
     data
   end
@@ -72,9 +68,7 @@ module SubmittedProposalsHelper
         s.blank? || s.eql?("Other")
       end
 
-      citizenships.each do |c|
-        data[c] += 1
-      end
+      citizenships.each { |c| data[c] += 1 }
     end
     data
   end
@@ -95,11 +89,11 @@ module SubmittedProposalsHelper
 
   def review_dates(review)
     date = review.review_date
-    date.split(', ')
+    date&.split(', ')
   end
 
   def proposal_logs(proposal)
     logs = proposal.answers.map(&:logs).reject(&:empty?) + proposal.logs
-    logs.flatten.sort_by{ |log| -log.created_at.to_i }
+    logs.flatten.sort_by { |log| -log.created_at.to_i }
   end
 end

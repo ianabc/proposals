@@ -113,11 +113,11 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def proposals_booklet
-    @proposal_ids = params[:proposal_ids]
-    @table = params[:table]
-    @counter = @proposal_ids.split(',').count
-    create_file
-    head :ok
+    proposal_ids = params[:proposal_ids]
+    table = params[:table]
+    counter = proposal_ids.split(',').count
+    ProposalBookletJob.perform_later(proposal_ids, table, counter, current_user)
+    head :accepted
   end
 
   def download_booklet
@@ -144,22 +144,15 @@ class SubmittedProposalsController < ApplicationController
   end
 
   def import_reviews
-    params[:proposals].split(',').each do |id|
-      import_proposal_reviews(id)
-      log_activity(Proposal.find(id))
-    end
-    import_message
-  rescue StandardError => e
-    if request.xhr?
-      render json: e.message, status: :internal_server_error
-    else
-      redirect_to versions_proposal_url(@proposal), alert: e.message
-    end
+    ImportJob.perform_later(params[:proposals], current_user, params[:action])
+    head :accepted
   end
 
   def reviews_booklet
-    check_selected_proposals
-    create_reviews_booklet
+    temp_file = "propfile-#{current_user.id}-review-booklet.tex"
+    ReviewJob.perform_now(params[:proposals], params[:reviewContentType],
+                          params[:table], current_user, temp_file)
+    head :accepted
   end
 
   def download_review_booklet
@@ -195,52 +188,6 @@ class SubmittedProposalsController < ApplicationController
     params.values.any?(&:present?)
   end
 
-  def import_proposal_reviews(id)
-    @reviews_not_imported = []
-    @statuses = []
-    @proposal = Proposal.find_by(id: id)
-
-    if @proposal.editflow_id.present?
-      proposal_reviews
-      change_proposal_review_status if @proposal.reload.reviews.present?
-    else
-      @reviews_not_imported << @proposal.status
-    end
-  end
-
-  def import_message
-    alert_success_message
-
-    if request.xhr?
-      respond_to do |format|
-        format.js { render json: { message: @message, type: @message_type }, status: :ok }
-      end
-    else
-      redirect_to versions_proposal_url(@proposal), notice: @message if @message_type == "success"
-      redirect_to versions_proposal_url(@proposal), alert: @message if @message_type == "alert"
-    end
-  end
-
-  def alert_success_message
-    @message_type = 'success'
-    if @reviews_not_imported.present?
-      error_messages
-    else
-      @message = "Reviews successfully imported."
-    end
-  end
-
-  def error_messages
-    @message = if @statuses.present?
-                 "Proposal status cannot be changed, if proposal status is not in 'in_progress' or
-                  'revision_submitted'"
-               else
-                 "Review cannot be imported for proposal with status #{@reviews_not_imported.uniq.join(', ')}.
-                  may be you have to sent to EditFlow before importing".squish
-               end
-    @message_type = 'alert'
-  end
-
   def email_params
     params.permit(:subject, :body, :cc_email, :bcc_email)
   end
@@ -253,6 +200,7 @@ class SubmittedProposalsController < ApplicationController
   def change_status
     revision_template
     @check_status = @email.update_status(@proposal, 'Approval') if params[:templates].split(':').first == "Approval"
+    @check_status = @email.update_status(@proposal, 'Reject') if params[:templates].split(':').first == "Reject"
     @check_status = @email.update_status(@proposal, 'Decision') if params[:templates].split.first == "Decision"
   end
 
@@ -275,6 +223,7 @@ class SubmittedProposalsController < ApplicationController
   rescue StandardError => e
     Rails.logger.info { "\n\n#{@proposal.code} LaTeX error:\n #{e.message}\n\n" }
     flash[:alert] = "#{@proposal.code} LaTeX error: #{e.message}"
+    @errors = "#{@proposal.code} LaTeX error: #{e.message}"
     ''
   end
 
@@ -452,53 +401,6 @@ class SubmittedProposalsController < ApplicationController
     @proposal = Proposal.find_by(id: params[:id])
   end
 
-  def create_file
-    @temp_file = "propfile-#{current_user.id}-proposals-booklet.tex"
-    if @counter == 1
-      single_proposal_booklet
-    else
-      multiple_proposals_booklet
-    end
-  end
-
-  def single_proposal_booklet
-    @proposal = Proposal.find_by(id: @proposal_ids)
-    BookletPdfService.new(@proposal.id, @temp_file, 'all', current_user).single_booklet(@table)
-    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
-    @latex_infile = @fh.read
-    @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
-    @proposals_macros = @proposal.macros
-    write_file
-  end
-
-  def write_file
-    @latex = "#{@proposals_macros}\n\\begin{document}\n#{@latex_infile}"
-    pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
-    @pdf_path = Rails.root.join('tmp/booklet-proposals.pdf')
-    File.open(@pdf_path, "w:UTF-8") do |file|
-      file.write(pdf_file)
-    end
-  end
-
-  def multiple_proposals_booklet
-    create_booklet
-    check_file_existence
-    @proposals_macros = ExtractPreamblesService.new(@proposal_ids).proposal_preambles
-    write_file
-  end
-
-  def create_booklet
-    BookletPdfService.new(@proposal_ids.split(',').first, @temp_file, 'all', current_user)
-                     .multiple_booklet(@table, @proposal_ids)
-  end
-
-  def check_file_existence
-    create_booklet unless File.exist?("#{Rails.root}/tmp/#{@temp_file}")
-
-    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
-    @latex_infile = @fh.read
-  end
-
   def template_params
     templates = params[:templates].split(": ")
     type = "#{templates.first.downcase}_type" if templates.first.present?
@@ -510,7 +412,7 @@ class SubmittedProposalsController < ApplicationController
   def send_email_proposals
     add_files
     organizers_email = @proposal.invites.where(invited_as: 'Organizer')&.pluck(:email)
-    @email.email_organizers(organizers_email) if @email.save
+    @email.new_email_organizers(organizers_email) if @email.save
     @errors << @email.errors.full_messages unless @email.errors.empty?
   end
 
@@ -565,106 +467,6 @@ class SubmittedProposalsController < ApplicationController
     @organizers_email = JSON.parse(params[:organizers_email]).map(&:values).flatten
   end
 
-  def proposal_reviews
-    edit_flow_query = EditFlowService.new(@proposal).mutation
-
-    response = RestClient.post ENV['EDITFLOW_API_URL'],
-                               { query: edit_flow_query },
-                               { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
-
-    if response.body.include?("errors")
-      display_errors(response)
-    else
-      review_version = get_response_body(response)
-      store_proposal_reviews(review_version)
-    end
-  end
-
-  def display_errors(response)
-    @errors = []
-    Rails.logger.info { "\n\nError sending #{@proposal.code}: #{response.body}\n\n" }
-    flash[:alert] = "Error sending #{@proposal.code}: #{response.body}"
-    @errors << "Error sending #{@proposal.code}: #{response.body}"
-    nil
-  end
-
-  def get_response_body(response)
-    response_body = JSON.parse(response.body)
-    article = response_body["data"]["article"]
-    review_version = article["reviewVersionLatest"]["number"]
-    check_review_version(review_version)
-    @reviews = article["reviewVersionLatest"]["reviews"]
-    review_version
-  end
-
-  def check_review_version(review_version)
-    return unless @proposal.reviews&.pluck(:version)&.uniq&.include? review_version
-
-    reviews = @proposal.reviews.where(version: review_version)
-    reviews.destroy_all
-  end
-
-  def store_proposal_reviews(review_version)
-    @reviews.each do |review|
-      reviewer_name = review["reviewer"]["nameFull"]
-      is_quick = review["isQuick"]
-      @score = review["score"]
-
-      @review = Review.new(reviewer_name: reviewer_name, is_quick: is_quick, score: @score,
-                           proposal_id: @proposal.id, person_id: @proposal.lead_organizer&.id,
-                           version: review_version)
-      @review.save
-      review_file(review)
-    end
-  end
-
-  def change_proposal_review_status
-    return if @proposal.decision_pending?
-
-    if @proposal.may_pending?
-      @proposal.pending!
-    else
-      @reviews_not_imported << @proposal.status if @reviews_not_imported.present?
-      @statuses << @proposal.status if @statuses.present?
-    end
-  end
-
-  def review_file(review)
-    @review_files = []
-    @review_dates = []
-    review["reports"]&.each do |report|
-      next if report["fileID"].blank?
-
-      review_file_url(report["fileID"])
-      @review_files << report["fileID"]
-      date = Time.zone.at(report["dateReported"])
-      @review_dates << date
-    end
-    @review.update(file_ids: @review_files.join(', '), review_date: @review_dates.join(', '))
-  end
-
-  def review_file_url(file_id)
-    file_url_query = EditFlowService.new(@proposal).file_url(file_id)
-    response = RestClient.post ENV['EDITFLOW_API_URL'],
-                               { query: file_url_query },
-                               { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
-
-    if response.body.include?("errors")
-      display_errors(response)
-    else
-      find_store_review_file(response)
-    end
-  end
-
-  def find_store_review_file(response)
-    response_body = JSON.parse(response.body)
-    file_url = response_body["data"]["fileURL"]
-    url = file_url["url"]
-    @file = URI.parse(url).open
-    @filename = File.basename(url)
-    @review.files.attach(io: @file, filename: @filename)
-  end
-
   def check_selected_proposals
     @proposal_ids = params[:proposals]
     @no_review_proposal_ids = []
@@ -686,37 +488,10 @@ class SubmittedProposalsController < ApplicationController
     if @proposal.reviews.present?
       @review_proposal_ids << @proposal.id
     elsif @proposal.editflow_id.present?
-      proposal_reviews
+      ImportReviewsService.new(@proposal).proposal_reviews
       @review_proposal_ids << @proposal.id
     else
       @no_review_proposal_ids << @proposal.id
-    end
-  end
-
-  def report_errors(errors)
-    StaffMailer.with(staff_email: current_user&.email, errors: errors)
-               .review_file_problems.deliver_later
-  end
-
-  def create_reviews_booklet
-    @temp_file = "propfile-#{current_user.id}-review-booklet.tex"
-    content_type = params[:reviewContentType]
-    table = params[:table]
-    book = ReviewsBook.new(@review_proposal_ids, @temp_file, content_type, table)
-    book.generate_booklet
-    report_errors(book.errors) if book.errors.present?
-    read_write_file
-  end
-
-  def read_write_file
-    @fh = File.open("#{Rails.root}/tmp/#{@temp_file}")
-    @latex_infile = @fh.read
-    @latex = "\\begin{document}\n#{@latex_infile}"
-    pdf_file = render_to_string layout: "booklet", inline: @latex, formats: [:pdf]
-    @pdf_path = Rails.root.join("tmp/proposal-reviews-#{current_user.id}.pdf")
-
-    File.open(@pdf_path, "w:UTF-8") do |file|
-      file.write(pdf_file)
     end
   end
 

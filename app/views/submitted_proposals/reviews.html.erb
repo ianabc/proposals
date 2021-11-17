@@ -26,7 +26,7 @@
                       <th>Score</th>
                       <th>Scientific Review</th>
                       <th>EDI Review</th>
-                      <th>Reviews</th>
+                      <th>Version</th>
                       <th>Submission Date</th>
                       <th>Attachments</th>
                       <th>Actions</th>
@@ -48,7 +48,7 @@
                           <td>False</td>
                         <% end %>
                         <td><%= review&.version %></td>
-                        <td><%= review_dates(review).join('<br>').html_safe %></td>
+                        <td><%= review_dates(review)&.join('<br>')&.html_safe %></td>
                         <td>
                           <% review.files&.each do |file| %>
                             <div>
