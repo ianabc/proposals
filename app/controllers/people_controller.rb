@@ -12,7 +12,8 @@ class PeopleController < ApplicationController
 
   def update
     if @person.update(person_params)
-      redirect_to new_survey_path(code: params[:code], response: params[:response]), notice: "Thank you!"
+      redirect_to new_survey_path(code: params[:code], response: params[:response]),
+                  notice: "Thank you. Please continue to complete the Diversity and Inclusivity Survey."
     else
       @invited_as = invite&.invited_as
       render :new
