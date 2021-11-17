@@ -168,6 +168,7 @@ namespace :birs do
       end
     end
   end
+
   desc "Update Ams Subjects database"
   task update_ams_subjects: :environment do
     Proposal.all.each do |proposal|
@@ -184,6 +185,19 @@ namespace :birs do
           second_code += "-XX"
           subject.update(code: second_code)
         end
+      end
+    end
+  end
+
+  desc "Delete Extra Proposal Ams Subjects in database"
+  task delete_ams_subjects: :environment do
+    Proposal.all.find_each do |proposal|
+      next if proposal.proposal_ams_subjects.empty? || proposal.proposal_ams_subjects&.count.eql?(2)
+
+      proposal.proposal_ams_subjects&.each do |ams_subject|
+        break if proposal.proposal_ams_subjects&.count.eql?(2)
+
+        ams_subject.destroy
       end
     end
   end
