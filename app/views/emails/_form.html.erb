@@ -10,15 +10,14 @@
         <div class="mb-3">
           <p><%= @proposal.lead_organizer.email %></p>
           <label>CC</label>
-          <% if organizers_email(@proposal).present? %>
-            <input name="cc_email" id="cc_email" data-submitted-proposals-target="organizersEmail" value="<%= organizers_email(@proposal) %>">
-          <% end %>
+          <input name="cc_email" id="cc_email" data-submitted-proposals-target="organizersEmail" value="<%= organizers_email(@proposal) %>">
+          <small>This text field supports a list of Cc emails. For example: birs@example.com, noreply@example.com, …</small>
         </div>
       </div>
       <div class="mb-3">
         <label>BCC</label>
         <%= f.text_field :bcc_email, class: 'form-control' %>
-        <small>This text field supports a list of bcc emails i.e. birs@example.com, noreply@example.com..</small>
+        <small>This text field supports a list of Bcc emails. For example: birs@example.com, noreply@example.com, …</small>
       </div>
       <div class="mb-3">
         <%= f.label :subject, class: 'form-label' %>

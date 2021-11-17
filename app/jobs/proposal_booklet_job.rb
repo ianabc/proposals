@@ -53,7 +53,7 @@ class ProposalBookletJob < ApplicationJob
 
   def multiple_proposals_booklet(proposal_ids, temp_file, table, current_user)
     create_booklet(proposal_ids, temp_file, table, current_user)
-    latex_infile = check_file_existence(temp_file)
+    latex_infile = check_file_existence(proposal_ids, temp_file, table, current_user)
     proposals_macros = ExtractPreamblesService.new(proposal_ids).proposal_preambles
     write_file(proposals_macros, latex_infile)
   end
@@ -66,8 +66,8 @@ class ProposalBookletJob < ApplicationJob
     @errors << "LaTeX error: #{e.message}"
   end
 
-  def check_file_existence(temp_file)
-    create_booklet unless File.exist?("#{Rails.root}/tmp/#{temp_file}")
+  def check_file_existence(proposal_ids, temp_file, table, current_user)
+    create_booklet(proposal_ids, temp_file, table, current_user) unless File.exist?("#{Rails.root}/tmp/#{temp_file}")
 
     fh = File.open("#{Rails.root}/tmp/#{temp_file}")
     fh.read
