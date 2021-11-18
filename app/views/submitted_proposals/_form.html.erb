@@ -254,22 +254,35 @@
                                 <br>
                                 Supported file types: *.pdf
                               </p>
-                              <div>
-                                <input type="file" id="file-upload" multiple accept="application/pdf" name="file-upload", data-action="multi-upload#uploadFile" data-proposal-form-id="<%= @proposal&.id %>">
-                              </div>
+                              <% if params[:action] == 'edit' %>
+                                <div>
+                                  <input type="file" id="file-upload" multiple accept="application/pdf" name="file-upload", data-action="multi-upload#uploadFile" data-proposal-form-id="<%= @proposal&.id %>">
+                                </div>
 
-                              <% if @proposal&.files&.attached? %>
-                                <h4 class="file-uploads">Attached files:</h4>
-                                <ul class="list-group list-group-flush">
-                                  <% @proposal.files.each do |file| %>
-                                    <li class="list-group-item">
-                                      <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
-                                      <span data-proposal-id="<%= @proposal.id %>" data-attachment-id="<%= file.id %>" data-action="click->multi-upload#removeFile" class="btn btn-sm btn-light m-3">
-                                        Remove file
-                                      </span>
-                                    </li>
-                                  <% end %>
-                                </ul>
+                                <% if @proposal&.files&.attached? %>
+                                  <h4 class="file-uploads">Attached files:</h4>
+                                  <ul class="list-group list-group-flush">
+                                    <% @proposal.files.each do |file| %>
+                                      <li class="list-group-item">
+                                        <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
+                                        <span data-proposal-id="<%= @proposal.id %>" data-attachment-id="<%= file.id %>" data-action="click->multi-upload#removeFile" class="btn btn-sm btn-light m-3">
+                                          Remove file
+                                        </span>
+                                      </li>
+                                    <% end %>
+                                  </ul>
+                                <% end %>
+                              <% else %>
+                                <% if @proposal&.files&.attached? %>
+                                  <h4 class="file-uploads">Attached files:</h4>
+                                  <ul class="list-group list-group-flush">
+                                    <% @proposal.files.each do |file| %>
+                                      <li class="list-group-item">
+                                        <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
+                                      </li>
+                                    <% end %>
+                                  </ul>
+                                <% end %>
                               <% end %>
                             </div>
                           </div>

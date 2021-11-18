@@ -153,16 +153,12 @@ export default class extends Controller {
       table = "ntoc"
     }
     if(table !== '') {
-      document.getElementById('spinner').classList.add("active")
+      $('.proposal-booklet-btn').html("Creating Booklet...")
+      $('.proposal-booklet-btn').addClass('disabled');
+      $(".proposal-booklet-ok-btn").addClass("disabled");
       $.post(`/submitted_proposals/proposals_booklet?proposal_ids=${ids}&table=${table}`,
         function() {
-          document.getElementById("proposal_booklet").click();
-          toastr.success('Proposals book successfully created.')
-      }).fail(function() {
-        toastr.error('Something went wrong.')
-      })
-      .always(function() {
-        document.getElementById('spinner').classList.remove("active")
+          toastr.success('Creating Proposal Booklet In progress. You will be notified once its done.')
       })
     }
   }
@@ -254,19 +250,10 @@ export default class extends Controller {
       toastr.error("Please select any checkbox!")
     }
     else {
+      $('.import-reviews-btn').html("Importing...")
+      $('.import-reviews-btn').addClass('disabled');
       $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function(response) {
-        let res = JSON.parse(response)
-        if(res.type === "alert") {
-          toastr.error(res.message)
-        }
-        else{
-          toastr.success(res.message)
-          setTimeout(function() {
-            window.location.reload();
-          }, 1000)
-        }
-      }).fail(function(response) {
-        toastr.error(response.responseText)
+        toastr.success("Import reviews In progress. You will be notified once its done.")
       })
     }
   }
@@ -319,13 +306,14 @@ export default class extends Controller {
     else {
       table = "ntoc"
     }
+    $('.reviews-booklet-btn').html("Creating Reviews Booklet...")
+    $('.reviews-booklet-btn').addClass('disabled');
+    $(".reviews-booklet-ok-btn").addClass("disabled");
     this.createReviewsBooklet(reviewContentType, proposalIds, table)
   }
 
   createReviewsBooklet(reviewContentType, proposalIds, table) {
     if(reviewContentType !== '') {
-      document.getElementById('spinner').classList.add("active")
-
       $.ajax({
         url: `/submitted_proposals/reviews_booklet`,
         type: 'POST',
@@ -335,14 +323,7 @@ export default class extends Controller {
           reviewContentType
         },
         success: () => {
-          document.getElementById("reviews_booklet").click();
-          toastr.success('Review Booklet successfully created.')
-        },
-        error: () => {
-          toastr.error('Something went wrong.')
-        },
-        complete: () => {
-          document.getElementById('spinner').classList.remove("active")
+          toastr.success('Creating Reviews Booklet In progress. You will be notified once its done.')
         }
       })
     }

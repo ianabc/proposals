@@ -65,17 +65,16 @@ class SubmitProposalsController < ApplicationController
 
   def confirm_submission
     if @proposal.may_active?
-      change_proposal_version
       change_proposal_status
     elsif @proposal.may_revision?
       @proposal.allow_late_submission = true if @proposal.revision_requested?
-      change_proposal_version
       @proposal.revision!
+      change_proposal_version
       send_mail
     elsif @proposal.may_revision_spc?
       @proposal.allow_late_submission = true if @proposal.revision_requested_spc?
-      change_proposal_version
       @proposal.revision_spc!
+      change_proposal_version
       send_mail
     else
       error_page_redirect
@@ -198,6 +197,7 @@ class SubmitProposalsController < ApplicationController
                   errors: #{@proposal.errors.full_messages}.".squish and return
     end
 
+    change_proposal_version
     send_mail
   end
 
@@ -213,9 +213,9 @@ class SubmitProposalsController < ApplicationController
   end
 
   def change_proposal_version
-    if @proposal.draft?
+    if @proposal.submitted?
       @proposal_version = ProposalVersion.new(title: @proposal.title, year: @proposal.year, proposal_id: @proposal.id,
-                                              subject: @proposal.subject.id,
+                                              subject: @proposal.subject.id, status: @proposal.status,
                                               ams_subject_one: @proposal.ams_subjects.first.id,
                                               ams_subject_two: @proposal.ams_subjects.last.id)
       @proposal_version.save
@@ -230,18 +230,18 @@ class SubmitProposalsController < ApplicationController
 
     return if @proposal_version.blank?
 
-    update_proposal_version
+    proposal_version = @proposal_version.dup
+    update_proposal_version(proposal_version)
   end
 
-  def update_proposal_version
-    proposal_version = @proposal_version.dup
+  def update_proposal_version(proposal_version)
     proposal_version.save
     version = proposal_version.version + 1
     proposal_version.update(title: @proposal.title, year: @proposal.year,
-                            proposal_id: @proposal.id,
+                            proposal_id: @proposal.id, status: @proposal.status,
                             subject: @proposal.subject.id,
                             ams_subject_one: @proposal.ams_subjects.first.id,
                             ams_subject_two: @proposal.ams_subjects.last.id,
-                            version: version)
+                            version: version, send_to_editflow: nil)
   end
 end
