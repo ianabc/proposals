@@ -132,7 +132,7 @@ class BookletPdfService
   def proposals_with_content
     proposals = Proposal.where(id: @proposals_ids.split(','))
     @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
-    @proposals = @subjects_with_proposals.first[1][0].id
+    first_subject_proposal
     @subjects_with_proposals.each do |subject|
       @subject = Subject.find_by(id: subject.first)
       check_subject
@@ -222,6 +222,10 @@ class BookletPdfService
   def participant_confirmed_count
     num_participants = remove_organizers_from_participants&.count || 0
     "#{num_participants} confirmed / #{proposal.proposal_type&.participant} maximum participants \\\\ \n"
+  end
+
+  def first_subject_proposal
+    @proposals = @subjects_with_proposals.first[1].min_by(&:code).id
   end
 
   def check_no_latex
