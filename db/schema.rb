@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_17_083122) do
+ActiveRecord::Schema.define(version: 2021_11_18_070934) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -154,6 +154,9 @@ ActiveRecord::Schema.define(version: 2021_11_17_083122) do
     t.string "code"
     t.string "city"
     t.string "country"
+    t.datetime "start_date"
+    t.datetime "end_date"
+    t.string "exclude_dates"
   end
 
   create_table "logs", force: :cascade do |t|
