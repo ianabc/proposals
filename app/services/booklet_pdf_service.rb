@@ -20,7 +20,8 @@ class BookletPdfService
   def multiple_booklet(table, proposals)
     @table = table
     @proposals_ids = proposals
-    multiple_proposals_fields if @input == 'all'
+    year = proposal&.year || (Date.current.year + 2)
+    multiple_proposals_fields(year) if @input == 'all'
   end
 
   def self.format_errors(error)
@@ -114,9 +115,7 @@ class BookletPdfService
     @text
   end
 
-  def multiple_proposals_fields
-    year = proposal&.year || (Date.current.year + 2)
-
+  def multiple_proposals_fields(year)
     title_page(year)
     case @table
     when "toc"
@@ -131,15 +130,20 @@ class BookletPdfService
 
   def proposals_with_content
     proposals = Proposal.where(id: @proposals_ids.split(','))
-    @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
-    @proposals = @subjects_with_proposals.first[1][0].id
-    @subjects_with_proposals.each do |subject|
+    subjects_with_proposals = selected_proposals_subjects(proposals)
+    subjects_with_proposals.each do |subject|
       @subject = Subject.find_by(id: subject.first)
       check_subject
       @proposals_objects = subject.last
       subject_proposals
     end
     @latex_text
+  end
+
+  def selected_proposals_subjects(proposals)
+    subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
+    @proposals = subjects_with_proposals.first[1][0].id
+    subjects_with_proposals
   end
 
   def check_subject
