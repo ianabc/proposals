@@ -28,7 +28,7 @@ class RolesController < ApplicationController
 
   def new_role
     @user = User.find_by(id: params[:user_id])
-    @user_role = UserRole.new(user_id: @user.id, role_id: @role.id)
+    @user_role = UserRole.new(user_id: @user&.id, role_id: @role&.id)
     if @user_role.save
       redirect_to role_path(@role), notice: "Added new user in role #{@role.name}"
     else

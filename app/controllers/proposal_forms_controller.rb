@@ -5,7 +5,7 @@ class ProposalFormsController < ApplicationController
                                              proposal_field]
 
   def index
-    @proposal_forms = @proposal_type&.proposal_forms
+    @proposal_forms = @proposal_type.proposal_forms
   end
 
   def new

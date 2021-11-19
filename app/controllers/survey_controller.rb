@@ -13,7 +13,7 @@ class SurveyController < ApplicationController
   def submit_survey
     demographic_data = DemographicData.new
     demographic_data.result = questionnaire_answers
-    demographic_data.person = current_user&.person || @invite&.person
+    demographic_data.person = current_user.person || @invite.person
     if demographic_data.save
       invite_response_save
       post_demographic_form_path
