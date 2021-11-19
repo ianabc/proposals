@@ -156,7 +156,7 @@ ActiveRecord::Schema.define(version: 2021_11_18_070934) do
     t.string "country"
     t.datetime "start_date"
     t.datetime "end_date"
-    t.string "exclude_dates"
+    t.text "exclude_dates", default: [], array: true
   end
 
   create_table "logs", force: :cascade do |t|

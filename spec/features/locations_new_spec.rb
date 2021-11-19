@@ -41,10 +41,6 @@ RSpec.feature "Locations new", type: :feature do
     expect(find_field('location_end_date').value).to eq(nil)
   end
 
-  scenario "there is an empty Exclude Dates field" do
-    expect(find_field('location_exclude_dates').value).to eq(nil)
-  end
-
   scenario "updating the form fields create new location" do
     fill_in 'location_name', with: 'New york'
     fill_in 'location_code', with: 'NY'
@@ -64,7 +60,6 @@ RSpec.feature "Locations new", type: :feature do
     expect(updated_location.country).to eq('United States')
     expect(updated_location.start_date.to_date).to eq(Time.current.to_date)
     expect(updated_location.end_date.to_date).to eq((Time.current + 2.days).to_date)
-    expect(updated_location.exclude_dates).to eq('02/05/2022 to 10/05/2022')
   end
 
   scenario "click back button" do
