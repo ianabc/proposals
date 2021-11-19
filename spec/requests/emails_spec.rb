@@ -26,61 +26,111 @@ RSpec.describe "/emails", type: :request do
     end
   end
 
-  # describe "PATCH /email_template" do
-  #   let(:email_params) do
-  #     { email_template: 'revision:test',
-  #       title: 'new email-template' }
-  #   end
-  #   before do
-  #     patch email_template_emails_url, params: email_params
-  #   end
-  #   it "updates the requested email-template" do
-  #     expect(email_template.reload.title).to eq(JSON.parse(response.body)["email_template"]["title"])
-  #   end
-  # end
+  describe "PATCH /email_template" do
+    context "email_type with decision email" do
+      let(:decision_email_params) do
+        { email_template: 'decision email: test',
+          title: 'new email-template' }
+      end
+      before do
+        email_template.update(email_type: 'decision_email_type')
+        patch email_template_emails_url, params: decision_email_params
+      end
+      it "returns the requested email_template" do
+        expect(email_template.reload.body).to eq(JSON.parse(response.body)["email_template"]["body"])
+      end
+    end
+
+    context "email_type with revision" do
+      let(:revision_email_params) do
+        { email_template: 'revision: test',
+          title: 'new email-template' }
+      end
+      before do
+        patch email_template_emails_url, params: revision_email_params
+      end
+      it "returns the requested email_template" do
+        expect(email_template.reload.body).to eq(JSON.parse(response.body)["email_template"]["body"])
+      end
+    end
+
+    context "email_type with revision_spc" do
+      let(:spc_email_params) do
+        { email_template: 'revision spc: test',
+          title: 'new email-template' }
+      end
+      before do
+        email_template.update(email_type: 'revision_spc_type')
+        patch email_template_emails_url, params: spc_email_params
+      end
+      it "returns the requested email_template" do
+        expect(email_template.reload.body).to eq(JSON.parse(response.body)["email_template"]["body"])
+      end
+    end
+  end
 
   describe "POST /email_types" do
-    let(:email_params) do
-      { title: 'test',
-        body: 'this is my first temolate',
-        subject: 'first template' }
-    end
-    # before do
-    #   post email_types_emails_url, params: email_params
-    # end
-    it "creates email templates corresponding to email-type" do
-      post email_types_emails_url, params: email_params.merge(type: 'approve')
-      expect(response).to have_http_status(:ok)
-    end
-    context "with approval_type parameters" do
-      it "Creates a new email_type(Reject)" do
-        expect do
-          post email_types_emails_url, params: email_params.merge(type: 'decline')
-        end.to change(Email, :count).by(0)
+    context "when type is approval" do
+      let(:email_params) do
+        { type: 'approve' }
+      end
+
+      before do
+        post email_types_emails_url, params: email_params
+      end
+
+      context "when email_type is decision_email_type" do
+        before do
+          email_template.update(email_type: "decision_email_type")
+        end
+        it "returns email_type with title" do
+          
+        end
+      end
+
+      context "when email_type is revision_type" do
+        before do
+          email_template.update(email_type: "revision_type")
+        end
+        it "returns email_type with title" do
+          
+        end
+      end
+
+      it "returns templates of approval_type" do
+        expect(response).to have_http_status(200)
       end
     end
 
-    context "with revision_type parameters" do
-      it "Creates a new email_type(Revision)" do
-        expect do
-          post email_types_emails_url, params: email_params.merge(email_type: 'revision_type')
-        end.to change(Email, :count).by(0)
+    context "when type is decline" do
+      let(:email_params) do
+        { type: 'decline' }
       end
-    end
 
-    context "with revision_spc_type parameters" do
-      it "Creates a new email_type(Revision SPC)" do
-        expect do
-          post email_types_emails_url, params: email_params.merge(email_type: 'revision_spc__type')
-        end.to change(Email, :count).by(0)
+      before do
+        post email_types_emails_url, params: email_params
       end
-    end
 
-    context "with decision_email_type parameters" do
-      it "Creates a new email_type(Decision)" do
-        expect do
-          post email_types_emails_url, params: email_params.merge(email_type: 'decision_email_type')
-        end.to change(Email, :count).by(0)
+      context "when email_type is decision_email_type" do
+        before do
+          email_template.update(email_type: "decision_email_type")
+        end
+        it "returns email_type with title" do
+          
+        end
+      end
+
+      context "when email_type is revision_type" do
+        before do
+          email_template.update(email_type: "revision_type")
+        end
+        it "returns email_type with title" do
+          
+        end
+      end
+
+      it "returns templates of decline_type" do
+        expect(response).to have_http_status(200)
       end
     end
   end
