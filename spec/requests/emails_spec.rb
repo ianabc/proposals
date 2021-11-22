@@ -79,24 +79,6 @@ RSpec.describe "/emails", type: :request do
         post email_types_emails_url, params: email_params
       end
 
-      context "when email_type is decision_email_type" do
-        before do
-          email_template.update(email_type: "decision_email_type")
-        end
-        it "returns email_type with title" do
-          
-        end
-      end
-
-      context "when email_type is revision_type" do
-        before do
-          email_template.update(email_type: "revision_type")
-        end
-        it "returns email_type with title" do
-          
-        end
-      end
-
       it "returns templates of approval_type" do
         expect(response).to have_http_status(200)
       end
@@ -109,24 +91,6 @@ RSpec.describe "/emails", type: :request do
 
       before do
         post email_types_emails_url, params: email_params
-      end
-
-      context "when email_type is decision_email_type" do
-        before do
-          email_template.update(email_type: "decision_email_type")
-        end
-        it "returns email_type with title" do
-          
-        end
-      end
-
-      context "when email_type is revision_type" do
-        before do
-          email_template.update(email_type: "revision_type")
-        end
-        it "returns email_type with title" do
-          
-        end
       end
 
       it "returns templates of decline_type" do

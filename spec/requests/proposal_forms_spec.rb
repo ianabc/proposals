@@ -87,7 +87,7 @@ RSpec.describe "/proposal_forms", type: :request do
 
   describe "GET /edit" do
     let(:proposal_form) do
-    create(:proposal_form, status: 'active', proposal_type: proposal_type)
+      create(:proposal_form, status: 'active', proposal_type: proposal_type)
     end
     it "render a successful response" do
       get edit_proposal_type_proposal_form_url(proposal_type, proposal_form)

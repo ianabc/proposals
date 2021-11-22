@@ -93,7 +93,7 @@ RSpec.describe "/proposals/:proposal_id/invites", type: :request do
 
   describe "POST /cancel" do
     context 'when deadline_date is less than current date' do
-      let(:invite1) { create(:invite, status: 'cancelled', deadline_date: Time.now) }
+      let(:invite1) { create(:invite, status: 'cancelled', deadline_date: Time.zone.now) }
       before do
         authenticate_for_controllers
         invite1.skip_deadline_validation = true
@@ -165,7 +165,8 @@ RSpec.describe "/proposals/:proposal_id/invites", type: :request do
     before do
       authenticate_for_controllers
       role.update(name: role_user.name)
-      post new_invite_proposal_invite_path(id: invite.id, code: invite.code, proposal_id: proposal.id), params: { invite: invite1 }
+      post new_invite_proposal_invite_path(id: invite.id, code: invite.code, proposal_id: proposal.id),
+           params: { invite: invite1 }
     end
 
     context 'when current user is staff member' do
