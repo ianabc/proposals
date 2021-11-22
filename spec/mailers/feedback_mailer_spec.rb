@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe FeedbackMailer, type: :mailer do
   # pending "add some examples to (or delete) #{__FILE__}"
-  describe 'new_feedbac_email' do
+  describe 'new_feedback_email' do
     let(:proposal) { create(:proposal, :with_organizers, status: :draft) }
     let(:user) { create(:user) }
     let(:feedback) { create(:feedback, user: user) }

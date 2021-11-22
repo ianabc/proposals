@@ -76,6 +76,7 @@ RSpec.describe "/emails", type: :request do
       end
 
       before do
+        email_template.update(email_type: "approval_type")
         post email_types_emails_url, params: email_params
       end
 
@@ -90,6 +91,7 @@ RSpec.describe "/emails", type: :request do
       end
 
       before do
+        email_template.update(email_type: "reject_type")
         post email_types_emails_url, params: email_params
       end
 

@@ -29,20 +29,7 @@ class EmailsController < ApplicationController
   def make_templates
     @email_templates.each do |template|
       @email_type = template.email_type.split('_').first.capitalize
-      @templates << case @email_type
-                    when 'Decision'
-                      "#{@email_type} Email: #{template.title}"
-                    when 'Revision'
-                      arr = email_type.split('_')
-                      if arr[1] == 'spc'
-                        "#{@email_type} SPC: #{template.title}"
-                      else
-                        "#{@email_type}: #{template.title}"
-                      end
-                    else
-                      "#{@email_type}: #{template.title}"
-
-                    end
+      @templates << "#{@email_type}: #{template.title}"
     end
   end
 

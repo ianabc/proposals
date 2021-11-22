@@ -93,4 +93,29 @@ RSpec.describe "Proposals", type: :request do
 
     it { expect(response).to have_http_status(:ok) }
   end
+
+  describe "POST /upload_file" do
+    include Rack::Test::Methods
+    include ActionDispatch::TestProcess::FixtureFile
+    context 'when file content type is plain text or pdf' do
+      it 'saves the uploaded file' do
+        file = []
+        file << fixture_file_upload(Rails.root.join('spec/fixtures/files/proposal_booklet.pdf'),
+                                    'application/pdf')
+        expect do
+          post upload_file_proposal_url(proposal), files: file
+        end.to change(ActiveStorage::Attachment, :count).by(1)
+      end
+    end
+
+    context 'when file content type is not plain text or pdf' do
+      it 'saves the uploaded file' do
+        file = []
+        file << fixture_file_upload(Rails.root.join('spec/fixtures/files/review_sample.xlsx'))
+        expect do
+          post upload_file_proposal_url(proposal), files: file
+        end.to change(ActiveStorage::Attachment, :count).by(0)
+      end
+    end
+  end
 end
