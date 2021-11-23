@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_17_083122) do
+ActiveRecord::Schema.define(version: 2021_11_23_075332) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -81,6 +81,17 @@ ActiveRecord::Schema.define(version: 2021_11_17_083122) do
     t.integer "version", default: 1
     t.index ["proposal_field_id"], name: "index_answers_on_proposal_field_id"
     t.index ["proposal_id"], name: "index_answers_on_proposal_id"
+  end
+
+  create_table "cases", force: :cascade do |t|
+    t.integer "case_num"
+    t.integer "week"
+    t.integer "hmc_score"
+    t.string "proposal"
+    t.bigint "run_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["run_id"], name: "index_cases_on_run_id"
   end
 
   create_table "demographic_data", force: :cascade do |t|
@@ -423,6 +434,21 @@ ActiveRecord::Schema.define(version: 2021_11_17_083122) do
     t.integer "role_type", default: 0
   end
 
+  create_table "runs", force: :cascade do |t|
+    t.datetime "start_time"
+    t.datetime "end_time"
+    t.integer "pid"
+    t.date "startweek"
+    t.integer "weeks"
+    t.integer "runs"
+    t.integer "cases"
+    t.integer "aborted"
+    t.integer "year"
+    t.string "location"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "staff_discussions", force: :cascade do |t|
     t.text "discussion"
     t.bigint "proposal_id", null: false
@@ -533,6 +559,7 @@ ActiveRecord::Schema.define(version: 2021_11_17_083122) do
   add_foreign_key "ams_subjects", "subjects"
   add_foreign_key "answers", "proposal_fields"
   add_foreign_key "answers", "proposals"
+  add_foreign_key "cases", "runs"
   add_foreign_key "demographic_data", "people"
   add_foreign_key "emails", "proposals"
   add_foreign_key "invites", "people"
