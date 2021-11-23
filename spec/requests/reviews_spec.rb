@@ -18,10 +18,33 @@ RSpec.describe "Reviews", type: :request do
     end
 
     context 'when file content type is not plain text or pdf' do
-      it 'saves the uploaded file' do
+      it 'does not save the uploaded file' do
         file = fixture_file_upload(Rails.root.join('spec/fixtures/files/review_sample.xlsx'))
         expect do
           post add_file_review_url(review), file: file
+        end.to change(ActiveStorage::Attachment, :count).by(0)
+      end
+    end
+  end
+
+  describe 'DELETE/remove_file' do
+    context 'when attached file is delete' do
+      let(:file) { fixture_file_upload(Rails.root.join('spec/fixtures/files/review.text')) }
+      before do
+        review.files.attach(file)
+      end
+
+      it 'removes uploaded file' do
+        expect do
+          delete remove_file_review_url(review), params: { attachment_id: review.files.first.id }
+        end.to change(ActiveStorage::Attachment, :count).by(0)
+      end
+    end
+
+    context 'when attached file does not  delete' do
+      it 'does not remove uploaded file' do
+        expect do
+          delete remove_file_review_url(review), params: { attachment_id: 0 }
         end.to change(ActiveStorage::Attachment, :count).by(0)
       end
     end

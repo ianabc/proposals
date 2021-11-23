@@ -118,4 +118,20 @@ RSpec.describe "Proposals", type: :request do
       end
     end
   end
+
+  describe 'POST /remove_file' do
+    include Rack::Test::Methods
+    include ActionDispatch::TestProcess::FixtureFile
+    let(:role) { create(:role, name: 'Staff') }
+    let(:file) { fixture_file_upload(Rails.root.join('spec/fixtures/files/proposal_booklet.pdf')) }
+    before do
+      proposal.files.attach(file)
+    end
+
+    it 'removes uploaded file' do
+      expect do
+        post remove_file_proposal_url(proposal), params: { attachment_id: proposal.files.first.id }
+      end.to change(ActiveStorage::Attachment, :count).by(0)
+    end
+  end
 end
