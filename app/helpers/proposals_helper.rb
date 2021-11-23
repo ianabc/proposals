@@ -177,6 +177,10 @@ module ProposalsHelper
                          end
     data = Hash.new(0)
 
+    career_hash(data, career_stage)
+  end
+
+  def career_hash(data, career_stage)
     career_stage.each do |s|
       data[s] += 1
     end
@@ -267,7 +271,6 @@ module ProposalsHelper
   def invite_last_name(invite)
     invite.person&.lastname || invite.lastname
   end
-
 
   def proposal_version_title(version, proposal)
     ProposalVersion.find_by(version: version, proposal_id: proposal.id).title

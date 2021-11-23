@@ -20,7 +20,8 @@ class BookletPdfService
   def multiple_booklet(table, proposals)
     @table = table
     @proposals_ids = proposals
-    multiple_proposals_fields if @input == 'all'
+    year = proposal&.year || (Date.current.year + 2)
+    multiple_proposals_fields(year) if @input == 'all'
   end
 
   def self.format_errors(error)
@@ -114,9 +115,7 @@ class BookletPdfService
     @text
   end
 
-  def multiple_proposals_fields
-    year = proposal&.year || (Date.current.year + 2)
-
+  def multiple_proposals_fields(year)
     title_page(year)
     case @table
     when "toc"
@@ -131,15 +130,20 @@ class BookletPdfService
 
   def proposals_with_content
     proposals = Proposal.where(id: @proposals_ids.split(','))
-    @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
-    first_subject_proposal
-    @subjects_with_proposals.each do |subject|
+    subjects_with_proposals = selected_proposals_subjects(proposals)
+    subjects_with_proposals.each do |subject|
       @subject = Subject.find_by(id: subject.first)
       check_subject
       @proposals_objects = subject.last
       subject_proposals
     end
     @latex_text
+  end
+
+  def selected_proposals_subjects(proposals)
+    subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
+    first_subject_proposal(subjects_with_proposals)
+    subjects_with_proposals
   end
 
   def check_subject
@@ -224,12 +228,12 @@ class BookletPdfService
     "#{num_participants} confirmed / #{proposal.proposal_type&.participant} maximum participants \\\\ \n"
   end
 
-  def first_subject_proposal
-    @proposals = @subjects_with_proposals.first[1].min_by(&:code).id
+  def first_subject_proposal(subjects_with_proposals)
+    @proposal_first_id = subjects_with_proposals.first[1].min_by(&:code).id
   end
 
   def check_no_latex
-    if @proposal.id == @proposals
+    if @proposal.id == @proposal_first_id
       File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
         io.write(@text)
       end

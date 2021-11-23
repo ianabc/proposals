@@ -252,7 +252,7 @@ export default class extends Controller {
     else {
       $('.import-reviews-btn').html("Importing...")
       $('.import-reviews-btn').addClass('disabled');
-      $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function(response) {
+      $.post(`/submitted_proposals/import_reviews?proposals=${proposalIds}`, function() {
         toastr.success("Import reviews In progress. You will be notified once its done.")
       })
     }
