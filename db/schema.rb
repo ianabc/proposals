@@ -154,8 +154,8 @@ ActiveRecord::Schema.define(version: 2021_11_18_070934) do
     t.string "code"
     t.string "city"
     t.string "country"
-    t.datetime "start_date"
-    t.datetime "end_date"
+    t.date "start_date"
+    t.date "end_date"
     t.text "exclude_dates", default: [], array: true
   end
 
