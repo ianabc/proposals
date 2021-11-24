@@ -38,7 +38,6 @@ jobs:
           name: Bundle install
           command: |
             cd /home/app/proposals
-            rm -rf vendor/bundle
             gem install bundler
             bundle install
       - run:
