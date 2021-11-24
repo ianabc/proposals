@@ -37,9 +37,9 @@ jobs:
       - run:
           name: Bundle install
           command: |
-            gem update --system
-            gem install bundler
             cd /home/app/proposals
+            rm -rf vendor/bundle
+            gem install bundler
             bundle install
       - run:
           name: Wait for database
