@@ -125,7 +125,6 @@ RSpec.feature "Locations new", type: :feature do
     scenario "exclude dates must be valid date strings"
     scenario "exclude dates must be after start date"
     scenario "exclude dates must be before end date"
-
   end
 
   scenario "click back button" do

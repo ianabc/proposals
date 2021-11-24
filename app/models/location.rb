@@ -38,19 +38,22 @@ class Location < ApplicationRecord
     errors.add("End Date", "must be a Friday.") unless end_date.friday?
   end
 
+  def parse_exclude_date(ds)
+    field = 'Exclude Dates'
+    begin
+      date = Date.parse(ds)
+      errors.add(field, "#{ds} must be after Start Date") if date < start_date
+      errors.add(field, "#{ds} must be before End Date") if date > end_date
+    rescue
+      errors.add(field, "#{ds} is not a valid date string.")
+    end
+  end
+
   def check_valid_exclude_dates
     return if exclude_dates.blank?
 
-    field = 'Exclude Dates'
-    exclude_dates.each do |ds|
-      date = Date.parse(ds) rescue nil
-
-      if date.nil?
-        errors.add(field, "#{ds} is not a valid date string.")
-      else
-        errors.add(field, "#{ds} must be after Start Date") if date < start_date
-        errors.add(field, "#{ds} must be before End Date") if date > end_date
-      end
+    exclude_dates.each do |date_string|
+      parse_exclude_date(date_string)
     end
   end
 end
