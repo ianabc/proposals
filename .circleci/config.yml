@@ -36,7 +36,11 @@ jobs:
           command: tar cvf - --exclude=".git" . | tar xf - -C /home/app/proposals/
       - run:
           name: Bundle install
-          command: gem install bundler; cd /home/app/proposals; bundle install
+          command: |
+            gem update --system
+            gem install bundler
+            cd /home/app/proposals
+            bundle install
       - run:
           name: Wait for database
           command: |
