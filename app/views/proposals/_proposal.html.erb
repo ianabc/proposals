@@ -57,9 +57,26 @@
                     <div class="tab-content">
                       <div class="tab-pane <%= active_tab(@proposal, 'one', params[:tab]) %>" id="tab-1" role="tabpanel">
                         <h4 class="tab-title"></h4>
+                        <% if @proposal.revision_requested_spc? || @proposal.cover_letter.present? %>
+                          <div class="mb-3">
+                            <h3 class="required">Cover Letter</h3>
+                            <p>
+                              Please list all the changes you have made to your proposal here.
+                            </p>
+                            <p>
+                              For example, you could say, "As requested by the BIRS program committee, we have increased our number of early-career participants by inviting the following people ... ". 
+                            </p>
+                            <%= f.text_area(:cover_letter, size: '5x5', class:'form-control', value: @proposal&.cover_letter, disabled: action) %>
+                          </div>
+                        <% end %>
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction&.html_safe %></p>
                         </div>
+                        <% if @proposal.code.present? && params[:action] == 'show' %> 
+                          <div class="mb-3">
+                            <p>Code: <%= @proposal.code %></p>
+                          </div>
+                        <% end %>
                         <div class="mb-3 row">
                           <%= f.label :title, class: "required" %>
                           <div class="col-6 mt-2">
@@ -107,15 +124,8 @@
                             <%= render partial: 'lead_organizer' %>
                             <div>
                               <h3 class="form-section">Add Supporting Organizers:</h3>
-                              <p>Supporting Organizers are people to help you with the work of organizing and running your workshop. In the BIRS online systems, they will have similar privileges to your own, to enter and maintain schedules, manage participants, etc.. In this proposal system, they will be able to view, but not edit the proposal.</p>
+                              <p><%= @proposal.proposal_type.organizer_description&.html_safe %></p>
 
-                              <p class="text-danger">To add and save Supporting Organizers, you must invite them.</p>
-
-                              <p>Add their information in the fields to provided. To invite more than one at a time, click the "Queue More Organizer Invitations" button. Click the "Invite Organizer(s)" button to send invitation emails, which then also saves their information in our database. The invitation email contains a special link that they must follow to indicate their interest in attending your workshop as a Supporting Organizer, should it be accepted.</p>
-
-                              <p>For recommendations regarding the composition of the organizing committee, please <%= link_to "see these guidelines", "/guidelines#organizing_committee", target: "_blank" %>.</p>
-
-                              <%= organizer_intro(@proposal) %>
                               <% if @proposal.invites %>
                                 <% @proposal.invites.each do |invite|%>
                                   <% if invite.invited_as == 'Organizer' %>
@@ -149,19 +159,7 @@
                             <div class="mt-4">
                               <div class="mb-3">
                                 <h3 class="form-section">Add Participants:</h3>
-                                <p class="text-danger">To add and save participants, you must invite them.</p>
-
-                                <p>To gauge the interest of the wider scientific community in your workshop, send invitations to potential participants. In this step of your proposal, you're encouraged to invite up to 342 participants, in order to showcase the appeal of your proposed workshop.</p>
-
-                                <p>All online and hybrid workshops can accommodate up to 300 virtual participants. For the in-person capacities of each type of workshop, see our <%= link_to "Participant Limits", "/guidelines#participant-limits", target: "_blank" %>.</p>
-
-                                <p>To send an invitation to a potential participant, enter a First Name, Last Name, Email, and Deadline for Reply. To invite more than one at a time, click the "Queue More Participant Invitations" button. Then click Invite Participant(s).</p>
-
-                                <p>The deadline for reply can be any date; it should be a date by which you'd like to hear back from your invitee.</p>
-
-                                <p><p>Invited participants will receive an email that asks if they would be interested in attending your proposed workshop if it were to happen. This invitation email is not a formal invitation; its purpose is to give you and the review committee an idea of your workshop's potential appeal.<em><%= link_to "Learn More", "/guidelines#adding-participants", target: "_blank" %></em></p>
-
-                                <p>For recommendations regarding the composition of your participant list, please review the Participants sections of the <%= link_to "EDI Rubric", "/guidelines#edi_rubric", target: "_blank" %> and the <%= link_to "Scientific Merit", "/guidelines#scientific_merit_rubric", target: "_blank" %> sections of the <em>Guidelines for Proposals</em>.</p>
+                                <p><%= @proposal.proposal_type.participant_description&.html_safe %></p>
 
                                 <% if @proposal.invites %>
                                   <% @proposal.invites.each do |invite|%>
@@ -212,7 +210,6 @@
                               <%= render partial: 'lead_organizer' %>
                               <div>
                                 <h3 class="form-section">Supporting Organizers:</h3>
-                                <%= organizer_intro(@proposal) %>
                                 <% if @proposal.invites %>
                                   <% @proposal.invites.each do |invite|%>
                                     <% if invite.invited_as == 'Organizer' %>
@@ -254,22 +251,35 @@
                                 <br>
                                 Supported file types: *.pdf
                               </p>
-                              <div>
-                                <input type="file" id="file-upload" multiple accept="application/pdf" name="file-upload", data-action="multi-upload#uploadFile" data-proposal-form-id="<%= @proposal&.id %>">
-                              </div>
+                              <% if params[:action] == 'edit' %>
+                                <div>
+                                  <input type="file" id="file-upload" multiple accept="application/pdf" name="file-upload", data-action="multi-upload#uploadFile" data-proposal-form-id="<%= @proposal&.id %>">
+                                </div>
 
-                              <% if @proposal&.files&.attached? %>
-                                <h4 class="file-uploads">Attached files:</h4>
-                                <ul class="list-group list-group-flush">
-                                  <% @proposal.files.each do |file| %>
-                                    <li class="list-group-item">
-                                      <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
-                                      <span data-proposal-id="<%= @proposal.id %>" data-attachment-id="<%= file.id %>" data-action="click->multi-upload#removeFile" class="btn btn-sm btn-light m-3">
-                                        Remove file
-                                      </span>
-                                    </li>
-                                  <% end %>
-                                </ul>
+                                <% if @proposal&.files&.attached? %>
+                                  <h4 class="file-uploads">Attached files:</h4>
+                                  <ul class="list-group list-group-flush">
+                                    <% @proposal.files.each do |file| %>
+                                      <li class="list-group-item">
+                                        <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
+                                        <span data-proposal-id="<%= @proposal.id %>" data-attachment-id="<%= file.id %>" data-action="click->multi-upload#removeFile" class="btn btn-sm btn-light m-3">
+                                          Remove file
+                                        </span>
+                                      </li>
+                                    <% end %>
+                                  </ul>
+                                <% end %>
+                              <% else %>
+                                <% if @proposal&.files&.attached? %>
+                                  <h4 class="file-uploads">Attached files:</h4>
+                                  <ul class="list-group list-group-flush">
+                                    <% @proposal.files.each do |file| %>
+                                      <li class="list-group-item">
+                                        <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
+                                      </li>
+                                    <% end %>
+                                  </ul>
+                                <% end %>
                               <% end %>
                             </div>
                           </div>
@@ -345,100 +355,102 @@
                         <div class="mb-3">
                           <p><%= @proposal.proposal_form.introduction_charts&.html_safe %></p>
                         </div>
-                      <div class="row">
-                        <div class="col-12 col-lg-6">
-                          <div class="card flex-fill w-100">
-                            <div class="card-header">
-                              <h5 class="card-title">Nationality</h5>
+                        <% if confirmed_minimum_participants(@proposal) %>
+                          <div class="row">
+                            <div class="col-12 col-lg-6">
+                              <div class="card flex-fill w-100">
+                                <div class="card-header">
+                                  <h5 class="card-title">Nationality</h5>
+                                </div>
+                                <div class="card-body">
+                                  <table class="table">
+                                    <thead>
+                                      <tr>
+                                        <th>Nationality</th>
+                                        <th>No.</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <% nationality_data(@proposal).each do |key, value| %>
+                                      <tr>
+                                        <td><%= key %></td>
+                                        <td><%= value %></td>
+                                      </tr>
+                                      <% end %>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
                             </div>
-                            <div class="card-body">
-                              <table class="table">
-                                <thead>
-                                  <tr>
-                                    <th>Nationality</th>
-                                    <th>No.</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <% nationality_data(@proposal).each do |key, value| %>
-                                  <tr>
-                                    <td><%= key %></td>
-                                    <td><%= value %></td>
-                                  </tr>
-                                  <% end %>
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-12 col-lg-6">
-                          <div class="card flex-fill w-100">
-                            <div class="card-header">
-                              <h5 class="card-title">Ethnicity</h5>
-                            </div>
-                            <div class="card-body">
-                              <table class="table">
-                                <thead>
-                                  <tr>
-                                    <th>Ethnicity</th>
-                                    <th>No.</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <% ethnicity_data(@proposal).each do |key, value| %>
-                                  <tr>
-                                    <td><%= key %></td>
-                                    <td><%= value %></td>
-                                  </tr>
-                                  <% end %>
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-12 col-lg-6">
-                          <div class="card flex-fill w-100">
-                            <div class="card-header">
-                              <h5 class="card-title">Gender</h5>
-                              <!-- <h6 class="card-subtitle text-muted">A line chart is a way of plotting data points on a line.</h6> -->
-                            </div>
-                            <div class="card-body">
-                              <div class="chart">
-                                <canvas id="chartjs-gender"></canvas>
+                            <div class="col-12 col-lg-6">
+                              <div class="card flex-fill w-100">
+                                <div class="card-header">
+                                  <h5 class="card-title">Ethnicity</h5>
+                                </div>
+                                <div class="card-body">
+                                  <table class="table">
+                                    <thead>
+                                      <tr>
+                                        <th>Ethnicity</th>
+                                        <th>No.</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <% ethnicity_data(@proposal).each do |key, value| %>
+                                      <tr>
+                                        <td><%= key %></td>
+                                        <td><%= value %></td>
+                                      </tr>
+                                      <% end %>
+                                    </tbody>
+                                  </table>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                        <div class="col-12 col-lg-6">
-                          <div class="card flex-fill w-100">
-                            <div class="card-header">
-                              <h5 class="card-title">Under-represented minority in STEM</h5>
-                              <!-- <h6 class="card-subtitle text-muted">A line chart is a way of plotting data points on a line.</h6> -->
+                          <div class="row">
+                            <div class="col-12 col-lg-6">
+                              <div class="card flex-fill w-100">
+                                <div class="card-header">
+                                  <h5 class="card-title">Gender</h5>
+                                  <!-- <h6 class="card-subtitle text-muted">A line chart is a way of plotting data points on a line.</h6> -->
+                                </div>
+                                <div class="card-body">
+                                  <div class="chart">
+                                    <canvas id="chartjs-gender"></canvas>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <div class="card-body">
-                              <div class="chart">
-                                <canvas id="chartjs-stem"></canvas>
+                            <div class="col-12 col-lg-6">
+                              <div class="card flex-fill w-100">
+                                <div class="card-header">
+                                  <h5 class="card-title">Under-represented minority in STEM</h5>
+                                  <!-- <h6 class="card-subtitle text-muted">A line chart is a way of plotting data points on a line.</h6> -->
+                                </div>
+                                <div class="card-body">
+                                  <div class="chart">
+                                    <canvas id="chartjs-stem"></canvas>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-12 col-lg-6">
-                          <div class="card flex-fill w-100">
-                            <div class="card-header">
-                              <h5 class="card-title">Career Stage</h5>
-                            </div>
-                            <div class="card-body">
-                              <div class="chart">
-                                <canvas id="chartjs-career"></canvas>
+                          <div class="row">
+                            <div class="col-12 col-lg-6">
+                              <div class="card flex-fill w-100">
+                                <div class="card-header">
+                                  <h5 class="card-title">Career Stage</h5>
+                                </div>
+                                <div class="card-body">
+                                  <div class="chart">
+                                    <canvas id="chartjs-career"></canvas>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
+                        <% end %>
                         <div class="row mt-20">&nbsp;</div>
                         <div class="d-flex">
                           <%= link_to "Print Proposal", rendered_proposal_proposal_path(@proposal.id, :format => :pdf), target: '_blank', class: 'p-2 mx-2 btn btn-primary' %>

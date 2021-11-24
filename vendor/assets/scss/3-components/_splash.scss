@@ -3,7 +3,8 @@
   user-select: none;
 
   .splash-icon {
-    background: $splash-bg;
+    //background: $splash-bg;
+    background: rgba(0,0,0,0.5);
     display: block;
     position: fixed;
     z-index: 100;

@@ -20,10 +20,16 @@ RSpec.describe Person, type: :model do
       p = build(:person, email: '')
       expect(p.valid?).to be_falsey
     end
+
+    it "has a country" do
+      p = build(:person)
+      expect(p.country).not_to be_blank
+    end
   end
 
   describe 'associations' do
     it { should belong_to(:user).optional(true) }
+    it { should have_many(:reviews).dependent(:destroy) }
     it { should have_many(:proposals).through(:proposal_roles) }
   end
 
@@ -36,9 +42,12 @@ RSpec.describe Person, type: :model do
   end
 
   describe '#lead_organizer_attributes' do
-    let(:person) { create(:person) }
+    let(:proposal) { create(:proposal) }
+    let(:proposal_roles) { create_list(:proposal_role, 3, proposal: proposal) }
+    let(:person) { proposal_roles.last.person }
     before do
-      person.is_lead_organizer = true
+      proposal_roles.last.role.update(name: 'lead_organizer')
+      person.lead_organizer?
       person.update(street_1: nil, city: nil)
     end
     it '' do

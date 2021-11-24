@@ -21,23 +21,39 @@ Rails.application.routes.draw do
       post :proposals_booklet
       get :download_booklet
       post :edit_flow
+      post :revise_proposal_editflow
+      post :approve_decline_proposals
       post :table_of_content
+      post :import_reviews
+      post :reviews_booklet
+      get :download_review_booklet
+      get :reviews_excel_booklet
     end
     member do
+      post :update_status
       post :staff_discussion
       post :send_emails
-      post :approve_status
-      post :decline_status
+      get :reviews
+    end
+  end
+
+  resources :reviews, only: [] do
+    member do
+      delete :remove_file
+      post :add_file
     end
   end
 
   get :invite, to: 'invites#show'
-  get 'expired' => 'invites#expired'
+  get 'cancelled' => 'invites#cancelled'
   post 'cancel' => 'invites#cancel'
+  post 'cancel_confirmed_invite' => 'invites#cancel_confirmed_invite'
 
   resources :proposals do
     post :latex, to: 'proposals#latex_input'
     member do
+      get :versions
+      get :proposal_version
       get :rendered_proposal, to: 'proposals#latex_output'
       get :rendered_field, to: 'proposals#latex_field'
       patch :ranking
@@ -51,6 +67,7 @@ Rails.application.routes.draw do
         post :inviter_response
         post :invite_reminder
         post :invite_email
+        post :new_invite
       end
       collection do
         get :thanks
@@ -71,6 +88,7 @@ Rails.application.routes.draw do
   resources :submit_proposals do
     collection do
       get :thanks
+      post :invitation_template
     end
   end
   resources :proposal_types do
@@ -124,6 +142,7 @@ Rails.application.routes.draw do
   resources :emails do
     collection do
       patch :email_template
+      post :email_types
     end
   end
 

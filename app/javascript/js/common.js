@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  $(document).on('hide.bs.modal', '#email-preview', function(event) {
+  $(document).on('hide.bs.modal', '#email-preview', function() {
     window.location.reload()
   });
 
@@ -7,7 +7,15 @@ $(document).ready(function() {
     window.location.reload()
   });
 
+  $(document).on('hide.bs.modal', '#email-template', function() {
+    window.location.reload()
+  });
+
   $(document).on('hide.bs.modal', '#table-window', function() {
+    window.location.reload()
+  });
+
+  $(document).on('hide.bs.modal', '#review-window', function() {
     window.location.reload()
   });
 
@@ -21,7 +29,7 @@ $(document).ready(function() {
     }
   });
 
-  $('[id^="chartjs"]').each(function(index, el) {
+  $('[id^="chartjs"]').each(function() {
     this.style.height = '200px'
   })
 

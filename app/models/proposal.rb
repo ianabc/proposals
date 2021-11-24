@@ -1,17 +1,9 @@
 class Proposal < ApplicationRecord
   include AASM
   include PgSearch::Model
-  pg_search_scope :search_proposals, against: %i[title],
-                                     associated_against: {
-                                       people: %i[firstname lastname]
-                                     }
+  include Logable
 
-  pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
-  pg_search_scope :search_proposal_status, against: %i[status]
-  pg_search_scope :search_proposal_subject, against: %i[subject_id]
-  pg_search_scope :search_proposal_year, against: %i[year]
-
-  attr_accessor :is_submission, :skip_submission_validation
+  attr_accessor :is_submission, :allow_late_submission
 
   has_many_attached :files
   has_many :proposal_locations, dependent: :destroy
@@ -29,14 +21,33 @@ class Proposal < ApplicationRecord
   belongs_to :subject, optional: true
   has_many :staff_discussions, dependent: :destroy
   has_many :emails, dependent: :destroy
+  has_many :reviews, dependent: :destroy
+  has_many :proposal_versions, dependent: :destroy
+
+  before_save :strip_whitespace
+  before_save :create_code, if: :is_submission
+  after_commit :log_activity
 
   validates :year, :title, presence: true, if: :is_submission
   validate :subjects, if: :is_submission
   validate :minimum_organizers, if: :is_submission
   validate :preferred_locations, if: :is_submission
   validate :not_before_opening, if: :is_submission
-  before_save :strip_whitespace
-  before_save :create_code, if: :is_submission
+  validate :cover_letter_field, if: :is_submission
+
+  pg_search_scope :search_proposals, against: %i[title code],
+                                     associated_against: {
+                                       people: %i[firstname lastname]
+                                     }, using: {
+                                       tsearch: {
+                                         prefix: true
+                                       }
+                                     }
+
+  pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
+  pg_search_scope :search_proposal_status, against: %i[status]
+  pg_search_scope :search_proposal_year, against: %i[year]
+  belongs_to :assigned_location, class_name: 'Location', optional: true
 
   enum status: {
     draft: 0,
@@ -48,7 +59,11 @@ class Proposal < ApplicationRecord
     decision_pending: 6,
     decision_email_sent: 7,
     approved: 8,
-    declined: 9
+    declined: 9,
+    revision_requested_spc: 10,
+    revision_submitted_spc: 11,
+    in_progress_spc: 12,
+    shortlisted: 13
   }
 
   aasm column: :status, enum: true do
@@ -56,10 +71,14 @@ class Proposal < ApplicationRecord
     state :submitted
     state :initial_review
     state :revision_requested
+    state :revision_requested_spc
     state :revision_submitted
+    state :revision_submitted_spc
     state :in_progress
+    state :in_progress_spc
     state :decision_pending
     state :decision_email_sent
+    state :shortlisted
 
     event :active do
       transitions from: :draft, to: :submitted
@@ -74,19 +93,31 @@ class Proposal < ApplicationRecord
     end
 
     event :pending do
-      transitions from: %i[in_progress revision_submitted], to: :decision_pending
+      transitions from: %i[in_progress in_progress_spc revision_submitted revision_submitted_spc], to: :decision_pending
     end
 
     event :requested do
       transitions from: %i[initial_review decision_pending revision_submitted], to: :revision_requested
     end
 
+    event :requested_spc do
+      transitions from: %i[initial_review decision_pending revision_submitted_spc shortlisted],
+                  to: :revision_requested_spc
+    end
+
     event :revision do
       transitions from: :revision_requested, to: :revision_submitted
     end
 
+    event :revision_spc do
+      transitions from: :revision_requested_spc, to: :revision_submitted_spc
+    end
+
     event :decision do
-      transitions from: :decision_pending, to: :decision_email_sent
+      transitions from: %i[decision_pending shortlisted], to: :decision_email_sent
+    end
+    event :progress_spc do
+      transitions from: :revision_submitted_spc, to: :in_progress_spc
     end
   end
 
@@ -104,12 +135,20 @@ class Proposal < ApplicationRecord
   }
 
   def editable?
-    draft? || revision_requested?
+    draft? || revision_requested? || revision_requested_spc?
   end
 
   def demographics_data
     DemographicData.where(person_id: invites.where(invited_as: 'Participant')
                    .pluck(:person_id))
+  end
+
+  def invites_demographic_data
+    # persons can have multiple confirmed invites
+    # for persons with more than one demo data record, use the latest one
+    DemographicData.where(person_id: invites.where(status: 'confirmed')
+                   .pluck(:person_id).uniq).order(:id)
+                   .index_by(&:person_id).values
   end
 
   def create_organizer_role(person, organizer)
@@ -143,18 +182,27 @@ class Proposal < ApplicationRecord
     Person.where(id: person_ids).where(academic_status: career)
   end
 
-  def self.to_csv
-    attributes = ["Code", "Proposal Title", "Proposal Type", "Lead Organizer",
-                  "Preffered Locations", "Status",
-                  "Updated"]
+  def self.supporting_organizer_fullnames(proposal)
+    proposal&.supporting_organizers&.map { |org| "#{org.firstname} #{org.lastname}" }&.join(', ')
+  end
+
+  def self.to_csv(proposals)
     CSV.generate(headers: true) do |csv|
-      csv << attributes
-      all.find_each do |proposal|
-        csv << [proposal.code, proposal.title, proposal.proposal_type.name,
-                proposal.lead_organizer.fullname, proposal.the_locations,
-                proposal.status, proposal.updated_at.to_date]
+      csv << HEADERS
+      proposals.find_each do |proposal|
+        csv << each_row(proposal)
       end
     end
+  end
+
+  HEADERS = ["Code", "Proposal Title", "Proposal Type", "Preffered Locations", "Status",
+             "Updated", "Subject Area", "Lead Organizer", "Supporting Organizers"].freeze
+
+  def self.each_row(proposal)
+    [proposal&.code, proposal&.title, proposal&.proposal_type&.name,
+     proposal&.the_locations, proposal&.status, proposal&.updated_at&.to_date,
+     proposal.subject&.title, proposal&.lead_organizer&.fullname,
+     supporting_organizer_fullnames(proposal)]
   end
 
   def pdf_file_type(file)
@@ -165,14 +213,31 @@ class Proposal < ApplicationRecord
     preamble || ''
   end
 
+  def max_supporting_organizers
+    proposal_type&.co_organizer
+  end
+
+  def max_participants
+    proposal_type&.participant
+  end
+
+  def max_virtual_participants
+    300 # temp until max_virtual setting is added
+  end
+
+  def max_total_participants
+    max_participants + max_virtual_participants
+  end
+
   private
 
   def not_before_opening
-    return if draft?
+    return if draft? || revision_requested? || revision_requested_spc? || allow_late_submission
+
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
-    errors.add("Late submission - ", "proposal submissions are not allowed
-               because of due date #{proposal_type.closed_date.to_date}".squish)
+    errors.add("Late submission - ", "proposal submissions closed on
+               #{proposal_type.closed_date.to_date}".squish)
   end
 
   def minimum_organizers
@@ -186,6 +251,12 @@ class Proposal < ApplicationRecord
   def subjects
     errors.add('Subject Area:', "please select a subject area") if subject.nil?
     errors.add('AMS Subjects:', 'please select 2 AMS Subjects') unless ams_subjects.pluck(:code).count == 2
+  end
+
+  def cover_letter_field
+    return unless revision_requested_spc?
+
+    errors.add('Cover Letter:', "shouldn't be empty.") if cover_letter.blank?
   end
 
   def next_number
@@ -215,5 +286,11 @@ class Proposal < ApplicationRecord
     attributes.each do |key, value|
       self[key] = value.strip if value.respond_to?(:strip)
     end
+  end
+
+  def log_activity
+    return if previous_changes.empty? || User.current.nil?
+
+    audit!(user: User.current)
   end
 end

@@ -28,9 +28,9 @@ class ProposalFiltersQuery
   end
 
   def filter_by_subject_area(subject_area)
-    return @result if subject_area.blank?
+    return @result if subject_area&.reject(&:blank?).blank?
 
-    @result.search_proposal_subject(subject_area)
+    @result.where(subject_id: subject_area)
   end
 
   def filter_by_proposal_type(proposal_type)
@@ -39,9 +39,13 @@ class ProposalFiltersQuery
     @result.search_proposal_type(proposal_type)
   end
 
-  def filter_by_status(status)
-    return @result if status.blank?
+  def filter_by_status(statuses)
+    return @result if statuses.blank?
 
-    @result.search_proposal_status(status).sort_by { |p| p.code || '' }
+    r = []
+    statuses.each do |status|
+      r << @result.search_proposal_status(status).sort_by { |p| p.code || '' }
+    end
+    @result = r.flatten
   end
 end

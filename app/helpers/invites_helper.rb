@@ -15,9 +15,14 @@ module InvitesHelper
 
   def invited_role(invited)
     if invited.invited_as.include?('Organizer')
-      "to be a supporting organizer for"
+      "be a supporting organizer for"
     else
       "participate in"
     end
+  end
+
+  def confirmed_minimum_participants(proposal)
+    participants = proposal.demographics_data&.count
+    participants >= 10
   end
 end

@@ -1,0 +1,77 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Proposals
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %> </a></li>
+          <li class="breadcrumb-item" aria-current="page"><%= link_to "Submitted Proposals", submitted_proposals_path %></li>
+          <li class="breadcrumb-item active">Reviews</li>
+        </ol>
+      </nav>
+    </div>
+      <div class="row" data-controller="submitted-proposals">
+        <div class="col-16">
+          <div class="card">
+            <div class="card-body">
+              <% if @proposal.reviews.empty? %>
+                <h1>There is no review added yet.</h1>
+              <% else %>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Reviewer Name</th>
+                      <th>Score</th>
+                      <th>Scientific Review</th>
+                      <th>EDI Review</th>
+                      <th>Version</th>
+                      <th>Submission Date</th>
+                      <th>Attachments</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% @proposal.reviews&.each do |review| %>
+                      <tr>
+                        <td><%= review&.reviewer_name %></td>
+                        <td><%= review&.score %></td>
+                        <% if review&.is_quick == false %>
+                          <td>True</td>
+                        <% else %>
+                          <td>False</td>
+                        <% end %>
+                        <% if review&.is_quick == true %>
+                          <td>True</td>
+                        <% else %>
+                          <td>False</td>
+                        <% end %>
+                        <td><%= review&.version %></td>
+                        <td><%= review_dates(review)&.join('<br>')&.html_safe %></td>
+                        <td>
+                          <% review.files&.each do |file| %>
+                            <div>
+                              <%= link_to file.filename, rails_blob_path(file), target: "_blank" %>
+                              <span data-review-id="<%= review.id %>" data-attachment-id="<%= file.id %>" 
+                                data-action="click->submitted-proposals#removeFile" class="btn btn-sm btn-light">
+                                  Remove file
+                              </span>
+                            </div>
+                          <% end %>
+                        </td>
+                        <td class="table-action">
+                          <input type="file" id="review-file" name="review-file", data-action="submitted-proposals#addFile" data-review-id="<%= review.id %>" >
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

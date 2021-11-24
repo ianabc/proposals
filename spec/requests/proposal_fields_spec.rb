@@ -2,17 +2,17 @@ require 'rails_helper'
 
 RSpec.describe "/proposal_forms/:id/proposal_fields", type: :request do
   let(:proposal_type) { create(:proposal_type) }
-  let(:proposal_form) {
+  let(:proposal_form) do
     create(:proposal_form, status: 'draft', proposal_type: proposal_type)
-  }
+  end
   let(:person) { create(:person) }
   let(:role) { create(:role, name: 'Staff') }
   let(:user) { create(:user, person: person) }
-  let(:role_privilege) {
+  let(:role_privilege) do
     create(:role_privilege,
            permission_type: "Manage", privilege_name: "ProposalField",
            role_id: role.id)
-  }
+  end
 
   before do
     role_privilege

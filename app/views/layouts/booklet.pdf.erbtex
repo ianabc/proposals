@@ -1,0 +1,197 @@
+\documentclass[12pt,table]{report}
+<% @latex_config = { :recipe => [
+  {:command => 'pdflatex'},
+  {:command => 'bibtex', :arguments =>[]},
+  {:command => 'pdflatex', :runs => 2}
+]}
+%>
+
+\setlength{\textwidth}{6.0in}
+\setlength{\textheight}{9in}
+\setlength{\oddsidemargin}{0.3in}
+\setlength{\evensidemargin}{0in}
+\setlength{\topmargin}{-0.25in}
+\pagestyle{myheadings}
+
+\usepackage{amsmath,amssymb,amsbsy,amsfonts,amsthm,latexsym,
+            amsopn,amstext,amsxtra,euscript,amscd,amsthm}
+\usepackage{mathrsfs}
+\bibliographystyle{amsref}
+%\usepackage{epsfig}
+%\usepackage{graphics}
+\usepackage[pdftex]{graphicx}
+\usepackage{times}
+\usepackage{color}
+\usepackage{hyphenat}
+\usepackage{fancyhdr}
+\usepackage{here}
+\usepackage{multirow}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\hypersetup{pdfborder={0 0 0 [0 0]}}
+\usepackage{comment}
+\usepackage{pdfpages}
+\usepackage{graphicx}
+\graphicspath{{<%= "#{Rails.root}/app/assets/images/" %>}}
+
+% problem unicode characters
+\DeclareUnicodeCharacter{2028}{\linebreak}
+\DeclareUnicodeCharacter{03B5}{$\epsilon$}
+\DeclareUnicodeCharacter{03B4}{$\delta$}
+\DeclareUnicodeCharacter{2264}{$\leq$}
+\DeclareUnicodeCharacter{6731}{}
+\DeclareUnicodeCharacter{6625}{}
+\DeclareUnicodeCharacter{94A2}{}
+\DeclareUnicodeCharacter{0301}{}
+
+\DeclareMathOperator{\Gal}{Gal}
+\DeclareMathOperator{\SL}{SL}
+\DeclareMathOperator\ed{\mathrm{ed}}
+\DeclareMathOperator\ho{\mathrm{H}}
+\DeclareMathOperator{\Diff}{Diff}
+\DeclareMathOperator{\Homeo}{Homeo}
+
+\newfont{\pimspacific}{pagd at 50pt}
+\newfont{\titlefont}{pagd at 40pt}
+
+\newcommand{\writeblack}{\special{ps: gsave 0 setgray}}
+\newcommand{\writeblue}{\color[rgb]{0,0.106,0.576}}
+\newcommand{\writegrey}{\color[gray]{0.4}}
+
+% commonly used math environments
+% from http://www.maths.tcd.ie/~dwilkins/LaTeXPrimer/Theorems.html
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+% 22w5057
+\usepackage[table]{xcolor}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{multirow}
+\newcommand{\greyrule}{\arrayrulecolor{black!30}\midrule\arrayrulecolor{black}}
+%\newcommand{\ve}{\varepsilon}
+%\newcommand{\R}{\mathbb{R}}
+%\newcommand{\rmd}{\mathrm{d}}
+%\DeclareMathOperator{\Id}{Id}
+\def\txtd{{\textnormal{d}}}
+
+% 22w5143
+\newcommand{\etalchar}[1]{$^{#1}$}
+
+% 16w5061 begin
+%\newtheorem{thm}{Theorem}
+%\newtheorem{conj}[thm]{Conjecture}
+%\newtheorem{prob}[thm]{Problem}
+%\newcommand{\Q}{\ensuremath{\mathbb{Q}} }
+%\def\HFi {\operatorname{HF}^\infty}
+%\newcommand{\spincs}{\mathfrak s}
+% 16w5061 end
+
+% 17w5009 begin
+\usepackage[all, knot]{xy}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand\op{*}
+\def\VR(#1,#2){\vrule width0pt height#1mm depth#2mm}
+% 17w5009 end
+
+% 18w5009+
+\newcommand{\C}{\mathbb C}
+\newcommand{\eps}{\epsilon}
+
+% 20w5147
+\def\en{\mathbb N}
+\def\er{\mathbb R}
+\newcommand{\divo}{\textnormal{div}}
+\newcommand{\dista}{\dist \,( \Omega', \partial\Omega)}
+\newcommand{\rif}[1]{(\ref{#1})}
+\def\eqn#1$$#2$${\begin{equation}\label#1#2\end{equation}}
+\def\mean#1{\mathchoice%
+          {\mathop{\kern 0.2em\vrule width 0.6em height 0.69678ex depth -0.58065ex
+                  \kern -0.8em \intop}\nolimits_{\kern -0.4em#1}}%
+          {\mathop{\kern 0.1em\vrule width 0.5em height 0.69678ex depth -0.60387ex
+                  \kern -0.6em \intop}\nolimits_{#1}}%
+          {\mathop{\kern 0.1em\vrule width 0.5em height 0.69678ex
+              depth -0.60387ex
+                  \kern -0.6em \intop}\nolimits_{#1}}%
+          {\mathop{\kern 0.1em\vrule width 0.5em height 0.69678ex depth -0.60387ex
+                  \kern -0.6em \intop}\nolimits_{#1}}}
+
+% 20w5069
+\newcommand{\tbl}{}
+\usepackage{epstopdf}
+\newcommand{\FM}{{\mathcal A}}
+\newcommand{\Rec}{{\mathcal R}}
+\newcommand{\rp}{{\alpha}}
+\newcommand{\D}{{\mathcal D}}
+
+% 20w5031
+%\usepackage[UTF8]{ctex}
+%\RequirePackage{CJKutf8}
+%\usepackage{CJK}
+
+% 20w5181
+\def\txtd{{\textnormal{d}}}
+\newcommand{\ve}{\varepsilon}
+\newcommand{\rmd}{\mathrm{d}}
+\DeclareMathOperator{\Id}{Id}
+\def\txtd{{\textnormal{d}}}
+
+% 20w5124
+\newtheorem*{conjecture*}{Conjecture}
+\newtheorem*{problem}{Problem}
+\usepackage{tikz}
+
+% 20w5176
+\usepackage{longtable}
+
+% 20w5160
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{coro}[thm]{Corollary}
+\newtheorem{question}[thm]{Question}
+\theoremstyle{definition}
+\newtheorem{propdef}[thm]{Proposition/Definition}
+\newtheorem{remarks}[thm]{Remarks}
+\newtheorem{ex}[thm]{Example}
+\theoremstyle{remark}
+\newtheorem*{note}{Note}
+\numberwithin{equation}{section}
+\newcommand{\nov}{\text{Nov}}
+\newcommand{\F}{\mathbb{F}}
+
+% 20w5193
+\newtheorem{conjecture}[equation]{Conjecture}
+\newcommand{\sfe}{{{\mathbb S}^{n-1}}}
+\newcommand{\s}{\mathbb S}
+\def\Vol{{\mathrm{Vol}}}
+
+% \proof defined elsewhere
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\newcommand{\birschapter}[4]{\chapter{#1}
+\begin{itemize}
+{\large #2}
+\end{itemize}}
+
+\fancyhf{}
+\fancyhead[CO,CE]{\bfseries Banff International Research Station <%= @year %> Proposal Submission}
+\pagestyle{fancy}
+\renewcommand{\thepage}{\arabic{page}}
+\rfoot{\thepage}
+
+
+%---------------------------- begin proposal contents ----------------------------%
+<%= yield %>
+%---------------------------- end proposal contents ----------------------------%
+
+\end{document}

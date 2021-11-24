@@ -2,11 +2,11 @@
   <div class="col-6 mt-2">
     <div class="mb-3">
       <label for="firstname">First Name: </label>
-      <label for="firstname"><%= invite.firstname %></label>
+      <label for="firstname"><%= invite_first_name(invite) %></label>
     </div>
     <div class="mb-3">
       <label for="lastname">Last Name: </label>
-      <label for="lastname"><%= invite.lastname %></label>
+      <label for="lastname"><%= invite_last_name(invite) %></label>
     </div>
     <div class="mb-3">
       <label for="email">Email: </label>
@@ -39,9 +39,12 @@
       <label for="deadline_date"><%= invite.deadline_date.to_date %></label>
     </div>
     <div class="float-end mb-3">
-      <% if invite.pending? %>
+      <% if invite.pending? && params[:action] == 'edit' %>
         <%= link_to 'Cancel Invite', cancel_url(code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
         <%= link_to 'Invite Reminder', invite_reminder_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
+      <% elsif invite.confirmed? && params[:action] == 'edit' %>
+        <%= link_to 'Cancel Invite', cancel_confirmed_invite_url(code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
+        <%= link_to 'Send New Invite', new_invite_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
       <% end %>
     </div>
   </div>

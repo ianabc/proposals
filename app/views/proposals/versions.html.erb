@@ -1,0 +1,79 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Proposals
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %> </a></li>
+          <% if current_user.staff_member? %>
+            <li class="breadcrumb-item active" aria-current="page"><%= link_to "Submitted Proposals", submitted_proposals_path %></li>
+          <% else %>
+            <li class="breadcrumb-item active" aria-current="page"><%= link_to "Proposals", proposals_path %></li>
+          <% end %>
+          <li class="breadcrumb-item active" aria-current="page">Versions</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3>Your Proposals</h3>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Proposal Title</th>
+                <th>Proposal Type</th>
+                <th>Lead Organizer</th>
+                <th>Preferred Location</th>
+                <th>Status</th>
+                <th width="125">Updated</th>
+                <th>Submitted to EditFlow</th>
+                <th>Version</th>
+                <th>Actions</th>
+                <% if current_user.staff_member? %>
+                  <th width="310"></th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <% @proposal.proposal_versions&.pluck(:version)&.uniq&.each do |version| %>
+                <tr>
+                  <td><%= @proposal.code %></td>
+                  <td><%= proposal_version_title(version, @proposal) %></td>
+                  <td><%= @proposal.proposal_type.name %></td>
+                  <td><%= @proposal.lead_organizer&.fullname %></td>
+                  <td>
+                    <% @proposal.locations.each do |loc| %>
+                     <%= loc.name %><br>
+                    <% end %>
+                  </td>
+                  <% status = proposal_version(version, @proposal).status %>
+                  <td class=<%= proposal_status_class(status) %> >
+                    <%= proposal_status(status) %>
+                  </td>
+                  <td><%= @proposal.updated_at.to_date %></td>
+                  <td><%= proposal_version(version, @proposal)&.send_to_editflow %></td>
+                  <td><%= version %></td>
+                  <td class="table-action">
+                    <%= link_to '<i class="align-middle fas fa-fw fa-eye"></i>Show'.html_safe, proposal_version_proposal_url(@proposal, version: version) %>
+                  </td>
+                  <% if current_user.staff_member? %>
+                    <td>
+                      <%= link_to "Send to EditFlow", revise_proposal_editflow_submitted_proposals_path(proposal_id: @proposal.id, version: version), method: :post, class: "btn btn-primary" %>
+                      <%= link_to "Import Reviews", import_reviews_submitted_proposals_path(proposals: @proposal.id), method: :post, class: "btn btn-primary" %>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

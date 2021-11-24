@@ -5,7 +5,7 @@ import Rails from '@rails/ujs'
 export default class extends Controller {
 
   static targets = [ 'proposalType', 'locationSpecificQuestions', 'locationIds', 'text', 'tabs', 
-                    'dragLocations', 'latexPreamble', 'latexBibliography' ]
+                    'dragLocations', 'latexPreamble', 'latexBibliography', 'proposalVersion' ]
   static values = { proposalTypeId: Number, proposal: Number }
 
   connect() {
@@ -21,11 +21,21 @@ export default class extends Controller {
       this.saveLocations()
     }
 
-    fetch(`/proposal_types/${this.proposalTypeIdValue}/location_based_fields?ids=${locations}&proposal_id=${this.proposalValue}`)
+    if(this.hasProposalVersionTarget) {
+      let version = $("#proposal_version").val()
+      fetch(`/proposal_types/${this.proposalTypeIdValue}/location_based_fields?ids=${locations}&proposal_id=${this.proposalValue}&proposal_version=${version}`)
       .then((response) => response.text())
       .then((html) => {
         this.locationSpecificQuestionsTarget.innerHTML = html
       });
+    }
+    else {
+      fetch(`/proposal_types/${this.proposalTypeIdValue}/location_based_fields?ids=${locations}&proposal_id=${this.proposalValue}`)
+      .then((response) => response.text())
+      .then((html) => {
+        this.locationSpecificQuestionsTarget.innerHTML = html
+      });
+    }
   }
 
   saveLocations() {
@@ -104,8 +114,7 @@ export default class extends Controller {
 
   saveProposal (id) {
    $.post(`/submit_proposals?proposal=${id}`,
-      $('form#submit_proposal').serialize(), function(data) {
-    })
+      $('form#submit_proposal').serialize(), function() {})
   }
 
   hideAndSave() {

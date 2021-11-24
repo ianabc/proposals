@@ -11,5 +11,18 @@ FactoryBot.define do
 
     association :proposal_type, factory: :proposal_type, strategy: :create
     association :proposal_form, factory: :proposal_form, strategy: :create
+    # association :subject, factory: :subject, strategy: :create
+  end
+
+  trait :with_organizers do
+    after(:create) do |proposal|
+      lead_role = create(:role, name: 'lead_organizer')
+      proposal.create_organizer_role(create(:person), lead_role)
+
+      3.times do
+        create(:invite, proposal: proposal, status: 'confirmed',
+                        invited_as: 'Organizer', response: 'yes')
+      end
+    end
   end
 end

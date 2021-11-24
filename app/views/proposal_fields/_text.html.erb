@@ -1,7 +1,7 @@
 <div>
   <span><%= location_name(field) %></span><br>
   <label for="statement"><h2><%= field.position %>. <%= field.statement %></h2></label><%= mandatory_field?(field) %>
-  <% if current_user&.staff_member? && @proposal_form&.draft? && params[:action] == 'edit' %>
+  <% if can_edit(@proposal_form) %>
     <span data-action="click->proposal-form#editField" data-field-id="<%= field.id %>" data-proposal-form-id="<%= @proposal_form&.id %>" style="color: #3b7ddd" class="mx-1" data-type-id="<%= @proposal_type&.id %>">Edit</span>
     <%= link_to 'Delete', proposal_field_proposal_type_proposal_form_url(@proposal_type, @proposal_form, field_id: field.id), method: :delete ,
     data: {confirm: "Are you sure you want to delete this field?"} %>
@@ -14,7 +14,11 @@
   </a></p>
 <% end %>
 <div>
-  <textarea name="<%= field.id %>" <%= action ? 'disabled' : '' %> id="" data-value='<%= field.id %>' cols="30" rows="5" class="form-control" data-proposal-form-target="textField" data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur"><%= answer(field, @proposal) %></textarea>
+  <% if @version.present? %>
+    <textarea name="<%= field.id %>" <%= action ? 'disabled' : '' %> id="" data-value='<%= field.id %>' cols="30" rows="5" class="form-control" data-proposal-form-target="textField" data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur"><%= answer_with_version(field, @proposal, @version) %></textarea>
+  <% else %>
+    <textarea name="<%= field.id %>" <%= action ? 'disabled' : '' %> id="" data-value='<%= field.id %>' cols="30" rows="5" class="form-control" data-proposal-form-target="textField" data-action="focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur"><%= answer(field, @proposal) %></textarea>
+  <% end %>
   <% if @submission %>
     <ul>
       <% validations(field, @proposal).each do |val| %>

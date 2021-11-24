@@ -18,22 +18,19 @@ class SubmitProposalService
     proposal_locations
   end
 
-  def has_errors?
-    unless @proposal.valid?
-      @errors << @proposal.errors.full_messages
-    end
+  def errors?
+    @errors << @proposal.errors.full_messages unless @proposal.valid?
 
-    !errors.flatten.empty?
+    !@errors.flatten.empty?
   end
 
   def error_messages
-    errors.uniq.flatten.join(', ')
+    @errors.uniq.flatten.join(', ')
   end
 
-  def is_final?
+  def final?
     params[:commit] == 'Submit Proposal'
   end
-
 
   private
 
@@ -53,13 +50,11 @@ class SubmitProposalService
   end
 
   def check_field_validations(id)
-    if @errors.flatten.count.zero?
-      field = ProposalField.find(id)
-      if field.location_id
-        return unless @proposal.locations.include?(field.location)
-      end
+    return unless @errors.flatten.count.zero?
 
-      @errors << ProposalFieldValidationsService.new(field, proposal).validations
-    end
+    field = ProposalField.find(id)
+    return if field.location_id && @proposal.locations.exclude?(field.location)
+
+    @errors << ProposalFieldValidationsService.new(field, proposal).validations
   end
 end

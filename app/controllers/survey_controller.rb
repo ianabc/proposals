@@ -2,9 +2,7 @@ class SurveyController < ApplicationController
   before_action :set_invite, only: %i[new survey_questionnaire submit_survey]
   layout('devise')
 
-  def new
-    @survey = Survey.first
-  end
+  def new; end
 
   def survey_questionnaire; end
 
@@ -13,10 +11,9 @@ class SurveyController < ApplicationController
   end
 
   def submit_survey
-    demographic_data = DemographicData.new
-    demographic_data.result = questionnaire_answers
-    demographic_data.person = current_user&.person || @invite&.person
+    demographic_data = new_demographic_data(DemographicData.new)
     if demographic_data.save
+      invite_response_save
       post_demographic_form_path
     else
       redirect_to survey_questionnaire_survey_index_path(code: @invite&.code),
@@ -26,7 +23,26 @@ class SurveyController < ApplicationController
 
   private
 
+  def new_demographic_data(demographic_data)
+    demographic_data.result = questionnaire_answers
+    demographic_data.person = current_user&.person || @invite&.person
+    demographic_data
+  end
+
   def questionnaire_answers
+    answers = questionnaire_params
+    questionnaire_params.each do |key, value|
+      if value.is_a?(Array) && value.any? { |answr| answr.match?(/^Prefer not/) }
+        answers[key] = ['Prefer not to answer']
+      elsif value.is_a?(String) && value.match?(/^Prefer not/)
+        answers[key] = 'Prefer not to answer'
+      end
+    end
+
+    answers
+  end
+
+  def questionnaire_params
     params.require(:survey)
   end
 
@@ -36,6 +52,42 @@ class SurveyController < ApplicationController
 
   def invite_code
     params.permit([:code])&.[](:code)
+  end
+
+  def invite_response_save
+    @invite.response = params[:response]
+    @invite.status = 'confirmed' unless @invite.no?
+    return unless @invite.save
+
+    create_role
+    send_email_on_response
+  end
+
+  def create_role
+    return if @invite.no?
+
+    proposal_role
+    create_user if @invite.invited_as == 'Organizer' && !@invite.person.user
+  end
+
+  def send_email_on_response
+    return if @invite.no?
+
+    @organizers = @invite.proposal.list_of_organizers.remove(@invite.person&.fullname)
+    InviteMailer.with(invite: @invite, organizers: @organizers)
+                .invite_acceptance.deliver_later
+  end
+
+  def proposal_role
+    role = Role.find_or_create_by!(name: @invite.invited_as)
+    @invite.proposal.proposal_roles.create(role: role, person: @invite.person)
+  end
+
+  def create_user
+    user = User.new(email: @invite.person.email,
+                    password: SecureRandom.urlsafe_base64(20), confirmed_at: Time.zone.now)
+    user.person = @invite.person
+    user.save
   end
 
   def post_demographic_form_path
@@ -54,8 +106,10 @@ class SurveyController < ApplicationController
       reset_password_token(@invite.person.user)
       redirect_to edit_password_url(@invite.person.user,
                                     reset_password_token: @token),
-                                    notice: message
+                  notice: message
     else
+      message << ' We will contact you with the next steps, after the
+                 peer-review process is complete.'.squish
       redirect_to root_path, notice: message
     end
   end

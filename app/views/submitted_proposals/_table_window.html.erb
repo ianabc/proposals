@@ -10,18 +10,18 @@
           <h4> Do you want? </h4>
         </div>
         <div>
-          <input type="radio" name="toc" data-submitted-proposals-target="toc">
-          <label>Table of content</label>
+          <input type="radio" name="toc" data-submitted-proposals-target="toc" id="toc">
+          <label for="toc">Table of contents</label>
         </div>
         <div>
-          <input type="radio" name="toc" data-submitted-proposals-target="ntoc">
-          <label>No-Table of content</label>
+          <input type="radio" name="toc" data-submitted-proposals-target="ntoc" id="ntoc">
+          <label for="ntoc">No-Table of contents</label>
         </div>
         <span id="proposals" hidden="true"></span>
       </div>
       <div class="modal-footer">
-        <a class="btn btn-secondary my-2" data-action="click->submitted-proposals#booklet"> Ok</a>
-        <a target="_blank" hidden="true" id="booklet" href="<%= "/submitted_proposals/download_booklet.pdf" %>">Download Booklet</a>
+        <a class="btn btn-secondary my-2 proposal-booklet-ok-btn" data-action="click->submitted-proposals#booklet"> Ok</a>
+        <a target="_blank" hidden="true" id="proposal_booklet" href="/submitted_proposals/download_booklet.pdf" class="btn btn-secondary">Download Booklet</a>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>

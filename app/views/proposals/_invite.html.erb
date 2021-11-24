@@ -31,9 +31,10 @@
     <div class="mb-3 col-md-6">
       <label for="deadline" class="required">Deadline for reply</label>
       <input type="date" name="invites_attributes[NEW_RECORD][deadline_date]" 
-        class="form-control" id="<%= invited_as.downcase %>_deadline"
+        class="form-control <%= invited_as.downcase %>-deadline-date" id="<%= invited_as.downcase %>_deadline"
+        data-role="<%= invited_as.downcase %>"
         value="<%= date %>"
-        data-action="click->proposal-form#presentDate"
+        data-action="click->proposal-form#presentDate change->proposal-form#disableOtherInvites"
       >
     </div>
   </div>

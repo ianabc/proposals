@@ -43,11 +43,4 @@ RSpec.describe "/subjects", type: :request do
       end
     end
   end
-
-  # describe "DELETE /subject" do
-  #   before do
-  #     delete subject_category_subject_url(subject_category.id, subject.id)
-  #   end
-  #   it { expect(Subject.all.count).to eq(0) }
-  # end
 end

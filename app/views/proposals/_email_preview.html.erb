@@ -2,33 +2,15 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><%= "BIRS Proposal: Invite for " %><span id="invited_as_title"></span></h5>
+        <h5 class="modal-title"><span id="subject"></span></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <span id="invited_as_pre" class="d-none"></span>
-      <div class="modal-body">
+      <div class="modal-body text-justify" style="text-align: justify;">
         <p>To: [invited person's email]</p>
         <p>Cc: <%= @proposal.lead_organizer.email %></p>
         <p>Dear [Firstname Lastname],</p>
-
-        <p><%= @proposal.lead_organizer&.fullname %> is putting together a proposal for a <%= @proposal.proposal_type.name %> titled "<%= @proposal.title %>" for submission to the Banff International Research Station.</p>
-
-        <p>If this proposal is successful, its proposed event would be some time during the 2023 calendar year.</p>
-
-        <p>This is an informal invitation to gauge your interest in this proposed workshop, if it were to be accepted. A positive response to the invitation does not confirm participation, but indicates your appreciation of the scientific content of the program.</p>
-
-        <p>This preliminary invitation is a required step in the proposal process. Your response would help the proposal organizers and proposal reviewers determine the appeal of this proposed workshop to the wider mathematical community.</p>
-
-        <p>To respond to this informal invitation, please indicate your interest in this proposal by following this link by [deadline]:</p>
-
-        <p><%= link_to invite_url(code: 'a1b2c3...'), '#' %></p>
-
-        <p>If you indicate a positive response (Yes or Maybe), you'll also be asked to fill out a Diversity and Inclusion survey. This survey is mandatory, but it should only take a minute to fill out, and for all questions, you are welcome to select Prefer not to answer. Data collected through this survey is anonymous and non-identifying. It will help organizers ensure a balanced composition of the participant pool and showcase the diversity and inclusivity of the proposed program to the review committee.</p>
-
-        <p>Thank you for indicating your interest in this proposed workshop!</p>
-
-        <p>Banff International Research Station,<br>
-            and the organizing committee.</p>
+        <p id="email_body_preview"></p>
+        <p id="email_body" class="d-none"></p>
       </div>
       <div class="modal-footer" data-controller="nested-invites">
         <button data-action="click->nested-invites#sendInvite" data-id="<%= @proposal.id %>" class="btn btn-secondary" data-organizer="<%= no_of_participants(@proposal.id, 'Organizer').last&.id %>"

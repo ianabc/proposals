@@ -1,6 +1,7 @@
 class ProposalsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_proposal, only: %w[show edit destroy ranking locations]
+  before_action :set_proposal, only: %w[show edit destroy ranking locations versions proposal_version]
+  before_action :check_status, only: %w[edit]
   before_action :authorize_user, only: %w[show edit]
   before_action :set_careers, only: %w[show edit]
 
@@ -35,7 +36,9 @@ class ProposalsController < ApplicationController
     end
   end
 
-  def show; end
+  def show
+    log_activity(@proposal)
+  end
 
   def edit
     @proposal.invites.build
@@ -49,7 +52,7 @@ class ProposalsController < ApplicationController
   def latex_input
     proposal_id = latex_params[:proposal_id]
     session[:proposal_id] = proposal_id
-    ProposalPdfService.new(proposal_id, latex_temp_file, latex_params[:latex])
+    ProposalPdfService.new(proposal_id, latex_temp_file, latex_params[:latex], current_user)
                       .generate_latex_file
 
     head :ok
@@ -59,9 +62,13 @@ class ProposalsController < ApplicationController
   def latex_output
     proposal_id = params[:id]
     @proposal = Proposal.find_by(id: proposal_id)
-    @year = @proposal&.year || Date.current.year.to_i + 2
-    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all')
-                                      .generate_latex_file.to_s
+    @year = @proposal&.year || (Date.current.year.to_i + 2)
+    @proposal_pdf = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
+                                      .generate_latex_file
+    @latex_infile = @proposal_pdf.to_s
+    errors = @proposal_pdf.file_errors.join(', ')
+
+    flash[:alert] = "[#{@proposal.code}] #{@proposal.title} - attachment not added: #{errors}."
     @proposal.review! if current_user.staff_member? && @proposal.may_review?
 
     render_latex
@@ -73,13 +80,21 @@ class ProposalsController < ApplicationController
     return if prop_id.blank?
 
     @proposal = Proposal.find_by(id: prop_id)
-    @year = @proposal&.year || Date.current.year.to_i + 2
+    @year = @proposal&.year || (Date.current.year.to_i + 2)
 
-    field_input = File.read("#{Rails.root}/tmp/#{latex_temp_file}")
-    field_input = LatexToPdf.escape_latex(field_input) if @proposal.no_latex
-    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, field_input)
+    @latex_infile = ProposalPdfService.new(@proposal.id, latex_temp_file, field_input, current_user)
                                       .generate_latex_file.to_s
     render_latex
+  end
+
+  def field_input
+    temp_file = "#{Rails.root}/tmp/#{latex_temp_file}"
+    field_input = 'all'
+    if File.exist?(temp_file)
+      field_input = File.read(temp_file)
+      field_input = LatexToPdf.escape_latex(field_input) if @proposal.no_latex
+    end
+    field_input
   end
 
   def destroy
@@ -105,17 +120,24 @@ class ProposalsController < ApplicationController
   end
 
   def remove_file
-    @proposal = Proposal.find(params[:id])
-    file = @proposal.files.where(id: params[:attachment_id])
-    file.purge_later
-
-    flash[:notice] = 'File has been removed!'
+    delete_file_message
 
     if request.xhr?
-      render js: "window.location='#{edit_proposal_path(@proposal)}'"
+      if current_user.staff_member?
+        render js: "window.location='#{edit_submitted_proposal_url(@proposal)}'"
+      else
+        render js: "window.location='#{edit_proposal_path(@proposal)}'"
+      end
     else
       redirect_to edit_proposal_path(@proposal)
     end
+  end
+
+  def versions; end
+
+  def proposal_version
+    @version = params[:version].to_i
+    @proposal_version = ProposalVersion.find_by(proposal_id: @proposal.id, version: @version)
   end
 
   private
@@ -172,12 +194,38 @@ class ProposalsController < ApplicationController
                      .pluck(:academic_status)
   end
 
+  def check_status
+    return if @proposal.editable?
+
+    raise CanCan::AccessDenied
+  end
+
+  def delete_file_message
+    @proposal = Proposal.find(params[:id])
+    file = @proposal.files.where(id: params[:attachment_id])
+    file.purge_later
+
+    flash[:notice] = 'File has been removed!'
+  end
+
   def authorize_user
     return if params[:action] == 'show' &&
               (current_user.staff_member? || current_user.organizer?(@proposal))
 
-    return if params[:action] == 'edit' && current_user.lead_organizer?(@proposal)
+    return if params[:action] == 'edit' &&
+              (current_user.staff_member? || current_user.lead_organizer?(@proposal))
 
     raise CanCan::AccessDenied
+  end
+
+  def log_activity(proposal)
+    data = {
+      logable: proposal,
+      user: current_user,
+      data: {
+        action: params[:action].humanize
+      }
+    }
+    Log.create!(data)
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_08_190909) do
+ActiveRecord::Schema.define(version: 2021_11_18_110337) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -154,6 +154,17 @@ ActiveRecord::Schema.define(version: 2021_09_08_190909) do
     t.string "code"
     t.string "city"
     t.string "country"
+  end
+
+  create_table "logs", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "logable_type"
+    t.bigint "logable_id"
+    t.json "data", default: "{}"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["logable_type", "logable_id"], name: "index_logs_on_logable"
+    t.index ["user_id"], name: "index_logs_on_user_id"
   end
 
   create_table "options", force: :cascade do |t|
@@ -331,7 +342,29 @@ ActiveRecord::Schema.define(version: 2021_09_08_190909) do
     t.string "code"
     t.datetime "open_date"
     t.datetime "closed_date"
+    t.text "participant_description"
+    t.text "organizer_description"
     t.index ["code"], name: "index_proposal_types_on_code", unique: true
+  end
+
+  create_table "proposal_versions", force: :cascade do |t|
+    t.string "title"
+    t.integer "year"
+    t.string "subject"
+    t.string "ams_subject_one"
+    t.string "ams_subject_two"
+    t.integer "version", default: 1
+    t.datetime "send_to_editflow"
+    t.string "editflow_id"
+    t.text "preamble"
+    t.text "bibliography"
+    t.boolean "no_latex"
+    t.string "file_ids"
+    t.bigint "proposal_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "status"
+    t.index ["proposal_id"], name: "index_proposal_versions_on_proposal_id"
   end
 
   create_table "proposals", force: :cascade do |t|
@@ -350,10 +383,31 @@ ActiveRecord::Schema.define(version: 2021_09_08_190909) do
     t.text "bibliography"
     t.datetime "edit_flow"
     t.string "outcome"
+    t.string "editflow_id"
+    t.text "cover_letter"
+    t.datetime "assigned_date"
+    t.integer "same_week_as"
+    t.integer "week_after"
+    t.integer "assigned_location_id"
     t.index ["code"], name: "index_proposals_on_code", unique: true
     t.index ["proposal_form_id"], name: "index_proposals_on_proposal_form_id"
     t.index ["proposal_type_id"], name: "index_proposals_on_proposal_type_id"
     t.index ["subject_id"], name: "index_proposals_on_subject_id"
+  end
+
+  create_table "reviews", force: :cascade do |t|
+    t.string "review_date"
+    t.bigint "proposal_id", null: false
+    t.bigint "person_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.string "reviewer_name"
+    t.integer "score"
+    t.boolean "is_quick"
+    t.string "file_ids"
+    t.integer "version", default: 1
+    t.index ["person_id"], name: "index_reviews_on_person_id"
+    t.index ["proposal_id"], name: "index_reviews_on_proposal_id"
   end
 
   create_table "role_privileges", force: :cascade do |t|
@@ -400,7 +454,7 @@ ActiveRecord::Schema.define(version: 2021_09_08_190909) do
   create_table "subjects", force: :cascade do |t|
     t.string "code"
     t.string "title"
-    t.bigint "subject_category_id", null: false
+    t.bigint "subject_category_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["code"], name: "index_subjects_on_code", unique: true
@@ -499,9 +553,12 @@ ActiveRecord::Schema.define(version: 2021_09_08_190909) do
   add_foreign_key "proposal_roles", "roles"
   add_foreign_key "proposal_type_locations", "locations"
   add_foreign_key "proposal_type_locations", "proposal_types"
+  add_foreign_key "proposal_versions", "proposals"
   add_foreign_key "proposals", "proposal_forms"
   add_foreign_key "proposals", "proposal_types"
   add_foreign_key "proposals", "subjects"
+  add_foreign_key "reviews", "people"
+  add_foreign_key "reviews", "proposals"
   add_foreign_key "role_privileges", "roles"
   add_foreign_key "staff_discussions", "proposals"
   add_foreign_key "subject_area_categories", "subject_categories"

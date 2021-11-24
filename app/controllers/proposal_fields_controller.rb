@@ -18,16 +18,7 @@ class ProposalFieldsController < ApplicationController
     end
     positions
     if check_position?
-      @proposal_field = @proposal_form.proposal_fields.new(proposal_field_params)
-      @proposal_field.fieldable = @fieldable
-      if @proposal_field.insert_at(@proposal_field.position)
-        @proposal_form.update(updated_by: current_user)
-        redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
-                    notice: "Field was successfully created."
-      else
-        redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
-                    alert: @proposal_form.errors
-      end
+      valid_position_create_field
     else
       redirect
     end
@@ -41,14 +32,7 @@ class ProposalFieldsController < ApplicationController
   def update
     positions
     if check_position?
-      if @proposal_field.update(proposal_field_params) && @proposal_field.fieldable.update(date_field_params)
-        @proposal_form.update(updated_by: current_user)
-        redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
-                    notice: "Field was successfully updated."
-      else
-        redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
-                    alert: @proposal_form.errors
-      end
+      valid_position_update_field
     else
       redirect
     end
@@ -90,11 +74,43 @@ class ProposalFieldsController < ApplicationController
 
   def redirect
     if (@position + 1) == 1
-      redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
+      redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
                   alert: "Postion should be greater than 0"
     else
-      redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form),
+      redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
                   alert: "Postion should be greater than 0 and smaller or equal to #{@position + 1}"
     end
+  end
+
+  def valid_position_create_field
+    @proposal_field = @proposal_form.proposal_fields.new(proposal_field_params)
+    @proposal_field.fieldable = @fieldable
+    if @proposal_field.insert_at(@proposal_field.position)
+      @proposal_form.update(updated_by: current_user)
+      redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
+                  notice: "Field was successfully created."
+    else
+      redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
+                  alert: @proposal_form.errors
+    end
+  end
+
+  def valid_position_update_field
+    if update_condition
+      @proposal_form.update(updated_by: current_user)
+      redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
+                  notice: "Field was successfully updated."
+    else
+      redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
+                  alert: @proposal_form.errors
+    end
+  end
+
+  def update_condition
+    unless @proposal_field.update(proposal_field_params) && @proposal_field.fieldable.update(date_field_params)
+      return false
+    end
+
+    true
   end
 end

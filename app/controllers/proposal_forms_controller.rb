@@ -16,13 +16,15 @@ class ProposalFormsController < ApplicationController
 
   def edit
     return unless @proposal_form.active?
+    return if params[:cloned]
 
     @proposal_form.update(status: :inactive)
     form = @proposal_form.deep_clone include: { proposal_fields:
                                                 %i[options validations] }
-    form.status = :draft
+    form.status = :active
     form.save
-    redirect_to edit_proposal_type_proposal_form_path(@proposal_type, form)
+
+    redirect_to edit_proposal_type_proposal_form_path(@proposal_type, form, cloned: true)
   end
 
   def show
@@ -31,8 +33,7 @@ class ProposalFormsController < ApplicationController
 
   def update
     if @proposal_form.update(proposal_form_params)
-      version = @proposal_form.version + 1
-      @proposal_form.update(version: version) if @proposal_form.active?
+      version_update_form
       redirect_to proposal_type_proposal_form_path(@proposal_type,
                                                    @proposal_form),
                   notice: 'Proposal form was successfully updated'
@@ -44,12 +45,7 @@ class ProposalFormsController < ApplicationController
   end
 
   def create
-    @proposal_form = ProposalForm.new(proposal_form_params)
-    forms = @proposal_form.proposal_type.proposal_forms.where(status:
-                                                              %i[active draft])
-    forms.update_all(status: :inactive) # rubocop:disable Rails/SkipsModelValidations
-    @proposal_form.created_by = current_user
-    @proposal_form.version = highest_version
+    version_form_create
     if @proposal_form.save
       redirect_to proposal_type_proposal_forms_path,
                   notice: 'Proposal form was successfully created!'
@@ -109,5 +105,19 @@ class ProposalFormsController < ApplicationController
 
   def highest_version
     @proposal_type.proposal_forms.maximum(:version).to_i
+  end
+
+  def version_update_form
+    version = @proposal_form.version + 1
+    @proposal_form.update(version: version) if @proposal_form.active?
+  end
+
+  def version_form_create
+    @proposal_form = ProposalForm.new(proposal_form_params)
+    forms = @proposal_form.proposal_type.proposal_forms.where(status:
+                                                              %i[active draft])
+    forms.update_all(status: :inactive) # rubocop:disable Rails/SkipsModelValidations
+    @proposal_form.created_by = current_user
+    @proposal_form.version = highest_version
   end
 end

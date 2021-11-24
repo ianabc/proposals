@@ -139,7 +139,13 @@ namespace :birs do
 
     ams_subject_codes.each do |ams_subject|
       puts "Adding AMS Subject: #{ams_subject[:title]}"
-      AmsSubject.create(code: ams_subject[:code], title: ams_subject[:title])
+      ams_sub = AmsSubject.find_by(title: ams_subject[:title])
+
+      if ams_sub
+        ams_sub.update(code: ams_subject[:code])
+      else
+        AmsSubject.create(code: ams_subject[:code], title: ams_subject[:title])
+      end
     end
     puts "Done!"
   end
@@ -151,10 +157,15 @@ namespace :birs do
       { code: "CE", title: "Commercialization and Entrepreneurship" }
     ]
 
-    category = SubjectCategory.find_or_create_by!(name: 'none')
     new_subjects.each do |subject|
       puts "Adding new subject: #{subject[:code]} => #{subject[:title]}"
-      Subject.create(code: subject[:code], title: subject[:title], subject_category: category)
+      subj = Subject.find_by(title: subject[:title])
+
+      if subj
+        subj.update(code: subject[:code])
+      else
+        Subject.create(code: subject[:code], title: subject[:title])
+      end
     end
   end
 
@@ -169,13 +180,24 @@ namespace :birs do
           first_code = subject.title.split.first
           first_code += "-XX"
           subject.update(code: first_code)
-          ProposalAmsSubject.create!(ams_subject: subject, proposal: proposal, code: 'code1')
         when 'code2'
-          first_code = subject.title.split.first
-          first_code += "-XX"
-          subject.update(code: first_code)
-          ProposalAmsSubject.create!(ams_subject: subject, proposal: proposal, code: 'code2')
+          second_code = subject.title.split.first
+          second_code += "-XX"
+          subject.update(code: second_code)
         end
+      end
+    end
+  end
+
+  desc "Delete Extra Proposal Ams Subjects in database"
+  task delete_ams_subjects: :environment do
+    Proposal.all.find_each do |proposal|
+      next if proposal.proposal_ams_subjects.empty? || proposal.proposal_ams_subjects&.count.eql?(2)
+
+      proposal.proposal_ams_subjects&.each do |ams_subject|
+        break if proposal.proposal_ams_subjects&.count.eql?(2)
+
+        ams_subject.destroy
       end
     end
   end

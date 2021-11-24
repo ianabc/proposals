@@ -34,6 +34,12 @@ module ProposalsHelper
     Proposal.statuses.map { |k, v| [k.humanize.capitalize, v] }
   end
 
+  def specific_proposal_statuses
+    specific_status = %w[approved declined]
+    statuses = Proposal.statuses.reject { |k, _v| specific_status.include?(k) }
+    statuses.map { |k, v| [k.humanize.capitalize, v] }
+  end
+
   def common_proposal_fields(proposal)
     proposal.proposal_form&.proposal_fields&.where(location_id: nil)
   end
@@ -58,6 +64,7 @@ module ProposalsHelper
   def show_edit_button?(proposal)
     return unless params[:action] == 'edit'
     return unless proposal.editable?
+
     lead_organizer?(proposal.proposal_roles)
   end
 
@@ -65,19 +72,8 @@ module ProposalsHelper
     proposal.proposal_ams_subjects.find_by(code: code)&.ams_subject_id
   end
 
-  def organizer_intro(proposal)
-    types_with_intro = ['5-Day Workshop', 'Summer School']
-    return '' unless types_with_intro.include? proposal.proposal_type.name
-
-    "<p>5-Day Workshops and Summer Schools require a minimum of 2, and a maximum
-     of 4 total organizers per proposal. In accordance with BIRS' commitment to
-     equity, diversity and inclusion (EDI), the organizing committee should
-     contain at least one early-career researcher within ten years of their
-     doctoral degree. For applications with two organizers, at least one member
-     of the organizing committee must be from an under-represented community in
-     STEM disciplines. For applications with three or more organizers, at least
-     two members of the organizing committee must be from an under-represented
-     community in STEM disciplines.</p>".html_safe
+  def max_organizers(proposal)
+    numbers_to_words[proposal.max_supporting_organizers]
   end
 
   def existing_organizers(invite)
@@ -112,8 +108,11 @@ module ProposalsHelper
       "submitted" => "text-proposal-submitted",
       "initial_review" => "text-warning",
       "revision_requested" => "text-danger",
+      "revision_requested_spc" => "text-danger",
       "revision_submitted" => "text-revision-submitted",
+      "revision_submitted_spc" => "text-revision-submitted",
       "in_progress" => "text-success",
+      "in_progress_spc" => "text-success",
       "decision_pending" => "text-info",
       "decision_email_sent" => "text-primary"
     }
@@ -159,21 +158,29 @@ module ProposalsHelper
 
   def gender_labels(proposal)
     data = graph_data("gender", "gender_other", proposal)
+    data = gender_graph(data)
     data.keys
   end
 
   def gender_values(proposal)
     data = graph_data("gender", "gender_other", proposal)
+    data = gender_graph(data)
     data.values
   end
 
   def career_data(param, param2, proposal)
     person = Person.where.not(id: proposal.lead_organizer.id)
-    career_stage = person.where(id: proposal.invites.where(invited_as: 'Participant').pluck(:person_id)).pluck(param, param2).flatten.reject do |s|
-      s.blank? || s.eql?("Other")
-    end
+    career_stage = person.where(id: proposal.invites.where(invited_as: 'Participant')
+                         .pluck(:person_id)).pluck(param, param2)
+                         .flatten.reject do |s|
+                           s.blank? || s.eql?("Other")
+                         end
     data = Hash.new(0)
 
+    career_hash(data, career_stage)
+  end
+
+  def career_hash(data, career_stage)
     career_stage.each do |s|
       data[s] += 1
     end
@@ -211,5 +218,65 @@ module ProposalsHelper
   def stem_values(proposal)
     data = stem_graph_data(proposal)
     data.values
+  end
+
+  def gender_graph(data)
+    if data.key?('Prefer not to answer') &&
+       data.key?('Gender fluid and/or non-binary person')
+      data = gender_add(data, 0)
+    else
+      single_data_delete(data)
+    end
+    data
+  end
+
+  def gender_add(data, values)
+    gender_option = ['Gender fluid and/or non-binary person', 'Prefer not to answer']
+    data.map do |k, v|
+      [
+        (values += v.to_i if gender_option.include?(k))
+      ]
+    end
+    gender_delete(data, values)
+  end
+
+  def gender_delete(data, values)
+    data.delete('Prefer not to answer')
+    data.delete('Gender fluid and/or non-binary person')
+    data.merge({ "Other" => values })
+  end
+
+  def single_data_delete(data)
+    data.map do |k, v|
+      [
+        case k
+        when 'Prefer not to answer'
+          single_gender_delete(data, 'Prefer not to answer', v)
+        when 'Gender fluid and/or non-binary person'
+          single_gender_delete(data, 'Gender fluid and/or non-binary person', v)
+        end
+      ]
+    end
+  end
+
+  def single_gender_delete(data, option, val)
+    data.delete(option)
+    data.merge({ "Other" => val })
+  end
+
+  def invite_first_name(invite)
+    invite.person&.firstname || invite.firstname
+  end
+
+  def invite_last_name(invite)
+    invite.person&.lastname || invite.lastname
+  end
+
+  def proposal_version_title(version, proposal)
+    ProposalVersion.find_by(version: version, proposal_id: proposal.id).title
+  end
+
+  def proposal_version(version, proposal)
+    ProposalVersion.find_by(version: version, proposal_id: proposal.id)
   end
 end

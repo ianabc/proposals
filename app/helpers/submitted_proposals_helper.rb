@@ -11,9 +11,7 @@ module SubmittedProposalsHelper
         s.blank? || s.eql?("Other")
       end
 
-      citizenships.each do |c|
-        data[c] += 1
-      end
+      citizenships.each { |c| data[c] += 1 }
     end
     data
   end
@@ -36,24 +34,24 @@ module SubmittedProposalsHelper
     data.values
   end
 
-  # rubocop:disable Metrics/AbcSize
   def submitted_career_data(param, param2, proposals)
     data = Hash.new(0)
     proposals&.each do |proposal|
-      person = Person.where.not(id: proposal.lead_organizer&.id)
-      career_stage = person.where(id: proposal.person_ids).pluck(param, param2)
-                           .flatten.reject do |s|
-        s.blank? || s.eql?("Other")
-      end
+      career_stage = proposal_career_stage(param, param2, proposal)
 
-      career_stage.each do |s|
-        data[s] += 1
-      end
+      career_stage.each { |s| data[s] += 1 }
     end
     data
   end
 
-  # rubocop:enable Metrics/AbcSize
+  def proposal_career_stage(param, param2, proposal)
+    person = Person.where.not(id: proposal.lead_organizer&.id)
+    person.where(id: proposal.person_ids).pluck(param, param2)
+          .flatten.reject do |s|
+      s.blank? || s.eql?("Other")
+    end
+  end
+
   def submitted_career_labels(proposals)
     data = submitted_career_data("academic_status", "other_academic_status",
                                  proposals)
@@ -69,13 +67,12 @@ module SubmittedProposalsHelper
   def submitted_stem_graph_data(proposals)
     data = Hash.new(0)
     proposals&.each do |proposal|
-      citizenships = proposal.demographics_data.pluck(:result).pluck("stem").flatten.reject do |s|
+      citizenships = proposal.demographics_data.pluck(:result).pluck("stem")
+                             .flatten.reject do |s|
         s.blank? || s.eql?("Other")
       end
 
-      citizenships.each do |c|
-        data[c] += 1
-      end
+      citizenships.each { |c| data[c] += 1 }
     end
     data
   end
@@ -91,6 +88,16 @@ module SubmittedProposalsHelper
   end
 
   def organizers_email(proposal)
-    proposal.invites.where(invited_as: 'Organizer').map(&:person).map(&:email).join(', ')
+    proposal.invites.where(invited_as: 'Organizer').map(&:person).map(&:email)
+  end
+
+  def review_dates(review)
+    date = review.review_date
+    date&.split(', ')
+  end
+
+  def proposal_logs(proposal)
+    logs = proposal.answers.map(&:logs).reject(&:empty?) + proposal.logs
+    logs.flatten.sort_by { |log| -log.created_at.to_i }
   end
 end
