@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :case do
+  factory :schedule do
     run_id { 12 }
     weeks { 23 }
     case_num { 34 }
