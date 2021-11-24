@@ -53,6 +53,7 @@ RSpec.describe "/locations", type: :request do
         end_date: '2023-12-15',
         exclude_dates: ['2023-07-09'] }
     end
+    
     context "with valid parameters" do
       it "creates a new Location" do
         expect do
