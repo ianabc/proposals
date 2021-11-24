@@ -52,6 +52,12 @@ jobs:
             PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U postgres < setup.sql
             rm setup.sql
       - run:
+          name: Bundle install
+          command: |
+            cd /home/app/proposals
+            gem install bundler
+            bundle install
+      - run:
           name: Run migrations
           command: |
             echo "127.0.0.1 db" >> /etc/hosts
