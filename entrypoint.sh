@@ -61,9 +61,9 @@ if [ ! -e /home/app/proposals/bin ]; then
   su - app -c "cd /home/app; rails new proposals"
 fi
 
-echo
-echo "Bundle install..."
-su - app -c "cd /home/app/proposals; /usr/local/rvm/gems/default/bin/bundle install"
+# echo
+# echo "Bundle install..."
+# su - app -c "cd /home/app/proposals; /usr/local/rvm/gems/default/bin/bundle install"
 
 echo
 echo "Bundle update..."
