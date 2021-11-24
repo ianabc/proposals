@@ -39,6 +39,7 @@ jobs:
           command: |
             cd /home/app/proposals
             gem install bundler
+            gem uninstall turbo-rails
             bundle install
       - run:
           name: Wait for database
