@@ -20,7 +20,8 @@ class BookletPdfService
   def multiple_booklet(table, proposals)
     @table = table
     @proposals_ids = proposals
-    multiple_proposals_fields if @input == 'all'
+    year = proposal&.year || (Date.current.year + 2)
+    multiple_proposals_fields(year) if @input == 'all'
   end
 
   def self.format_errors(error)
@@ -114,9 +115,7 @@ class BookletPdfService
     @text
   end
 
-  def multiple_proposals_fields
-    year = proposal&.year || (Date.current.year + 2)
-
+  def multiple_proposals_fields(year)
     title_page(year)
     case @table
     when "toc"
@@ -131,15 +130,20 @@ class BookletPdfService
 
   def proposals_with_content
     proposals = Proposal.where(id: @proposals_ids.split(','))
-    @subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
-    @proposals = @subjects_with_proposals.first[1][0].id
-    @subjects_with_proposals.each do |subject|
+    subjects_with_proposals = selected_proposals_subjects(proposals)
+    subjects_with_proposals.each do |subject|
       @subject = Subject.find_by(id: subject.first)
       check_subject
       @proposals_objects = subject.last
       subject_proposals
     end
     @latex_text
+  end
+
+  def selected_proposals_subjects(proposals)
+    subjects_with_proposals = proposals.sort_by { |p| p.subject.title }.group_by(&:subject_id)
+    first_subject_proposal(subjects_with_proposals)
+    subjects_with_proposals
   end
 
   def check_subject
@@ -151,7 +155,7 @@ class BookletPdfService
 
   def subject_proposals
     @proposals_objects&.sort_by { |p| p.code }&.each do |proposal|
-      @proposal = proposal
+      @current_proposal = proposal
       code = proposal.code.blank? ? '' : "#{proposal.code}: "
       @text << "\\addcontentsline{toc}{section}{ #{code} #{LatexToPdf.escape_latex(proposal&.title)}}"
       proposals_without_content
@@ -174,8 +178,8 @@ class BookletPdfService
     @proposals = @proposals_ids.split(",").first.to_i
     @proposals_ids.split(',').each do |id|
       proposal = Proposal.find_by(id: id)
-      @proposal = proposal
-      code = proposal.code.blank? ? '' : "#{@proposal&.code}: "
+      @current_proposal = proposal
+      code = proposal.code.blank? ? '' : "#{@current_proposal&.code}: "
       @text << "\\section*{\\centering #{code} #{proposal_title(proposal)}}\n "
       single_proposal_heading
       check_no_latex
@@ -186,7 +190,7 @@ class BookletPdfService
     @text << "\n\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << participant_confirmed_count
     @text << lead_organizer_info
-    all_text = ProposalPdfService.new(@proposal.id, @temp_file, 'all', @user).booklet_content
+    all_text = ProposalPdfService.new(@current_proposal.id, @temp_file, 'all', @user).booklet_content
     @text << all_text if all_text.present?
   end
 
@@ -224,8 +228,12 @@ class BookletPdfService
     "#{num_participants} confirmed / #{proposal.proposal_type&.participant} maximum participants \\\\ \n"
   end
 
+  def first_subject_proposal(subjects_with_proposals)
+    @first_proposal_id = subjects_with_proposals.first[1].min_by(&:code).id
+  end
+
   def check_no_latex
-    if @proposal.id == @proposals
+    if @current_proposal.id == @first_proposal_id
       File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
         io.write(@text)
       end

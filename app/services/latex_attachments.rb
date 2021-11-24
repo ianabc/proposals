@@ -46,7 +46,8 @@ module LatexAttachments
 
       if extentions.include?(file_extension)
         text_content = LatexToPdf.escape_latex(File.read(file_path))
-        text << "\\noindent File Attachment #{num += 1}: #{text_content} \n\n\n"
+        num += 1
+        text << "\\noindent File Attachment #{num}: #{text_content} \n\n\n"
       elsif file_extension == 'pdf'
         full_filename = write_attachment_file(File.read(file_path), filename,
                                               proposal)
@@ -64,9 +65,10 @@ module LatexAttachments
   end
 
   def add_file_to_tex(num, filename, full_filename)
+    num += 1
     # scale first page 0.8 to avoid the page content overlapping the heading
     tex = "\\includepdf[scale=0.8,pages=1,pagecommand={\\subsection*
-           {File Attachment #{num += 1}: #{filename}}}]{#{full_filename}}\n"
+           {File Attachment #{num}: #{filename}}}]{#{full_filename}}\n"
 
     # Only include the subsection heading on the 1st page of the attached file
     if PDF::Reader.new(full_filename).page_count > 1

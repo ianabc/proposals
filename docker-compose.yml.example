@@ -40,6 +40,7 @@ services:
       - proposals_cache:/home/app/proposals/node_modules
     links:
       - db
+      - redis
     environment:
       - DB_USER=propuser
       - DB_PASS=
@@ -70,6 +71,8 @@ services:
       - UBCO_EMAIL=ubco@example.com
       - EDITFLOW_API_TOKEN=
       - EDITFLOW_API_URL=
+      - REDIS_URL='redis://host:port'
+      - REDIS_DB=0
 
 
 volumes:
