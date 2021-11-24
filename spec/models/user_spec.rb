@@ -15,6 +15,13 @@ RSpec.describe User, type: :model do
     expect(user.valid?).to be_falsey
   end
 
+  describe 'associations' do
+    it { should have_many(:user_roles).dependent(:destroy) }
+    it { should have_many(:roles).through(:user_roles) }
+    it { should have_one(:person) }
+    it { should have_many(:feedback) }
+  end
+
   describe 'when created' do
     let(:staff_user) { create(:user, email: 'staff.user@birs.ca') }
     let(:user) { create(:user) }
@@ -38,8 +45,8 @@ RSpec.describe User, type: :model do
 
   describe '#fullname' do
     let(:user) { create(:user) }
-    let(:fullname) { user.person.firstname+' '+user.person.lastname }
-    
+    let(:fullname) { "#{user.person.firstname} #{user.person.lastname}" }
+
     it 'returns fullname of user' do
       expect(user.fullname).to eq(fullname)
     end

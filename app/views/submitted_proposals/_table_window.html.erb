@@ -1,0 +1,29 @@
+<div class="modal fade" id="table-window" tabindex="-1" aria-labelledby="table-windowLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Table</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-justify" style="text-align: justify;">
+        <div class="mb-3">
+          <h4> Do you want? </h4>
+        </div>
+        <div>
+          <input type="radio" name="toc" data-submitted-proposals-target="toc" id="toc">
+          <label for="toc">Table of contents</label>
+        </div>
+        <div>
+          <input type="radio" name="toc" data-submitted-proposals-target="ntoc" id="ntoc">
+          <label for="ntoc">No-Table of contents</label>
+        </div>
+        <span id="proposals" hidden="true"></span>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-secondary my-2 proposal-booklet-ok-btn" data-action="click->submitted-proposals#booklet"> Ok</a>
+        <a target="_blank" hidden="true" id="proposal_booklet" href="/submitted_proposals/download_booklet.pdf" class="btn btn-secondary">Download Booklet</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

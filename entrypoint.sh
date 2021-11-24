@@ -10,7 +10,12 @@ echo
 echo "Setting system timezone..."
 export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
 echo "tzdata tzdata/Areas select America" > /tmp/tz.txt
-echo "tzdata tzdata/Zones/America select Edmonton" >> /tmp/tz.txt
+if [ "$STAGING_SERVER" == "true" ]; then
+  echo "tzdata tzdata/Zones/America select Edmonton" >> /tmp/tz.txt
+else
+  echo "tzdata tzdata/Zones/America select Vancouver" >> /tmp/tz.txt
+fi
+
 debconf-set-selections /tmp/tz.txt
 rm /etc/timezone
 rm /etc/localtime
@@ -92,37 +97,42 @@ if [ ! -e /home/app/proposals/config/webpacker.yml ]; then
   echo
 fi
 
+if [ ! -e /home/app/proposals/app/assets/stylesheets/actiontext.scss ]; then
+  echo "Setting up ActionText..."
+  su - app -c "cd /home/app/proposals; bin/rails action_text:install"
+  echo
+  echo "Done!"
+fi
 
-echo
-echo "Updating file permissions..."
-chown app:app -R /home/app/proposals
+if [ "$RAILS_ENV" == "production" ]; then
+  echo
+  echo "Updating file permissions..."
+  chown app:app -R /home/app/proposals
+fi
 
 echo
 echo "Compiling Assets..."
 chmod 755 /home/app/proposals/node_modules
 su - app -c "cd /home/app/proposals; yarn install"
 
-if [ $RAILS_ENV = "production" ]; then
-  su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
+if [ "$RAILS_ENV" == "production" ]; then
+  su - app -c "cd /home/app/proposals; RAILS_ENV=production SECRET_KEY_BASE=token bundle exec rake assets:precompile --trace"
   su - app -c "cd /home/app/proposals; yarn"
-else
-  echo
-  echo "Running: webpack --verbose --progress..."
-  su - app -c "cd /home/app/proposals; bin/webpack --verbose --progress"
+
+  # Update release tag
+  rake birs:release_tag
 fi
 
 echo
+echo "Running: webpack --verbose --progress..."
+su - app -c "cd /home/app/proposals; bin/webpack --verbose --progress"
+echo
 echo "Done compiling assets!"
 
-
-if [ $APPLICATION_HOST = "localhost" ]; then
+if [ "$APPLICATION_HOST" == "localhost" ]; then
   echo
   echo "Launching webpack-dev-server..."
   su - app -c "cd /home/app/proposals; RAILS_ENV=development SECRET_KEY_BASE=token bundle exec bin/webpack-dev-server &"
-fi
-
-if [ $STAGING_SERVER = "true" ]; then
-  rake staging:release_tag
 fi
 
 echo

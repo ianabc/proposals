@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Users
   class SessionsController < Devise::SessionsController
     # before_action :configure_sign_in_params, only: [:create]
@@ -26,8 +24,11 @@ module Users
     #   devise_parameter_sanitizer.permit(:sign_in, keys: [:attribute])
     # end
 
-    def after_sign_in_path_for(_resource)
-      dashboards_path
+    def after_sign_in_path_for(resource)
+      return proposal_types_path if resource&.staff_member?
+      return new_person_path if resource.person&.demographic_data.blank?
+
+      new_proposal_or_list(resource)
     end
   end
 end

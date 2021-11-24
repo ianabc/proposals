@@ -6,8 +6,9 @@
       </h1>
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %></a></li>
-          <li class="breadcrumb-item"> <%= link_to "Proposal Forms", proposal_forms_path %></li>
+          <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %></a></li>
+          <li class="breadcrumb-item"><%= link_to "Proposal Types", proposal_types_path %> </li>
+          <li class="breadcrumb-item"><%= link_to @proposal_type.name, proposal_type_proposal_forms_path %></li>
           <li class="breadcrumb-item active" aria-current="page"><%= @proposal_form.new_record? ? 'New' : 'Edit' %></li>
         </ol>
       </nav>
@@ -17,31 +18,47 @@
         <div class="card-body">
           <div id="panel" data-controller="proposal-form">
             <div class="container-fluid" data-proposal-form-target="proposalFormId">
-              <%= form_for(@proposal_form) do |form| %>
+              <%= form_for([@proposal_type, @proposal_form]) do |form| %>
                 <div class="form-group mb-2">
                   <%= form.label :title, class:'mb-2' %>
-                  <%= form.text_field :title, class:'form-control', disabled: @proposal_form&.active? %>
+                  <%= form.text_field :title, class:'form-control', disabled: @proposal_form&.inactive? %>
                </div>
                <% if @proposal_form.new_record? %>
                   <div class="form-group mb-2">
                     <%= form.label :proposal_type, class:'mb-2' %>
-                    <%= form.select :proposal_type_id, options_for_select(all_proposal_types, params[:proposal_type]), {}, class:'form-control' %>
+                    <%= form.select :proposal_type_id, options_for_select(all_proposal_types, params[:proposal_type_id]), {}, class:'form-control' %>
                   </div>
                <% end %>
                <div class="form-group mb-2">
                   <%= form.label :status, class:'mb-2' %>
-                  <%= form.select :status, options_for_select(proposal_form_statuses, @proposal_form.status), {}, class:'form-control', disabled: @proposal_form&.active? %>
+                  <%= form.select :status, options_for_select(proposal_form_statuses, @proposal_form.status), {}, class:'form-control', disabled: @proposal_form&.inactive? %>
+               </div>
+               <div class="form-group mb-2">
+                  <%= form.label :introduction_for_step_1, class:'mb-2' %>
+                  <%=form.text_area(:introduction, size: '3x5', class:'form-control') %>
+               </div>
+               <div class="form-group mb-2">
+                  <%= form.label :introduction_for_step_2, class:'mb-2' %>
+                  <%=form.text_area(:introduction2, size: '3x5', class:'form-control') %>
+               </div>
+               <div class="form-group mb-2">
+                  <%= form.label :introduction_for_step_3, class:'mb-2' %>
+                  <%=form.text_area(:introduction3, size: '3x5', class:'form-control') %>
+               </div>
+               <div class="form-group mb-2">
+                  <%= form.label :introduction_for_Demographic_Charts, class:'mb-2' %>
+                  <%=form.text_area(:introduction_charts, size: '3x5', class:'form-control') %>
                </div>
                <div class="form-group">
-                 <%= form.submit class:'btn btn-primary my-2', disabled: @proposal_form&.active? %>
+                 <%= form.submit class:'btn btn-primary my-2', disabled: @proposal_form&.inactive? %>
                </div>
               <% end %>
-              <% if @proposal_form.id && @proposal_form.draft? %>
+              <% if @proposal_form.id && (@proposal_form.draft? || @proposal_form.active?) %>
                 <div class="col-12 d-flex align-self-center justify-content-end position-relative" >
                   <a href="javascript:void(0)" class="btn btn-primary" data-proposal-form-target="contentOfButton" data-action="click->proposal-form#toggleProposalFieldsPanel">Add Form Field</a>
                   <section class="fields-panel hidden" data-proposal-form-target='proposalFieldsPanel' data-proposal-form-visible-value="false">
                     <% ProposalField::FIELD_TYPES.each do |field_type| %>
-                    <a href="javascript:void(0);" class="btn btn-light " data-action="click->proposal-form#fetchField click->proposal-form#toggleProposalFieldsPanel" data-field="<%= field_type %>" data-id="<%= @proposal_form.id %>"><%= field_type %></a>
+                    <a href="javascript:void(0);" class="btn btn-light " data-action="click->proposal-form#fetchField click->proposal-form#toggleProposalFieldsPanel" data-field="<%= field_type %>" data-type-id="<%= @proposal_type&.id %>" data-id="<%= @proposal_form.id %>"><%= field_type %></a>
                     <% end %>
                   </section>
                 </div>
@@ -50,6 +67,9 @@
                 <div class="row">
                   <div class="col-7">
                     <div class="card cursor-pointer">
+                      <div class="card-header">
+                        <h3>Proposal Fields</h3>
+                      </div>
                       <div class="card-body">
                         <div class="row">
                           <div class="col mt-0">

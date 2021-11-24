@@ -1,3 +1,5 @@
 // Import Bootstrap v5
 @import "~bootstrap/scss/bootstrap";
-@import "toastr";
+@import "toastr/toastr";
+@import "trix/dist/trix";
+@import "@yaireo/tagify/dist/tagify.css"

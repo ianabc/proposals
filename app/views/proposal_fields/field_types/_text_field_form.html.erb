@@ -1,11 +1,12 @@
-<%= form_for field, url: 'proposal_fields?type=Text' do |f| %>
+<%= form_for field, data: { controller: 'nested-form proposal-form', nested_form_wrapper_selector_value: '.nested-form-wrapper', 'proposal-form-highest-position-value': "#{@proposal_form.highest_field_position}" }, url: 'proposal_fields?type=Text' do |f| %>
+  <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
   <div class="mb-3">
     <%= f.label :statement, class: 'form-label' %>
     <%= f.text_field :statement, required: true, class:'form-control' %>
   </div>
   <div class="mb-3">
     <%= f.label :location, class: 'form-label' %>
-    <%= f.select :location_id, proposal_type_locations(@proposal_form.proposal_type),{:include_blank => 'Select location if this field is location based'} ,class:'form-control' %>
+    <%= f.select :location_id, proposal_type_locations(@proposal_form.proposal_type),{:include_blank => 'Select location if this field is location based'} ,class:'form-select' %>
   </div>
   <div class="mb-3">
     <%= f.label :description , class: 'form-label'%>
@@ -17,10 +18,33 @@
   </div>
   <div class="mb-3">
     <%= f.label :position , class: 'form-label'%>
-    <%= f.number_field :position, required: true, class:'form-control' %>
+    <% if @proposal_form.highest_field_position >= 1 %>
+      <% if @proposal_form.highest_field_position == 1 %>
+        <p>(Position is 1)</p>
+      <% else %>
+        <p>(Positions are 1 - <%= @proposal_form.highest_field_position %>)</p>
+      <% end %>
+    <% end %>
+    <% unless @proposal_form.highest_field_position >= 1%>
+      <p>(Position should be greater than 0)</p> 
+    <% end %>
+    <%= f.number_field :position, required: true, class:'form-control', data: {'action': 'change->proposal-form#checkPosition', 'proposal-form-target': 'position'} %>
   </div>
-  <%= render partial: 'validations_form', locals: {f: f} %>
+  <div>
+    <template data-nested-form-target="template">
+      <%= f.fields_for :validations, Validation.new, child_index: 'NEW_RECORD' do |validation| %>
+        <%= render partial: 'validations_form', locals: {f: validation} %>
+      <% end %>
+    </template>
+    <%= f.fields_for :validations do |validation| %>
+      <%= render partial: 'validations_form', locals: {f: validation} %>
+    <% end %>
+    <div data-nested-form-target="target"></div>
+    <button type="button" class="btn btn-primary btn-sm my-2" data-action="nested-form#add">
+      Add Validation
+    </button>
+  </div>
   <div class="mb-3">
-    <%= f.submit 'submit', class: 'btn  btn-primary' %>
+    <button disabled="true" id="submitButton" class="btn btn-primary">Submit</button>
   </div>
 <% end %>

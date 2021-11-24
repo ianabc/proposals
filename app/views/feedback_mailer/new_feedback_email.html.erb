@@ -1,0 +1,11 @@
+<p>Feedback from: </p>
+<p>"<%= @person.fullname %>"< <%= @person.email %> ></p>
+<p>(<%= @person.affiliation %>)</p>
+<p> </p>
+<p>Feedback for proposal:</p>
+<% if @proposal.present? %>
+  <p><%= @proposal&.code %>: <%= @proposal&.title %> by</p>
+  <p><%= @proposal&.lead_organizer&.fullname %></p>
+<% end %>
+<br><p><%= @person&.fullname %>'s feedback:</p><br>
+<p><%= @feedback.content %></p>

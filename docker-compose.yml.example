@@ -54,9 +54,22 @@ services:
       - DEVISE_EMAIL=webmaster@example.com
       - APPLICATION_HOST=localhost
       - APPLICATION_PROTOCOL=http
+      - ROLLBAR_ENV=development
+      - ROLLBAR_TOKEN=12345
       - EMAIL_SERVER=mail.example.com
       - EMAIL_PORT=587
       - EMAIL_STARTTLS=true
+      - WEBMASTER_EMAIL=webmaster@example.com
+      - BIRS_COORD='BIRS Program Coordinator'
+      - BIRS_EMAIL=birs@example.com
+      - CMO_COORD='CMO Program Coordinator'
+      - CMO_EMAIL=cmo@example.com
+      - IASM_COORD='IASM Program Coordinator'
+      - IASM_EMAIL=iasm@example.com
+      - UBCO_COORD='UBCO Program Coordinator'
+      - UBCO_EMAIL=ubco@example.com
+      - EDITFLOW_API_TOKEN=
+      - EDITFLOW_API_URL=
 
 
 volumes:

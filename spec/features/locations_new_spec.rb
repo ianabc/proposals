@@ -1,8 +1,18 @@
 require 'rails_helper'
 
 RSpec.feature "Locations new", type: :feature do
+  let(:person) { create(:person) }
+  let(:role) { create(:role, name: 'Staff') }
+  let(:user) { create(:user, person: person) }
+  let(:role_privilege) do
+    create(:role_privilege,
+           permission_type: "Manage", privilege_name: "Location", role_id: role.id)
+  end
 
- before do
+  before do
+    role_privilege
+    user.roles << role
+    login_as(user)
     visit new_location_path
   end
 
@@ -14,7 +24,7 @@ RSpec.feature "Locations new", type: :feature do
     expect(find_field('location_code').value).to eq(nil)
   end
 
-   scenario "there is an empty City field" do
+  scenario "there is an empty City field" do
     expect(find_field('location_city').value).to eq(nil)
   end
 
@@ -42,5 +52,4 @@ RSpec.feature "Locations new", type: :feature do
   scenario "click back button" do
     expect(page).to have_link(href: locations_path)
   end
-
 end

@@ -1,0 +1,70 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Proposal Forms
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %></li>
+          <li class="breadcrumb-item"><%= link_to "Proposal Types", proposal_types_path %> </li>
+          <li class="breadcrumb-item active" aria-current="page"> <%= @proposal_type.name %></li>
+          <li class="breadcrumb-item active" aria-current="page">Proposal Forms</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            </h6>
+          </div>
+          <div class="me-3" data-controller="proposal-types">
+            <div class="float-end">
+              <a data-toggle="tooltip" title="Clone" data-bs-toggle="modal" data-bs-target="#cloneProposalForm<%= @proposal_type.id %>" href="#" class="btn btn-pill btn-primary text-white">
+                <i class="align-middle fas fa-fw fa-copy cursor-pointer "></i>Clone
+              </a>
+              <%= link_to 'Create Proposal form',  new_proposal_form_url(proposal_type_id: @proposal_type.id), class: 'btn btn-pill btn-primary text-white', data: (active_form?(@proposal_type.id) ? {confirm: 'You have already active proposal form. If you continue already active forms will become inactive'} : '') %>
+              <%= render partial: 'proposal_forms/clone_proposal_form', locals: { proposal_type_id: @proposal_type.id } %>
+            </div>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Versions</th>
+                <th>Location </th>
+                <th>Status</th>
+                <th>Created at</th>
+                <th>Created by</th>
+                <th>Updated by</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @proposal_type.proposal_forms.each do |proposal_form| %>
+              <tr>
+                <td><%= proposal_form.version %></td>
+                <td>
+                  <% proposal_form.proposal_type.locations.each do |loc| %>
+                   <%= loc.name %><br>
+                  <% end %>
+                </td>
+                <td><%= proposal_form.status %></td>
+                <td><%= proposal_form.created_at.to_date %></td>
+                <td><%= proposal_form.created_by&.email %></td>
+                <td><%= proposal_form.updated_by&.email %></td>
+                <td class="table-action">
+                  <%= link_to '<i class="align-middle fas fa-fw fa-eye" data-toggle="tooltip" title="Show"></i>Show'.html_safe, proposal_form_path(proposal_form) %>
+                  <% if proposal_form.draft? || proposal_form.active? %>
+                   <%= link_to '<i class="align-middle fas fa-fw fa-pen" data-toggle="tooltip" title="Edit"></i>Edit'.html_safe, edit_proposal_form_path(proposal_form, proposal_type_id: @proposal_type.id) %>
+                  <% end %>
+                </td>
+              </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

@@ -59,6 +59,7 @@
 @import "4-utilities/sizing";
 
 // 3rd party plugins
+// !! add these to app/javascripts/stylesheets/application.scss !!
 //@import "~apexcharts/src/assets/apexcharts";
 //@import "~bootstrap-daterangepicker/daterangepicker";
 //@import "~datatables.net-bs4/css/dataTables.bootstrap4";
@@ -85,6 +86,6 @@
 //@import "5-vendor/highlight";
 @import "5-vendor/ion-icons";
 //@import "5-vendor/quill";
-@import "5-vendor/select2";
-//@import "5-vendor/toastr";
+//@import "5-vendor/select2";
+@import "5-vendor/toastr";
 //@import "5-vendor/smartwizard";

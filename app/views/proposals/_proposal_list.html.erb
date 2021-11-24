@@ -1,0 +1,31 @@
+<% @proposals&.each do |proposal| %>
+<tr>
+  <% unless participant?(proposal.proposal_roles) %>
+    <td><%= proposal.code %></td>
+    <td><%= proposal.title %></td>
+    <td><%= proposal.proposal_type.name %></td>
+    <td><%= proposal_roles(proposal.proposal_roles) %></td>
+    <td>
+      <% proposal.locations.each do |loc| %>
+       <%= loc.name %><br>
+      <% end %>
+    </td>
+    <td class=<%= proposal_status_class(proposal.status) %> >
+      <%= proposal_status(proposal.status) %>
+    </td>
+    <td><%= proposal.updated_at.to_date %></td>
+    <td class="table-action">
+      <%= link_to '<i class="align-middle fas fa-fw fa-eye"></i>Show'.html_safe, proposal_url(proposal) %>
+      <%= link_to '<i class="align-middle mr-2 fas fa-fw fa-clone"></i>Versions'.html_safe, versions_proposal_url(proposal) %>
+      <% if lead_organizer?(proposal.proposal_roles) %>
+        <% unless proposal.submitted? || proposal.revision_submitted? ||
+          proposal.revision_submitted_spc? || proposal.approved? || proposal.declined? || proposal.decision_email_sent? || proposal.decision_pending? || proposal.initial_review? || proposal.in_progress? || proposal.in_progress_spc? %>
+         <%= link_to '<i class="align-middle fas fa-fw fa-pen"></i>Edit'.html_safe, edit_proposal_path(proposal) %>
+        <% end %>
+        <%= link_to '<i class="align-middle fas fa-fw fa-trash"></i>Delete'.html_safe, proposal_path(proposal), method: :delete ,
+          data: {confirm: "Are you sure you want to delete #{proposal.proposal_type.name}?"} %>
+      <% end %>
+    </td>
+  <% end %>
+</tr>
+<% end %>

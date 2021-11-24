@@ -7,7 +7,7 @@ RSpec.describe Validation, type: :model do
     end
   end
 
-   describe 'associations' do
+  describe 'associations' do
     it { should belong_to(:proposal_field) }
   end
 end

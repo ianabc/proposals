@@ -1,25 +1,21 @@
-<div data-proposal-form-target="addValidation">
+<div class="nested-form-wrapper" data-new-record="<%= f.object&.new_record? %>" data-controller="proposal-form">
   <label for="validations">Add Validations</label><br>  
-  <%= f.fields_for :validations do |field| %>
-    <div data-proposal-form-target="validationRow">
-      <div class="row">
-        <div class="form-group col-5 mb-2">
-          <%= field.label :type %>
-          <%= field.select :type, options_for_select(validation_types), {:include_blank => 'Validation Type'}, class: 'form-control', name: 'proposal_field[validations][0][type]', data:{ action: 'change->proposal-form#handleValidationChange' ,value:'proposal_field[validations][0][type]' }%>
-        </div>
-      <div class="form-group col-5 mb-2" data-proposal-form-target="hiddenField" data-value='proposal_field[validations][0][type]'>
-        <%= field.label :value %>
-        <%= field.text_field :value , class: 'form-control', name: 'proposal_field[validations][0][value]'%>
-      </div>
-      <div class="form-group col-10 mb-2">
-        <%= field.label :error_message %>
-        <%= field.text_field :error_message , class: 'form-control', name: 'proposal_field[validations][0][error_message]' %>
-      </div>
-      <div class="align-items-center mt-2 col-1 d-flex justify-content-center">
-        <%= image_tag 'delete.svg', size: '25x25', data: {action: 'click->proposal-form#deleteValidation'} %>
-      </div>
+  <div class="row mt-2">
+    <div class="form-group col-5 mb-2">
+      <%= f.label :type %>
+      <%= f.select :validation_type, options_for_select(validation_types, f.object&.validation_type), {include_blank: 'Select validation'}, class: 'form-select', data: {action: 'proposal-form#handleValidationChange'} %>
+    </div>
+    <div class="form-group col-5 mb-2 <%= f.object&.validation_type == 'mandatory' ? 'hidden' : '' %>" >
+      <%= f.label :value %>
+      <%= f.text_field :value , class: 'form-control'%>
+    </div>
+    <div class="form-group col-10 mb-2">
+      <%= f.label :error_message %>
+      <%= f.text_field :error_message , class: 'form-control' %>
+    </div>
+    <div class="align-items-center mt-2 col-1 d-flex justify-content-center">
+      <%= image_tag 'delete.svg', size: '25x25', data: {action: 'click->nested-form#remove'} %>
     </div>
   </div>
-  <% end %>
+  <%= f.hidden_field :_destroy %>
 </div>
-<span class="btn btn-sm btn-primary my-2" data-action="click->proposal-form#handleAddValidations" data-proposal-form-value="validationCounter">Add Validation</span>

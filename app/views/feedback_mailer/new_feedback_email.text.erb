@@ -1,0 +1,13 @@
+Feedback from: 
+"<%= @person.fullname %>"< <%= @person.email %> >
+(<%= @person.affiliation %>)
+ 
+
+Feedback for proposal:
+<% if @proposal.present? %>
+  <%= @proposal&.code %>: <%= @proposal&.title %> by
+  <%= @proposal&.lead_organizer&.fullname %>
+<% end %>
+
+<%= @person.fullname %>'s feedback:
+<%= @feedback.content %>

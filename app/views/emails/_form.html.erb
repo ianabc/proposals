@@ -1,0 +1,74 @@
+<div data-controller="submitted-proposals">
+  <%= form_with(url: send_emails_submitted_proposal_url(@proposal), method: :post) do |f| %>
+    <div class="mb-3">
+      <h2>Email Organizers</h2>
+      <p>This will send an email to the lead organizer and supporting organizers.
+        The "Request proposal revision" option will indicate in the database that
+        a revision has been requested.</p>
+      <div class="mb-3">
+        <h4>Email Addresses of Organizers</h4>
+        <div class="mb-3">
+          <p><%= @proposal.lead_organizer.email %></p>
+          <label>CC</label>
+          <input name="cc_email" id="cc_email" data-submitted-proposals-target="organizersEmail" value="<%= organizers_email(@proposal) %>">
+          <small>This text field supports a list of Cc emails. For example: birs@example.com, noreply@example.com, …</small>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label>BCC</label>
+        <%= f.text_field :bcc_email, class: 'form-control' %>
+        <small>This text field supports a list of Bcc emails. For example: birs@example.com, noreply@example.com, …</small>
+      </div>
+      <div class="mb-3">
+        <%= f.label :subject, class: 'form-label' %>
+        <%= f.text_field :subject, class: 'form-control w-50', id: 'birs_email_subject' %>
+      </div>
+      <div class="mb-3">
+        <label class='form-label'>Template</label>
+        <%= select_tag :templates, options_for_select(name_of_templates), include_blank: '', class: 'form-select w-25', data: {'action': 'click->submitted-proposals#emailTemplate', 'submitted-proposals-target': 'template'}, required: true %>
+      </div>
+      <div class="mb-3">
+        <p>Attachments</p>
+        <%= f.file_field :files, multiple: true %>
+      </div>
+      <div>
+        <%= f.label :body, class: 'form-label' %>
+        <%= f.text_area(:body, size: '3x5', class:'form-control tinymce', id:'birs_email_body') %>
+      </div>
+      <div class="text-end m-3">
+        <%= f.submit "Submit", class:  'btn btn-primary' %>
+      </div>
+    </div>
+  <% end %>
+</div>
+<br />
+<div class="mt-4 mb-3">
+  <h2> Email Correspondence </h2>
+  <% @proposal.emails&.each do |email| %>
+    <div class="mb-3 row border m-1 p-1">
+      <div class="mb-3 col-md-6">
+        <% if email.cc_email.present? %>
+          <p> CC: <%= email.cc_email %> </p>
+        <% end %>
+        <% if email.bcc_email.present? %>
+          <p> BCC: <%= email.bcc_email %> </p>
+        <% end %>
+        <p> Subject: <%= email.subject %></p>
+        <p> Body: <%= email.body.html_safe %></p>
+      </div>
+      <div class="mb-3 col-md-6">
+        <p> Sent at: <%= email.created_at %></p>
+        <% if email&.files&.attached? %>
+          <p class="file-uploads">Attached files:</p>
+          <ul>
+            <% email.files.each do |file| %>
+              <li>
+                <%= link_to file.filename, rails_blob_path(file, disposition: 'preview') %>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

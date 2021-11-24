@@ -1,5 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe Answer, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  describe 'validations' do
+    it 'has valid factory' do
+      expect(build(:answer)).to be_valid
+    end
+  end
+
+  describe 'associations' do
+    it { should belong_to(:proposal) }
+    it { should belong_to(:proposal_field) }
+  end
 end

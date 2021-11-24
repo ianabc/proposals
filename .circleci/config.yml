@@ -24,6 +24,7 @@ jobs:
           PG_USER: $DB_USER
           RAILS_ENV: test
           RACK_ENV: test
+          CODACY_PROJECT_TOKEN: $CODACY_PROJECT_TOKEN
       - image: 'circleci/postgres:12.1-alpine-ram'
         environment:
           POSTGRES_USER: postgres
@@ -57,16 +58,16 @@ jobs:
           name: Run migrations
           command: |
             echo "127.0.0.1 db" >> /etc/hosts
+            chown -R app:app /home/app/proposals
             cd /home/app/proposals
-            SECRET_KEY_BASE=token DB_USER=$DB_USER DB_PASS=$DB_PASS rake db:migrate RAILS_ENV=development
-            SECRET_KEY_BASE=token DB_USER=$DB_USER DB_PASS=$DB_PASS rake db:migrate RAILS_ENV=test
-      - run:
-          name: Update permissions
-          command: chown -R app:app /home/app/proposals
+            SECRET_KEY_BASE=token DB_USER=$DB_USER DB_PASS=$DB_PASS bin/rails db:migrate RAILS_ENV=test
       - run:
           name: Run the tests
-          command: cd /home/app/proposals; bundle exec rspec
-
+          command: |
+            chown -R app:app /home/app/proposals
+            cd /home/app/proposals
+            bundle exec rspec
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report -l ruby -p "Proposals" -r coverage/lcov/proposals.lcov
   deploy_to_staging:
     docker:
       - image: birs/proposals:latest
@@ -86,7 +87,12 @@ jobs:
             - "9f:15:4c:07:65:8b:14:ca:f3:68:01:0a:cf:dd:67:95"
       - run:
           name: Run Capistrano
-          command: cd /home/app/proposals; bundle exec cap staging deploy
+          command: | 
+            tar cvf - --exclude=".git" . | tar xf - -C /home/app/proposals/
+            chown -R app:app /home/app/proposals
+            cd /home/app/proposals
+            bundle install
+            bundle exec cap staging deploy
 
   deploy_to_production:
     docker:

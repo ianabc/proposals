@@ -4,10 +4,22 @@ RSpec.describe "/proposal_types", type: :request do
   let(:proposal_type) { create(:proposal_type) }
 
   describe "GET /index" do
-    before do
-      get proposal_types_url
+    context 'for non-staff' do
+      it 'forwards to proposals_path' do
+        get proposal_types_url
+
+        expect(response).to have_http_status(:redirect)
+      end
     end
-    it { expect(response).to have_http_status(:ok) }
+
+    context 'for staff' do
+      it 'responds OK' do
+        authenticate_for_controllers
+        get proposal_types_url
+
+        expect(response).to have_http_status(:ok)
+      end
+    end
   end
 
   describe "GET /new" do
@@ -26,7 +38,12 @@ RSpec.describe "/proposal_types", type: :request do
 
   describe "POST /create" do
     context "with valid parameters" do
-      let(:proposal_type_params) { { name: '2 Day Workshop' } }
+      let(:proposal_type_params) do
+        { name: '2 Day Workshop', year: '2015,2016,2017', participant: '1', co_organizer: '1', code: '2021xx2',
+          open_date: Time.current.to_date, closed_date: Time.current.to_date + 1.week,
+          participant_description: 'some participants description',
+          organizer_description: 'some organizers description' }
+      end
       it "creates a new proposal_type" do
         expect do
           post proposal_types_url, params: { proposal_type: proposal_type_params }
@@ -35,7 +52,12 @@ RSpec.describe "/proposal_types", type: :request do
     end
 
     context "with invalid parameters" do
-      let(:proposal_type_params) { { name: ' ' } }
+      let(:proposal_type_params) do
+        { name: ' ', participant: '1', co_organizer: '1', code: '2021xx2', open_date: Time.current.to_date,
+          closed_date: Time.current.to_date + 1.week,
+          participant_description: 'some participants description',
+          organizer_description: 'some organizers description' }
+      end
 
       it "does not create a new proposal_type" do
         expect do
@@ -47,7 +69,7 @@ RSpec.describe "/proposal_types", type: :request do
 
   describe "PATCH /update" do
     context "with valid parameters" do
-      let(:proposal_type_params) { { name: '5 Day Workshop' } }
+      let(:proposal_type_params) { { name: '5 Day Workshop', year: '2021,2022,2023' } }
 
       before do
         patch proposal_type_url(proposal_type), params: { proposal_type: proposal_type_params }
@@ -58,13 +80,13 @@ RSpec.describe "/proposal_types", type: :request do
     end
 
     context "with invalid parameters" do
-      let(:proposal_type_params) { { name: ' ' } }
+      let(:proposal_type_params) { { name: ' ', year: '2012,2013,2014' } }
 
       before do
         patch proposal_type_url(proposal_type), params: { proposal_type: proposal_type_params }
       end
       it "renders a successful response (i.e. to display the 'edit' template)" do
-        expect(response).to have_http_status(200)
+        expect(response).to redirect_to(edit_proposal_type_url(proposal_type))
       end
     end
   end

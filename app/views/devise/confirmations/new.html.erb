@@ -1,42 +1,37 @@
-<div class="main-content">
-  <!-- Header -->
-  <div class="header bg-gradient-primary py-7 py-lg-8 pt-lg-9">
-    <div class="container">
-      <div class="header-body text-center mb-7">
-        <div class="row justify-content-center">
-          <div class="col-xl-5 col-lg-6 col-md-8 px-5">
-            <h2 class="text-white">Resend confirmation instructions</h2>
+<div class="splash">
+  <div class="splash-icon"></div>
+</div>
+<main class="main h-100 w-100">
+  <div class="container h-100">
+    <div class="row h-100">
+      <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+        <div class="d-table-cell align-middle">
+          <div class="text-center mt-4">
+            <h1 class="h2">Confirm Your Account</h1>
+            <p class="lead">
+              Please check your e-mail, and click the link in the message we sent.
+            </p>
           </div>
-        </div>
-      </div>
-    </div>
-    <div class="separator separator-bottom separator-skew zindex-100">
-      <svg x="0" y="0" viewBox="0 0 2560 100" preserveAspectRatio="none" version="1.1" xmlns="http://www.w3.org/2000/svg">
-        <polygon class="fill-default" points="2560 0 2560 100 0 100"></polygon>
-      </svg>
-    </div>
-  </div>
-  <!-- Page content -->
-  <div class="container mt--8 pb-5">
-    <!-- Table -->
-    <div class="row justify-content-center">
-      <div class="col-lg-6 col-md-8">
-        <div class="card bg-secondary border-0">
-          <div class="card-body px-lg-5 py-lg-5">
-            <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post, 'data-turbo':'false' }) do |f| %>
-              <div class="form-group">
-                <div class="input-group input-group-merge input-group-alternative mb-3">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="ni ni-email-83"></i></span>
+          <!-- Page content -->
+          <div class="card">
+            <div class="card-body">
+              <div class="m-sm-4">
+              <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post, 'data-turbo':'false' }) do |f| %>
+                <div class="form-group">
+                  <div class="mb-3">
+                    <%= f.email_field :email, class:"form-control form-control-lg", placeholder:"Enter the e-mail address", autofocus: true, autocomplete: "email", value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email)  %>
+                    <label>Resend confirmation e-mail to the address you signed up with.</label>
                   </div>
-                    <%= f.email_field :email, class:"form-control", placeholder:"Email", autofocus: true, autocomplete: "email", value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email) %>
+                </div>
+                <div class="form-group">
+                  <div class="text-center mt-3">
+                    <%= f.submit "Resend confirmation instructions", class: 'btn btn-lg btn-primary' %>
+                  </div>
                 </div>
               </div>
-              <div class="text-center">
-                <%= f.submit "Resend confirmation instructions", class: 'btn btn-primary' %>
-              </div>
             <% end %>
-          </div>
+            </div>
+
           <div class="d-flex justify-content-around mb-4">
             <%= link_to "Log in", new_session_path(resource_name) %>
           <%= link_to "Sign up", new_registration_path(resource_name) %>

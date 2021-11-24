@@ -1,25 +1,21 @@
-<div data-proposal-form-target="addOption">
+<div class="nested-options-wrapper" data-new-record="<%= f.object&.new_record? %>">
   <label for="options">Add Options</label><br>  
-  <%= f.fields :options do |field| %>
-   <div data-proposal-form-target="optionRow">
-     <div class="row">
-        <div class="form-group col-3 mb-2">
+  <div class="row mt-2">
+    <div class="form-group col-3 mb-2">
       <%= f.label :index %>
-      <%= field.number_field :index, class:"form-control", name: 'proposal_field[options][0][index]' %>
+      <%= f.number_field :index , class: 'form-control', name: "proposal_field[options_attributes][NEW_RECORD][index]" %>
     </div>
-    <div class="form-group col-4 mb-2">
+    <div class="form-group col-4 mb-2" >
       <%= f.label :text %>
-      <%= field.text_field :text, required: true, class:"form-control", name: 'proposal_field[options][0][text]' %>
+      <%= f.text_field :text, class: 'form-control', name: "proposal_field[options_attributes][NEW_RECORD][text]" %>
     </div>
-    <div class="form-group col-4 mb-2">
+    <div class="form-group col-3 mb-2">
       <%= f.label :value %>
-      <%= field.text_field :value, required: true, class:"form-control", name: 'proposal_field[options][0][value]' %>
+      <%= f.text_field :value, class: 'form-control', name: "proposal_field[options_attributes][NEW_RECORD][value]" %>
     </div>
     <div class="align-items-center mt-2 col-1 d-flex justify-content-center">
-      <%= image_tag 'delete.svg', size: '25x25', data: {action: 'click->proposal-form#deleteOption'} %>
+      <%= image_tag 'delete.svg', size: '25x25', data: {action: 'click->nested-options#remove'} %>
     </div>
-     </div>
-   </div>
-  <% end %>
+  </div>
+  <%= f.hidden_field :_destroy %>
 </div>
-<span class="btn btn-sm btn-primary my-2" data-action="click->proposal-form#handleAddOptions" data-proposal-form-value="optionCounter">Add option</span>

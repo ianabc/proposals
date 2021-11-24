@@ -1,8 +1,7 @@
 require 'rails_helper'
 
 RSpec.feature "Proposal Type new", type: :feature do
-
- before do
+  before do
     create_list(:location, 4)
     visit new_proposal_type_path
   end
@@ -23,8 +22,16 @@ RSpec.feature "Proposal Type new", type: :feature do
 
   scenario "updating the form fields create new Proposal Type" do
     fill_in 'proposal_type_name', with: 'Focussed Research Group'
+    fill_in 'proposal_type_year', with: Time.current.to_date
+    fill_in 'proposal_type_co_organizer', with: 2
+    fill_in 'proposal_type_participant', with: 3
+    fill_in 'proposal_type_code', with: '2021xx2'
+    fill_in 'proposal_type_open_date', with: Time.current.to_date
+    fill_in 'proposal_type_closed_date', with: Time.current.to_date + 1.week
+    fill_in 'proposal_type_organizer_description', with: 'A long text passage which describes organizers'
+    fill_in 'proposal_type_participant_description', with: 'A long text paragraph which describes participants'
     select Location.first.name
-    click_button 'Create Proposal Type' 
+    click_button 'Create Proposal Type'
     updated_proposal_type = ProposalType.last
     expect(updated_proposal_type.name).to eq('Focussed Research Group')
     expect(updated_proposal_type.locations.first.name).to eq(Location.first.name)

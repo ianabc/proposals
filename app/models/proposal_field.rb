@@ -6,6 +6,10 @@ class ProposalField < ApplicationRecord
   has_one :answer, dependent: :destroy
   acts_as_list scope: :proposal_form
   has_many :validations, dependent: :destroy
+  has_many :options, dependent: :destroy
 
-  FIELD_TYPES = %w[Date Radio Text SingleChoice MultiChoice].freeze
+  accepts_nested_attributes_for :validations, reject_if: :all_blank, allow_destroy: true
+  accepts_nested_attributes_for :options, reject_if: :all_blank, allow_destroy: true
+
+  FIELD_TYPES = %w[Date Radio Text SingleChoice MultiChoice PreferredImpossibleDate].freeze
 end

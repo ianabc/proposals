@@ -7,7 +7,7 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><%= link_to "Dashboard", dashboards_path %> </a></li>
-          <li class="breadcrumb-item active" aria-current="page">Proposals</li>
+          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Proposals", proposals_path %></li>
         </ol>
       </nav>
     </div>
@@ -15,37 +15,26 @@
       <div class="col-12">
         <div class="card">
           <div class="card-header">
-            </h6>
+            <h3>Your Proposals</h3>
           </div>
           <table class="table">
             <thead>
               <tr>
+                <th>Code</th>
+                <th>Proposal Title</th>
                 <th>Proposal Type</th>
-                <th>Location</th>
+                <th>Role</th>
+                <th>Preferred Location</th>
                 <th>Status</th>
-                <th>Created</th>
+                <th width="125">Updated</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <% @proposals&.each do |proposal| %>
-              <tr>
-                <td><%= proposal.proposal_type.name %></td>
-                <td> 
-                  <% proposal.locations.each do |loc| %>
-                   <%= loc.name %><br>
-                  <% end %>
-                </td>
-                <td><%= proposal.status %></td>
-                <td><%= proposal.created_at.to_date %></td>
-                <td class="table-action">
-                  <% if proposal.draft? %>
-                   <%= link_to '<i class="align-middle fas fa-fw fa-pen"></i>Edit'.html_safe, edit_proposal_path(proposal) %>
-                  <% end %>
-                  <%= link_to '<i class="align-middle fas fa-fw fa-trash"></i>Delete'.html_safe, proposal_path(proposal), method: :delete ,
-                    data: {confirm: "Are you sure you want to delete #{proposal.proposal_type.name}?"} %>
-                </td>
-              </tr>
+              <% if @proposals.empty? %>
+                <tr><td><h3>No proposal applications found.</h3></td></tr>
+              <% else %>
+                <%= render 'proposal_list', proposals: @proposals %>
               <% end %>
             </tbody>
           </table>

@@ -1,4 +1,5 @@
 class LocationsController < ApplicationController
+  load_and_authorize_resource
   before_action :set_location, only: %i[show edit update destroy]
 
   def index
@@ -33,10 +34,7 @@ class LocationsController < ApplicationController
         format.html { redirect_to @location, notice: "Location was successfully updated." }
         format.json { render :show, status: :ok, location: @location }
       else
-        format.html do
-          render :edit, status: :unprocessable_entity,
-                        error: "Unable to update location."
-        end
+        format.html { render :edit, status: :unprocessable_entity, error: "Unable to update location." }
         format.json { render json: @location.errors, status: :unprocessable_entity }
       end
     end

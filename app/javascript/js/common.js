@@ -1,10 +1,37 @@
 $(document).ready(function() {
-  $(".comment").shorten({
-    "showChars": 120,
-    "moreText": '<i class="align-middle me-2 fas fa-fw fa-arrow-down"></i>',
-    "lessText": '<i class="align-middle me-2 fas fa-fw fa-arrow-up"></i>'
+  $(document).on('hide.bs.modal', '#email-preview', function() {
+    window.location.reload()
   });
+
+  $(document).on('hide.bs.modal', '#user-window', function() {
+    window.location.reload()
+  });
+
+  $(document).on('hide.bs.modal', '#email-template', function() {
+    window.location.reload()
+  });
+
+  $(document).on('hide.bs.modal', '#table-window', function() {
+    window.location.reload()
+  });
+
+  $(document).on('hide.bs.modal', '#review-window', function() {
+    window.location.reload()
+  });
+
+  $('.latex-show-more').click(function() {
+    var $this = $(this);
+    $this.toggleClass('latex-show-more');
+    if($this.hasClass('latex-show-more')) {
+      $this.text('Show full error log');
+    } else {
+      $this.text('Hide full error log');
+    }
+  });
+
+  $('[id^="chartjs"]').each(function() {
+    this.style.height = '200px'
+  })
+
+  $('#add-more-participant, #add-more-organizer').click();
 });
-
-
-

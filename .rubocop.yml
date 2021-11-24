@@ -6,10 +6,15 @@ AllCops:
   NewCops: enable
   Include:
     - 'app/controllers/**/*'
+    - 'app/controllers/users/**/*'
     - 'app/models/**/*'
+    - 'app/views/**/*'
     - 'app/helpers/**/*'
     - 'app/jobs/**/*'
+    - 'app/services/**/*'
+    - 'app/queries/**/*'
     - 'app/channels/**/*'
+    - 'app/mailers/**/*'
     - 'spec/**/*.rb'
     - 'Gemfile'
   TargetRubyVersion: 2.7
@@ -26,4 +31,10 @@ Style/FrozenStringLiteralComment:
 Style/BlockComments:
   Enabled: false
 Style/StringLiterals:
+  Enabled: false
+# it's required to exclude spec files because we have to test every case, hence, lines will be increase default limit.
+Metrics/BlockLength:
+  Exclude:
+    - "**/*_spec.rb"
+Naming/VariableNumber:
   Enabled: false

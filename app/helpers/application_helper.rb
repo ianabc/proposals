@@ -6,11 +6,13 @@ module ApplicationHelper
   end
 
   def dashboard_menu
-    return 'show' if request.path.in?(['/proposal_types', '/locations', '/proposal_forms', '/feedbacks'])
+    return 'show' if request.path.in?(['/proposal_types', '/submitted_proposals', '/locations', '/proposal_forms',
+                                       '/feedback'])
   end
 
   def dashboard_list
-    return 'active' if request.path.in?(['/proposal_types', '/locations', '/proposal_forms', '/feedbacks'])
+    return 'active' if request.path.in?(['/proposal_types', '/submitted_proposals', '/locations', '/proposal_forms',
+                                         '/feedback'])
   end
 
   def proposal_menu
@@ -29,11 +31,18 @@ module ApplicationHelper
     return 'active' if request.path.in?(['/guidelines'])
   end
 
-  def feedback_menu 
-    return 'active' if request.path.in?(['/feedbacks/new'])
+  def feedback_menu
+    return 'active' if request.path.in?(['/feedback/new'])
   end
 
-  def lesc(text)
-    LatexToPdf.escape_latex(text)
+  def faq_menu
+    return 'active' if request.path.in?(['/faqs/new'])
+  end
+
+  def numbers_to_words
+    {
+      1 => 'one', 2 => 'two', 3 => 'three', 4 => 'four', 5 => 'five',
+      6 => 'six', 7 => 'seven', 8 => 'eight', 9 => 'nine', 10 => 'ten'
+    }
   end
 end

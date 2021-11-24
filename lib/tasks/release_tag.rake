@@ -1,4 +1,4 @@
-namespace :staging do
+namespace :birs do
   task :default => 'staging:release_tag'
 
   desc "Update timestamp on staging server"
