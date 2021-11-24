@@ -120,11 +120,7 @@ class ProposalsController < ApplicationController
   end
 
   def remove_file
-    @proposal = Proposal.find(params[:id])
-    file = @proposal.files.where(id: params[:attachment_id])
-    file.purge_later
-
-    flash[:notice] = 'File has been removed!'
+    delete_file_message
 
     if request.xhr?
       if current_user.staff_member?
@@ -202,6 +198,14 @@ class ProposalsController < ApplicationController
     return if @proposal.editable?
 
     raise CanCan::AccessDenied
+  end
+
+  def delete_file_message
+    @proposal = Proposal.find(params[:id])
+    file = @proposal.files.where(id: params[:attachment_id])
+    file.purge_later
+
+    flash[:notice] = 'File has been removed!'
   end
 
   def authorize_user

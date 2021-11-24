@@ -67,15 +67,9 @@ class SubmitProposalsController < ApplicationController
     if @proposal.may_active?
       change_proposal_status
     elsif @proposal.may_revision?
-      @proposal.allow_late_submission = true if @proposal.revision_requested?
-      @proposal.revision!
-      change_proposal_version
-      send_mail
+      proposal_revision_status
     elsif @proposal.may_revision_spc?
-      @proposal.allow_late_submission = true if @proposal.revision_requested_spc?
-      @proposal.revision_spc!
-      change_proposal_version
-      send_mail
+      proposal_revision_spc_status
     else
       error_page_redirect
     end
@@ -94,17 +88,19 @@ class SubmitProposalsController < ApplicationController
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
     @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user)
                                       .generate_latex_file.to_s
-    begin
-      render_to_string(layout: "application", inline: @latex_infile,
-                       formats: [:pdf])
-    rescue ActionView::Template::Error
-      error_message = "We were unable to compile your proposal with LaTeX.
+    render_file_string
+  end
+
+  def render_file_string
+    render_to_string(layout: "application", inline: @latex_infile,
+                     formats: [:pdf])
+  rescue ActionView::Template::Error
+    error_message = "We were unable to compile your proposal with LaTeX.
                       Please see the error messages, and generated LaTeX
                       docmument, then edit your submission to fix the
                       errors".squish
-      redirect_to rendered_proposal_proposal_path(@proposal, format: :pdf),
-                  alert: error_message and return
-    end
+    redirect_to rendered_proposal_proposal_path(@proposal, format: :pdf),
+                alert: error_message and return
   end
 
   def proposal_params
@@ -176,6 +172,10 @@ class SubmitProposalsController < ApplicationController
       redirect_to new_email_template_path, alert: 'No email template found!'
       return
     end
+    placing_holders
+  end
+
+  def placing_holders
     placeholders = { "Proposal_lead_organizer_name" => @proposal&.lead_organizer&.fullname,
                      "proposal_type" => @proposal.proposal_type&.name,
                      "proposal_title" => @proposal&.title }
@@ -210,6 +210,20 @@ class SubmitProposalsController < ApplicationController
     redirect_to edit_proposal_path(@proposal), alert: "The proposal status is
                 #{@proposal.status&.humanize} but expecting Draft or Revision
                 requested.".squish and return
+  end
+
+  def proposal_revision_spc_status
+    @proposal.allow_late_submission = true if @proposal.revision_requested_spc?
+    @proposal.revision_spc!
+    change_proposal_version
+    send_mail
+  end
+
+  def proposal_revision_status
+    @proposal.allow_late_submission = true if @proposal.revision_requested?
+    @proposal.revision!
+    change_proposal_version
+    send_mail
   end
 
   def change_proposal_version

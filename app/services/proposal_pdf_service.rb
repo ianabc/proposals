@@ -107,8 +107,8 @@ class ProposalPdfService
     end
 
     if proposal.files.attached?
-      @text, file_errors = add_proposal_attachments(proposal, @text,
-                                                    file_errors)
+      @text, _file_errors = add_proposal_attachments(proposal, @text,
+                                                     file_errors)
     end
 
     @text

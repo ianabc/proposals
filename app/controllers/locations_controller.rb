@@ -34,10 +34,7 @@ class LocationsController < ApplicationController
         format.html { redirect_to @location, notice: "Location was successfully updated." }
         format.json { render :show, status: :ok, location: @location }
       else
-        format.html do
-          render :edit, status: :unprocessable_entity,
-                        error: "Unable to update location."
-        end
+        format.html { render :edit, status: :unprocessable_entity, error: "Unable to update location." }
         format.json { render json: @location.errors, status: :unprocessable_entity }
       end
     end
@@ -58,6 +55,6 @@ class LocationsController < ApplicationController
   end
 
   def location_params
-    params.require(:location).permit(:name, :code, :city, :country)
+    params.require(:location).permit(:name, :code, :city, :country, :start_date, :end_date, :exclude_dates)
   end
 end
