@@ -48,6 +48,19 @@ class LocationsController < ApplicationController
     end
   end
 
+  def weeks_exclude_dates
+    start_date = params[:start].to_date
+    end_date = params[:end].to_date - 5.days
+    exclude_dates = []
+    while start_date <= end_date
+      week_days = start_date
+      week_days += 6.days
+      exclude_dates << "#{start_date} - #{week_days}"
+      start_date = week_days
+    end
+    render json: { exclude_dates: exclude_dates }, status: :ok
+  end
+
   private
 
   def set_location
