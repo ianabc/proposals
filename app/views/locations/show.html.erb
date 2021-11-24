@@ -35,6 +35,18 @@
               <label class="form-label">Country: </label>
               <label class="form-label" id="location_country"> <%= @location.country %> </label>
             </div>
+             <div class="mb-3">
+              <label class="form-label">Start Date: </label>
+              <label class="form-label" id="location_country"> <%= @location.start_date %> </label>
+            </div>
+             <div class="mb-3">
+              <label class="form-label">End Date: </label>
+              <label class="form-label" id="location_country"> <%= @location.end_date %> </label>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Exclude Dates: </label>
+              <label class="form-label" id="location_country"> <%= @location.exclude_dates %> </label>
+            </div>
             <div class="mb-3">
               <%= link_to "Edit", edit_location_path, class: 'btn btn-primary' %> | 
               <%= link_to "Back", locations_path, class: 'btn btn-primary' %> 
