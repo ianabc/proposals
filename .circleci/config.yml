@@ -35,9 +35,6 @@ jobs:
           name: Copy code to app home
           command: tar cvf - --exclude=".git" . | tar xf - -C /home/app/proposals/
       - run:
-          name: Bundle install
-          command: cd /home/app/proposals; bundle install
-      - run:
           name: Wait for database
           command: |
             for i in `seq 1 10`;
@@ -54,6 +51,12 @@ jobs:
             sed s/DB_USER/$DB_USER/g db-init.sql | sed s/DB_PASS/$DB_PASS/g > setup.sql
             PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U postgres < setup.sql
             rm setup.sql
+      - run:
+          name: Bundle install
+          command: |
+            cd /home/app/proposals
+            gem install bundler
+            bundle install
       - run:
           name: Run migrations
           command: |

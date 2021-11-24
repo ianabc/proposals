@@ -47,6 +47,7 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
   pg_search_scope :search_proposal_status, against: %i[status]
   pg_search_scope :search_proposal_year, against: %i[year]
+  belongs_to :assigned_location, class_name: 'Location', optional: true
 
   enum status: {
     draft: 0,

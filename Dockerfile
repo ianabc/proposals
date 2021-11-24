@@ -1,7 +1,7 @@
 # See: https://github.com/phusion/passenger-docker
 # Latest image versions:
 # https://github.com/phusion/passenger-docker/blob/master/CHANGELOG.md
-FROM phusion/passenger-ruby27:1.0.14
+FROM phusion/passenger-ruby27:2.0.0
 
 ENV HOME /root
 
@@ -16,7 +16,7 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 RUN curl -sS https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 # Needed packages
-RUN apt-get update -qq
+RUN apt-get update
 RUN apt-get install --yes --fix-missing pkg-config apt-utils build-essential \
               cmake automake tzdata locales curl git gnupg ca-certificates \
               libpq-dev wget libxrender1 libxext6 libsodium23 libsodium-dev \
@@ -47,8 +47,9 @@ ENV APP_HOME /home/app/proposals
 # disabled because we mount host directory in $APP_HOME
 COPY . $APP_HOME
 WORKDIR $APP_HOME
-RUN /usr/local/rvm/bin/rvm default use 2.7.3
-RUN /usr/local/rvm/bin/rvm-exec 2.7.3 gem install bundler
+RUN /usr/local/rvm/bin/rvm default use 2.7.4
+RUN /usr/local/rvm/bin/rvm-exec 2.7.4 gem install bundler
+RUN /usr/local/rvm/bin/rvm-exec 2.7.4 gem uninstall turbo-rails
 RUN bundle install
 RUN RAILS_ENV=development bundle exec cap install
 RUN RAILS_ENV=development bundle exec rails webpacker:install
@@ -63,8 +64,8 @@ COPY entrypoint.sh /sbin/
 RUN chmod 755 /sbin/entrypoint.sh
 RUN mkdir -p /etc/my_init.d
 RUN ln -s /sbin/entrypoint.sh /etc/my_init.d/entrypoint.sh
-RUN echo 'export PATH=./bin:$PATH:/usr/local/rvm/rubies/ruby-2.7.3/bin' >> /root/.bashrc
-RUN echo 'export PATH=./bin:$PATH:/usr/local/rvm/rubies/ruby-2.7.3/bin' >> /home/app/.bashrc
+RUN echo 'export PATH=./bin:$PATH:/usr/local/rvm/rubies/ruby-2.7.4/bin' >> /root/.bashrc
+RUN echo 'export PATH=./bin:$PATH:/usr/local/rvm/rubies/ruby-2.7.4/bin' >> /home/app/.bashrc
 RUN echo 'alias rspec="bundle exec rspec"' >> /root/.bashrc
 RUN echo 'alias rspec="bundle exec rspec"' >> /home/app/.bashrc
 RUN echo 'alias restart="passenger-config restart-app /home/app/proposals & tail -f log/production.log"' >> /root/.bashrc
