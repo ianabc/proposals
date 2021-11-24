@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.7.3'
+ruby '2.7.4'
 
 gem 'bcrypt_pbkdf'
 gem 'bootsnap', '>= 1.4.4', require: false
@@ -14,7 +14,7 @@ gem 'jbuilder', '~> 2.7'
 gem 'pg'
 gem 'rails', '~> 6.1.3'
 gem 'sass-rails', '>= 6'
-gem 'turbo-rails'
+gem 'turbo-rails', '>= 0.8.2'
 gem 'webpacker', '~> 5.0'
 gem 'rails-latex'
 gem 'deep_cloneable', '~> 3.1.0'
