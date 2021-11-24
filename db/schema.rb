@@ -387,7 +387,7 @@ ActiveRecord::Schema.define(version: 2021_11_18_110337) do
     t.string "outcome"
     t.string "editflow_id"
     t.text "cover_letter"
-    t.datetime "assigned_date"
+    t.date "assigned_date"
     t.integer "same_week_as"
     t.integer "week_after"
     t.integer "assigned_location_id"

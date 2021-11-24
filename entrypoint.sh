@@ -49,10 +49,10 @@ echo
 echo "Installing latest bundler..."
 /usr/local/rvm/bin/rvm-exec 2.7.4 gem install bundler
 
-if [ ! -e /usr/local/rvm/gems/ruby-2.7.4/gems/rails-6.1.3.2 ]; then
+if [ ! -e /usr/local/rvm/gems/ruby-2.7.4/gems/rails-6.1.4.1 ]; then
   echo
-  echo "Installing Rails 6.1.3.2..."
-  su - app -c "cd /home/app/proposals; /usr/local/rvm/bin/rvm-exec 2.7.4 gem install rails -v 6.1.3.2"
+  echo "Installing Rails 6.1.4.1..."
+  su - app -c "cd /home/app/proposals; /usr/local/rvm/bin/rvm-exec 2.7.4 gem install rails -v 6.1.4.1"
 fi
 
 if [ ! -e /home/app/proposals/bin ]; then
