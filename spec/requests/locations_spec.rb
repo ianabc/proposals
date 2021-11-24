@@ -49,9 +49,9 @@ RSpec.describe "/locations", type: :request do
         code: 'BIRS',
         city: 'Banff',
         country: 'Canada',
-        start_date: '2020-10-29',
-        end_date: '2021-11-29',
-        exclude_dates: 'xyz' }
+        start_date: '2023-01-08',
+        end_date: '2023-12-15',
+        exclude_dates: ['2023-07-09'] }
     end
     context "with valid parameters" do
       it "creates a new Location" do
@@ -77,9 +77,9 @@ RSpec.describe "/locations", type: :request do
         code: 'BIRS',
         city: 'Banff',
         country: 'Canada',
-        start_date: '2020-10-29',
-        end_date: '2021-11-29',
-        exclude_dates: 'xyz' }
+        start_date: '2023-01-08',
+        end_date: '2023-12-15',
+        exclude_dates: ['2023-07-09'] }
     end
 
     context "with valid parameters" do
