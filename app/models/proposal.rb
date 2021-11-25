@@ -229,6 +229,18 @@ class Proposal < ApplicationRecord
     max_participants + max_virtual_participants
   end
 
+  def preferred_dates
+    # placeholder - this should return the proposal's preferred dates, in order
+    # of most preferred to least
+    [Date.parse('2023-06-04'), Date.parse('2023-10-22'),
+     Date.parse('2023-07-16')]
+  end
+
+  def impossible_dates
+    # placeholder - this should return the proposal's impossible dates (ordered)
+    [Date.parse('2023-02-19'), Date.parse('2023-12-03')]
+  end
+
   private
 
   def not_before_opening
