@@ -1,8 +1,8 @@
 # A class for interacting with the HMC schedule optimizer
 
 class HungarianMonteCarlo
-  attr_reader :errors
   require 'socket'
+  attr_reader :errors
 
   def initialize(run_params:, test_mode: false)
     @location = run_params['location']
@@ -11,10 +11,8 @@ class HungarianMonteCarlo
     @run_params = run_params
 
     @errors = {}
-    @maximum_preferred_dates = 5
-    @maximum_impossible_dates = 2
-    @hmc_server = 'hmc'
-    @hmc_port = 29000
+    @hmc_server = ENV['HMC_SERVER']
+    @hmc_port = ENV['HMC_PORT']
     @hmc_access_code = ENV['HMC_ACCESS']
     validate_location
     validate_run_params
@@ -41,7 +39,7 @@ class HungarianMonteCarlo
 
   def hmc_reply(socket, prompt)
     begin
-      return socket.gets.chomp.match?(prompt)
+      socket.gets.chomp.match?(prompt)
     rescue IOError => error
       @errors['HMC'] = "Error reading socket! #{error.message}"
     end
@@ -49,7 +47,7 @@ class HungarianMonteCarlo
 
   def hmc_connect
     begin
-      return TCPSocket.open(@hmc_server, @hmc_port)
+      TCPSocket.open(@hmc_server, @hmc_port)
     rescue IOError => error
       @errors['HMC'] = "Error connecting to HMC! #{error.message}"
     end
@@ -61,12 +59,12 @@ class HungarianMonteCarlo
 
   def create_data_file
     timestamp = DateTime.current.to_i
-    datafile_name = "#{Rails.root}/tmp/propfile-#{@year}-#{timestamp}.txt"
+    datafile_name = Rails.root.join("tmp/propfile-#{@year}-#{timestamp}.txt")
     fh = File.open(datafile_name, 'w')
 
     proposals = @test_mode ? testing_mode_proposals : accepted_proposals
 
-    proposals.each do |code, params|
+    proposals.each do |_code, params|
       fh.puts(params)
     end
 
@@ -192,7 +190,7 @@ class HungarianMonteCarlo
   def formatted_run_params
     r = @run_params
     r['run_id'] + ' ' + r['start_week'] + ' ' + r['number_of_weeks'] + ' ' +
-    r['number_of_runs'] + r['number_of_best_cases']
+      r['number_of_runs'] + ' ' + r['number_of_best_cases']
   end
 
   def merge_preferred_dates(proposal1, proposal2)
@@ -215,9 +213,7 @@ class HungarianMonteCarlo
       proposal2_preferred = proposal2.preferred_dates.map { |d| d - 1.week }
     end
 
-
     merged_dates = []
-
     p1count = proposal1_preferred.count
     p2count = proposal2_preferred.count
 
@@ -229,7 +225,12 @@ class HungarianMonteCarlo
   end
 
   def merge_impossible_dates(proposal1, proposal2)
-    proposal2_impossible = proposal2.impossible_dates.map { |d| d - 1.week }
+    proposal2_impossible = proposal2.impossible_dates
+
+    if proposal2.week_after.present?
+      proposal2_impossible = proposal2.impossible_dates.map { |d| d - 1.week }
+    end
+
     (proposal1.impossible_dates + proposal2_impossible).uniq
   end
 end
