@@ -107,10 +107,10 @@ class HungarianMonteCarlo
         code << " and #{other_proposal&.code}"
 
         merged_dates = merge_preferred_dates(other_proposal, proposal)
-        preferred_dates = format_dates(merged_dates)
+        preferred_dates = format_dates(merged_dates).join(';')
 
         merged_dates = merge_impossible_dates(other_proposal, proposal)
-        impossible_dates = format_dates(merged_dates)
+        impossible_dates = format_dates(merged_dates).join(';')
 
         if data.key?(other_proposal&.code)
           data.delete(other_proposal&.code)
@@ -127,10 +127,10 @@ class HungarianMonteCarlo
         code = "#{week_after_proposal&.code} followed by #{proposal.code}"
 
         merged_dates = merge_preferred_dates(week_after_proposal, proposal)
-        preferred_dates = format_dates(merged_dates)
+        preferred_dates = format_dates(merged_dates).join(';')
 
         merged_dates = merge_impossible_dates(week_after_proposal, proposal)
-        impossible_dates = format_dates(merged_dates)
+        impossible_dates = format_dates(merged_dates).join(';')
 
         if data.key?(week_after_proposal&.code)
           data.delete(week_after_proposal&.code)
