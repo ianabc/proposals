@@ -92,9 +92,19 @@
                         <div class="mb-3">
                           <%= f.text_field :assigned_location_id, class: 'form-control w-25', disabled: true, value:@proposal.assigned_location&.code %>
                         </div>
+                         <div>
+                          <%= label_tag :assigned_date %>
+                        </div>
+                        <div class="mb-3">
+                          <%= f.text_field :assigned_date, class: 'form-control w-25', disabled: true, value:@proposal.assigned_date %>
+                        </div>
                         <div class="mb-3">
                           <label for="same_week">Same week as: </label>
                           <label for="same_week">(Links to another proposal that is to be scheduled the same week as this proposal.)</label>
+                        </div>
+                         <div class="mb-3">
+                          <label for="week_after">Week after: </label>
+                          <label for="week_after">(Links to another proposal, schedule this proposal the week after the linked proposal)</label>
                         </div>
                         <div class="mb-3">
                           <label>Type of Meeting</label>
