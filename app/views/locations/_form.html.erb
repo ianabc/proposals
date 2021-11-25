@@ -51,15 +51,15 @@
             </div>
             <div class="mb-3">
               <%= f.label :'Start Date' , class: 'form-label' %><br>
-              <%= f.text_field :start_date, type: 'date', value: @location.start_date.to_date, data: {'action': 'change->location#excludeDatesList', 'location-target': 'startDate'} %>
+              <%= f.text_field :start_date, type: 'date', value: @location.start_date, data: {'action': 'change->location#excludeDatesList', 'location-target': 'startDate'} %>
             </div>
             <div class="mb-3">
               <%= f.label :'End Date' , class: 'form-label' %><br>
-              <%= f.text_field :end_date, type: 'date', value: @location.end_date.to_date, data: {'action': 'change->location#excludeDatesList', 'location-target': 'endDate'} %>
+              <%= f.text_field :end_date, type: 'date', value: @location.end_date, data: {'action': 'change->location#excludeDatesList', 'location-target': 'endDate'} %>
             </div>
             <div class="mb-3">
               <%= f.label :'Exclude Dates' , class: 'form-label' %><br>
-              <%= f.select :exclude_dates, options_for_select([]), {}, data: {'location-target': 'excludeDates'}, class: 'form-select w-25', multiple: true %>
+              <%= f.select :exclude_dates, options_for_select([], @location.exclude_dates), {}, data: {'location-target': 'excludeDates'}, class: 'form-select w-25', multiple: true %>
             </div>
             <%= f.submit @location.new_record? ? "Create New Location" : "Update Location", class:  'btn btn-primary' %>
             <%= link_to "Back", locations_path, class: 'btn btn-primary' %>
