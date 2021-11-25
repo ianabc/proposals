@@ -8,7 +8,7 @@ RSpec.describe ProposalFieldsHelper, type: :helper do
     it "returns locations of a proposal type" do
       proposal_type_locations(proposal_type).each do |location|
         loc = proposal_type.locations.where(id: location.last).first
-        location_string = "#{loc.name} (#{loc.city}, #{loc.country})"
+        location_string = "#{loc.code} (#{loc.city}, #{loc.country})"
         expect(location.first).to eq(location_string)
       end
     end

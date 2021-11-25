@@ -1,6 +1,6 @@
 module ProposalFieldsHelper
   def proposal_type_locations(proposal_type)
-    proposal_type.locations.map { |loc| ["#{loc.name} (#{loc.city}, #{loc.country})", loc.id] }
+    proposal_type.locations.map { |loc| ["#{loc.code} (#{loc.city}, #{loc.country})", loc.id] }
   end
 
   def proposal_field_options(field)
