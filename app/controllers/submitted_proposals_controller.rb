@@ -182,10 +182,23 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
+  def proposal_outcome_location
+    proposal_ids = params[:proposal_ids]
+    proposal_ids.each do |id|
+      proposal = Proposal.find_by(id: id)
+      proposal.update(outcome_location_params)
+    end
+    head :ok
+  end
+
   private
 
   def query_params?
     params.values.any?(&:present?)
+  end
+
+  def outcome_location_params
+    params.permit(:outcome, :assigned_location_id)
   end
 
   def email_params
