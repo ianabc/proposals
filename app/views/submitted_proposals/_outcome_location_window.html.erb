@@ -2,7 +2,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Outcome Location</h5>
+        <h5 class="modal-title">Outcome Location Workshop Size</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body text-justify" style="text-align: justify;" >
@@ -16,8 +16,8 @@
             <%= select_tag :location, options_for_select(locations), include_blank: '', class: 'form-select w-25', data: { 'submitted-proposals-target': 'selectedLocation' } %>
           </div>
           <div class="mb-3">
-            <label class="form-label">Size</label>
-             <!-- # TODO pending proposal assigned size functionality  -->
+            <label class="form-label">Workshop Size</label>
+            <%= select_tag :size, options_for_select([['Half', 'Half'], ['Full', 'Full']]), include_blank: '', class: 'form-select w-25', data: { 'submitted-proposals-target': 'assignedSize' } %>
           </div>
         </div>
       </div>

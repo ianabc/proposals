@@ -6,7 +6,7 @@ import Tagify from '@yaireo/tagify'
 export default class extends Controller {
   static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus',
                      'organizersEmail', 'bothReviews', 'scientificReviews', 'ediReviews',
-                     'reviewToc', 'reviewNToc', 'outcome', 'selectedLocation' ]
+                     'reviewToc', 'reviewNToc', 'outcome', 'selectedLocation', 'assignedSize' ]
 
   connect () {
     let proposalId = 0
@@ -423,14 +423,18 @@ export default class extends Controller {
       let data = new FormData()
       let outcome = this.outcomeTarget.value
       let location = this.selectedLocationTarget.value
+      let size = this.assignedSizeTarget.value
       var url = `/submitted_proposals/proposal_outcome_location`
       $.ajax({
         url,
         type: "POST",
         data: {
-          'proposal_ids': proposalIds,
-          outcome,
-          'assigned_location_id': location
+          'proposal': {
+            'id': proposalIds,
+            outcome,
+            'assigned_location_id': location,
+            'assigned_size': size
+          }
         },
         success: () => {
           toastr.success('Saved successfully!')
