@@ -74,9 +74,8 @@ export default class extends Controller {
       toastr.error("Please select any checkbox!")
     }
     else {
-      let id = event.currentTarget.id
       let _this = this
-      $.post(`/emails/email_types?type=${id}`, function(data) {
+      $.post(`/emails/email_types`, function(data) {
         const selectBox = _this.templatesTarget;
         selectBox.innerHTML = '';
         const opt = document.createElement('option');
