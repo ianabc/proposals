@@ -4,30 +4,28 @@ class HungarianMonteCarlo
   require 'socket'
   attr_reader :errors
 
-  def initialize(run_params:, test_mode: false)
-    @location = run_params['location']
-    @year = run_params['year']
+  def initialize(run_params:, location:, test_mode: false)
+    @run_params = run_params # hash of HMC run parameters
+    @location = location # Location object
     @test_mode = test_mode
-    @run_params = run_params
 
     @errors = {}
-    @hmc_server = ENV['HMC_SERVER']
-    @hmc_port = ENV['HMC_PORT']
-    @hmc_access_code = ENV['HMC_ACCESS']
+    set_hmc_params
     validate_location
     validate_run_params
   end
 
-  def send_data_file
+  def run_optimizer
     socket = hmc_connect
     socket.puts @hmc_access_code if hmc_reply(socket, 'Access code')
     socket.puts('newrun') if hmc_reply(socket, 'READY')
     socket.puts(formatted_run_params) if hmc_reply(socket, 'Run parameters')
 
+    proposal_data = @test_mode ? hmc_formatted_test_data : hmc_formatted_data
+    proposal_data = placeholder_events(proposal_data.values)
+
     if hmc_reply(socket, 'Send proposals')
-      File.readlines(create_data_file).each do |line|
-        socket.puts line
-      end
+      proposal_data.each { |line| socket.puts line }
 
       if hmc_reply(socket, 'Launching HungarianMonteCarlo')
         update_schedule_runs(socket)
@@ -38,52 +36,40 @@ class HungarianMonteCarlo
   end
 
   def hmc_reply(socket, prompt)
-    begin
-      socket.gets.chomp.match?(prompt)
+    socket.gets.chomp.match?(prompt)
     rescue IOError => error
       @errors['HMC'] = "Error reading socket! #{error.message}"
-    end
   end
 
   def hmc_connect
-    begin
-      TCPSocket.open(@hmc_server, @hmc_port)
+    TCPSocket.open(@hmc_server, @hmc_port)
     rescue IOError => error
       @errors['HMC'] = "Error connecting to HMC! #{error.message}"
-    end
   end
 
   def update_schedule_runs(socket)
     # Update the schedule_runs table with the start time and the pid number
   end
 
-  def create_data_file
-    timestamp = DateTime.current.to_i
-    datafile_name = Rails.root.join("tmp/propfile-#{@year}-#{timestamp}.txt")
-    fh = File.open(datafile_name, 'w')
+  def hmc_formatted_test_data
+    proposals = Proposal.where(year: @run_params['year']).limit(program_weeks)
 
-    proposals = @test_mode ? testing_mode_proposals : accepted_proposals
+    proposals.shuffle.each_with_object({}) do |proposal, data|
+      next if invalid_proposal?(proposal)
 
-    proposals.each do |_code, params|
-      fh.puts(params)
+      priority = 2
+      code = proposal.code
+      preferred_dates = format_dates(proposal.preferred_dates).join(';')
+      impossible_dates = format_dates(proposal.impossible_dates).join(';')
+
+      data[code] = "#{code}:#{priority}: #{preferred_dates}: #{impossible_dates}:"
     end
-
-    fh.close
-    datafile_name
   end
 
-  def testing_mode_proposals
-    proposals = Proposal.where(year: @year).limit(program_weeks)
-    # do other processing...
-  end
-
-  def accepted_proposals
+  def hmc_formatted_data
     proposals = Proposal.where(assigned_location: @location)
-                        .where(outcome: 'Accepted').where(year: @year)
-
-    same_weeks = proposals.select { |p| p.same_week_as.present? }
-    week_afters = proposals.select { |p| p.week_after.present? }
-    half_workshops = proposals.select { |p| p.assigned_size == 'Half' }
+                        .where(outcome: 'Accepted')
+                        .where(year: @run_params['year'])
 
     skip_proposals = []
     proposals.shuffle.each_with_object({}) do |proposal, data|
@@ -91,61 +77,58 @@ class HungarianMonteCarlo
       next if skip_proposals.include?(proposal)
 
       priority = 2
-      priority = 1 if proposal.assigned_date.present?
       code = proposal.code
       preferred_dates = format_dates(proposal.preferred_dates).join(';')
       impossible_dates = format_dates(proposal.impossible_dates).join(';')
 
       if proposal.assigned_date.present?
+        priority = 1
         preferred_dates = format_dates([proposal.assigned_date]).first
       end
 
-      if same_weeks.include?(proposal)
-        other_proposal = proposal.same_week_as
-        code << " and #{other_proposal&.code}"
-
-        merged_dates = merge_preferred_dates(other_proposal, proposal)
-        preferred_dates = format_dates(merged_dates).join(';')
-
-        merged_dates = merge_impossible_dates(other_proposal, proposal)
-        impossible_dates = format_dates(merged_dates).join(';')
-
-        if data.key?(other_proposal&.code)
-          data.delete(other_proposal&.code)
-        else
-          skip_proposals << other_proposal
-        end
-      elsif half_workshops.include?(proposal)
-        # Half workshops without .same_week_as will be paired by the optimizer
+      if proposal.assigned_size == 'Half'
         code << " (1/2 workshop)"
       end
 
-      if week_afters.include?(proposal)
-        week_after_proposal = proposal.week_after
-        code = "#{week_after_proposal&.code} followed by #{proposal.code}"
+      if proposal.same_week_as.present?
+        code = "#{proposal.same_week_as&.code} and #{proposal.code}"
+        preferred_dates, impossible_dates, data, skip_proposals =
+          merge_and_purge(proposal.same_week_as, proposal, data, skip_proposals)
+      end
 
-        merged_dates = merge_preferred_dates(week_after_proposal, proposal)
-        preferred_dates = format_dates(merged_dates).join(';')
-
-        merged_dates = merge_impossible_dates(week_after_proposal, proposal)
-        impossible_dates = format_dates(merged_dates).join(';')
-
-        if data.key?(week_after_proposal&.code)
-          data.delete(week_after_proposal&.code)
-        else
-          skip_proposals << week_after_proposal
-        end
+      if proposal.week_after.present?
+        code = "#{proposal.week_after&.code} followed by #{proposal.code}"
+        preferred_dates, impossible_dates, data, skip_proposals =
+          merge_and_purge(proposal.week_after, proposal, data, skip_proposals)
       end
 
       data[code] = "#{code}:#{priority}: #{preferred_dates}: #{impossible_dates}:"
     end
   end
 
+  def placeholder_events(proposal_data)
+    return proposal_data if @location.exclude_dates.blank?
+
+    prefix = @run_params['year'].to_s.chars.last(2).join + 'w'
+    code_num = 6660
+
+    format_dates(@location.exclude_dates).each do |date|
+      proposal_data << "#{prefix}#{code_num}:1: #{date}: :"
+      code_num += 1
+    end
+    proposal_data
+  end
+
   private
 
-  def program_weeks
-    include SchedulesHelper
-    weeks_in_location(@location)
+  def set_hmc_params
+    @hmc_server = ENV['HMC_SERVER']
+    @hmc_port = ENV['HMC_PORT']
+    @hmc_access_code = ENV['HMC_ACCESS']
+
+    if [@hmc_server, @hmc_port, @hmc_access_code].any?(&:blank?)
+      @errors['HMC settings'] = "Missing HMC environment variable!"
+    end
   end
 
   def validate_location
@@ -164,10 +147,25 @@ class HungarianMonteCarlo
     required_keys = %w[run_id start_week number_of_weeks number_of_runs
                        number_of_best_cases]
 
+    @errors['Run parameters'] = ''
     unless (required_keys - @run_params.keys).empty?
-      @errors['Run parameters'] = "Run parameters must include at least these
+      @errors['Run parameters'] << "Run parameters must include at least these
         keys: #{required_keys.join(', ')}".squish
     end
+
+    required_keys.each_with_index do |key, i|
+      unless @run_params[i] == key
+        @erros['Run parameters'] << " Run parameters must be in this order:
+                                     #{required_keys.keys.join(' ')}".squish
+      end
+    end
+
+    @errors.delete('Run parameters') if @errors['Run parameters'].empty?
+  end
+
+  def program_weeks
+    include SchedulesHelper
+    weeks_in_location(@location)
   end
 
   def invalid_proposal?(proposal)
@@ -188,9 +186,23 @@ class HungarianMonteCarlo
   end
 
   def formatted_run_params
-    r = @run_params
-    r['run_id'] + ' ' + r['start_week'] + ' ' + r['number_of_weeks'] + ' ' +
-      r['number_of_runs'] + ' ' + r['number_of_best_cases']
+    @run_params.values.join(' ')
+  end
+
+  def merge_and_purge(proposal1, proposal2, data, skip_proposals)
+    merged_dates = merge_preferred_dates(proposal1, proposal2)
+    preferred_dates = format_dates(merged_dates).join(';')
+
+    merged_dates = merge_impossible_dates(proposal1, proposal2)
+    impossible_dates = format_dates(merged_dates).join(';')
+
+    if data.key?(proposal1&.code)
+      data.delete(proposal1&.code)
+    else
+      skip_proposals << proposal1
+    end
+
+    [preferred_dates, impossible_dates, data, skip_proposals]
   end
 
   def merge_preferred_dates(proposal1, proposal2)
