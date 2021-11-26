@@ -20,35 +20,35 @@ class HungarianMonteCarlo
     socket.puts @hmc_access_code if hmc_reply(socket, 'Access code')
     socket.puts('newrun') if hmc_reply(socket, 'READY')
     socket.puts(formatted_run_params) if hmc_reply(socket, 'Run parameters')
-
-    proposal_data = @test_mode ? hmc_formatted_test_data : hmc_formatted_data
-    proposal_data = placeholder_events(proposal_data.values)
-
-    if hmc_reply(socket, 'Send proposals')
-      proposal_data.each { |line| socket.puts line }
-
-      if hmc_reply(socket, 'Launching HungarianMonteCarlo')
-        update_schedule_runs(socket)
-      end
-    end
-
+    socket.puts proposal_data.join("\n") if hmc_reply(socket, 'Send proposals')
+    update_schedule_runs(socket)
     socket.close
   end
 
   def hmc_reply(socket, prompt)
     socket.gets.chomp.match?(prompt)
-    rescue IOError => error
-      @errors['HMC'] = "Error reading socket! #{error.message}"
+  rescue IOError => e
+      @errors['HMC'] = "Error reading socket! #{e.message}"
   end
 
   def hmc_connect
     TCPSocket.open(@hmc_server, @hmc_port)
-    rescue IOError => error
-      @errors['HMC'] = "Error connecting to HMC! #{error.message}"
+  rescue IOError => e
+      @errors['HMC'] = "Error connecting to HMC! #{e.message}"
   end
 
   def update_schedule_runs(socket)
     # Update the schedule_runs table with the start time and the pid number
+    # if hmc_reply(socket, 'Launching HungarianMonteCarlo')
+    #   ask for run_id
+    # else
+    #   report error condition
+    # end
+  end
+
+  def proposal_data
+    formatted_data = @test_mode ? hmc_formatted_test_data : hmc_formatted_data
+    add_placeholder_events(formatted_data.values)
   end
 
   def hmc_formatted_test_data
@@ -106,7 +106,7 @@ class HungarianMonteCarlo
     end
   end
 
-  def placeholder_events(proposal_data)
+  def add_placeholder_events(proposal_data)
     return proposal_data if @location.exclude_dates.blank?
 
     prefix = @run_params['year'].to_s.chars.last(2).join + 'w'
@@ -205,35 +205,48 @@ class HungarianMonteCarlo
     [preferred_dates, impossible_dates, data, skip_proposals]
   end
 
-  def merge_preferred_dates(proposal1, proposal2)
+  def assigned?(proposal1, proposal2)
+    proposal1.assigned_date.present? || proposal2.assigned_date.present?
+  end
+
+  def assigned(proposal1, proposal2)
     return [proposal1.assigned_date] if proposal1.assigned_date.present?
 
-    if proposal2.assigned_date.present?
-      return [proposal2.assigned_date - 1.week] if proposal2.week_after.present?
+    # see adjust_preferred_week() for explanation
+    return [proposal2.assigned_date - 1.week] if proposal2.week_after.present?
 
-      return [proposal2.assigned_date]
-    end
+    [proposal2.assigned_date]
+  end
 
-    proposal1_preferred = proposal1.preferred_dates
-    proposal2_preferred = proposal2.preferred_dates
+  def most_dates(proposal1, proposal2)
+    [proposal1.preferred_dates.count, proposal2.preferred_dates.count].max
+  end
+
+  def adjust_preferred_week(proposal)
+    preferred_dates = proposal.preferred_dates
 
     # For .week_after, both proposals will be given to the optimzer as one event,
     # "event1 followed by event2". Therefore, proposal2's preferred dates must
     # be set to a week earlier so that the schedule optimizer assigns it to
     # the actual preferred date of proposal2, the week after proposal1
-    if proposal2.week_after.present?
-      proposal2_preferred = proposal2.preferred_dates.map { |d| d - 1.week }
+    if proposal.week_after.present?
+      preferred_dates = proposal.preferred_dates.map { |d| d - 1.week }
     end
 
-    merged_dates = []
-    p1count = proposal1_preferred.count
-    p2count = proposal2_preferred.count
+    preferred_dates
+  end
 
-    (p1count > p2count ? p1count : p2count).times do |i|
-      merged_dates << proposal1_preferred[i] if proposal1_preferred[i]
-      merged_dates << proposal2_preferred[i] if proposal2_preferred[i]
+  def merge_preferred_dates(proposal1, proposal2)
+    return assigned(proposal1, proposal2) if assigned?(proposal1, proposal2)
+
+    proposal2_preferred = adjust_preferred_week(proposal2)
+
+    merged = []
+    most_dates(proposal1, proposal2).times do |i|
+      merged << proposal1.preferred_dates[i] if proposal1.preferred_dates[i]
+      merged << proposal2_preferred[i] if proposal2_preferred[i]
     end
-    merged_dates.uniq
+    merged.uniq
   end
 
   def merge_impossible_dates(proposal1, proposal2)
