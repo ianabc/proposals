@@ -15,8 +15,18 @@ RSpec.describe "/submitted_proposals", type: :request do
     create(:role_privilege,
            permission_type: "Manage", privilege_name: "SubmittedProposalsController", role_id: role.id)
   end
+  let(:role_privilege_reviews) do
+    create(:role_privilege,
+           permission_type: "Manage", privilege_name: "Review", role_id: role.id)
+  end
+  let(:role_privilege_email) do
+    create(:role_privilege,
+           permission_type: "Manage", privilege_name: "Email", role_id: role.id)
+  end
   before do
+    role_privilege_reviews
     role_privilege_controller
+    role_privilege_email
     user.roles << role
     sign_in user
   end
@@ -94,6 +104,24 @@ RSpec.describe "/submitted_proposals", type: :request do
     end
   end
 
+  describe "POST /send_emails" do
+    let(:email_template) { create(:email_template, email_type: :revision_type) }
+    let(:params) do
+      { cc_email: '',
+        bcc_email: '',
+        subject: email_template.subject,
+        body: email_template.body,
+        templates: "Revision: Revise Proposal" }
+    end
+    before do
+      post send_emails_submitted_proposal_path(proposal, params: params)
+    end
+
+    it "send emails to lead_organizer" do
+      expect(response).to redirect_to(edit_submitted_proposal_path(proposal))
+    end
+  end
+
   describe 'POST /submitted_proposals/approve_decline_proposals' do
     let(:email_template) { create(:email_template, email_type: :approval_type) }
     let(:params) do
@@ -159,5 +187,54 @@ RSpec.describe "/submitted_proposals", type: :request do
       delete submitted_proposal_url(proposal)
     end
     it { expect(Proposal.all.count).to eq(0) }
+  end
+
+  describe "POST /proposals_booklet" do
+    let(:params) do
+      {
+        proposal_ids: proposal.id,
+        table: "toc"
+      }
+    end
+
+    before do
+      post proposals_booklet_submitted_proposals_path(params: params)
+    end
+
+    it "render a successful response" do
+      expect(response).to have_http_status(202)
+    end
+  end
+
+  describe "POST /import_reviews" do
+    let(:params) do
+      { proposals: proposal.id }
+    end
+
+    before do
+      post import_reviews_submitted_proposals_path(params: params)
+    end
+
+    it "render a successful response" do
+      expect(response).to have_http_status(202)
+    end
+  end
+
+  describe "POST /reviews_booklet" do
+    let(:params) do
+      {
+        proposals: proposal.id,
+        reviewContentType: "both",
+        table: "toc"
+      }
+    end
+
+    before do
+      post reviews_booklet_submitted_proposals_path(params: params)
+    end
+
+    it "render a successful response" do
+      expect(response).to have_http_status(202)
+    end
   end
 end

@@ -139,4 +139,47 @@ RSpec.describe "/submit_proposals", type: :request do
       expect(response).to have_http_status(:ok)
     end
   end
+
+  describe "POST /invitation_template" do
+    let(:proposal_role) { create(:proposal_role, proposal: proposal) }
+    context "when params contain organizer" do
+      let(:params) do
+        {
+          invited_as: 'organizer',
+          proposal: proposal.id
+        }
+      end
+      let(:email_template) { create(:email_template) }
+
+      before do
+        proposal_role.role.update(name: 'lead_organizer')
+        email_template.update(email_type: "organizer_invitation_type")
+        post invitation_template_submit_proposals_url, params: params
+      end
+
+      it "render a successful response" do
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "when params contain participant" do
+      let(:params) do
+        {
+          invited_as: 'participant',
+          proposal: proposal.id
+        }
+      end
+      let(:email_template) { create(:email_template) }
+
+      before do
+        proposal_role.role.update(name: 'lead_organizer')
+        email_template.update(email_type: "participant_invitation_type")
+        post invitation_template_submit_proposals_url, params: params
+      end
+
+      it "render a successful response" do
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
 end
