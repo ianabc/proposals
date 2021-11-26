@@ -1,3 +1,3 @@
 class Schedule < ApplicationRecord
-  belongs_to :run
+  belongs_to :schedule_run
 end

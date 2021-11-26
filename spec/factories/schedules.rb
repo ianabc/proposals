@@ -6,6 +6,6 @@ FactoryBot.define do
     hmc_score { 43 }
     proposal { 'Faker::Lorem.paragraph' }
 
-    association :run, factory: :run, strategy: :create
+    association :run, factory: :schedule_run, strategy: :create
   end
 end

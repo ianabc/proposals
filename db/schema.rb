@@ -422,7 +422,7 @@ ActiveRecord::Schema.define(version: 2021_11_23_075332) do
     t.integer "role_type", default: 0
   end
 
-  create_table "runs", force: :cascade do |t|
+  create_table "schedule_runs", force: :cascade do |t|
     t.datetime "start_time"
     t.datetime "end_time"
     t.integer "pid"
@@ -432,7 +432,7 @@ ActiveRecord::Schema.define(version: 2021_11_23_075332) do
     t.integer "cases"
     t.integer "aborted"
     t.integer "year"
-    t.string "location"
+    t.integer "location_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -442,10 +442,10 @@ ActiveRecord::Schema.define(version: 2021_11_23_075332) do
     t.integer "week"
     t.integer "hmc_score"
     t.string "proposal"
-    t.bigint "run_id"
+    t.bigint "schedule_run_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["run_id"], name: "index_schedules_on_run_id"
+    t.index ["schedule_run_id"], name: "index_schedules_on_schedule_run_id"
   end
 
   create_table "staff_discussions", force: :cascade do |t|
@@ -581,7 +581,7 @@ ActiveRecord::Schema.define(version: 2021_11_23_075332) do
   add_foreign_key "reviews", "people"
   add_foreign_key "reviews", "proposals"
   add_foreign_key "role_privileges", "roles"
-  add_foreign_key "schedules", "runs"
+  add_foreign_key "schedules", "schedule_runs"
   add_foreign_key "staff_discussions", "proposals"
   add_foreign_key "subject_area_categories", "subject_categories"
   add_foreign_key "subject_area_categories", "subjects"

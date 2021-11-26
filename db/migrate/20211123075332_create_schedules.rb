@@ -6,7 +6,7 @@ class CreateSchedules < ActiveRecord::Migration[6.1]
       t.integer :hmc_score
       t.string :proposal
 
-      t.references :run, null: true, foreign_key: true
+      t.references :schedule_run, null: true, foreign_key: true
 
       t.timestamps
     end
