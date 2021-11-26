@@ -143,6 +143,15 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
+  def update_location
+    location = params[:location]
+    if @proposal.update(assigned_location_id: location)
+      render json: {}, status: :ok
+    else
+      render json: @proposal.errors.full_messages, location: :unprocessable_entity
+    end
+  end
+
   def import_reviews
     ImportJob.perform_later(params[:proposals], current_user, params[:action])
     head :accepted

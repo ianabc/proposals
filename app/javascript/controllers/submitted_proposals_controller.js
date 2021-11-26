@@ -6,7 +6,7 @@ import Tagify from '@yaireo/tagify'
 export default class extends Controller {
   static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus',
                      'organizersEmail', 'bothReviews', 'scientificReviews', 'ediReviews',
-                     'reviewToc', 'reviewNToc' ]
+                     'reviewToc', 'reviewNToc', 'proposalLocation', 'locationOptions', 'location' ]
 
   connect () {
     let proposalId = 0
@@ -172,6 +172,16 @@ export default class extends Controller {
     }
   }
 
+  handleLocations() {
+    let currentLocationId = event.currentTarget.dataset.id
+    for(var i = 0; i < this.locationOptionsTargets.length; i++){
+      if(currentLocationId === this.locationOptionsTargets [`${i}`].dataset.id){
+        this.proposalLocationTargets [`${i}`].classList.add("hidden")
+        this.locationOptionsTargets [`${i}`].classList.remove("hidden")
+      }
+    }
+  }
+
   proposalStatuses() {
     let id = event.currentTarget.dataset.id
     let status = ''
@@ -181,6 +191,26 @@ export default class extends Controller {
         status = this.statusTargets [`${i}`].value
         $.post(`/submitted_proposals/${id}/update_status?status=${status}`, function() {
           toastr.success('Proposal status has been updated!')
+          setTimeout(function() {
+            window.location.reload();
+          }, 1000)
+        })
+        .fail(function(res) {
+          res.responseJSON.forEach((msg) => toastr.error(msg))
+        });
+      }
+    }
+  }
+
+  proposalLocations() {
+    let id = event.currentTarget.dataset.id
+    let location = ''
+    let _this = this
+    for(var i = 0; i < this.locationTargets.length; i++){
+      if(id === this.locationTargets [`${i}`].dataset.id){
+        location = this.locationTargets [`${i}`].value
+        $.post(`/submitted_proposals/${id}/update_location?location=${location}`, function() {
+          toastr.success('Proposal location has been updated!')
           setTimeout(function() {
             window.location.reload();
           }, 1000)

@@ -8,6 +8,7 @@
       <th>Proposal Type</th>
       <th>Lead Organizer</th>
       <th>Preferred Location</th>
+      <th>Assigned Location</th>
       <th>Status</th>
       <th>Outcome</th>
       <th width="125">Updated</th>
@@ -29,6 +30,15 @@
         <% proposal.locations.each do |loc| %>
          <%= loc.name %><br>
         <% end %>
+      </td>
+      <td>
+        <div class="form-group" data-submitted-proposals-target="proposalLocation" data-id=<%= proposal.id %> >
+          <label data-action="click->submitted-proposals#handleLocations" data-id=<%= proposal.id %>><%= proposal.assigned_location&.code %></label>
+        </div>
+        <div class="hidden form-group" data-submitted-proposals-target="locationOptions" data-id=<%= proposal.id %> >
+          <input type="hidden" id="proposal_id" name="proposal_id" value="<%= proposal.id %>">
+          <%= select_tag :status, options_for_select(locations), include_blank: '', class: 'form-select', data: { 'action': 'change->submitted-proposals#proposalLocations', 'submitted-proposals-target': 'location', 'id': proposal.id }, required: true %>
+        </div>
       </td>
       <td class=<%= proposal_status_class(proposal.status) %> >
         <div class="form-group" data-submitted-proposals-target="proposalStatus" data-id=<%= proposal.id %> >
