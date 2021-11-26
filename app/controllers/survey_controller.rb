@@ -11,9 +11,7 @@ class SurveyController < ApplicationController
   end
 
   def submit_survey
-    demographic_data = DemographicData.new
-    demographic_data.result = questionnaire_answers
-    demographic_data.person = current_user.person || @invite.person
+    demographic_data = new_demographic_data(DemographicData.new)
     if demographic_data.save
       invite_response_save
       post_demographic_form_path
@@ -24,6 +22,12 @@ class SurveyController < ApplicationController
   end
 
   private
+
+  def new_demographic_data(demographic_data)
+    demographic_data.result = questionnaire_answers
+    demographic_data.person = current_user&.person || @invite&.person
+    demographic_data
+  end
 
   def questionnaire_answers
     answers = questionnaire_params

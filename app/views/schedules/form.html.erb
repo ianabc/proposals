@@ -1,0 +1,98 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Schedules
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </a></li>
+          <li class="breadcrumb-item active" aria-current="page">Schedule</li>
+          <li class="breadcrumb-item active" aria-current="page">Form</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <div>
+              <h1 class="mb-3">Enter parameters for HungarianMonteCarlo:</h1>
+              <form class="mb-3">
+                <table class="table" border="1">
+                  <thead>
+                    <tr>
+                      <th width="350">Parameter</th>
+                      <th width="200">Value</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Date first workshop begins:</td>
+                      <td>
+                        <input disabled="true" type="text" name="start_date" value="<%= @location&.start_date %>">
+                      </td>
+                      <td>
+                        <p>The format is: YYYY-MM-DD.</p>
+                        <p>For the CMO program, the default start date is sometimes the 1st week of May or last week of April.</p>
+                        <p>For IASM, it has been the 1st week of September.</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Number of weeks in program year:</td>
+                      <td>
+                        <input disabled="true" type="text" name="weeks" value="<%= weeks_in_location(@location) %>">
+                      </td>
+                      <td>
+                        <p>In 2010, BIRS had workshops for 48 weeks.</p>
+                        <p>The CMO program ran 32 weeks in 2017, with nothing scheduled July or the US & Canadian Thanksgiving weeks in November.</p>
+                        <p>The AIS-H program ran 10 weeks in 2020.</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Number of iterations to run:</td>
+                      <td>
+                        <input type="text" name="runs">
+                      </td>
+                      <td>
+                        <p>As this number increases, the level of optimization increases, as does the time it takes to run. Adding more iterations will not improve optimization past the upper bound for a given data set, but it will increase the time it takes for the run to complete.
+                        The upper bound is usually reached somewhere between 1 and 10 million iterations. <span>1 million iterations takes about 45 minutes to complete.</span></p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Number of cases in the result set:</td>
+                      <td>
+                        <input type="text" name="cases">
+                      </td>
+                      <td>
+                        <p>Each iteration produces a set of results called "cases". This parameter is the number of cases to show in the results, ordered from most optimized to least.</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Enable Test Mode:</td>
+                      <td>
+                        <div>
+                          <input type="radio" name="mode" id="onMode">
+                          <label for="onMode">On</label>
+                          <input type="radio" checked="true" name="mode" id="offMode">
+                          <label for="offMode">Off</label>
+                        </div>
+                      </td>
+                      <td>
+                        <p>Enabling test mode selects the first <em>x</em> number of proposals, instead of selecting only approved proposals. <em>x</em> is equal to the number of weeks specified in this form.</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div>
+                  <button>Run HMC with the above parameters</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

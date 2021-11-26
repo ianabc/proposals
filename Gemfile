@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.7.3'
+ruby '2.7.4'
 
 gem 'aasm', '~> 5.1', '>= 5.1.1'
 gem 'acts_as_list'
@@ -21,13 +21,14 @@ gem 'pdf-reader', '~> 1.0', '>= 1.0.2'
 gem 'pg'
 gem 'pg_search'
 gem 'puma', '~> 5.0'
-gem 'rails', '~> 6.1.3'
+gem 'rails', '~> 6.1.4'
 gem 'rails-latex'
+gem 'redis'
 gem 'rest-client'
 gem 'rollbar'
 gem 'sass-rails', '>= 6'
 gem 'tinymce-rails'
-gem 'turbo-rails'
+gem 'turbo-rails', '~> 0.8.2'
 gem 'webpacker', '~> 5.0'
 group :development, :test do
   gem 'byebug'
