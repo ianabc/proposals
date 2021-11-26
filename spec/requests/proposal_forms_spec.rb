@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "/proposal_forms", type: :request do
   let(:proposal_type) { create(:proposal_type) }
+  let(:proposal_type2) { create(:proposal_type) }
   let(:proposal_form) do
     create(:proposal_form, status: 'draft', proposal_type: proposal_type)
   end
@@ -78,16 +79,19 @@ RSpec.describe "/proposal_forms", type: :request do
 
   describe "GET /show" do
     before do
-      get proposal_type_proposal_form_url(proposal_type, proposal_form)
+      get proposal_type_proposal_form_url(proposal_type2, proposal_form)
     end
 
     it { expect(response).to have_http_status(:ok) }
   end
 
   describe "GET /edit" do
+    let(:proposal_form) do
+      create(:proposal_form, status: 'active', proposal_type: proposal_type)
+    end
     it "render a successful response" do
       get edit_proposal_type_proposal_form_url(proposal_type, proposal_form)
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_http_status(302)
     end
   end
 
