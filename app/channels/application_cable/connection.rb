@@ -8,12 +8,12 @@ module ApplicationCable
 
     private
 
-      def find_verified_user
-        if env['warden'].user&.staff_member?
-          env['warden'].user
-        else
-          reject_unauthorized_connection
-        end
+    def find_verified_user
+      if env['warden'].user&.staff_member?
+        env['warden'].user
+      else
+        reject_unauthorized_connection
       end
+    end
   end
 end
