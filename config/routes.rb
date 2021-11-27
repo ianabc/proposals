@@ -153,4 +153,7 @@ Rails.application.routes.draw do
   end
 
   resources :email_templates
+
+  # Serve websocket cable requests in-process (passenger runs separate process)
+  mount ActionCable.server => '/cable'
 end
