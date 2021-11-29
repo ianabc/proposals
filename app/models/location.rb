@@ -8,11 +8,11 @@ class Location < ApplicationRecord
   validate :date_rules
 
   def date_rules
-    check_valid_date_range
     return if start_date.nil? || end_date.nil?
 
     check_greater_date
     check_equal_date
+    check_valid_date_range
     check_valid_exclude_dates
   end
 
@@ -38,8 +38,9 @@ class Location < ApplicationRecord
     errors.add("End Date", "must be a Friday.") unless end_date.friday?
   end
 
-  def parse_exclude_date(ds)
+  def parse_exclude_date(date_string)
     field = 'Exclude Dates'
+    ds = date_string
     begin
       date = Date.parse(ds)
       errors.add(field, "#{ds} must be after Start Date") if date < start_date

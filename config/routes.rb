@@ -44,6 +44,12 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :schedules do
+    collection do
+      get :form
+    end
+  end
+
   get :invite, to: 'invites#show'
   get 'cancelled' => 'invites#cancelled'
   post 'cancel' => 'invites#cancel'
