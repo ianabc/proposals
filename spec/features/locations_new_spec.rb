@@ -99,6 +99,7 @@ RSpec.feature "Locations new", type: :feature do
 
       fill_in 'location_start_date', with: start_date
       fill_in 'location_end_date', with: end_date
+
       click_button 'Create New Location'
 
       expect(page.body).to have_text('Start date 2023-06-04 - cannot be same as

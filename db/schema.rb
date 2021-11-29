@@ -137,11 +137,11 @@ ActiveRecord::Schema.define(version: 2021_11_26_072303) do
     t.integer "status", default: 0
     t.integer "response"
     t.string "code"
+    t.datetime "deadline_date"
     t.bigint "proposal_id", null: false
     t.bigint "person_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.datetime "deadline_date"
     t.index ["person_id"], name: "index_invites_on_person_id"
     t.index ["proposal_id"], name: "index_invites_on_proposal_id"
   end
@@ -153,6 +153,9 @@ ActiveRecord::Schema.define(version: 2021_11_26_072303) do
     t.string "code"
     t.string "city"
     t.string "country"
+    t.date "start_date"
+    t.date "end_date"
+    t.text "exclude_dates", default: [], array: true
   end
 
   create_table "logs", force: :cascade do |t|
@@ -291,8 +294,8 @@ ActiveRecord::Schema.define(version: 2021_11_26_072303) do
     t.bigint "created_by_id"
     t.bigint "updated_by_id"
     t.string "title"
-    t.text "introduction"
     t.integer "version", default: 0
+    t.text "introduction"
     t.text "introduction2"
     t.text "introduction3"
     t.text "introduction_charts"
