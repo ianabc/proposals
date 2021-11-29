@@ -42,6 +42,10 @@ RSpec.feature "Locations new", type: :feature do
     expect(find_field('location_end_date').value).to eq(nil)
   end
 
+  scenario "there is an empty Exclude Dates field" do
+    expect(find_field('location_exclude_dates').value).to eq([])
+  end
+
   def fill_in_geography
     fill_in 'location_name', with: 'New york'
     fill_in 'location_code', with: 'NY'

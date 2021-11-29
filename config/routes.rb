@@ -120,6 +120,9 @@ Rails.application.routes.draw do
     member do
       get :proposal_types
     end
+    collection do
+      post :weeks_exclude_dates
+    end
   end
   resources :page_contents
 

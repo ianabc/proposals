@@ -54,6 +54,8 @@ class Location < ApplicationRecord
     return if exclude_dates.blank?
 
     exclude_dates.each do |date_string|
+      next if date_string.blank?
+
       parse_exclude_date(date_string)
     end
   end
