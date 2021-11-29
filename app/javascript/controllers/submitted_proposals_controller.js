@@ -6,7 +6,7 @@ import Tagify from '@yaireo/tagify'
 export default class extends Controller {
   static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus',
                      'organizersEmail', 'bothReviews', 'scientificReviews', 'ediReviews',
-                     'reviewToc', 'reviewNToc' ]
+                     'reviewToc', 'reviewNToc', 'outcome', 'selectedLocation', 'assignedSize' ]
 
   connect () {
     let proposalId = 0
@@ -393,6 +393,53 @@ export default class extends Controller {
     }
     else {
       toastr.error('Only .pdf and .txt files are allowed.')
+    }
+  }
+
+  outcomeLocationModal() {
+   var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[0] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      $("#outcome-window").modal('show')
+    } 
+  }
+
+  outcomeLocation() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[0] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      let data = new FormData()
+      let outcome = this.outcomeTarget.value
+      let location = this.selectedLocationTarget.value
+      let size = this.assignedSizeTarget.value
+      var url = `/submitted_proposals/proposal_outcome_location`
+      $.ajax({
+        url,
+        type: "POST",
+        data: {
+          'proposal': {
+            'id': proposalIds,
+            outcome,
+            'assigned_location_id': location,
+            'assigned_size': size
+          }
+        },
+        success: () => {
+          toastr.success('Saved successfully!')
+        }
+      })
     }
   }
 }

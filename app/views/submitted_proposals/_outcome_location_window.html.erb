@@ -1,0 +1,30 @@
+<div class="modal fade" id="outcome-window" tabindex="-1" aria-labelledby="outcome-windowLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Outcome Location Workshop Size</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-justify" style="text-align: justify;" >
+        <div class="mb-3">
+          <div class="mb-3">
+            <label>Outcome</label>
+            <%= select_tag :outcome, options_for_select([['Approved', 'Approved'], ['Rejected', 'Rejected']]), include_blank: '', class: 'form-select w-25', data: { 'submitted-proposals-target': 'outcome' } %>
+          </div>
+          <div class="mb-3">
+            <label>Location</label>
+            <%= select_tag :location, options_for_select(locations), include_blank: '', class: 'form-select w-25', data: { 'submitted-proposals-target': 'selectedLocation' } %>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Workshop Size</label>
+            <%= select_tag :size, options_for_select([['Half', 'Half'], ['Full', 'Full']]), include_blank: '', class: 'form-select w-25', data: { 'submitted-proposals-target': 'assignedSize' } %>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button data-action="click->submitted-proposals#outcomeLocation" class="btn btn-secondary">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
