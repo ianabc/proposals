@@ -51,11 +51,11 @@
             </div>
             <div class="mb-3">
               <%= f.label :'Start Date' , class: 'form-label' %><br>
-              <%= f.text_field :start_date, type: 'date', value: @location.start_date, data: {'action': 'change->location#excludeDatesList', 'location-target': 'startDate'} %>
+              <%= f.text_field :start_date, type: 'date', value: @location.start_date.to_date, data: {'action': 'change->location#excludeDatesList', 'location-target': 'startDate'} %>
             </div>
             <div class="mb-3">
               <%= f.label :'End Date' , class: 'form-label' %><br>
-              <%= f.text_field :end_date, type: 'date', value: @location.end_date, data: {'action': 'change->location#excludeDatesList', 'location-target': 'endDate'} %>
+              <%= f.text_field :end_date, type: 'date', value: @location.end_date.to_date, data: {'action': 'change->location#excludeDatesList', 'location-target': 'endDate'} %>
             </div>
             <div class="mb-3">
               <%= f.label :'Exclude Dates' , class: 'form-label' %><br>

@@ -49,16 +49,20 @@ class LocationsController < ApplicationController
   end
 
   def weeks_exclude_dates
-    start_date = params[:start].to_date
-    end_date = params[:end].to_date - 5.days
-    exclude_dates = []
-    while start_date <= end_date
-      week_days = start_date
-      week_days += 6.days
-      exclude_dates << "#{start_date} - #{week_days}"
-      start_date = week_days
+    if params[:start].blank? || params[:end].blank?
+      render json: { errors: "Date cannot be empty." }, status: :unprocessable_entity
+    else
+      start_date = params[:start].to_date
+      end_date = params[:end].to_date - 5.days
+      exclude_dates = []
+      workshop_start_date = start_date
+      while workshop_start_date <= end_date
+        workshop_end_date = workshop_start_date + 5.days # 5-Day Workshops
+        exclude_dates << "#{workshop_start_date} - #{workshop_end_date}"
+        workshop_start_date += 7.days
+      end
+      render json: { exclude_dates: exclude_dates }, status: :ok
     end
-    render json: { exclude_dates: exclude_dates }, status: :ok
   end
 
   private

@@ -53,6 +53,12 @@ export default class extends Controller {
           selectBox.appendChild(opt);
         });
       })
+      .fail(function(response) {
+        let errors = response.responseJSON
+        $.each(errors, function(index, error) {
+          toastr.error(error)
+        })
+      });
     }
   }
 }
