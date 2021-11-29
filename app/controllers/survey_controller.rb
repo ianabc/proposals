@@ -13,7 +13,8 @@ class SurveyController < ApplicationController
   def submit_survey
     demographic_data = new_demographic_data(DemographicData.new)
     if demographic_data.save
-      invite_response_save
+      return if session[:is_invited_person] && !check_params
+
       post_demographic_form_path
     else
       redirect_to survey_questionnaire_survey_index_path(code: @invite&.code),
@@ -22,6 +23,19 @@ class SurveyController < ApplicationController
   end
 
   private
+
+  def check_params
+    invite_response_save if @invite && params[:response].present?
+
+    if @invite.nil?
+      redirect_to root_path, alert: 'Invite is empty.'
+      return false
+    elsif params[:response].empty?
+      redirect_to root_path, alert: 'Response is empty.'
+      return false
+    end
+    true
+  end
 
   def new_demographic_data(demographic_data)
     demographic_data.result = questionnaire_answers
