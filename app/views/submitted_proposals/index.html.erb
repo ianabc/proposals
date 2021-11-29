@@ -73,10 +73,10 @@
                     <div class="text-end m-3">
                       <span data-action="click->submitted-proposals#tableOfContent" class="btn btn-primary proposal-booklet-btn">Create Booklet</span>
                       <span data-action="click->submitted-proposals#editFlow" class="btn btn-primary">Send to EditFlow</span>
-                     <!--  <%= link_to "Download CSV", download_csv_submitted_proposals_url( {:format => :csv}.merge(params.permit!)), class: "btn btn-primary" %> -->
                       <button data-action="click->submitted-proposals#downloadCSV" class="btn btn-primary">Download CSV</button>
-                      <span data-action="click->submitted-proposals#emailModal" id="approve" class="btn btn-primary">Approve Selected Proposals</span>
-                      <span data-action="click->submitted-proposals#emailModal" id="decline" class="btn btn-primary">Decline Selected Proposals</span>
+                      <span data-action="click->submitted-proposals#emailModal" class="btn btn-primary">Send Decision Email</span>
+                      <span data-action="click->submitted-proposals#outcomeLocationModal" id="decline" class="btn btn-primary">Set Outcome/Location</span>
+                      <%= render 'outcome_location_window' %>
                       <%= render 'email_templates' %>
                     </div>
                     <div class="text-end m-3">

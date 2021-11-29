@@ -46,31 +46,36 @@ RSpec.describe "/profile", type: :request do
   end
 
   describe "POST /demographic_data" do
-    let(:survey_params) do
-      {
-        "survey" => { "citizenships" => ["Åland Islands"], "indigenous_person" => "No",
-                      "ethnicity" => ["Arab"], "gender" => "Man",
-                      "community" => "No", "disability" => "No",
-                      "minorities" => "No", "stem" => "Yes", "underRepresented" => "Prefer not to answer" }
-      }
-    end
-
     context "with valid parameters" do
+      let(:survey_params) do
+        {
+          "survey" => { "citizenships" => ["Åland Islands"], "indigenous_person" => "No",
+                        "ethnicity" => ["Arab"], "gender" => "Man",
+                        "community" => "No", "disability" => "No",
+                        "minorities" => "No", "stem" => "Yes", "underRepresented" => "Prefer not to answer" }
+        }
+      end
       before do
         post demographic_data_path(person), params: { profile_survey: survey_params }
       end
 
-      it "updates the requested Person" do
+      it "updates the person's demographic_data" do
         expect(response).to redirect_to profile_path
       end
     end
 
     context "with invalid parameters" do
-      before do
-        post demographic_data_path(person), params: { profile_survey: survey_params }
+      let(:survey_params) do
+        {
+          "survey" => " "
+        }
       end
 
-      it "does not update Person" do
+      before do
+        post demographic_data_path(person), params: { profile_survey: 'survey_params' }
+      end
+
+      it "does not update person's demographic_data" do
         expect(response).to redirect_to profile_path
       end
     end

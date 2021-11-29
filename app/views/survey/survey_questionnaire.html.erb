@@ -8,6 +8,8 @@
               <div data-controller="survey">
                 <%= form_for :survey, url: submit_survey_survey_index_path(code: params[:code], response: params[:response]), method: :post do |f| %>
                   <div class="col-lg-8">
+                    <%= f.hidden_field :code, value: params[:code] %>
+                    <%= f.hidden_field :response, value: params[:response] %>
                     <div class="mb-3"> 
                       <div>
                         <label class="form-label required">1. What is your country of citizenship? &dagger;</label>

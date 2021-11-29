@@ -71,8 +71,7 @@ services:
       - UBCO_EMAIL=ubco@example.com
       - EDITFLOW_API_TOKEN=
       - EDITFLOW_API_URL=
-      - REDIS_URL='redis://host:port'
-      - REDIS_DB=0
+      - REDIS_URL='redis://host:port/0'
 
 
 volumes:

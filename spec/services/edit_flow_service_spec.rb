@@ -48,6 +48,7 @@ RSpec.describe 'EditFlowService' do
   end
 
   it "assigns the lead organizer's country code" do
+    update_organizers
     country = @proposal.lead_organizer.country
     code = Country.find_country_by_name(country).alpha2
     expect(@efs.proposal_country.alpha2).to eq(code)

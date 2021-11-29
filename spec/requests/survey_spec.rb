@@ -45,25 +45,59 @@ RSpec.describe "/survey", type: :request do
   end
 
   describe "POST /submit_survey" do
-    let(:params) do
-      { code: invite.code,
-        response: invite.response,
-        survey: { "citizenships" => ["", "Algeria"],
-                  "citizenships_other" => "",
-                  "indigenous_person" => "No",
-                  "indigenous_person_yes" => [""],
-                  "ethnicity" => ["", "Arab"],
-                  "ethnicity_other" => "",
-                  "gender" => "Man", "gender_other" => "",
-                  "community" => "No", "disability" => "No",
-                  "minorities" => "Yes", "stem" => "Yes",
-                  "underRepresented" => "Yes" } }
-    end
-    let(:demographic_data) { build(:demographic_data, person_id: invite.person) }
+    context "with valid parameters" do
+      let(:params) do
+        { code: invite.code,
+          response: 'yes',
+          survey: { "citizenships" => ["", "Algeria"],
+                    "citizenships_other" => "",
+                    "indigenous_person" => "No",
+                    "indigenous_person_yes" => [""],
+                    "ethnicity" => ["", "Arab"],
+                    "ethnicity_other" => "",
+                    "gender" => "Man", "gender_other" => "",
+                    "community" => "No", "disability" => "No",
+                    "minorities" => "Yes", "stem" => "Yes",
+                    "underRepresented" => "Yes" } }
+      end
+      let(:demographic_data) { build(:demographic_data, person_id: invite.person) }
 
-    it "renders a successful response" do
-      post submit_survey_survey_index_path(params: params)
-      expect(response).to have_http_status(:found)
+      before do
+        invite.update(status: 'confirmed')
+        post submit_survey_survey_index_path(params: params)
+      end
+
+      it "renders a successful response" do
+        expect(response).to have_http_status(:found)
+      end
+    end
+
+    context "with invalid parameters" do
+      let(:params) do
+        { code: invite.code,
+          response: invite.response,
+          survey: { "citizenships" => ["", "Algeria"],
+                    "citizenships_other" => "",
+                    "indigenous_person" => "No",
+                    "indigenous_person_yes" => [""],
+                    "ethnicity" => ["", "Arab"],
+                    "ethnicity_other" => "",
+                    "gender" => "Man", "gender_other" => "",
+                    "community" => "No", "disability" => "No",
+                    "minorities" => "Yes", "stem" => "Yes",
+                    "underRepresented" => "Yes" } }
+      end
+      let(:demographic_data) { build(:demographic_data, person_id: 0) }
+
+      before do
+        invite.update(status: 'confirmed')
+        post submit_survey_survey_index_path(params: params)
+      end
+
+      it "renders a successful response" do
+        post submit_survey_survey_index_path(params: params)
+        expect(response).to have_http_status(:found)
+      end
     end
   end
 end

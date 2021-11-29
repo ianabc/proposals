@@ -143,6 +143,15 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
+  def update_location
+    location = params[:location]
+    if @proposal.update(assigned_location_id: location)
+      render json: {}, status: :ok
+    else
+      render json: @proposal.errors.full_messages, location: :unprocessable_entity
+    end
+  end
+
   def import_reviews
     ImportJob.perform_later(params[:proposals], current_user, params[:action])
     head :accepted
@@ -182,10 +191,24 @@ class SubmittedProposalsController < ApplicationController
     end
   end
 
+  def proposal_outcome_location
+    proposals = Proposal.where(selected_proposal_ids)
+    proposals.update_all(outcome_location_params.to_hash)
+    head :ok
+  end
+
   private
+
+  def selected_proposal_ids
+    params.require(:proposal).permit(id: [])
+  end
 
   def query_params?
     params.values.any?(&:present?)
+  end
+
+  def outcome_location_params
+    params.require(:proposal).permit(:outcome, :assigned_location_id, :assigned_size)
   end
 
   def email_params

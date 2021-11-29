@@ -4,6 +4,7 @@ class EmailsController < ApplicationController
   def new
     @email_templates = EmailTemplate.all
     @email = Email.new
+    @proposal = Proposal.find(params[:id])
   end
 
   def email_template
@@ -15,34 +16,21 @@ class EmailsController < ApplicationController
   end
 
   def email_types
-    @email_type = "approval_type" if params[:type] == "approve"
-    @email_type = "reject_type" if params[:type] == "decline"
-    @email_templates = EmailTemplate.where(email_type: @email_type)
-    @templates = []
-    make_templates
-    render json: { email_templates: @templates }, status: :ok
+    email_templates = []
+    email_templates << EmailTemplate.where(email_type: %w[approval_type reject_type])
+    templates = []
+    templates = make_templates(email_templates, templates) if email_templates
+    render json: { email_templates: templates }, status: :ok
   end
 
   private
 
-  def make_templates
-    @email_templates.each do |template|
-      @email_type = template.email_type.split('_').first.capitalize
-      @templates << case @email_type
-                    when 'Decision'
-                      "#{@email_type} Email: #{template.title}"
-                    when 'Revision'
-                      arr = email_type.split('_')
-                      if arr[1] == 'spc'
-                        "#{@email_type} SPC: #{template.title}"
-                      else
-                        "#{@email_type}: #{template.title}"
-                      end
-                    else
-                      "#{@email_type}: #{template.title}"
-
-                    end
+  def make_templates(email_templates, templates)
+    email_templates.flatten.each do |template|
+      email_type = template.email_type.split('_').first.capitalize
+      templates << "#{email_type}: #{template.title}"
     end
+    templates
   end
 
   def find_email_type(template)

@@ -10,10 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_18_110337) do
+ActiveRecord::Schema.define(version: 2021_11_26_072303) do
 
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pgcrypto"
 
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
@@ -391,6 +391,8 @@ ActiveRecord::Schema.define(version: 2021_11_18_110337) do
     t.integer "same_week_as"
     t.integer "week_after"
     t.integer "assigned_location_id"
+    t.string "assigned_size"
+
     t.index ["code"], name: "index_proposals_on_code", unique: true
     t.index ["proposal_form_id"], name: "index_proposals_on_proposal_form_id"
     t.index ["proposal_type_id"], name: "index_proposals_on_proposal_type_id"
@@ -427,6 +429,32 @@ ActiveRecord::Schema.define(version: 2021_11_18_110337) do
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "system_generated", default: false
     t.integer "role_type", default: 0
+  end
+
+  create_table "schedule_runs", force: :cascade do |t|
+    t.datetime "start_time"
+    t.datetime "end_time"
+    t.integer "pid"
+    t.date "startweek"
+    t.integer "weeks"
+    t.integer "runs"
+    t.integer "cases"
+    t.integer "aborted"
+    t.integer "year"
+    t.integer "location_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "schedules", force: :cascade do |t|
+    t.integer "case_num"
+    t.integer "week"
+    t.integer "hmc_score"
+    t.string "proposal"
+    t.bigint "schedule_run_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["schedule_run_id"], name: "index_schedules_on_schedule_run_id"
   end
 
   create_table "staff_discussions", force: :cascade do |t|
@@ -562,6 +590,7 @@ ActiveRecord::Schema.define(version: 2021_11_18_110337) do
   add_foreign_key "reviews", "people"
   add_foreign_key "reviews", "proposals"
   add_foreign_key "role_privileges", "roles"
+  add_foreign_key "schedules", "schedule_runs"
   add_foreign_key "staff_discussions", "proposals"
   add_foreign_key "subject_area_categories", "subject_categories"
   add_foreign_key "subject_area_categories", "subjects"
