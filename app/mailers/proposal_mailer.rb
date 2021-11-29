@@ -55,7 +55,7 @@ class ProposalMailer < ApplicationMailer
   end
 
   def mail_attachments
-    return unless @email&.files&.attached?
+    return unless @email.files.attached?
 
     @email.files.each do |file|
       attachments[file.blob.filename.to_s] = {
