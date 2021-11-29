@@ -114,6 +114,7 @@ class InvitesController < ApplicationController
     if @invite.no? && @invite.save
       send_email_on_response
     elsif %(yes maybe).include? @invite.response
+      session[:is_invited_person] = true
       redirect_to new_person_path(code: @invite.code, response: @invite.response)
     else
       redirect_to invite_url(code: @invite&.code),

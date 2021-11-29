@@ -1,7 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe "/emails", type: :request do
-  let(:email) { create(:birs_email) }
+  let(:proposal) { create(:proposal, :with_organizers, status: :decision_pending) }
+  let(:email) { create(:birs_email, proposal_id: proposal.id) }
   let!(:email_template) { create(:email_template, email_type: 'revision_type', title: 'test') }
   let(:role) { create(:role, name: 'Staff') }
   let(:user) { create(:user) }
@@ -16,24 +17,87 @@ RSpec.describe "/emails", type: :request do
   end
 
   describe "GET/new" do
+    let(:proposal_params) do
+      { id: proposal.id }
+    end
     it "reders a successful response" do
-      get new_email_template_url
-      expect(response).to have_http_status(302)
+      get new_email_url, params: proposal_params
+      expect(response).to have_http_status(:ok)
     end
   end
 
   describe "PATCH /email_template" do
-    let(:email_params) do
-      { email_template: 'Revision: test',
-        title: 'new email-template' }
+    context "email_type with decision email" do
+      let(:decision_email_params) do
+        { email_template: 'decision email: test',
+          title: 'new email-template' }
+      end
+      before do
+        email_template.update(email_type: 'decision_email_type')
+        patch email_template_emails_url, params: decision_email_params
+      end
+      it "returns the requested email_template" do
+        expect(email_template.reload.body).to eq(JSON.parse(response.body)["email_template"]["body"])
+      end
     end
 
-    before do
-      patch email_template_emails_url, params: email_params
+    context "email_type with revision" do
+      let(:revision_email_params) do
+        { email_template: 'revision: test',
+          title: 'new email-template' }
+      end
+      before do
+        patch email_template_emails_url, params: revision_email_params
+      end
+      it "returns the requested email_template" do
+        expect(email_template.reload.body).to eq(JSON.parse(response.body)["email_template"]["body"])
+      end
     end
 
-    it "updates the requested email-template" do
-      expect(email_template.reload.title).to eq(JSON.parse(response.body)["email_template"]["title"])
+    context "email_type with revision_spc" do
+      let(:spc_email_params) do
+        { email_template: 'revision spc: test',
+          title: 'new email-template' }
+      end
+      before do
+        email_template.update(email_type: 'revision_spc_type')
+        patch email_template_emails_url, params: spc_email_params
+      end
+      it "returns the requested email_template" do
+        expect(email_template.reload.body).to eq(JSON.parse(response.body)["email_template"]["body"])
+      end
+    end
+  end
+
+  describe "POST /email_types" do
+    context "when type is approval" do
+      let(:email_params) do
+        { type: 'approve' }
+      end
+
+      before do
+        email_template.update(email_type: "approval_type")
+        post email_types_emails_url, params: email_params
+      end
+
+      it "returns templates of approval_type" do
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context "when type is decline" do
+      let(:email_params) do
+        { type: 'decline' }
+      end
+
+      before do
+        email_template.update(email_type: "reject_type")
+        post email_types_emails_url, params: email_params
+      end
+
+      it "returns templates of decline_type" do
+        expect(response).to have_http_status(200)
+      end
     end
   end
 end

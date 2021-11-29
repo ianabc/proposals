@@ -22,9 +22,11 @@ class InviteMailer < ApplicationMailer
     @invite = params[:invite]
     @existing_organizers = params[:organizers]
 
-    @existing_organizers.prepend(", ") if @existing_organizers.present?
-    @existing_organizers = @existing_organizers.strip.delete_suffix(",")
-    @existing_organizers = @existing_organizers.sub(/.*\K,/, ' and') if @existing_organizers.present?
+    if @existing_organizers.present?
+      @existing_organizers.prepend(", ")
+      @existing_organizers = @existing_organizers.strip.delete_suffix(",")
+      @existing_organizers = @existing_organizers.sub(/.*\K,/, ' and')
+    end
     @proposal = @invite.proposal
     @person = @invite.person
 
