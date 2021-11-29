@@ -34,6 +34,14 @@ RSpec.feature "Locations show", type: :feature do
     expect(find_by_id('location_country').text).to eq(@location.country)
   end
 
+  scenario "there is a Start Date field containing the start date" do
+    expect(find_by_id('location_start_date').text).to eq("#{@location.start_date}")
+  end
+
+  scenario "there is a End Date field containing the end date" do
+    expect(find_by_id('location_end_date').text).to eq("#{@location.end_date}")
+  end
+
   scenario "click on edit" do
     expect(page).to have_link(href: edit_location_path(@location))
   end

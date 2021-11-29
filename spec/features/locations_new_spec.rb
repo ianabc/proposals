@@ -42,6 +42,10 @@ RSpec.feature "Locations new", type: :feature do
     expect(find_field('location_end_date').value).to eq(nil)
   end
 
+  scenario "there is an empty Exclude Dates field" do
+    expect(find_field('location_exclude_dates').value).to eq([])
+  end
+
   def fill_in_geography
     fill_in 'location_name', with: 'New york'
     fill_in 'location_code', with: 'NY'
@@ -91,9 +95,10 @@ RSpec.feature "Locations new", type: :feature do
 
     scenario "start date equal to end date" do
       start_date = Date.parse("#{@program_year}-06-04")
+      end_date = Date.parse("#{@program_year}-06-04")
 
       fill_in 'location_start_date', with: start_date
-      fill_in 'location_end_date', with: start_date
+      fill_in 'location_end_date', with: end_date
       click_button 'Create New Location'
 
       expect(page.body).to have_text('Start date 2023-06-04 - cannot be same as
