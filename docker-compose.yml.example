@@ -73,6 +73,8 @@ services:
       - EDITFLOW_API_URL=
       - REDIS_URL='redis://host:port/0'
       - HMC_ACCESS=123
+      - HMC_SERVER=hmc_host
+      - HMC_PORT=2000
 
 
 volumes:
