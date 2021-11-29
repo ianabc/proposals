@@ -71,7 +71,7 @@ services:
       - UBCO_EMAIL=ubco@example.com
       - EDITFLOW_API_TOKEN=
       - EDITFLOW_API_URL=
-      - REDIS_URL='redis://host:port/0'
+      - REDIS_URL='redis://localhost:port/0'
       - HMC_ACCESS=123
       - HMC_SERVER=hmc_host
       - HMC_PORT=2000
