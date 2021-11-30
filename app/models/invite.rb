@@ -89,7 +89,7 @@ class Invite < ApplicationRecord
   def find_or_create_person
     return if email.blank?
 
-    fixed_email = self.email.strip.downcase
+    fixed_email = email.strip.downcase
     person = Person.find_by(email: fixed_email)
     return person if person.present?
 
