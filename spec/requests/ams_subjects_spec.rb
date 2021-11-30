@@ -30,7 +30,7 @@ RSpec.describe "/subjects", type: :request do
 
     context "with invalid parameters" do
       let(:params) do
-        { ams_subject: { title: 'category' },
+        { ams_subject: { title: '' },
           subject_category_ids: subject_category.id }
       end
       before do
@@ -42,5 +42,12 @@ RSpec.describe "/subjects", type: :request do
         expect(ams_subject.reload.title).to eq(ams_subject.title)
       end
     end
+  end
+
+  describe "DELETE /destroy" do
+    before do
+      delete subject_category_ams_subject_url(subject_category, ams_subject)
+    end
+    it { expect(subject.subject_categories.count).to eq(0) }
   end
 end

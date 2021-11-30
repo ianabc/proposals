@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_25_001539) do
+ActiveRecord::Schema.define(version: 2021_11_26_072303) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -430,6 +430,32 @@ ActiveRecord::Schema.define(version: 2021_11_25_001539) do
     t.integer "role_type", default: 0
   end
 
+  create_table "schedule_runs", force: :cascade do |t|
+    t.datetime "start_time"
+    t.datetime "end_time"
+    t.integer "pid"
+    t.date "startweek"
+    t.integer "weeks"
+    t.integer "runs"
+    t.integer "cases"
+    t.integer "aborted"
+    t.integer "year"
+    t.integer "location_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "schedules", force: :cascade do |t|
+    t.integer "case_num"
+    t.integer "week"
+    t.integer "hmc_score"
+    t.string "proposal"
+    t.bigint "schedule_run_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["schedule_run_id"], name: "index_schedules_on_schedule_run_id"
+  end
+
   create_table "staff_discussions", force: :cascade do |t|
     t.text "discussion"
     t.bigint "proposal_id", null: false
@@ -563,6 +589,7 @@ ActiveRecord::Schema.define(version: 2021_11_25_001539) do
   add_foreign_key "reviews", "people"
   add_foreign_key "reviews", "proposals"
   add_foreign_key "role_privileges", "roles"
+  add_foreign_key "schedules", "schedule_runs"
   add_foreign_key "staff_discussions", "proposals"
   add_foreign_key "subject_area_categories", "subject_categories"
   add_foreign_key "subject_area_categories", "subjects"

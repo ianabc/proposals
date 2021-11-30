@@ -29,6 +29,13 @@ services:
       - DB_USER=propuser
       - DB_PASS=
 
+  redis:
+    image: 'redis:6.2.6'
+    container_name: proposals_redis
+    command: redis-server
+    volumes:
+      - redis_data:/data
+
   web:
     build: .
     container_name: proposals
@@ -84,3 +91,6 @@ volumes:
   proposals_cache:
     external:
       name: "proposals_cache"
+  redis_data:
+    external:
+      name: "redis_data"
