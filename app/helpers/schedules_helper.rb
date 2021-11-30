@@ -2,6 +2,14 @@ module SchedulesHelper
   def weeks_in_location(location)
     date_1 = location&.start_date&.to_time
     date_2 = location&.end_date&.to_time
-    (date_2 - date_1).seconds.in_weeks.to_i.abs if date_1.present? && date_2.present?
+    week = (date_2 - date_1).seconds.in_weeks.to_i.abs if date_1.present? && date_2.present?
+    return week if location.exclude_dates.empty?
+
+    location_exclude_dates(location, week)
+  end
+
+  def location_exclude_dates(location, week)
+    location.exclude_dates.delete("")
+    (week - location.exclude_dates.count)
   end
 end

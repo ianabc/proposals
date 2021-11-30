@@ -469,6 +469,9 @@ export default class extends Controller {
         },
         success: () => {
           toastr.success('Saved successfully!')
+          setTimeout(function() {
+            window.location.reload();
+          }, 2000)
         }
       })
     }

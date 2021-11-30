@@ -229,7 +229,36 @@ class Proposal < ApplicationRecord
     max_participants + max_virtual_participants
   end
 
+  def preferred_dates
+    answer = preferred_impossible_field
+    (0..4).each_with_object([]) do |i, preferred_dates|
+      next if answer[i].blank?
+
+      date = answer[i].split(' to ')
+      preferred_dates << Date.parse(date.first)
+      preferred_dates << Date.parse(date.last)
+    end
+  end
+
+  def impossible_dates
+    answer = preferred_impossible_field
+    (5..6).each_with_object([]) do |i, impossible_dates|
+      next if answer[i].blank?
+
+      date = answer[i].split(' to ')
+      impossible_dates << Date.parse(date.first)
+      impossible_dates << Date.parse(date.last)
+    end
+  end
+
   private
+
+  def preferred_impossible_field
+    proposal_fields = answers.joins(:proposal_field).where("proposal_fields.fieldable_type =?",
+                                                           "ProposalFields::PreferredImpossibleDate")
+
+    JSON.parse(proposal_fields.first.answer)
+  end
 
   def not_before_opening
     return if draft? || revision_requested? || revision_requested_spc? || allow_late_submission

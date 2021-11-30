@@ -1,4 +1,6 @@
 class ScheduleRun < ApplicationRecord
-  validates :start_time, :aborted, presence: true
   has_many :schedules
+  belongs_to :location
+
+  validates :runs, :cases, :year, presence: true
 end
