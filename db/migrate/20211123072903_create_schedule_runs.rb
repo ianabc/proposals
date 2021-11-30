@@ -10,7 +10,7 @@ class CreateScheduleRuns < ActiveRecord::Migration[6.1]
       t.integer :cases
       t.integer :aborted
       t.integer :year
-      t.integer :location_id
+      t.references :location, null: false, foreign_key: true
 
       t.timestamps
     end

@@ -48,7 +48,7 @@ Rails.application.configure do
   # config.action_cable.mount_path = nil
   config.action_cable.url = 'wss://127.0.0.1/cable'
   url = 'https://' + ENV.fetch('APPLICATION_HOST', 'localhost')
-  config.action_cable.allowed_request_origins = [ url ]
+  config.action_cable.allowed_request_origins = [ url, 'http://localhost' ]
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
