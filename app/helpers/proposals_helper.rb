@@ -22,6 +22,10 @@ module ProposalsHelper
     proposal_type.year&.split(",")&.map { |year| year }
   end
 
+  def proposal_same_week_as
+    Proposal.all.where(outcome: "approved").map { |pro| [pro.code] }
+  end
+
   def locations
     Location.all.map { |loc| [loc.name, loc.id] }
   end
