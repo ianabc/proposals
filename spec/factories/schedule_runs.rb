@@ -9,6 +9,7 @@ FactoryBot.define do
     runs { 5000 }
     aborted { 0 }
     year { 2023 }
-    # location_id { 23 }
+
+    association :location, factory: :location, strategy: :create
   end
 end
