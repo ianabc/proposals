@@ -29,7 +29,6 @@ class Invite < ApplicationRecord
   def add_person
     return if [firstname, lastname, email].map(&:blank?).any?
 
-    email.downcase!
     self.person = find_or_create_person
   end
 
@@ -49,7 +48,7 @@ class Invite < ApplicationRecord
   private
 
   def downcase_email
-    self.email = email.downcase if email.present?
+    self.email = email.downcase.strip if email.present?
   end
 
   def proposal_title
@@ -80,14 +79,17 @@ class Invite < ApplicationRecord
   end
 
   def find_or_create_person
-    person = Person.where(email: email).first
+    email = email.strip.downcase
+    person = Person.find_by(email: email)
 
     if person.blank?
       begin
         person = Person.create(email: email, firstname: firstname,
                                lastname: lastname)
       rescue ActiveRecord::RecordNotUnique
-        person = Person.find_by(email: email)
+        errors.add('Email problem:', "#{email} is already used by another
+          record, and we are having troubles using it again. Please contact
+          birs@birs.ca to report this issue.")
       end
     end
     person
