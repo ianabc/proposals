@@ -6,6 +6,6 @@ FactoryBot.define do
     name { Faker::University.name }
     start_date { Date.parse('2023-01-08') }
     end_date { Date.parse('2023-12-15') }
-    exclude_dates { %w[2023-07-02 2023-07-09] }
+    exclude_dates { ["2023-02-05 - 2023-02-11", "2023-02-12 - 2023-02-18"] }
   end
 end

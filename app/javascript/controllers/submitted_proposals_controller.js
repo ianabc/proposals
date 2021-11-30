@@ -6,7 +6,8 @@ import Tagify from '@yaireo/tagify'
 export default class extends Controller {
   static targets = [ 'toc', 'ntoc', 'templates', 'status', 'statusOptions', 'proposalStatus',
                      'organizersEmail', 'bothReviews', 'scientificReviews', 'ediReviews',
-                     'reviewToc', 'reviewNToc' ]
+                    'reviewToc', 'reviewNToc', 'proposalLocation', 'locationOptions', 'location',
+                    'outcome', 'selectedLocation', 'assignedSize' ]
 
   connect () {
     let proposalId = 0
@@ -172,6 +173,16 @@ export default class extends Controller {
     }
   }
 
+  handleLocations() {
+    let currentLocationId = event.currentTarget.dataset.id
+    for(var i = 0; i < this.locationOptionsTargets.length; i++){
+      if(currentLocationId === this.locationOptionsTargets [`${i}`].dataset.id){
+        this.proposalLocationTargets [`${i}`].classList.add("hidden")
+        this.locationOptionsTargets [`${i}`].classList.remove("hidden")
+      }
+    }
+  }
+
   proposalStatuses() {
     let id = event.currentTarget.dataset.id
     let status = ''
@@ -181,6 +192,26 @@ export default class extends Controller {
         status = this.statusTargets [`${i}`].value
         $.post(`/submitted_proposals/${id}/update_status?status=${status}`, function() {
           toastr.success('Proposal status has been updated!')
+          setTimeout(function() {
+            window.location.reload();
+          }, 1000)
+        })
+        .fail(function(res) {
+          res.responseJSON.forEach((msg) => toastr.error(msg))
+        });
+      }
+    }
+  }
+
+  proposalLocations() {
+    let id = event.currentTarget.dataset.id
+    let location = ''
+    let _this = this
+    for(var i = 0; i < this.locationTargets.length; i++){
+      if(id === this.locationTargets [`${i}`].dataset.id){
+        location = this.locationTargets [`${i}`].value
+        $.post(`/submitted_proposals/${id}/update_location?location=${location}`, function() {
+          toastr.success('Proposal location has been updated!')
           setTimeout(function() {
             window.location.reload();
           }, 1000)
@@ -393,6 +424,56 @@ export default class extends Controller {
     }
     else {
       toastr.error('Only .pdf and .txt files are allowed.')
+    }
+  }
+
+  outcomeLocationModal() {
+   var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[0] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      $("#outcome-window").modal('show')
+    } 
+  }
+
+  outcomeLocation() {
+    var proposalIds = [];
+    $("input:checked").each(function() {
+      proposalIds.push(this.dataset.value);
+    });
+    if(typeof proposalIds[0] === "undefined")
+    {
+      toastr.error("Please select any checkbox!")
+    }
+    else {
+      let data = new FormData()
+      let outcome = this.outcomeTarget.value
+      let location = this.selectedLocationTarget.value
+      let size = this.assignedSizeTarget.value
+      var url = `/submitted_proposals/proposal_outcome_location`
+      $.ajax({
+        url,
+        type: "POST",
+        data: {
+          'proposal': {
+            'id': proposalIds,
+            outcome,
+            'assigned_location_id': location,
+            'assigned_size': size
+          }
+        },
+        success: () => {
+          toastr.success('Saved successfully!')
+          setTimeout(function() {
+            window.location.reload();
+          }, 2000)
+        }
+      })
     }
   }
 }
