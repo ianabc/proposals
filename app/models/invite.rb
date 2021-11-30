@@ -78,9 +78,8 @@ class Invite < ApplicationRecord
     end
   end
 
-  def create_person(email)
-    Person.create(email: email, firstname: firstname, lastname: lastname)
-
+  def create_person(fixed_email)
+    Person.create(email: fixed_email, firstname: firstname, lastname: lastname)
   rescue ActiveRecord::RecordNotUnique
     errors.add('Email problem:', "#{email} is already used by another
                 record, and we are having troubles using it again. Please
@@ -88,12 +87,12 @@ class Invite < ApplicationRecord
   end
 
   def find_or_create_person
-    return if self.email.blank?
+    return if email.blank?
 
-    email = self.email.strip.downcase
-    person = Person.find_by(email: email)
-    return person unless person.blank?
+    fixed_email = self.email.strip.downcase
+    person = Person.find_by(email: fixed_email)
+    return person if person.present?
 
-    create_person(email)
+    create_person(fixed_email)
   end
 end
