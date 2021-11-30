@@ -92,6 +92,8 @@ class Invite < ApplicationRecord
 
     email = self.email.strip.downcase
     person = Person.find_by(email: email)
-    create_person(email) if person.blank?
+    return person unless person.blank?
+
+    create_person(email)
   end
 end
