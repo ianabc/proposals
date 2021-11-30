@@ -28,13 +28,13 @@ class HungarianMonteCarlo
   def hmc_reply(socket, prompt)
     socket.gets.chomp.match?(prompt)
   rescue IOError => e
-      @errors['HMC'] = "Error reading socket! #{e.message}"
+    @errors['HMC'] = "Error reading socket! #{e.message}"
   end
 
   def hmc_connect
     TCPSocket.open(@hmc_server, @hmc_port)
   rescue IOError => e
-      @errors['HMC'] = "Error connecting to HMC! #{e.message}"
+    @errors['HMC'] = "Error connecting to HMC! #{e.message}"
   end
 
   def update_schedule_runs(socket)
@@ -111,7 +111,7 @@ class HungarianMonteCarlo
   def add_placeholder_events(proposal_data)
     return proposal_data if @location.exclude_dates.blank?
 
-    prefix = @run_params['year'].to_s.chars.last(2).join + 'w'
+    prefix = @schedule_run.year.to_s.chars.last(2).join + 'w'
     code_num = 6660
 
     format_dates(@location.exclude_dates).each do |date|
@@ -166,13 +166,13 @@ class HungarianMonteCarlo
   end
 
   def invalid_proposal?(proposal)
-    if proposal.code.blank?
-      error_message = "#{proposal.title} (id: #{proposal.id}) has no code!"
-      if @errors['Proposal'].blank?
-        @errors['Proposal'] = error_message
-      else
-        @errors['Proposal'] << "\n #{error_message}"
-      end
+    return unless proposal.code.blank?
+
+    error_message = "#{proposal.title} (id: #{proposal.id}) has no code!"
+    if @errors['Proposal'].blank?
+      @errors['Proposal'] = error_message
+    else
+      @errors['Proposal'] << "\n #{error_message}"
     end
   end
 
@@ -181,7 +181,8 @@ class HungarianMonteCarlo
   end
 
   def formatted_run_params
-    # Usage: HungarianMonteCarlo <run_id> <date of first workshop (yyyy-mm-dd)> <number of weeks> <number of runs> <number of cases>\n")
+    # Usage: HungarianMonteCarlo <run_id> <date of first workshop (yyyy-mm-dd)>
+    # <number of weeks> <number of runs> <number of cases>\n")
     s = @schedule_run
     start_week = s.startweek.strftime("%Y-%m-%d")
     "#{s.id} #{start_week} #{s.weeks} #{s.runs} #{s.cases}"

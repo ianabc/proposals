@@ -147,7 +147,7 @@ RSpec.describe "/proposals/:proposal_id/invites", type: :request do
       let(:role_user) { create(:role, name: 'Staff') }
       it "updates the invite status" do
         expect(invite1.reload.status).to eq('cancelled')
-        expect(response).to redirect_to(edit_submitted_proposal_url(invite.proposal))
+        expect(response).to redirect_to(edit_submitted_proposal_path(invite.proposal))
       end
     end
 
