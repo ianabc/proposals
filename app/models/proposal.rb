@@ -230,18 +230,39 @@ class Proposal < ApplicationRecord
   end
 
   def preferred_dates
-    # placeholder - this should return the proposal's preferred dates, in order
-    # of most preferred to least
-    [Date.parse('2023-06-04'), Date.parse('2023-10-22'),
-     Date.parse('2023-07-16')]
+    answer = preferred_impossible_field
+    preferred_dates = []
+    (0..4).each do |i|
+      next if answer[i].blank?
+
+      date = answer[i].split(' to ')
+      preferred_dates << date.first
+      preferred_dates << date.last
+    end
+    preferred_dates
   end
 
   def impossible_dates
-    # placeholder - this should return the proposal's impossible dates (ordered)
-    [Date.parse('2023-02-19'), Date.parse('2023-12-03')]
+    answer = preferred_impossible_field
+    impossible_dates = []
+    (5..6).each do |i|
+      next if answer[i].blank?
+
+      date = answer[i].split(' to ')
+      impossible_dates << date.first
+      impossible_dates << date.last
+    end
+    impossible_dates
   end
 
   private
+
+  def preferred_impossible_field
+    proposal_fields = answers.joins(:proposal_field).where("proposal_fields.fieldable_type =?",
+                                                           "ProposalFields::PreferredImpossibleDate")
+
+    JSON.parse(proposal_fields.first.answer)
+  end
 
   def not_before_opening
     return if draft? || revision_requested? || revision_requested_spc? || allow_late_submission
