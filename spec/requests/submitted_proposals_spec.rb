@@ -4,6 +4,7 @@ RSpec.describe "/submitted_proposals", type: :request do
   let(:proposal_type) { create(:proposal_type) }
   let(:proposal) { create(:proposal, :with_organizers, proposal_type: proposal_type, status: :decision_pending) }
   let(:person) { create(:person) }
+  let(:location) { create(:location) }
   let(:role) { create(:role, name: 'Staff') }
   let(:staff_discussion) { create(:staff_discussion, proposal_id: proposal.id) }
   let(:user) { create(:user, person: person) }
@@ -166,6 +167,20 @@ RSpec.describe "/submitted_proposals", type: :request do
 
     it 'update proposal status' do
       expect(proposal.reload.status).to eq("in_progress")
+    end
+  end
+
+  describe 'POST /submitted_proposals/:id/update_location' do
+    # before { post update_location_submitted_proposal_path(id: proposal.id, location: location) }
+
+    context 'for valid parameters' do
+      before { post update_location_submitted_proposal_path(id: proposal.id, location: location) }
+      it 'update proposal location' do
+        expect(response).to have_http_status(200)
+      end
+    end
+    context 'for invalid parameters' do
+      before { post update_location_submitted_proposal_path(id: proposal.id) }
     end
   end
 

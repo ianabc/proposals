@@ -53,7 +53,7 @@ RSpec.describe "/locations", type: :request do
         end_date: '2023-12-15',
         exclude_dates: ['2023-07-09'] }
     end
-    
+
     context "with valid parameters" do
       it "creates a new Location" do
         expect do
@@ -100,6 +100,44 @@ RSpec.describe "/locations", type: :request do
       end
 
       it "does not update Location" do
+        expect(response).to have_http_status(422)
+      end
+    end
+  end
+
+  describe "POST /weeks_exclude_dates" do
+    context "with valid parameters" do
+      let(:location_params) do
+        { name: 'Banff International Research Station',
+          code: 'BIRS',
+          city: 'Banff',
+          country: 'Canada',
+          start: '2023-01-08',
+          end: '2023-12-15',
+          exclude_dates: ['2023-07-09'] }
+      end
+      before do
+        post weeks_exclude_dates_locations_url, params: location_params
+      end
+      it "return exclude dates" do
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context "with invalid parameters" do
+      let(:location_params) do
+        { name: 'Banff International Research Station',
+          code: 'BIRS',
+          city: 'Banff',
+          country: 'Canada',
+          start: '',
+          end: '2023-12-15',
+          exclude_dates: ['2023-07-09'] }
+      end
+      before do
+        post weeks_exclude_dates_locations_url, params: location_params
+      end
+      it "return exclude dates" do
         expect(response).to have_http_status(422)
       end
     end

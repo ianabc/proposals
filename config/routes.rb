@@ -32,6 +32,7 @@ Rails.application.routes.draw do
     end
     member do
       post :update_status
+      post :update_location
       post :staff_discussion
       post :send_emails
       get :reviews
