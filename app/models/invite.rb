@@ -78,20 +78,20 @@ class Invite < ApplicationRecord
     end
   end
 
-  def find_or_create_person
-    email = email.strip.downcase
-    person = Person.find_by(email: email)
+  def create_person(email)
+    Person.create(email: email, firstname: firstname, lastname: lastname)
 
-    if person.blank?
-      begin
-        person = Person.create(email: email, firstname: firstname,
-                               lastname: lastname)
-      rescue ActiveRecord::RecordNotUnique
-        errors.add('Email problem:', "#{email} is already used by another
-          record, and we are having troubles using it again. Please contact
-          birs@birs.ca to report this issue.")
-      end
-    end
-    person
+  rescue ActiveRecord::RecordNotUnique
+    errors.add('Email problem:', "#{email} is already used by another
+                record, and we are having troubles using it again. Please
+                contact birs@birs.ca to report this issue.".squish)
+  end
+
+  def find_or_create_person
+    return if self.email.blank?
+
+    email = self.email.strip.downcase
+    person = Person.find_by(email: email)
+    create_person(email) if person.blank?
   end
 end
