@@ -88,9 +88,7 @@ class HungarianMonteCarlo
         preferred_dates = format_dates([proposal.assigned_date]).first
       end
 
-      if proposal.assigned_size == 'Half'
-        code << " (1/2 workshop)"
-      end
+      code << " (1/2 workshop)" if proposal.assigned_size == 'Half'
 
       if proposal.same_week_as.present?
         code = "#{proposal.same_week_as&.code} and #{proposal.code}"
@@ -111,7 +109,7 @@ class HungarianMonteCarlo
   def add_placeholder_events(proposal_data)
     return proposal_data if @location.exclude_dates.blank?
 
-    prefix = @schedule_run.year.to_s.chars.last(2).join + 'w'
+    prefix = "#{@schedule_run.year.to_s.chars.last(2).join}w"
     code_num = 6660
 
     format_dates(@location.exclude_dates).each do |date|
@@ -137,9 +135,9 @@ class HungarianMonteCarlo
     @hmc_port = ENV['HMC_PORT']
     @hmc_access_code = ENV['HMC_ACCESS']
 
-    if [@hmc_server, @hmc_port, @hmc_access_code].any?(&:blank?)
-      @errors['HMC settings'] = "Missing HMC environment variable!"
-    end
+    return unless [@hmc_server, @hmc_port, @hmc_access_code].any?(&:blank?)
+
+    @errors['HMC settings'] = "Missing HMC environment variable!"
   end
 
   def validate_location
@@ -148,10 +146,10 @@ class HungarianMonteCarlo
                              Sunday!".squish
     end
 
-    unless @location.end_date.friday?
-      @errors['Location'] << "Location #{@location.code} end_date is not a
-                              Friday!".squish
-    end
+    return if @location.end_date.friday?
+
+    @errors['Location'] << "Location #{@location.code} end_date is not a
+                            Friday!".squish
   end
 
   def update_run_params
@@ -161,12 +159,12 @@ class HungarianMonteCarlo
   end
 
   def program_weeks
-    include SchedulesHelper
+    extend SchedulesHelper
     weeks_in_location(@location)
   end
 
   def invalid_proposal?(proposal)
-    return unless proposal.code.blank?
+    return if proposal.code.present?
 
     error_message = "#{proposal.title} (id: #{proposal.id}) has no code!"
     if @errors['Proposal'].blank?
@@ -228,9 +226,7 @@ class HungarianMonteCarlo
     # "event1 followed by event2". Therefore, proposal2's preferred dates must
     # be set to a week earlier so that the schedule optimizer assigns it to
     # the actual preferred date of proposal2, the week after proposal1
-    if proposal.week_after.present?
-      preferred_dates = proposal.preferred_dates.map { |d| d - 1.week }
-    end
+    preferred_dates = proposal.preferred_dates.map { |d| d - 1.week } if proposal.week_after.present?
 
     preferred_dates
   end
@@ -251,9 +247,7 @@ class HungarianMonteCarlo
   def merge_impossible_dates(proposal1, proposal2)
     proposal2_impossible = proposal2.impossible_dates
 
-    if proposal2.week_after.present?
-      proposal2_impossible = proposal2.impossible_dates.map { |d| d - 1.week }
-    end
+    proposal2_impossible = proposal2.impossible_dates.map { |d| d - 1.week } if proposal2.week_after.present?
 
     (proposal1.impossible_dates + proposal2_impossible).uniq
   end
