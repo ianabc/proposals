@@ -440,9 +440,10 @@ ActiveRecord::Schema.define(version: 2021_11_26_072303) do
     t.integer "cases"
     t.integer "aborted"
     t.integer "year"
-    t.integer "location_id"
+    t.bigint "location_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["location_id"], name: "index_schedule_runs_on_location_id"
   end
 
   create_table "schedules", force: :cascade do |t|
@@ -589,6 +590,7 @@ ActiveRecord::Schema.define(version: 2021_11_26_072303) do
   add_foreign_key "reviews", "people"
   add_foreign_key "reviews", "proposals"
   add_foreign_key "role_privileges", "roles"
+  add_foreign_key "schedule_runs", "locations"
   add_foreign_key "schedules", "schedule_runs"
   add_foreign_key "staff_discussions", "proposals"
   add_foreign_key "subject_area_categories", "subject_categories"

@@ -4,15 +4,15 @@ class HungarianMonteCarlo
   require 'socket'
   attr_reader :errors
 
-  def initialize(run_params:, location:, test_mode: false)
-    @run_params = run_params # hash of HMC run parameters
-    @location = location # Location object
+  def initialize(schedule_run:, test_mode: false)
+    @schedule_run = schedule_run
+    @location = schedule_run.location
     @test_mode = test_mode
 
     @errors = {}
     set_hmc_params
     validate_location
-    validate_run_params
+    update_run_params
   end
 
   def run_optimizer
@@ -38,12 +38,14 @@ class HungarianMonteCarlo
   end
 
   def update_schedule_runs(socket)
-    # Update the schedule_runs table with the start time and the pid number
-    # if hmc_reply(socket, 'Launching HungarianMonteCarlo')
-    #   ask for run_id
-    # else
-    #   report error condition
-    # end
+    output = socket.gets.chomp
+    if output.match?('HMC launched')
+      pid = output.split(':').last.strip.to_i
+      update_schedule_run(pid)
+    else
+      @errors['HMC runtime error'] = "HMC failed to launch for run
+                                      #{@schedule_run.id}!".squish
+    end
   end
 
   def proposal_data
@@ -52,7 +54,7 @@ class HungarianMonteCarlo
   end
 
   def hmc_formatted_test_data
-    proposals = Proposal.where(year: @run_params['year']).limit(program_weeks)
+    proposals = Proposal.where(year: @schedule_run.year).limit(program_weeks)
 
     proposals.shuffle.each_with_object({}) do |proposal, data|
       next if invalid_proposal?(proposal)
@@ -69,7 +71,7 @@ class HungarianMonteCarlo
   def hmc_formatted_data
     proposals = Proposal.where(assigned_location: @location)
                         .where(outcome: 'Accepted')
-                        .where(year: @run_params['year'])
+                        .where(year: @schedule_run.year)
 
     skip_proposals = []
     proposals.shuffle.each_with_object({}) do |proposal, data|
@@ -121,6 +123,15 @@ class HungarianMonteCarlo
 
   private
 
+  def update_schedule_run(pid)
+    if pid.blank?
+      @errors['HMC runtime error'] = "No process ID returned for run
+                                      #{@schedule_run.id}!".squish
+    else
+      @schedule_run.update_columns(pid: pid)
+    end
+  end
+
   def set_hmc_params
     @hmc_server = ENV['HMC_SERVER']
     @hmc_port = ENV['HMC_PORT']
@@ -143,24 +154,10 @@ class HungarianMonteCarlo
     end
   end
 
-  def validate_run_params
-    required_keys = %w[run_id start_week number_of_weeks number_of_runs
-                       number_of_best_cases]
-
-    @errors['Run parameters'] = ''
-    unless (required_keys - @run_params.keys).empty?
-      @errors['Run parameters'] << "Run parameters must include at least these
-        keys: #{required_keys.join(', ')}".squish
-    end
-
-    required_keys.each_with_index do |key, i|
-      unless @run_params[i] == key
-        @erros['Run parameters'] << " Run parameters must be in this order:
-                                     #{required_keys.keys.join(' ')}".squish
-      end
-    end
-
-    @errors.delete('Run parameters') if @errors['Run parameters'].empty?
+  def update_run_params
+    @schedule_run.update_columns(startweek: @location.start_date,
+                                 weeks: program_weeks,
+                                 start_time: DateTime.current)
   end
 
   def program_weeks
@@ -176,8 +173,6 @@ class HungarianMonteCarlo
       else
         @errors['Proposal'] << "\n #{error_message}"
       end
-
-      next
     end
   end
 
@@ -186,7 +181,10 @@ class HungarianMonteCarlo
   end
 
   def formatted_run_params
-    @run_params.values.join(' ')
+    # Usage: HungarianMonteCarlo <run_id> <date of first workshop (yyyy-mm-dd)> <number of weeks> <number of runs> <number of cases>\n")
+    s = @schedule_run
+    start_week = s.startweek.strftime("%Y-%m-%d")
+    "#{s.id} #{start_week} #{s.weeks} #{s.runs} #{s.cases}"
   end
 
   def merge_and_purge(proposal1, proposal2, data, skip_proposals)

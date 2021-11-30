@@ -5,6 +5,7 @@ class Location < ApplicationRecord
   has_many :proposal_locations, dependent: :destroy
   has_many :proposals, through: :proposal_locations
   has_many :proposal_fields
+  has_many :schedule_runs
   validate :date_rules
 
   def date_rules
