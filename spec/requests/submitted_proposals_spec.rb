@@ -237,4 +237,25 @@ RSpec.describe "/submitted_proposals", type: :request do
       expect(response).to have_http_status(202)
     end
   end
+
+  describe 'POST /submitted_proposals/proposal_outcome_location' do
+    let(:location) { create(:location) }
+    let(:params) do
+      { proposal:
+        {
+          id: proposal.id,
+          outcome: 'Approved',
+          assigned_location_id: location.id,
+          assigned_size: "Half"
+        } }
+    end
+
+    before do
+      post proposal_outcome_location_submitted_proposals_path(params: params)
+    end
+
+    it 'will update selected proposals' do
+      expect(response).to have_http_status(200)
+    end
+  end
 end

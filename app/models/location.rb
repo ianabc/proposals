@@ -5,6 +5,7 @@ class Location < ApplicationRecord
   has_many :proposal_locations, dependent: :destroy
   has_many :proposals, through: :proposal_locations
   has_many :proposal_fields
+  has_many :schedule_runs
   validate :date_rules
 
   def date_rules
@@ -41,19 +42,20 @@ class Location < ApplicationRecord
   def parse_exclude_date(date_string)
     field = 'Exclude Dates'
     ds = date_string
-    begin
-      date = Date.parse(ds)
-      errors.add(field, "#{ds} must be after Start Date") if date < start_date
-      errors.add(field, "#{ds} must be before End Date") if date > end_date
-    rescue
+    date = Date.parse(ds)
+    errors.add(field, "#{ds} must be after Start Date") if date < start_date
+    errors.add(field, "#{ds} must be before End Date") if date > end_date
+    
+    rescue Date::Error
       errors.add(field, "#{ds} is not a valid date string.")
-    end
   end
 
   def check_valid_exclude_dates
     return if exclude_dates.blank?
 
     exclude_dates.each do |date_string|
+      next if date_string.blank?
+
       parse_exclude_date(date_string)
     end
   end

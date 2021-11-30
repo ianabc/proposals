@@ -28,6 +28,7 @@ Rails.application.routes.draw do
       post :reviews_booklet
       get :download_review_booklet
       get :reviews_excel_booklet
+      post :proposal_outcome_location
     end
     member do
       post :update_status
@@ -119,6 +120,9 @@ Rails.application.routes.draw do
     member do
       get :proposal_types
     end
+    collection do
+      post :weeks_exclude_dates
+    end
   end
   resources :page_contents
 
@@ -153,4 +157,7 @@ Rails.application.routes.draw do
   end
 
   resources :email_templates
+
+  # Serve websocket cable requests in-process (passenger runs separate process)
+  mount ActionCable.server => '/cable'
 end
