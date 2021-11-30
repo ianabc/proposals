@@ -231,28 +231,24 @@ class Proposal < ApplicationRecord
 
   def preferred_dates
     answer = preferred_impossible_field
-    preferred_dates = []
-    (0..4).each do |i|
+    (0..4).each_with_object([]) do |i, preferred_dates|
       next if answer[i].blank?
 
       date = answer[i].split(' to ')
-      preferred_dates << date.first
-      preferred_dates << date.last
+      preferred_dates << Date.parse(date.first)
+      preferred_dates << Date.parse(date.last)
     end
-    preferred_dates
   end
 
   def impossible_dates
     answer = preferred_impossible_field
-    impossible_dates = []
-    (5..6).each do |i|
+    (5..6).each_with_object([]) do |i, impossible_dates|
       next if answer[i].blank?
 
       date = answer[i].split(' to ')
-      impossible_dates << date.first
-      impossible_dates << date.last
+      impossible_dates << Date.parse(date.first)
+      impossible_dates << Date.parse(date.last)
     end
-    impossible_dates
   end
 
   private
