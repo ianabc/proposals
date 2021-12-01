@@ -23,7 +23,7 @@ module ProposalsHelper
   end
 
   def proposal_same_week_as
-    Proposal.all.where(outcome: "approved").map { |pro| [pro.code] }
+    Proposal.all.where(outcome: "Approved").map { |proposal| [proposal.code] }
   end
 
   def assigned_dates(location)
