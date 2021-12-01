@@ -22,12 +22,13 @@ module ProposalsHelper
     proposal_type.year&.split(",")&.map { |year| year }
   end
 
-  def proposal_same_week_as
-    Proposal.all.where(outcome: "Approved").map { |proposal| [proposal.code] }
+  def approved_proposals
+    [""] + Proposal.where(outcome: 'Approved').pluck(:code) - [@proposal.code]
   end
 
   def assigned_dates(location)
-    return [] if location.blank?
+    return [] if location.blank? || location.start_date.blank? ||
+                 location.end_date.blank?
 
     dates = []
     workshop_start_date = location.start_date
@@ -37,7 +38,8 @@ module ProposalsHelper
       dates << "#{workshop_start_date} - #{workshop_end_date}"
       workshop_start_date += 7.days
     end
-    dates - location.exclude_dates
+
+    [""] + (dates - location.exclude_dates)
   end
 
   def locations
