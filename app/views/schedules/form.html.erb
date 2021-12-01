@@ -17,10 +17,10 @@
         <div class="card">
           <div class="card-body">
             <div>
-              <h1 class="mb-3" style ="color: #166688; ">Generate Schedule For <%= @location.name %> (<%= @location.code %>):</h1>
+              <h1 class="mb-3" style ="color: #166688; ">Generate Schedule For <%= @location&.name %> (<%= @location&.code %>):</h1>
               <%= form_with(url: run_hmc_program_schedules_path, method: :post) do |f| %>
                 <div>
-                  <%= f.hidden_field :location_id, value: @location.id %>
+                  <%= f.hidden_field :location_id, value: @location&.id %>
                   <table class="table" border="1">
                     <thead>
                       <tr>
@@ -92,9 +92,9 @@
                         <td>Enable Test Mode:</td>
                         <td>
                           <div>
-                            <input type="radio" name="mode" id="onMode">
+                            <input type="radio" name="test_mode" id="onMode" value="true">
                             <label for="onMode">On</label>
-                            <input type="radio" checked="true" name="mode" id="offMode">
+                            <input type="radio" checked="true" name="test_mode" id="offMode" value="false">
                             <label for="offMode">Off</label>
                           </div>
                         </td>

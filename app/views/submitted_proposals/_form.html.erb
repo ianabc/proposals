@@ -57,7 +57,7 @@
                     <div class="tab-content">
                       <div class="tab-pane active" id="tab-1" role="tabpanel">
                         <h4 class="tab-title"></h4>
-                        <% if @proposal.cover_letter.present? %>
+                        <% if @proposal.revision_requested_spc? || @proposal.cover_letter.present? %>
                           <div class="mb-3">
                             <h3 class="required">Cover Letter</h3>
                             <p>
@@ -86,12 +86,36 @@
                             <p class="field-validation">Title is required</p>
                           <% end %>
                         </div>
-
+                        <% if @current_user&.staff_member? %>
+                          <div>
+                            <%= label_tag :assigned_location_id %>
+                          </div>
+                          <div class="mb-3">
+                            <%= f.text_field :assigned_location_id, class: 'form-control w-25', disabled: true, value: @proposal.assigned_location&.code %>
+                          </div>
+                          <div>
+                            <%= label_tag :assigned_size %>
+                          </div>
+                          <div class="mb-3">
+                            <%= select_tag :assigned_size, options_for_select(['', 'Full', 'Half'], @proposal.assigned_size), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                          </div>
+                          <div class="mb-3">
+                            <%= label_tag :Assigned_date %>
+                            <%= select_tag :assigned_date, options_for_select(assigned_dates(@proposal.assigned_location), @proposal.assigned_location), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                          </div>
+                          <div class="mb-3">
+                            <%= label_tag :Same_week_as %>
+                            <%= select_tag :same_week_as, options_for_select(approved_proposals(@proposal), @proposal.same_week_as), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                          </div>
+                          <div class="mb-3">
+                            <%= label_tag :week_after %>
+                            <%= select_tag :week_after, options_for_select(approved_proposals(@proposal), @proposal.week_after), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                          </div>
+                        <% end %>
                         <div class="mb-3">
                           <label>Type of Meeting</label>
                           <p class="form-select w-25"><%= @proposal.proposal_type.name.titleize %></p>
                         </div>
-
                         <div class="mb-3">
                           <%= label_tag :year %>
                           <%= select_tag :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>

@@ -4,18 +4,18 @@ class HungarianMonteCarlo
   require 'socket'
   attr_reader :errors
 
-  def initialize(schedule_run:, test_mode: false)
+  def initialize(schedule_run:)
     @schedule_run = schedule_run
     @location = schedule_run.location
-    @test_mode = test_mode
-
     @errors = {}
+
     set_hmc_params
-    validate_location
     update_run_params
   end
 
   def run_optimizer
+    return if @errors.present?
+
     socket = hmc_connect
     socket.puts @hmc_access_code if hmc_reply(socket, 'Access code')
     socket.puts('newrun') if hmc_reply(socket, 'READY')
@@ -49,11 +49,11 @@ class HungarianMonteCarlo
   end
 
   def proposal_data
-    formatted_data = @test_mode ? hmc_formatted_test_data : hmc_formatted_data
+    formatted_data = schedule_run.test_mode ? hmc_test_data : hmc_formatted_data
     add_placeholder_events(formatted_data.values)
   end
 
-  def hmc_formatted_test_data
+  def hmc_test_data
     proposals = Proposal.where(year: @schedule_run.year).limit(program_weeks)
 
     proposals.shuffle.each_with_object({}) do |proposal, data|
@@ -106,14 +106,25 @@ class HungarianMonteCarlo
     end
   end
 
+  def formatted_excluded_dates
+    @location.exclude_dates.each_with_object([]) do |date_range, excluded|
+      next if date_range.blank?
+
+      start_date, end_date = date_range.split(' - ')
+      excluded << [Date.parse(start_date).strftime("%m/%d/%Y"),
+                   Date.parse(end_date).strftime("%m/%d/%Y")]
+    end
+  end
+
   def add_placeholder_events(proposal_data)
     return proposal_data if @location.exclude_dates.blank?
 
     prefix = "#{@schedule_run.year.to_s.chars.last(2).join}w"
-    code_num = 6660
+    code_num = 6600
 
-    format_dates(@location.exclude_dates).each do |date|
-      proposal_data << "#{prefix}#{code_num}:1: #{date}: :"
+    formatted_excluded_dates.each do |dates|
+      # Priority 1 ensures that placeholder proposal is scheduled on 1st date
+      proposal_data << "#{prefix}#{code_num}:1: #{dates[0]};#{dates[1]}: :"
       code_num += 1
     end
     proposal_data
@@ -126,7 +137,7 @@ class HungarianMonteCarlo
       @errors['HMC runtime error'] = "No process ID returned for run
                                       #{@schedule_run.id}!".squish
     else
-      @schedule_run.update_columns(pid: pid)
+      @schedule_run.update_columns(pid: pid, start_time: DateTime.current)
     end
   end
 
@@ -140,22 +151,22 @@ class HungarianMonteCarlo
     @errors['HMC settings'] = "Missing HMC environment variable!"
   end
 
-  def validate_location
-    unless @location.start_date.sunday?
-      @errors['Location'] = "Location #{@location.code} start_date is not a
-                             Sunday!".squish
-    end
+  def save_schedule_run
+    @schedule_run.save
 
-    return if @location.end_date.friday?
-
-    @errors['Location'] << "Location #{@location.code} end_date is not a
-                            Friday!".squish
+  rescue ActiveRecord::Error => e
+    @errors['ScheduleRun'] = "Error saving ScheduleRun record: #{e.message}."
+    @errors['ScheduleRun'] << "\n\n#{@schedule_run.inspect}"
   end
 
   def update_run_params
+    save_schedule_run if @schedule_run.id.blank?
+
     @schedule_run.update_columns(startweek: @location.start_date,
-                                 weeks: program_weeks,
-                                 start_time: DateTime.current)
+                                 weeks: program_weeks)
+
+  rescue ActiveRecord::ActiveRecordError => e
+    @errors['ScheduleRun'] = "Error updating ScheduleRun record: #{e.message}."
   end
 
   def program_weeks
