@@ -27,7 +27,7 @@ module ProposalsHelper
   end
 
   def assigned_dates(location)
-    return [] unless location.present?
+    return [] if location.blank?
 
     dates = []
     workshop_start_date = location.start_date
