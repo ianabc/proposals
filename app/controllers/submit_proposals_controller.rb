@@ -52,15 +52,22 @@ class SubmitProposalsController < ApplicationController
     return unless request.xhr?
 
     @errors = []
-    counter = 0
+    @counter = 0
     params[:invites_attributes].each_value do |invite|
       @invite = @proposal.invites.new(invite_params(invite))
-      counter += 1 if @invite.save
+      invite_save
       next if @invite.errors.empty?
 
       invalid_email_error_message
     end
-    render json: { errors: @errors, counter: counter }, status: :ok
+    render json: { errors: @errors, counter: @counter }, status: :ok
+  end
+
+  def invite_save
+    return unless @invite.save
+
+    log_activity(@invite)
+    @counter += 1
   end
 
   def confirm_submission
@@ -86,7 +93,8 @@ class SubmitProposalsController < ApplicationController
 
   def generate_proposal_pdf
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
-    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user)
+    version = @proposal.answers.maximum(:version).to_i
+    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user, version)
                                       .generate_latex_file.to_s
     render_file_string
   end
@@ -105,7 +113,7 @@ class SubmitProposalsController < ApplicationController
 
   def proposal_params
     params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
-                  :no_latex, :preamble, :bibliography, :cover_letter)
+                  :no_latex, :preamble, :bibliography, :cover_letter, :same_week_as, :week_after, :assigned_date)
           .merge(no_latex: params[:no_latex] == 'on')
   end
 
@@ -257,5 +265,16 @@ class SubmitProposalsController < ApplicationController
                             ams_subject_one: @proposal.ams_subjects.first.id,
                             ams_subject_two: @proposal.ams_subjects.last.id,
                             version: version, send_to_editflow: nil)
+  end
+
+  def log_activity(invite)
+    data = {
+      logable: invite,
+      user: current_user,
+      data: {
+        action: params[:action].humanize
+      }
+    }
+    Log.create!(data)
   end
 end

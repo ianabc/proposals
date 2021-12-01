@@ -1,4 +1,6 @@
 class Invite < ApplicationRecord
+  include Logable
+
   attr_accessor :skip_deadline_validation
 
   belongs_to :person
@@ -14,6 +16,7 @@ class Invite < ApplicationRecord
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
   validate :deadline_not_in_past, :proposal_title
   validate :one_invite_per_person, on: :create
+  after_commit :log_activity
 
   enum status: { pending: 0, confirmed: 1, cancelled: 2 }
   enum response: { yes: 0, maybe: 1, no: 2 }
@@ -29,7 +32,6 @@ class Invite < ApplicationRecord
   def add_person
     return if [firstname, lastname, email].map(&:blank?).any?
 
-    email.downcase!
     self.person = find_or_create_person
   end
 
@@ -49,7 +51,7 @@ class Invite < ApplicationRecord
   private
 
   def downcase_email
-    self.email = email.downcase if email.present?
+    self.email = email.downcase.strip if email.present?
   end
 
   def proposal_title
@@ -79,17 +81,27 @@ class Invite < ApplicationRecord
     end
   end
 
-  def find_or_create_person
-    person = Person.where(email: email).first
+  def create_person(fixed_email)
+    Person.create(email: fixed_email, firstname: firstname, lastname: lastname)
+  rescue ActiveRecord::RecordNotUnique
+    errors.add('Email problem:', "#{email} is already used by another
+                record, and we are having troubles using it again. Please
+                contact birs@birs.ca to report this issue.".squish)
+  end
 
-    if person.blank?
-      begin
-        person = Person.create(email: email, firstname: firstname,
-                               lastname: lastname)
-      rescue ActiveRecord::RecordNotUnique
-        person = Person.find_by(email: email)
-      end
-    end
-    person
+  def find_or_create_person
+    return if email.blank?
+
+    fixed_email = email.strip.downcase
+    person = Person.find_by(email: fixed_email)
+    return person if person.present?
+
+    create_person(fixed_email)
+  end
+
+  def log_activity
+    return if previous_changes.empty? || User.current.nil?
+
+    audit!(user: User.current)
   end
 end

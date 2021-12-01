@@ -62,10 +62,7 @@ class ProposalsController < ApplicationController
   def latex_output
     proposal_id = params[:id]
     @proposal = Proposal.find_by(id: proposal_id)
-    @year = @proposal&.year || (Date.current.year.to_i + 2)
-    @proposal_pdf = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user)
-                                      .generate_latex_file
-    @latex_infile = @proposal_pdf.to_s
+    generate_file
     errors = @proposal_pdf.file_errors.join(', ')
 
     flash[:alert] = "[#{@proposal.code}] #{@proposal.title} - attachment not added: #{errors}."
@@ -209,6 +206,7 @@ class ProposalsController < ApplicationController
   end
 
   def authorize_user
+    @current_user = current_user
     return if params[:action] == 'show' &&
               (current_user.staff_member? || current_user.organizer?(@proposal))
 
@@ -227,5 +225,13 @@ class ProposalsController < ApplicationController
       }
     }
     Log.create!(data)
+  end
+
+  def generate_file
+    @year = @proposal&.year || (Date.current.year.to_i + 2)
+    version = @proposal.answers.maximum(:version).to_i
+    @proposal_pdf = ProposalPdfService.new(@proposal.id, latex_temp_file, 'all', current_user, version)
+                                      .generate_latex_file
+    @latex_infile = @proposal_pdf.to_s
   end
 end
