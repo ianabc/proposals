@@ -86,7 +86,7 @@
                             <p class="field-validation">Title is required</p>
                           <% end %>
                         </div>
-                        <% if @current_user.staff_member? %>
+                        <% if @current_user&.staff_member? %>
                           <div>
                             <%= label_tag :assigned_location_id %>
                           </div>
