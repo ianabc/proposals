@@ -206,6 +206,7 @@ class ProposalsController < ApplicationController
   end
 
   def authorize_user
+    @current_user = current_user
     return if params[:action] == 'show' &&
               (current_user.staff_member? || current_user.organizer?(@proposal))
 
