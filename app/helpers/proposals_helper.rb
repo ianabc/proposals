@@ -27,8 +27,14 @@ module ProposalsHelper
   end
 
   def assigned_dates(location)
+    return "" unless location
+
     start_date = location.start_date
     end_date = location.end_date
+    get_assigne_dates(start_date, end_date, location)
+  end
+
+  def get_assigne_dates(start_date, end_date, location)
     assigned_exclude_dates = []
     workshop_start_date = start_date
     while workshop_start_date <= end_date
@@ -36,8 +42,8 @@ module ProposalsHelper
       assigned_exclude_dates << "#{workshop_start_date} - #{workshop_end_date}"
       workshop_start_date += 7.days
     end
-    assigned_exclude_dates = assigned_exclude_dates - location.exclude_dates
-    assigned_exclude_dates.map {|exc| exc}
+    assigned_exclude_dates -= location.exclude_dates
+    assigned_exclude_dates.map { |exc| exc }
   end
 
   def locations
