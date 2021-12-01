@@ -46,8 +46,8 @@ class Location < ApplicationRecord
     errors.add(field, "#{ds} must be after Start Date") if date < start_date
     errors.add(field, "#{ds} must be before End Date") if date > end_date
     
-    rescue Date::Error
-      errors.add(field, "#{ds} is not a valid date string.")
+  rescue Date::Error
+    errors.add(field, "#{ds} is not a valid date string.")
   end
 
   def check_valid_exclude_dates

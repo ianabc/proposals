@@ -17,6 +17,6 @@ class SchedulesController < ApplicationController
   private
 
   def run_params
-    params.permit(:weeks, :runs, :cases, :location_id, :year)
+    params.permit(:weeks, :runs, :cases, :location_id, :year, :test_mode)
   end
 end
