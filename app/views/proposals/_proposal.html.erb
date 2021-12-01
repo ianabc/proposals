@@ -108,11 +108,11 @@
                           </div>
                          <div class="mb-3">
                             <%= label_tag :Same_week_as %>
-                            <%= select_tag :same_week_as, options_for_select(approved_proposals, @proposal.same_week_as), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <%= select_tag :same_week_as, options_for_select(approved_proposals(@proposal), @proposal.same_week_as), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                           </div>
                           <div class="mb-3">
                             <%= label_tag :week_after %>
-                            <%= select_tag :week_after, options_for_select(approved_proposals, @proposal.week_after), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <%= select_tag :week_after, options_for_select(approved_proposals(@proposal), @proposal.week_after), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                           </div>
                         <% end %>
                         <div class="mb-3">

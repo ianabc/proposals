@@ -22,8 +22,8 @@ module ProposalsHelper
     proposal_type.year&.split(",")&.map { |year| year }
   end
 
-  def approved_proposals
-    [""] + Proposal.where(outcome: 'Approved').pluck(:code) - [@proposal.code]
+  def approved_proposals(proposal)
+    [""] + Proposal.where(outcome: 'Approved').pluck(:code) - [proposal.code]
   end
 
   def assigned_dates(location)
