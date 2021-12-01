@@ -26,6 +26,20 @@ module ProposalsHelper
     Proposal.all.where(outcome: "approved").map { |pro| [pro.code] }
   end
 
+  def assigned_dates(location)
+    start_date = location.start_date
+    end_date = location.end_date
+    assigned_exclude_dates = []
+    workshop_start_date = start_date
+    while workshop_start_date <= end_date
+      workshop_end_date = workshop_start_date + 5.days
+      assigned_exclude_dates << "#{workshop_start_date} - #{workshop_end_date}"
+      workshop_start_date += 7.days
+    end
+    assigned_exclude_dates = assigned_exclude_dates - location.exclude_dates
+    assigned_exclude_dates.map {|exc| exc}
+  end
+
   def locations
     Location.all.map { |loc| [loc.name, loc.id] }
   end
