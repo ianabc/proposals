@@ -111,8 +111,8 @@ class HungarianMonteCarlo
       next if date_range.blank?
 
       start_date, end_date = date_range.split(' - ')
-      excluded << [ Date.parse(start_date).strftime("%m/%d/%Y"),
-                    Date.parse(end_date).strftime("%m/%d/%Y") ]
+      excluded << [Date.parse(start_date).strftime("%m/%d/%Y"),
+                   Date.parse(end_date).strftime("%m/%d/%Y")]
     end
   end
 
