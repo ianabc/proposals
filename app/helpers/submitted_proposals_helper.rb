@@ -97,7 +97,12 @@ module SubmittedProposalsHelper
   end
 
   def proposal_logs(proposal)
-    logs = proposal.answers.map(&:logs).reject(&:empty?) + proposal.logs
+    logs = proposal.answers.map(&:logs).reject(&:empty?) + proposal.invites.map(&:logs).reject(&:empty?) + proposal.logs
     logs.flatten.sort_by { |log| -log.created_at.to_i }
+  end
+
+  def invites_logs(log)
+    "#{log.user&.fullname} invited #{log.data['firstname'].last}
+    #{log.data['lastname'].last} #{log.data['email'].last} as #{log.data['invited_as'].last} at #{log.created_at}"
   end
 end
