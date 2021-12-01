@@ -235,8 +235,8 @@ class Proposal < ApplicationRecord
       next if answer[i].blank?
 
       date = answer[i].split(' to ')
-      preferred_dates << Date.parse(date.first)
-      preferred_dates << Date.parse(date.last)
+      preferred_dates << Date.strptime(date.first.strip, '%m/%d/%Y')
+      preferred_dates << Date.strptime(date.last, '%m/%d/%Y')
     end
   end
 
@@ -246,8 +246,8 @@ class Proposal < ApplicationRecord
       next if answer[i].blank?
 
       date = answer[i].split(' to ')
-      impossible_dates << Date.parse(date.first)
-      impossible_dates << Date.parse(date.last)
+      impossible_dates << Date.strptime(date.first.strip, '%m/%d/%Y')
+      impossible_dates << Date.strptime(date.last, '%m/%d/%Y')
     end
   end
 
