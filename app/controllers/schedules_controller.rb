@@ -1,9 +1,11 @@
 class SchedulesController < ApplicationController
+  before_action :authenticate_user!
+  before_action :authorize_user
+  before_action :set_location, only: %w[form]
+
   def new; end
 
-  def form
-    @location = Location.find_by(id: params[:location])
-  end
+  def form; end
 
   def run_hmc_program
     schedule_run = ScheduleRun.new(run_params)
@@ -18,5 +20,13 @@ class SchedulesController < ApplicationController
 
   def run_params
     params.permit(:weeks, :runs, :cases, :location_id, :year, :test_mode)
+  end
+
+  def set_location
+    @location = Location.find_by(id: params[:location])
+  end
+
+  def authorize_user
+    authorize! params[:action], SubmittedProposalsController
   end
 end

@@ -93,7 +93,8 @@ class SubmitProposalsController < ApplicationController
 
   def generate_proposal_pdf
     temp_file = "propfile-#{current_user.id}-#{@proposal.id}.tex"
-    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user)
+    version = @proposal.answers.maximum(:version).to_i
+    @latex_infile = ProposalPdfService.new(@proposal.id, temp_file, 'all', current_user, version)
                                       .generate_latex_file.to_s
     render_file_string
   end
