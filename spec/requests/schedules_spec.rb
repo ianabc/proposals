@@ -2,16 +2,19 @@ require 'rails_helper'
 
 RSpec.describe "/schedules", type: :request do
   let(:location) { create(:location) }
+  let(:person) { create(:person) }
   let(:role) { create(:role, name: 'Staff') }
+  let(:user) { create(:user, person: person) }
   let(:role_privilege_controller) do
     create(:role_privilege,
-           permission_type: "Manage", privilege_name: "SubmittedProposalsController", role_id: role.id)
+           permission_type: "Manage", privilege_name: "SchedulesController", role_id: role.id)
   end
 
   before do
     authenticate_for_controllers
     role_privilege_controller
-    @user.roles << role
+    user.roles << role
+    sign_in user
   end
 
   describe "GET /new" do

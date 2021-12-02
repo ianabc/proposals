@@ -7,7 +7,7 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </a></li>
-          <li class="breadcrumb-item active" aria-current="page">Schedule</li>
+          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Schedule", new_schedule_path %></li>
           <li class="breadcrumb-item active" aria-current="page">Form</li>
         </ol>
       </nav>
@@ -39,16 +39,28 @@
                       </tr>
                       <tr>
                         <td>Program Start Date:</td>
-                        <td>
-                          <%= link_to @location&.start_date, edit_location_path(@location) %>
-                        </td>
+                        <% if @location&.start_date.present? %>
+                          <td>
+                            <%= link_to @location.start_date, edit_location_path(@location) %>
+                          </td>
+                        <% else %>
+                          <td>
+                            <%= link_to 'Add Start Date', edit_location_path(@location) %>
+                          </td>
+                        <% end %>
                         <td></td>
                       </tr>
                       <tr>
                         <td>Program End Date:</td>
-                        <td>
-                          <%= link_to @location&.end_date, edit_location_path(@location) %>
-                        </td>
+                        <% if @location&.start_date.present? %>
+                          <td>
+                            <%= link_to @location&.end_date, edit_location_path(@location) %>
+                          </td>
+                        <% else %>
+                          <td>
+                            <%= link_to 'Add End Date', edit_location_path(@location) %>
+                          </td>
+                        <% end %>
                         <td></td>
                       </tr>
                       <tr>

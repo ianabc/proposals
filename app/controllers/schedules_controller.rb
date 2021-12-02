@@ -27,6 +27,6 @@ class SchedulesController < ApplicationController
   end
 
   def authorize_user
-    authorize! params[:action], SubmittedProposalsController
+    authorize! params[:action], SchedulesController
   end
 end
