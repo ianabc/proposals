@@ -14,9 +14,9 @@ class HungarianMonteCarlo
   end
 
   def run_optimizer
+    socket = hmc_connect
     return if @errors.present?
 
-    socket = hmc_connect
     socket.puts "#{@hmc_access_code}" if hmc_reply(socket, 'Access code')
     socket.puts "newrun" if hmc_reply(socket, 'READY')
     socket.puts formatted_run_params if hmc_reply(socket, 'Run parameters')
@@ -34,7 +34,7 @@ class HungarianMonteCarlo
 
   def hmc_connect
     TCPSocket.open(@hmc_server, @hmc_port)
-  rescue IOError => e
+  rescue SocketError => e
     @errors['HMC'] = "Error connecting to HMC! #{e.message}"
   end
 

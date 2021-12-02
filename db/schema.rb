@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_01_040031) do
+ActiveRecord::Schema.define(version: 2021_12_02_011343) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -388,8 +388,8 @@ ActiveRecord::Schema.define(version: 2021_12_01_040031) do
     t.string "editflow_id"
     t.text "cover_letter"
     t.date "assigned_date"
-    t.integer "same_week_as"
-    t.integer "week_after"
+    t.string "same_week_as"
+    t.string "week_after"
     t.integer "assigned_location_id"
     t.string "assigned_size"
     t.index ["code"], name: "index_proposals_on_code", unique: true
