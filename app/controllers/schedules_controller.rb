@@ -10,10 +10,9 @@ class SchedulesController < ApplicationController
   def run_hmc_program
     schedule_run = ScheduleRun.new(run_params)
     if schedule_run.save
-      HungarianMonteCarlo.new(schedule_run: schedule_run).run_optimizer
+      hmc_program(schedule_run)
     else
-      redirect_to new_schedule_run_schedules_path(location: params[:location_id]),
-                  alert: schedule_run.errors.full_messages
+      render json: { errors: schedule_run.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -21,6 +20,16 @@ class SchedulesController < ApplicationController
 
   def run_params
     params.permit(:weeks, :runs, :cases, :location_id, :year, :test_mode)
+  end
+
+  def hmc_program(schedule_run)
+    hmc = HungarianMonteCarlo.new(schedule_run: schedule_run)
+    if hmc.errors
+      render json: { errors: hmc.errors }, status: :unprocessable_entity
+    else
+      HmcJob.new(hmc).perform
+      head :accepted
+    end
   end
 
   def set_location
