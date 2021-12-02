@@ -23,10 +23,46 @@ RSpec.describe "/schedules", type: :request do
   end
 
   describe "GET /form" do
-    let(:location) { create(:location) }
     it "render a successful response" do
       get new_schedule_run_schedules_url, params: { location: location.id }
       expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "GET /run_hmc_program" do
+    context "when schedule run save successfully" do
+      let(:params) do
+        {
+          location_id: location.id,
+          year: Date.current.year + 2,
+          weeks: 5,
+          runs: 5000,
+          cases: 10,
+          test_mode: false
+        }
+      end
+
+      it "calls hmc job" do
+        post run_hmc_program_schedules_url, params: params
+        expect(response).to have_http_status(422)
+      end
+    end
+
+    context "when schedule run does not save successfully" do
+      let(:params) do
+        {
+          location_id: location.id,
+          year: Date.current.year + 2,
+          weeks: 5,
+          runs: 5000,
+          test_mode: false
+        }
+      end
+
+      it "render a unsuccessful response" do
+        post run_hmc_program_schedules_url, params: params
+        expect(response).to have_http_status(422)
+      end
     end
   end
 end
