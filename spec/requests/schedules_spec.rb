@@ -5,11 +5,12 @@ RSpec.describe "/schedules", type: :request do
   let(:role) { create(:role, name: 'Staff') }
   let(:role_privilege_controller) do
     create(:role_privilege,
-           permission_type: "Manage", privilege_name: "SubmittedProposalsController", role_id: role.id)
+           permission_type: "Manage", privilege_name: "SchedulesController",
+           role_id: role.id)
   end
 
   before do
-    authenticate_for_controllers
+    authenticate_for_controllers # signs-in @user
     role_privilege_controller
     @user.roles << role
   end

@@ -21,13 +21,13 @@ class Email < ApplicationRecord
     when 'Reject'
       if proposal.may_decision?
         proposal.decision!
-        proposal.update(outcome: 'rejected')
+        proposal.update(outcome: 'Rejected')
         return true
       end
     when 'Approval'
       if proposal.may_decision?
         proposal.decision!
-        proposal.update(outcome: 'approved')
+        proposal.update(outcome: 'Approved')
         return true
       end
     when 'Decision'

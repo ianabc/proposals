@@ -3,6 +3,7 @@ require_relative '../config/environment'
 require 'rails/test_help'
 require 'simplecov'
 require 'simplecov-lcov'
+require 'factory_bot_rails'
 
 SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
 COVERAGE_FORMATTER = SimpleCov::Formatter::MultiFormatter.new([
