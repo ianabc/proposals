@@ -13,7 +13,7 @@ class HmcJob < ApplicationJob
           @hmc.errors })
     else
       ActionCable.server.broadcast("hmc_channel", { success:
-          "HMC run optimizer successfully." })
+          "Schedule optimizer ran successfully." })
     end
   end
 end

@@ -6,7 +6,7 @@ export default class extends Controller {
   runHmcProgram() {
     $.post(`/schedules/run_hmc_program`,
       $("#schedule_run_parameters").serialize(), function() {
-        toastr.success("Started running schedules parameters optimaztion.")
+        toastr.success("Started schedule optimization run!")
       }
     )
     .fail(function(response) {
