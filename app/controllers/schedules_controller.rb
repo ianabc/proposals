@@ -1,18 +1,19 @@
 class SchedulesController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_user
-  before_action :set_location, only: %w[form]
+  before_action :set_location, only: %w[new_schedule_run]
 
   def new; end
 
-  def form; end
+  def new_schedule_run; end
 
   def run_hmc_program
     schedule_run = ScheduleRun.new(run_params)
     if schedule_run.save
       HungarianMonteCarlo.new(schedule_run: schedule_run).run_optimizer
     else
-      redirect_to form_schedules_path(location: params[:location_id]), alert: schedule_run.errors.full_messages
+      redirect_to new_schedule_run_schedules_path(location: params[:location_id]),
+                  alert: schedule_run.errors.full_messages
     end
   end
 
