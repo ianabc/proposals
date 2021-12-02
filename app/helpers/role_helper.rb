@@ -18,8 +18,11 @@ module RoleHelper
                   %w[Option Option], ['Page Content', 'PageContent'], %w[Person Person],
                   %w[Proposal Proposal], ['Proposal Field', 'ProposalField'],
                   ['Proposal Form', 'ProposalForm'], ['Proposal Type', 'ProposalType'],
-                  %w[Review Review], %w[Role Role], ['Staff Discussion', 'StaffDiscussion'],
-                  %w[Subject Subject], %w[SubjectCategory SubjectCategory], %w[Survey Survey],
+                  %w[Review Review], %w[Role Role], %w[SchedulesController SchedulesController],
+                  ['Staff Discussion', 'StaffDiscussion'], %w[Subject Subject],
+                  %w[SubjectCategory SubjectCategory],
+                  %w[SubmittedProposalsController SubmittedProposalsController],
+                  %w[Survey Survey],
                   %w[User User], %w[Validation Validation]]
     privileges.map { |disp, _value| disp }
   end
