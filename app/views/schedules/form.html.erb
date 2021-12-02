@@ -13,14 +13,14 @@
       </nav>
     </div>
     <div class="row">
-      <div class="col-12">
+      <div class="col-12" data-controller="schedules">
         <div class="card">
           <div class="card-body">
             <div>
               <h1 class="mb-3" style ="color: #166688; ">Generate Schedule For <%= @location&.name %> (<%= @location&.code %>):</h1>
-              <%= form_with(url: run_hmc_program_schedules_path, method: :post) do |f| %>
+              <form id="schedule_run_parameters">
                 <div>
-                  <%= f.hidden_field :location_id, value: @location&.id %>
+                  <input type="text" name="location_id" hidden="true" value="<%= @location&.id %>">
                   <table class="table" border="1">
                     <thead>
                       <tr>
@@ -105,10 +105,10 @@
                     </tbody>
                   </table>
                   <div>
-                    <%= f.submit "Run HMC with the above parameters", class:  'btn btn-light' %>
+                    <span data-action="click->schedules#runHmcProgram" class="btn btn-light">Run HMC with the above parameters</span>
                   </div>
                 </div>
-              <% end %>
+              </form>
             </div>
           </div>
         </div>
