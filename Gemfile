@@ -30,10 +30,11 @@ gem 'sass-rails', '>= 6'
 gem 'tinymce-rails'
 gem 'turbo-rails', '~> 0.8.2'
 gem 'webpacker', '~> 5.0'
+
 group :development, :test do
   gem 'byebug'
   gem 'capybara', '>= 3.26'
-  gem 'factory_bot_rails'
+  gem 'factory_bot_rails', require: false
   gem 'faker'
   gem 'rspec-rails', '~> 4.1.0'
   gem 'rubocop-performance'
