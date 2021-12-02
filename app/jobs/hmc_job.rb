@@ -2,6 +2,7 @@ class HmcJob < ApplicationJob
   queue_as :default
 
   def initialize(hmc)
+    super
     @hmc = hmc
   end
 
