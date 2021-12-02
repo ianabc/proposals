@@ -17,17 +17,18 @@ class HungarianMonteCarlo
     return if @errors.present?
 
     socket = hmc_connect
-    socket.puts @hmc_access_code if hmc_reply(socket, 'Access code')
-    socket.puts('newrun') if hmc_reply(socket, 'READY')
-    socket.puts(formatted_run_params) if hmc_reply(socket, 'Run parameters')
+    socket.puts "#{@hmc_access_code}" if hmc_reply(socket, 'Access code')
+    socket.puts "newrun" if hmc_reply(socket, 'READY')
+    socket.puts formatted_run_params if hmc_reply(socket, 'Run parameters')
     socket.puts proposal_data.join("\n") if hmc_reply(socket, 'Send proposals')
     update_schedule_runs(socket)
     socket.close
+    @schedule_run.pid
   end
 
   def hmc_reply(socket, prompt)
-    socket.gets.chomp.match?(prompt)
-  rescue IOError => e
+    socket.gets&.chomp&.match?(prompt)
+  rescue => e
     @errors['HMC'] = "Error reading socket! #{e.message}"
   end
 
@@ -49,14 +50,16 @@ class HungarianMonteCarlo
   end
 
   def proposal_data
-    formatted_data = schedule_run.test_mode ? hmc_test_data : hmc_formatted_data
-    add_placeholder_events(formatted_data.values)
+    formatted_data = @schedule_run.test_mode ? hmc_test_data : hmc_formatted_data
+    # trailing newline at end of input required
+    add_placeholder_events(formatted_data.values.shuffle) << "\n"
   end
 
   def hmc_test_data
-    proposals = Proposal.where(year: @schedule_run.year).limit(program_weeks)
+    proposals = Proposal.where(year: @schedule_run.year)
+                        .where.not(code: nil).limit(program_weeks)
 
-    proposals.shuffle.each_with_object({}) do |proposal, data|
+    proposals.each_with_object({}) do |proposal, data|
       next if invalid_proposal?(proposal)
 
       priority = 2
@@ -70,11 +73,11 @@ class HungarianMonteCarlo
 
   def hmc_formatted_data
     proposals = Proposal.where(assigned_location: @location)
-                        .where(outcome: 'Accepted')
+                        .where(outcome: 'Approved')
                         .where(year: @schedule_run.year)
 
     skip_proposals = []
-    proposals.shuffle.each_with_object({}) do |proposal, data|
+    proposals.each_with_object({}) do |proposal, data|
       next if invalid_proposal?(proposal)
       next if skip_proposals.include?(proposal)
 
@@ -85,21 +88,33 @@ class HungarianMonteCarlo
 
       if proposal.assigned_date.present?
         priority = 1
-        preferred_dates = format_dates([proposal.assigned_date]).first
+        start_date = proposal.assigned_date
+        end_date = start_date + 5.days
+        preferred_dates = format_dates([start_date, end_date]).join(';')
       end
 
       code << " (1/2 workshop)" if proposal.assigned_size == 'Half'
 
       if proposal.same_week_as.present?
-        code = "#{proposal.same_week_as&.code} and #{proposal.code}"
+        other_proposal = find_other_proposal(proposal.code,
+                                             proposal.same_week_as,
+                                             'same_week_as')
+        next if other_proposal.blank?
+
+        code = "#{other_proposal&.code} and #{proposal.code}"
         preferred_dates, impossible_dates, data, skip_proposals =
-          merge_and_purge(proposal.same_week_as, proposal, data, skip_proposals)
+          merge_and_purge(other_proposal, proposal, data, skip_proposals)
       end
 
       if proposal.week_after.present?
-        code = "#{proposal.week_after&.code} followed by #{proposal.code}"
+        other_proposal = find_other_proposal(proposal.code,
+                                             proposal.same_week_as,
+                                             'week_after')
+        next if other_proposal.blank?
+
+        code = "#{other_proposal&.code} followed by #{proposal.code}"
         preferred_dates, impossible_dates, data, skip_proposals =
-          merge_and_purge(proposal.week_after, proposal, data, skip_proposals)
+          merge_and_purge(other_proposal, proposal, data, skip_proposals)
       end
 
       data[code] = "#{code}:#{priority}: #{preferred_dates}: #{impossible_dates}:"
@@ -131,6 +146,15 @@ class HungarianMonteCarlo
   end
 
   private
+
+  def find_other_proposal(code, other_code, kind)
+    other_proposal = Proposal.find_by(code: other_code)
+    if other_proposal.blank?
+      @errors[kind] = "Proposal #{code} has non-existent proposal #{other_code}
+                       in its #{kind} field!".squish
+    end
+    other_proposal
+  end
 
   def update_schedule_run(pid)
     if pid.blank?
