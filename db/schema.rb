@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_02_071851) do
+ActiveRecord::Schema.define(version: 2021_12_03_111239) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -450,7 +450,7 @@ ActiveRecord::Schema.define(version: 2021_12_02_071851) do
   create_table "schedules", force: :cascade do |t|
     t.integer "case_num"
     t.integer "week"
-    t.integer "hmc_score"
+    t.decimal "hmc_score", precision: 5, scale: 2
     t.string "proposal"
     t.bigint "schedule_run_id"
     t.datetime "created_at", precision: 6, null: false
