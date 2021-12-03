@@ -22,7 +22,11 @@ RSpec.describe ProposalsHelper, type: :helper do
   describe "#proposal_type_year" do
     let(:proposal_type) { create(:proposal_type) }
     it "return array of year comma separated [year]" do
-      expect(proposal_type_year(proposal_type)).to match_array(%w[2021 2022 2023])
+      expect(proposal_type_year(proposal_type)).to eq(%w[2021 2022 2023])
+    end
+    it "does not return array of year comma separated [year]" do
+      proposal_type.update(year: "")
+      expect(proposal_type_year(proposal_type)).to eq([Date.current.year + 2])
     end
   end
 
@@ -31,6 +35,20 @@ RSpec.describe ProposalsHelper, type: :helper do
     it "returns array of locations [name,id]" do
       locations_list
       expect(locations).to match_array(locations_list.pluck(:name, :id))
+    end
+  end
+
+  describe "#all_statuses" do
+    it "returns array of statuses[status,id] " do
+      expect(all_statuses).to eq(Proposal.statuses.map { |k, v| [k.humanize.capitalize, v] })
+    end
+  end
+
+  describe "#all_proposal_types" do
+    let(:proposal_types_list) { create_list(:proposal_type, 4) }
+    it "returns array of proposal_types [name,id]" do
+      proposal_types_list
+      expect(all_proposal_types).to match_array(proposal_types_list.pluck(:name, :id))
     end
   end
 
@@ -64,6 +82,83 @@ RSpec.describe ProposalsHelper, type: :helper do
 
     it 'returns id of proposal ams subject with provided code' do
       expect(proposal_ams_subjects_code(proposal, 'code2')).to eq(ams_subject.id)
+    end
+  end
+
+  describe "#assigned_dates" do
+    context "when start date is blank" do
+      let(:location) { create(:location) }
+      it "creates range of dates" do
+        assigned_dates(location)
+        expect(response).to have_http_status(:ok)
+      end
+      it "does not return range of dates" do
+        assigned_dates("")
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
+
+  describe "#approved_proposals" do
+    let(:proposal) { create(:proposal) }
+    it "creates a successful response" do
+      approved_proposals(proposal)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "#proposal_version" do
+    let(:proposal) { create(:proposal) }
+    let(:version) { create(:proposal_version) }
+    it "returns the version of proposal" do
+      proposal_version(version, proposal)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "#proposal_version_title" do
+    let(:proposal) { create(:proposal) }
+    let(:proposal_version) { create(:proposal_version, proposal_id: proposal.id) }
+    it "returns the title of proposal version" do
+      proposal_version
+      proposal_version_title(1, proposal)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "#invite_last_name" do
+    let(:person) { create(:person) }
+    let(:invite) { create(:invite, person_id: person.id) }
+    it "returns the last name of invite" do
+      invite_last_name(invite)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "#invite_first_name" do
+    let(:person) { create(:person) }
+    let(:invite) { create(:invite, person_id: person.id) }
+    it "returns the first name of invite" do
+      invite_first_name(invite)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "#no_of_participants" do
+    let(:proposal) { create(:proposal) }
+    let(:invite) { create(:invite) }
+    it "returns the last name of invite" do
+      no_of_participants(invite, proposal.id)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "#confirmed_participants" do
+    let(:proposal) { create(:proposal) }
+    let(:invite) { create(:invite) }
+    it "returns the last name of invite" do
+      confirmed_participants(invite, proposal.id)
+      expect(response).to have_http_status(:ok)
     end
   end
 end
