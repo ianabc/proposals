@@ -2,6 +2,7 @@ class SchedulesController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_user
   before_action :set_location, only: %w[new_schedule_run]
+  before_action :set_schedule_run, only: %w[abort_run optimized_schedule]
 
   def new; end
 
@@ -16,6 +17,12 @@ class SchedulesController < ApplicationController
     end
   end
 
+  def abort_run
+    # TODO: abort_run method pending
+  end
+
+  def optimized_schedule; end
+
   private
 
   def run_params
@@ -27,9 +34,13 @@ class SchedulesController < ApplicationController
     if hmc.errors
       render json: { errors: hmc.errors }, status: :unprocessable_entity
     else
-      HmcJob.new(hmc).perform
+      HmcJob.new(hmc).perform(schedule_run)
       head :accepted
     end
+  end
+
+  def set_schedule_run
+    @schedule_run = ScheduleRun.find_by(id: params[:run_id])
   end
 
   def set_location

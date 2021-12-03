@@ -30,6 +30,51 @@
                 </div>
               <% end %>
             </div>
+            <div>
+              <h2 class="mt-4 mb-3" style ="color: #166688;" >Schedule Optimization Results</h2>
+              <table class="table" border="1">
+                <thead>
+                  <tr>
+                    <th >Id</th>
+                    <th>Loc</th>
+                    <th>Weeks</th>
+                    <th>First Week</th>
+                    <th>Run Time</th>
+                    <th>iterations</th>
+                    <th>Number of Cases</th>
+                    <th>Top Score</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% ScheduleRun.all&.find_each do |run| %>
+                    <tr>
+                      <td><%= run.id %></td>
+                      <td><%= run.location.name %></td>
+                      <td><%= run.weeks %></td>
+                      <td><%= run.startweek %></td>
+                      <% if run.end_time.nil? %>
+                        <td>
+                          <%= link_to 'Abort the run', abort_run_schedules_path(run_id: run.id), method: :post %>
+                        </td>
+                      <% else %>
+                        <td><%= run.end_time %></td>
+                      <% end %>
+                      <td><%= run.runs %></td>
+                      <td><%= run.cases %></td>
+                      <td></td>
+                      <% if run.end_time.present? %>
+                        <td>
+                          <%= link_to 'View results', optimized_schedule_schedules_url(run_id: run.id) %>
+                        </td>
+                      <% else %>
+                        <td></td>
+                      <% end %>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

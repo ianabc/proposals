@@ -1,0 +1,51 @@
+<main class="content">
+  <div class="container-fluid">
+    <div class="header">
+      <h1 class="header-title">
+        Schedules
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </a></li>
+          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Schedule", new_schedule_path %></li>
+          <li class="breadcrumb-item active" aria-current="page">Optimized Schedule</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <div>
+              <h2><strong>Run
+                <!--TODO: schedule_run.id run object -->
+                , Case of
+                <!--TODO: schedule_run.cases cases list -->
+                , HMC Score: 
+                <!--TODO: hmc_score on the basis of selected case -->
+                </strong></h2>
+                <p>Each case represents a possible schedule.Click the left or right arrows above to see the previous or next case in this run.Statistics for this run are at the bottom.To create the 2020 event schedule from a given case,click the "apply..."" at the button at bottom.</p>
+            <table class="table table-bordered" >
+              <thead>
+                <tr>
+                  <th width="100">Week</th>
+                  <th class="text-center" width="1000">Workshop</th>
+                  <th width="50">Choice</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- schedules.each do |schedule| -->
+                <tr>
+                  <!--TODO: pending (data on the basis of selected case)-->
+                  <!--TODO: <td> schedule.week </td> -->
+                  <!--TODO: <td> schedule.proposal.code </td> -->
+                  <!--TODO: <td></td> -->
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

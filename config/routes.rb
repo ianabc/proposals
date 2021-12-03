@@ -50,6 +50,8 @@ Rails.application.routes.draw do
     collection do
       get :new_schedule_run
       post :run_hmc_program
+      post :abort_run
+      get :optimized_schedule
     end
   end
 
