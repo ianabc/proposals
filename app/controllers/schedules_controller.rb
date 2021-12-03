@@ -1,9 +1,13 @@
 class SchedulesController < ApplicationController
-  before_action :authenticate_user!
-  before_action :authorize_user
+  before_action :authenticate_user!, except: %i[create]
+  before_action :authorize_user, except: %i[create]
   before_action :set_location, only: %w[new_schedule_run]
+  skip_before_action :verify_authenticity_token, only: %i[create]
+  before_action :parse_request, :authenticate_api_key, :schedules_data, only: %i[create]
 
   def new; end
+
+  def create; end
 
   def new_schedule_run; end
 
@@ -34,6 +38,38 @@ class SchedulesController < ApplicationController
 
   def set_location
     @location = Location.find_by(id: params[:location])
+  end
+
+  def parse_request
+    @json_data = JSON.parse(request.body.read)
+  rescue JSON::ParserError
+    head :bad_request
+  end
+
+  def authenticate_api_key
+    return if ENV['SCHEDULE_API_KEY'] == @json_data["SCHEDULE_API_KEY"]
+
+    unauthorized
+  end
+
+  def schedules_data
+    run_data = @json_data["run_data"]
+    run_data.each do |run|
+      schedules_assignments(run)
+    end
+  end
+
+  def schedules_assignments(run)
+    run["assignments"].flatten.each do |assignment|
+      schedule = Schedule.new(schedule_run_id: run["schedule_run_id"], case_num: run["case_num"],
+                              hmc_score: run["hmc_score"], week: assignment["week"],
+                              proposal: assignment["proposal"])
+      schedule.save
+    end
+  end
+
+  def unauthorized
+    head :unauthorized
   end
 
   def authorize_user
