@@ -1,13 +1,22 @@
 class SchedulesController < ApplicationController
   before_action :authenticate_user!, except: %i[create]
   before_action :authorize_user, except: %i[create]
-  before_action :set_location, only: %w[new_schedule_run]
   skip_before_action :verify_authenticity_token, only: %i[create]
-  before_action :parse_request, :authenticate_api_key, :schedules_data, only: %i[create]
+  before_action :json_only, :authenticate_api_key, only: %i[create]
+  before_action :set_location, only: %w[new_schedule_run]
 
   def new; end
 
-  def create; end
+  def create
+    schedule_errors = save_schedules_data
+
+    if schedule_errors.flatten.empty?
+      render json: { success: 'Schedule saved!' }, status: :ok
+    else
+      render json: { errors: schedule_errors.join(',') },
+             status: :unprocessable_entity
+    end
+  end
 
   def new_schedule_run; end
 
@@ -26,6 +35,13 @@ class SchedulesController < ApplicationController
     params.permit(:weeks, :runs, :cases, :location_id, :year, :test_mode)
   end
 
+  def schedule_params
+    params.require(:schedule)
+          .permit(:SCHEDULE_API_KEY, :schedule_run_id,
+                  run_data: [:case_num, :hmc_score,
+                             assignments: [:week, :proposal]])
+  end
+
   def hmc_program(schedule_run)
     hmc = HungarianMonteCarlo.new(schedule_run: schedule_run)
     if hmc.errors
@@ -41,35 +57,45 @@ class SchedulesController < ApplicationController
   end
 
   def parse_request
-    @json_data = JSON.parse(request.body.read)
+    JSON.parse(request.body.read)
   rescue JSON::ParserError
     head :bad_request
   end
 
   def authenticate_api_key
-    return if ENV['SCHEDULE_API_KEY'] == @json_data["SCHEDULE_API_KEY"]
+    if ENV['SCHEDULE_API_KEY'].blank?
+      render json: { error: "We have no API key!" }, status: :unauthorized
+    end
 
-    unauthorized
+    return if schedule_params['SCHEDULE_API_KEY'] == ENV['SCHEDULE_API_KEY']
+
+    render json: { error: "Invalid API key." }, status: :unauthorized
   end
 
-  def schedules_data
-    run_data = @json_data["run_data"]
-    run_data.each do |run|
-      schedules_assignments(run)
+  def json_only
+    head :not_acceptable unless request.format == :json
+  end
+
+  def save_schedules_data
+    schedule_run_id = schedule_params['schedule_run_id']
+
+    schedule_params['run_data'].each_with_object([]) do |run_data, errors|
+      error = save_schedule(schedule_run_id, run_data)
+      errors << error unless error.blank?
     end
   end
 
-  def schedules_assignments(run)
-    run["assignments"].flatten.each do |assignment|
-      schedule = Schedule.new(schedule_run_id: run["schedule_run_id"], case_num: run["case_num"],
-                              hmc_score: run["hmc_score"], week: assignment["week"],
+  def save_schedule(schedule_run_id, run_data)
+    return "Empty week assignments!" if run_data["assignments"].blank?
+
+    run_data["assignments"].flatten.each do |assignment|
+      schedule = Schedule.new(schedule_run_id: schedule_run_id,
+                              case_num: run_data["case_num"],
+                              hmc_score: run_data["hmc_score"],
+                              week: assignment["week"],
                               proposal: assignment["proposal"])
-      schedule.save
+      return schedule.errors.full_messages unless schedule.save
     end
-  end
-
-  def unauthorized
-    head :unauthorized
   end
 
   def authorize_user
