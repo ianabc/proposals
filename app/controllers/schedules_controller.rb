@@ -56,12 +56,6 @@ class SchedulesController < ApplicationController
     @location = Location.find_by(id: params[:location])
   end
 
-  def parse_request
-    JSON.parse(request.body.read)
-  rescue JSON::ParserError
-    head :bad_request
-  end
-
   def authenticate_api_key
     if ENV['SCHEDULE_API_KEY'].blank?
       render json: { error: "We have no API key!" }, status: :unauthorized
@@ -81,7 +75,7 @@ class SchedulesController < ApplicationController
 
     schedule_params['run_data'].each_with_object([]) do |run_data, errors|
       error = save_schedule(schedule_run_id, run_data)
-      errors << error unless error.blank?
+      errors << error if error.present?
     end
   end
 
