@@ -18,7 +18,7 @@
           <div class="card-body">
             <div>
               <h2>Start a new Schedule</h2>
-              <%= form_with(url: form_schedules_path, method: :get) do |f| %>
+              <%= form_with(url: new_schedule_run_schedules_path, method: :get) do |f| %>
                 <div class="col-lg-8">
                   <div class="mb-3">
                     <%= f.label :locations, "Select the location for schedule:", class: 'form-label' %>

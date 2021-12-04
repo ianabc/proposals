@@ -20,8 +20,11 @@ FactoryBot.define do
       proposal.create_organizer_role(create(:person), lead_role)
 
       3.times do
+        person = create(:person)
         create(:invite, proposal: proposal, status: 'confirmed',
-                        invited_as: 'Organizer', response: 'yes')
+                        invited_as: 'Organizer', response: 'yes',
+                        firstname: person.firstname, lastname: person.lastname,
+                        email: person.email, person: person)
       end
     end
   end

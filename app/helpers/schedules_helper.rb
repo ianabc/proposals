@@ -1,5 +1,7 @@
 module SchedulesHelper
   def weeks_in_location(location)
+    return '' if location.start_date.blank? || location.end_date.blank?
+
     date_1 = location&.start_date&.to_time
     date_2 = location&.end_date&.to_time
     week = (date_2 - date_1).seconds.in_weeks.to_i.abs if date_1.present? && date_2.present?

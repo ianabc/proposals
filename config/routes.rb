@@ -48,7 +48,7 @@ Rails.application.routes.draw do
 
   resources :schedules do
     collection do
-      get :form
+      get :new_schedule_run
       post :run_hmc_program
     end
   end

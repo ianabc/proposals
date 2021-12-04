@@ -19,22 +19,6 @@ RSpec.describe 'EditFlowService' do
     @proposal.proposal_ams_subjects << subject1
     @proposal.proposal_ams_subjects << subject2
     @efs = EditFlowService.new(@proposal)
-    update_organizers
-  end
-
-  def update_organizers
-    # ensure country exists in the `Country` database
-    countries = %w[Canada Mexico Brazil India Japan Sweden Denmark Ukraine]
-    @proposal.lead_organizer.update(country: countries.sample)
-
-    # invite.person info is getting blanked out with invite creation
-    @proposal.invites.where(invited_as: 'Organizer').each do |invite|
-      person = invite.person
-      person.country = countries.sample
-      person.affiliation = Faker::University.name
-      person.skip_person_validation = true
-      person.save!
-    end
   end
 
   it 'has supporting organizers with countries' do
@@ -48,7 +32,6 @@ RSpec.describe 'EditFlowService' do
   end
 
   it "assigns the lead organizer's country code" do
-    update_organizers
     country = @proposal.lead_organizer.country
     code = Country.find_country_by_name(country).alpha2
     expect(@efs.proposal_country.alpha2).to eq(code)
@@ -88,6 +71,7 @@ RSpec.describe 'EditFlowService' do
     end
 
     it 'accepts an invite and returns a Country object' do
+      # update_organizers
       org_country = @efs.organizer_country(@org_invite)
       expect(org_country).to be_a(Country)
       expect(org_country.name).to eq(@org_invite.person.country)
@@ -125,7 +109,6 @@ RSpec.describe 'EditFlowService' do
 
   context ".query" do
     before do
-      update_organizers
       @result = @efs.query
       expect(@result).not_to be_empty
       expect(@result.class).to eq(String)
