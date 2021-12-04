@@ -145,6 +145,14 @@ class HungarianMonteCarlo
     proposal_data
   end
 
+  def formatted_run_params
+    # Usage: HungarianMonteCarlo <run_id> <date of first workshop (yyyy-mm-dd)>
+    # <number of weeks> <number of runs> <number of cases>\n")
+    s = @schedule_run
+    start_week = s.startweek.strftime("%Y-%m-%d")
+    "#{s.id} #{start_week} #{s.weeks} #{s.runs} #{s.cases}"
+  end
+
   private
 
   def find_other_proposal(code, other_code, kind)
@@ -211,14 +219,6 @@ class HungarianMonteCarlo
 
   def format_dates(dates)
     dates.map { |d| d.strftime("%m/%d/%Y") }
-  end
-
-  def formatted_run_params
-    # Usage: HungarianMonteCarlo <run_id> <date of first workshop (yyyy-mm-dd)>
-    # <number of weeks> <number of runs> <number of cases>\n")
-    s = @schedule_run
-    start_week = s.startweek.strftime("%Y-%m-%d")
-    "#{s.id} #{start_week} #{s.weeks} #{s.runs} #{s.cases}"
   end
 
   def merge_and_purge(proposal1, proposal2, data, skip_proposals)
