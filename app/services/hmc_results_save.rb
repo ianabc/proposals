@@ -31,7 +31,6 @@ class HmcResultsSave < HungarianMonteCarlo
                             proposal: assignment["proposal"])
     return if schedule.save
 
-    Rails.logger.info "Schedule save failed: #{schedule.errors.full_messages}"
     @errors << schedule.errors.full_messages
   end
 end
