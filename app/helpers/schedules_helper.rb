@@ -14,4 +14,11 @@ module SchedulesHelper
     location.exclude_dates.delete("")
     (week - location.exclude_dates.count)
   end
+
+  def schedule_proposal(proposal_code)
+    return '' if proposal_code.blank?
+
+    proposal = Proposal.find_by(code: proposal_code)
+    proposal.present? ? "[#{proposal.code}] #{proposal.title}" : ''
+  end
 end

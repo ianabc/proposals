@@ -4,6 +4,7 @@ class SchedulesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: %i[create]
   before_action :json_only, :authenticate_api_key, only: %i[create]
   before_action :set_location, only: %w[new_schedule_run]
+  before_action :set_schedule_run, only: %w[abort_run optimized_schedule]
 
   def new; end
 
@@ -29,6 +30,19 @@ class SchedulesController < ApplicationController
     end
   end
 
+  def abort_run
+    # TODO: abort_run method pending
+  end
+
+  def optimized_schedule
+    @case_num = if params[:page].to_i > @schedule_run.cases
+                  @schedule_run.cases
+                else
+                  params[:page] >= "1" ? params[:page] : 1
+                end
+    @schedules = Schedule.where(schedule_run_id: @schedule_run.id, case_num: @case_num)
+  end
+
   private
 
   def run_params
@@ -44,12 +58,16 @@ class SchedulesController < ApplicationController
 
   def hmc_program(schedule_run)
     hmc = HungarianMonteCarlo.new(schedule_run: schedule_run)
-    if hmc.errors
+    if hmc.errors.present?
       render json: { errors: hmc.errors }, status: :unprocessable_entity
     else
-      HmcJob.new(hmc).perform
+      HmcJob.new(hmc).perform(schedule_run)
       head :accepted
     end
+  end
+
+  def set_schedule_run
+    @schedule_run = ScheduleRun.find_by(id: params[:run_id])
   end
 
   def set_location
