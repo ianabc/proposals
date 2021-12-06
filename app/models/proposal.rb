@@ -134,6 +134,10 @@ class Proposal < ApplicationRecord
     joins(:proposal_type).where(proposal_type: { name: type })
   }
 
+  def self.find(param)
+    param.to_s.match?(/\D/) ? find_by(code: param) : super
+  end
+
   def editable?
     draft? || revision_requested? || revision_requested_spc?
   end
