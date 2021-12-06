@@ -44,7 +44,7 @@ class SchedulesController < ApplicationController
 
   def hmc_program(schedule_run)
     hmc = HungarianMonteCarlo.new(schedule_run: schedule_run)
-    if hmc.errors
+    if hmc.errors.present?
       render json: { errors: hmc.errors }, status: :unprocessable_entity
     else
       HmcJob.new(hmc).perform
