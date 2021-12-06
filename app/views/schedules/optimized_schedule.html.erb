@@ -12,16 +12,17 @@
         </ol>
       </nav>
     </div>
+
     <div class="row">
       <div class="col-12">
         <div class="card">
           <div class="card-body">
             <div>
-              <h2><strong>Run
-                <!--TODO: schedule_run.id run object -->
-                , Case of
-                <!--TODO: schedule_run.cases cases list -->
-                , HMC Score: 
+              <h2><strong>Run <%= @schedule_run.id %>, Case
+                <%= link_to "←", params.merge(page: (@case_num.to_i - 1), run_id: @schedule_run.id).permit(:page, :run_id) %>
+                <%= @case_num %>
+                <%= link_to "→", params.merge(:page => (@case_num.to_i + 1), run_id: @schedule_run.id).permit(:page, :run_id) %>
+                 of <%= @schedule_run.cases %>, HMC Score: <%= @schedules&.first&.hmc_score %>
                 <!--TODO: hmc_score on the basis of selected case -->
                 </strong></h2>
                 <p>Each case represents a possible schedule.Click the left or right arrows above to see the previous or next case in this run.Statistics for this run are at the bottom.To create the 2020 event schedule from a given case,click the "apply..."" at the button at bottom.</p>
@@ -34,13 +35,14 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- schedules.each do |schedule| -->
+                <% @schedules.each do |schedule| %>
                 <tr>
                   <!--TODO: pending (data on the basis of selected case)-->
-                  <!--TODO: <td> schedule.week </td> -->
-                  <!--TODO: <td> schedule.proposal.code </td> -->
+                  <td><%= schedule.week %></td> 
+                  <td><%= schedule_proposal(schedule.proposal) %></td> 
                   <!--TODO: <td></td> -->
                 </tr>
+                <% end %>
               </tbody>
             </table>
           </div>

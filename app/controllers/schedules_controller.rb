@@ -21,7 +21,14 @@ class SchedulesController < ApplicationController
     # TODO: abort_run method pending
   end
 
-  def optimized_schedule; end
+  def optimized_schedule
+    @case_num = if params[:page].to_i > @schedule_run.cases
+                  @schedule_run.cases
+                else
+                  params[:page] >= "1" ? params[:page] : 1
+                end
+    @schedules = Schedule.where(schedule_run_id: @schedule_run.id, case_num: @case_num)
+  end
 
   private
 
