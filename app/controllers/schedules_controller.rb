@@ -9,11 +9,14 @@ class SchedulesController < ApplicationController
   def new; end
 
   def create
+    return unless @authenticated
+
     schedule_errors = save_schedules_data
 
     if schedule_errors.flatten.empty?
       render json: { success: 'Schedule saved!' }, status: :ok
     else
+      Rails.logger.info("Schedule save errors: #{schedule_errors}")
       render json: { errors: schedule_errors.join(',') },
              status: :unprocessable_entity
     end
@@ -26,7 +29,8 @@ class SchedulesController < ApplicationController
     if schedule_run.save
       hmc_program(schedule_run)
     else
-      render json: { errors: schedule_run.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: schedule_run.errors.full_messages },
+             status: :unprocessable_entity
     end
   end
 
@@ -75,13 +79,18 @@ class SchedulesController < ApplicationController
   end
 
   def authenticate_api_key
+    @authenticated = false
     if ENV['SCHEDULE_API_KEY'].blank?
       render json: { error: "We have no API key!" }, status: :unauthorized
+      return
     end
 
-    return if schedule_params['SCHEDULE_API_KEY'] == ENV['SCHEDULE_API_KEY']
+    if schedule_params['SCHEDULE_API_KEY'] != ENV['SCHEDULE_API_KEY']
+      render json: { error: "Invalid API key." }, status: :unauthorized
+      return
+    end
 
-    render json: { error: "Invalid API key." }, status: :unauthorized
+    @authenticated = true
   end
 
   def json_only
@@ -106,7 +115,10 @@ class SchedulesController < ApplicationController
                               hmc_score: run_data["hmc_score"],
                               week: assignment["week"],
                               proposal: assignment["proposal"])
-      return schedule.errors.full_messages unless schedule.save
+      return if schedule.save
+
+      Rails.logger.info "Schedule save failed: #{schedule.errors.full_messages}"
+      schedule.errors.full_messages
     end
   end
 
