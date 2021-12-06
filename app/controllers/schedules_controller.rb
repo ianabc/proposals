@@ -11,14 +11,13 @@ class SchedulesController < ApplicationController
   def create
     return unless @authenticated
 
-    schedule_errors = save_schedules_data
+    schedules = HmcResultsSave.new(schedule_params)
 
-    if schedule_errors.flatten.empty?
-      render json: { success: 'Schedule saved!' }, status: :ok
+    if schedules.save
+      render json: { success: 'Schedules saved!' }, status: :ok
     else
-      Rails.logger.info("Schedule save errors: #{schedule_errors}")
-      render json: { errors: schedule_errors.join(',') },
-             status: :unprocessable_entity
+      Rails.logger.info("Schedules save errors: #{schedules.errors}")
+      render json: { errors: schedules.errors }, status: :unprocessable_entity
     end
   end
 
@@ -95,31 +94,6 @@ class SchedulesController < ApplicationController
 
   def json_only
     head :not_acceptable unless request.format == :json
-  end
-
-  def save_schedules_data
-    schedule_run_id = schedule_params['schedule_run_id']
-
-    schedule_params['run_data'].each_with_object([]) do |run_data, errors|
-      error = save_schedule(schedule_run_id, run_data)
-      errors << error if error.present?
-    end
-  end
-
-  def save_schedule(schedule_run_id, run_data)
-    return "Empty week assignments!" if run_data["assignments"].blank?
-
-    run_data["assignments"].flatten.each do |assignment|
-      schedule = Schedule.new(schedule_run_id: schedule_run_id,
-                              case_num: run_data["case_num"],
-                              hmc_score: run_data["hmc_score"],
-                              week: assignment["week"],
-                              proposal: assignment["proposal"])
-      return if schedule.save
-
-      Rails.logger.info "Schedule save failed: #{schedule.errors.full_messages}"
-      schedule.errors.full_messages
-    end
   end
 
   def authorize_user
