@@ -57,7 +57,7 @@ class HungarianMonteCarlo
 
   def hmc_test_data
     proposals = Proposal.where(year: @schedule_run.year)
-                        .where.not(code: nil).limit(program_weeks)
+                        .where.not(code: nil).limit(@location.num_weeks)
 
     proposals.each_with_object({}) do |proposal, data|
       next if invalid_proposal?(proposal)
@@ -195,15 +195,10 @@ class HungarianMonteCarlo
     save_schedule_run if @schedule_run.id.blank?
 
     @schedule_run.update_columns(startweek: @location.start_date,
-                                 weeks: program_weeks)
+                                 weeks: @location.num_weeks)
 
   rescue ActiveRecord::ActiveRecordError => e
     @errors['ScheduleRun'] = "Error updating ScheduleRun record: #{e.message}."
-  end
-
-  def program_weeks
-    extend SchedulesHelper
-    weeks_in_location(@location)
   end
 
   def invalid_proposal?(proposal)
