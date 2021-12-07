@@ -86,43 +86,46 @@ RSpec.describe ProposalsHelper, type: :helper do
   end
 
   describe "#assigned_dates" do
-    context "when start date is blank" do
+    context "for valid parameters" do
       let(:location) { create(:location) }
-      it "creates range of dates" do
-        assigned_dates(location)
-        expect(response).to have_http_status(:ok)
+      it "returns the range of dates" do
+        dates = assigned_dates(location)
+        expect(assigned_dates(location)).to match_array(dates)
       end
-      it "does not return range of dates" do
-        assigned_dates("")
-        expect(response).to have_http_status(:ok)
+    end
+    context "for invalid parameters" do
+      let(:location) { create(:location, start_date: "") }
+      it "does not returns the range of dates" do
+        expect(assigned_dates(location)).to match_array([])
       end
     end
   end
 
   describe "#approved_proposals" do
     let(:proposal) { create(:proposal) }
-    it "creates a successful response" do
-      approved_proposals(proposal)
-      expect(response).to have_http_status(:ok)
+    let(:proposals) { create_list(:proposal, 3, outcome: 'Approved') }
+    it "return the code for approved proposals" do
+      codes = [""] + proposals.pluck(:code)
+      expect(approved_proposals(proposal)).to match_array(codes)
     end
   end
 
-  describe "#proposal_version" do
-    let(:proposal) { create(:proposal) }
-    let(:version) { create(:proposal_version) }
-    it "returns the version of proposal" do
-      proposal_version(version, proposal)
-      expect(response).to have_http_status(:ok)
-    end
-  end
+  # describe "#proposal_version" do
+  #   let(:proposal) { create(:proposal) }
+  #   let(:proposal_version) { create(:proposal_versionproposal_id: proposal.id) }
+  #   it "returns the version of proposal" do
+  #     debugger
+  #     proposal_version(proposal_version, proposal)
+  #     expect(response.body).to eq(proposal_version)
+  #   end
+  # end
 
   describe "#proposal_version_title" do
-    let(:proposal) { create(:proposal) }
+    let(:proposal) { create(:proposal, title: 'Test') }
     let(:proposal_version) { create(:proposal_version, proposal_id: proposal.id) }
     it "returns the title of proposal version" do
       proposal_version
-      proposal_version_title(1, proposal)
-      expect(response).to have_http_status(:ok)
+      expect(proposal_version_title(1, proposal)).to eq(proposal_version.title)
     end
   end
 
@@ -130,8 +133,7 @@ RSpec.describe ProposalsHelper, type: :helper do
     let(:person) { create(:person) }
     let(:invite) { create(:invite, person_id: person.id) }
     it "returns the last name of invite" do
-      invite_last_name(invite)
-      expect(response).to have_http_status(:ok)
+      expect(invite_last_name(invite)).to eq(invite.lastname)
     end
   end
 
@@ -139,26 +141,92 @@ RSpec.describe ProposalsHelper, type: :helper do
     let(:person) { create(:person) }
     let(:invite) { create(:invite, person_id: person.id) }
     it "returns the first name of invite" do
-      invite_first_name(invite)
-      expect(response).to have_http_status(:ok)
+      expect(invite_first_name(invite)).to eq(invite.firstname)
     end
   end
 
   describe "#no_of_participants" do
     let(:proposal) { create(:proposal) }
-    let(:invite) { create(:invite) }
-    it "returns the last name of invite" do
-      no_of_participants(invite, proposal.id)
-      expect(response).to have_http_status(:ok)
+    let(:invites) { create_list(:invite, 2, proposal_id: proposal.id, invited_as: "Organizer") }
+    it "returns total  participants" do
+      expect(no_of_participants(proposal.id, "Organizer")).to eq(invites)
     end
   end
 
   describe "#confirmed_participants" do
     let(:proposal) { create(:proposal) }
-    let(:invite) { create(:invite) }
-    it "returns the last name of invite" do
-      confirmed_participants(invite, proposal.id)
+    let(:invites) { create_list(:invite, 2, proposal_id: proposal.id, invited_as: "Organizer", status: "confirmed") }
+    it "returns confirmed participants" do
+      expect(confirmed_participants(proposal.id, "Organizer")).to eq(invites)
+    end
+  end
+
+  describe "#nationality_data" do
+    let(:proposal) { create(:proposal) }
+    it "returns the nationality" do
+      expect(nationality_data(proposal)).to match_array([])
+    end
+  end
+
+  describe "#ethnicity_data" do
+    let(:proposal) { create(:proposal) }
+    it "returns the ethnicity" do
+      expect(ethnicity_data(proposal)).to match_array([])
+    end
+  end
+
+  describe "#invite_deadline_date_color" do
+    let(:invite) { create(:invite, status: 'pending') }
+    it "it changes the color of text" do
+      invite_deadline_date_color(invite)
       expect(response).to have_http_status(:ok)
     end
   end
+
+  describe "#invite_response_color" do
+    context "when status is yes or may be" do
+      let(:invite) { create(:invite, response: 'yes') }
+      it "changes the color of response" do
+        invite_response_color(invite.response)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+    context "when status is no" do
+      let(:invite) { create(:invite, response: 'no') }
+      it "changes the color of response" do
+        invite_response_color(invite.response)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+    context "when status is nil" do
+      let(:invite) { create(:invite, response: nil) }
+      it "changes the color of response" do
+        invite_response_color(invite.response)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
+
+  # describe "#career_labels" do
+  #   let(:proposal) { create(:proposal) }
+  #   let(:person) { create(:person, proposal_id:proposal.id) }
+  #   it "returns the lables" do
+  #     expect(career_labels(proposal)).to match_array([])
+  #   end
+  # end
+
+  # describe "#proposal_status" do
+  #   let(:proposal){ create(:proposal, status: :revision_submitted) }
+  #   it "return the status of the proposal" do
+  #     # status = proposal.status.split('_').map(:capitalize).join(' ')
+  #     expect(proposal_status(proposal.status)).to eq("Revision Submitted")
+  #   end
+  # end
+
+  # describe "#proposal_status_class" do
+  #   let(:proposal){ create(:proposal, status: :revision_submitted) }
+  #   it "return the status of the proposal" do
+  #     expect(proposal_status_class(proposal.status)).to eq(proposal.status)
+  #   end
+  # end
 end
