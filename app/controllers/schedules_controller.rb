@@ -9,13 +9,15 @@ class SchedulesController < ApplicationController
   def new; end
 
   def create
-    schedule_errors = save_schedules_data
+    return unless @authenticated
 
-    if schedule_errors.flatten.empty?
-      render json: { success: 'Schedule saved!' }, status: :ok
+    schedules = HmcResultsSave.new(schedule_params)
+
+    if schedules.save
+      render json: { success: 'Schedules saved!' }, status: :ok
     else
-      render json: { errors: schedule_errors.join(',') },
-             status: :unprocessable_entity
+      Rails.logger.info("Schedules save errors: #{schedules.errors}")
+      render json: { errors: schedules.errors }, status: :unprocessable_entity
     end
   end
 
@@ -26,7 +28,8 @@ class SchedulesController < ApplicationController
     if schedule_run.save
       hmc_program(schedule_run)
     else
-      render json: { errors: schedule_run.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: schedule_run.errors.full_messages },
+             status: :unprocessable_entity
     end
   end
 
@@ -75,39 +78,22 @@ class SchedulesController < ApplicationController
   end
 
   def authenticate_api_key
+    @authenticated = false
     if ENV['SCHEDULE_API_KEY'].blank?
       render json: { error: "We have no API key!" }, status: :unauthorized
+      return
     end
 
-    return if schedule_params['SCHEDULE_API_KEY'] == ENV['SCHEDULE_API_KEY']
+    if schedule_params['SCHEDULE_API_KEY'] != ENV['SCHEDULE_API_KEY']
+      render json: { error: "Invalid API key." }, status: :unauthorized
+      return
+    end
 
-    render json: { error: "Invalid API key." }, status: :unauthorized
+    @authenticated = true
   end
 
   def json_only
     head :not_acceptable unless request.format == :json
-  end
-
-  def save_schedules_data
-    schedule_run_id = schedule_params['schedule_run_id']
-
-    schedule_params['run_data'].each_with_object([]) do |run_data, errors|
-      error = save_schedule(schedule_run_id, run_data)
-      errors << error if error.present?
-    end
-  end
-
-  def save_schedule(schedule_run_id, run_data)
-    return "Empty week assignments!" if run_data["assignments"].blank?
-
-    run_data["assignments"].flatten.each do |assignment|
-      schedule = Schedule.new(schedule_run_id: schedule_run_id,
-                              case_num: run_data["case_num"],
-                              hmc_score: run_data["hmc_score"],
-                              week: assignment["week"],
-                              proposal: assignment["proposal"])
-      return schedule.errors.full_messages unless schedule.save
-    end
   end
 
   def authorize_user
