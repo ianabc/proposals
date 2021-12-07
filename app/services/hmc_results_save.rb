@@ -9,31 +9,44 @@ class HmcResultsSave
     @errors = ''
   end
 
-  def missing_assignments
-    @errors << "Empty week assignments!" if @run_data["assignments"].blank?
-    unless @run_data["assignments"].respond_to(:flatten)
-      @errors << "Unexpected assignment data structure"
+  def missing_assignments(case_data)
+    unless case_data.key?("assignments")
+      @errors << "Missing assignments!"
+      return true
     end
+
+    if case_data["assignments"].blank?
+      @errors << "Empty week assignments!"
+      return true
+    end
+
+    unless case_data["assignments"].respond_to?(:flatten)
+      @errors << "Unexpected assignment data structure"
+      return true
+    end
+
+    false
   end
 
   def save
-    return if missing_assignments
-
-    @run_data["assignments"].flatten.each do |assignment|
-      save_schedule(assignment) if @errors.empty?
+    @run_data.each do |case_data|
+      save_schedule(case_data) unless @errors.present?
     end
 
     @errors.empty?
   end
 
-  def save_schedule(assignment)
-    schedule = Schedule.new(schedule_run_id: @run_id,
-                            case_num: @run_data["case_num"],
-                            hmc_score: @run_data["hmc_score"],
-                            week: assignment["week"],
-                            proposal: assignment["proposal"])
-    return if schedule.save
+  def save_schedule(case_data)
+    return if missing_assignments(case_data)
 
-    @errors << schedule.errors.full_messages
+    case_data["assignments"].flatten.each do |assignment|
+      schedule = Schedule.new(schedule_run_id: @run_id,
+                              case_num: case_data["case_num"],
+                              hmc_score: case_data["hmc_score"],
+                              week: assignment["week"],
+                              proposal: assignment["proposal"])
+      schedule.save
+      @errors << schedule.errors.full_messages.join(', ')
+    end
   end
 end
