@@ -1,6 +1,6 @@
 # A class for saving schedule data posted from HMC
 
-class HmcResultsSave < HungarianMonteCarlo
+class HmcResultsSave
   attr_reader :errors
 
   def initialize(schedule_params)
@@ -11,12 +11,15 @@ class HmcResultsSave < HungarianMonteCarlo
 
   def missing_assignments
     @errors << "Empty week assignments!" if @run_data["assignments"].blank?
+    unless @run_data["assignments"].respond_to(:flatten)
+      @errors << "Unexpected assignment data structure"
+    end
   end
 
   def save
     return if missing_assignments
 
-    @run_data["assignments"]&.flatten.each do |assignment|
+    @run_data["assignments"].flatten.each do |assignment|
       save_schedule(assignment) if @errors.empty?
     end
 
