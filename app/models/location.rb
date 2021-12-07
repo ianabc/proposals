@@ -17,6 +17,24 @@ class Location < ApplicationRecord
     check_valid_exclude_dates
   end
 
+  def num_weeks
+    return 0 if start_date.blank? || end_date.blank?
+
+    weeks = (end_date.to_time - start_date.to_time).seconds.in_weeks.to_i.abs
+    return weeks if exclude_dates.blank?
+
+    remove_excluded_dates(weeks)
+  end
+
+  def remove_excluded_dates(weeks)
+    exclude_dates.delete("")
+    weeks - exclude_dates.count
+  end
+
+  def excluded_dates
+    exclude_dates.map { |date_string| Date.parse(date_string) }
+  end
+
   private
 
   def check_greater_date
