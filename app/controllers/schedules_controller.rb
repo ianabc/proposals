@@ -38,7 +38,9 @@ class SchedulesController < ApplicationController
   end
 
   def optimized_schedule
-    @case_num = if params[:page].to_i > @schedule_run.cases
+    @case_num = if params[:page].blank?
+                  1
+                elsif params[:page].to_i > @schedule_run.cases
                   @schedule_run.cases
                 else
                   params[:page] >= "1" ? params[:page] : 1
@@ -56,7 +58,7 @@ class SchedulesController < ApplicationController
     params.require(:schedule)
           .permit(:SCHEDULE_API_KEY, :schedule_run_id,
                   run_data: [:case_num, :hmc_score,
-                             assignments: [:week, :proposal]])
+                             { assignments: %i[week proposal] }])
   end
 
   def hmc_program(schedule_run)

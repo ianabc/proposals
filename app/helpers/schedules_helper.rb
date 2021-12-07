@@ -21,4 +21,12 @@ module SchedulesHelper
     proposal = Proposal.find_by(code: proposal_code)
     proposal.present? ? "[#{proposal.code}] #{proposal.title}" : ''
   end
+
+  def choice_assignment(choices, choose)
+    return '' if choices.blank?
+
+    assign = 0
+    choices.map { |choice| choice == choose ? assign += 1 : next }
+    assign
+  end
 end
