@@ -4,7 +4,7 @@ class Schedule < ApplicationRecord
   validates :case_num, :week, :hmc_score, :schedule_run_id, presence: true
 
   def dates
-    return [] if schedule_run.location.num_weeks == 0
+    return [] if schedule_run.location.num_weeks.zero?
 
     program_dates = []
     date = schedule_run.location.start_date

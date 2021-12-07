@@ -20,11 +20,15 @@ class Location < ApplicationRecord
   def num_weeks
     return 0 if start_date.blank? || end_date.blank?
 
-    week = (end_date.to_time - start_date.to_time).seconds.in_weeks.to_i.abs
-    return week if exclude_dates.blank?
+    weeks = (end_date.to_time - start_date.to_time).seconds.in_weeks.to_i.abs
+    return weeks if exclude_dates.blank?
 
+    remove_excluded_dates(weeks)
+  end
+
+  def remove_excluded_dates(weeks)
     exclude_dates.delete("")
-    week - exclude_dates.count
+    weeks - exclude_dates.count
   end
 
   def excluded_dates
