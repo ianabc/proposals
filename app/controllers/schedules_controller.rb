@@ -57,7 +57,6 @@ class SchedulesController < ApplicationController
     proposals =  schedules.each_with_object([]) do |schedule, props|
                    props += update_proposal_date(schedule, program_weeks)
                  end
-    update_proposal_dates(@schedule_run)
 
     ExportScheduledProposalsJob.perform_async(proposals, @schedule_run)
   end
