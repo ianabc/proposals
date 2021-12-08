@@ -55,10 +55,12 @@ class SchedulesController < ApplicationController
                                case_num: params[:case].to_i)
     program_weeks = schedules&.first&.dates
     proposals =  schedules.each_with_object([]) do |schedule, props|
+                   next if schedule.proposal&.match?('w66') # placeholder code
+
                    props += update_proposal_date(schedule, program_weeks)
                  end
 
-    ExportScheduledProposalsJob.perform_async(proposals, @schedule_run)
+    ExportScheduledProposalsJob.perform_now(proposals, @schedule_run)
   end
 
   private
@@ -88,7 +90,7 @@ class SchedulesController < ApplicationController
     params.require(:schedule)
           .permit(:SCHEDULE_API_KEY, :schedule_run_id,
                   run_data: [:case_num, :hmc_score,
-                             assignments: [:week, :proposal]])
+                             { assignments: %i[week proposal] }])
   end
 
   def hmc_program(schedule_run)
