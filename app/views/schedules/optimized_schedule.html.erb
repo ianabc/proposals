@@ -22,8 +22,7 @@
                 <%= link_to "←", params.merge(page: (@case_num.to_i - 1), run_id: @schedule_run.id).permit(:page, :run_id) %>
                 <%= @case_num %>
                 <%= link_to "→", params.merge(:page => (@case_num.to_i + 1), run_id: @schedule_run.id).permit(:page, :run_id) %>
-                 of <%= @schedule_run.cases %>, HMC Score: <%= @schedules&.first&.hmc_score %>
-                <!--TODO: hmc_score on the basis of selected case -->
+                 of <%= @schedule_run.cases %>, HMC Score: <%= @schedules&.first&.top_score %>
                 </strong></h2>
                 <p>Each case represents a possible schedule.Click the left or right arrows above to see the previous or next case in this run.Statistics for this run are at the bottom.To create the 2020 event schedule from a given case,click the "apply..."" at the button at bottom.</p>
             <table class="table table-bordered" >
@@ -37,10 +36,8 @@
               <tbody>
                 <% @schedules.each do |schedule| %>
                 <tr>
-                  <td><%= schedule.week %> (<%= @dates[(schedule.week - 1)].strftime("%m-%d") %>)
-                  </td> 
+                  <td><%= schedule.week %> (<%= @dates[(schedule.week - 1)].strftime("%m-%d") %>)</td>
                   <td><%= schedule_proposal(schedule.proposal) %></td> 
-                  <!--TODO: <td></td> -->
                 </tr>
                 <% end %>
               </tbody>

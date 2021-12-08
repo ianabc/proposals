@@ -11,8 +11,8 @@ class ExportScheduledProposalsJob < ApplicationJob
 
       response = RestClient.post url, request_body.to_json, content_type: :json, accept: :json
       Rails.logger.info("Posted proposal #{code} to Workshops. Response: #{response}")
-    rescue => error
-      Rails.logger.info("Error posting proposal #{code} to Workshops: #{error}. Reponse: #{response}")
+    rescue => e
+      Rails.logger.info("Error posting proposal #{code} to Workshops: #{e}. Reponse: #{response}")
     end
   end
 end

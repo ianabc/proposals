@@ -54,24 +54,28 @@ class SchedulesController < ApplicationController
     schedules = Schedule.where(schedule_run_id: @schedule_run.id,
                                case_num: params[:case].to_i)
     program_weeks = schedules&.first&.dates
-    proposals = schedules.each_with_object([]) do |schedule, props|
-                  date = program_weeks[(schedule.week - 1)]
-                  if schedule.proposal.match?(' and ')
-                    prop1, prop2 = schedule.proposal.split(' and ')
-                    props << prop1
-                    props << prop2
-                    update_proposal_applied_date(prop1, date)
-                    update_proposal_applied_date(prop2, date)
-                  else
-                    props << schedule.proposal
-                    update_proposal_applied_date(schedule.proposal, date)
-                  end
-                end
+    proposals =  schedules.each_with_object([]) do |schedule, props|
+                   props += update_proposal_date(schedule, program_weeks)
+                 end
+    update_proposal_dates(@schedule_run)
 
     ExportScheduledProposalsJob.perform_async(proposals, @schedule_run)
   end
 
   private
+
+  def update_proposal_date(schedule, program_weeks)
+    date = program_weeks[(schedule.week - 1)]
+    if schedule.proposal.match?(' and ')
+      prop1, prop2 = schedule.proposal.split(' and ')
+      update_proposal_applied_date(prop1, date)
+      update_proposal_applied_date(prop2, date)
+      return [prop1, prop2]
+    else
+      update_proposal_applied_date(schedule.proposal, date)
+      return [schedule.proposal]
+    end
+  end
 
   def update_proposal_applied_date(proposal_code, date)
     Proposal.find(proposal_code)&.update(applied_date: date)
