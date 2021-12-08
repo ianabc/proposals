@@ -33,7 +33,9 @@ class HmcResultsSave
       save_schedule(case_data) unless @errors.present?
     end
 
-    @errors.empty?
+    if @errors.empty?
+      ScheduleRun.find_by(id: @run_id).update(end_time: DateTime.current)
+    end
   end
 
   def save_schedule(case_data)

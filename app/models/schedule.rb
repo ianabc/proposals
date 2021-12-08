@@ -16,4 +16,8 @@ class Schedule < ApplicationRecord
     # include excluded_dates for placeholder events
     program_dates #- schedule_run.location.excluded_dates
   end
+
+  def top_score
+    Schedule.where(schedule_run_id: self.schedule_run_id).pluck(:hmc_score).max
+  end
 end
