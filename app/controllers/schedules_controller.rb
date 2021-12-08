@@ -88,7 +88,7 @@ class SchedulesController < ApplicationController
     params.require(:schedule)
           .permit(:SCHEDULE_API_KEY, :schedule_run_id,
                   run_data: [:case_num, :hmc_score,
-                             assignments: [:week, :proposal]])
+                             { assignments: %i[week proposal] }])
   end
 
   def hmc_program(schedule_run)

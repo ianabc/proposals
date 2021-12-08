@@ -17,7 +17,7 @@
       <div class="col-12">
         <div class="card">
           <div class="card-body">
-            <div>
+            <div class="mb-3">
               <h2><strong>Run <%= @schedule_run.id %>, Case
                 <%= link_to "←", params.merge(page: (@case_num.to_i - 1), run_id: @schedule_run.id).permit(:page, :run_id) %>
                 <%= @case_num %>
@@ -34,15 +34,42 @@
                 </tr>
               </thead>
               <tbody>
-                <% @schedules.each do |schedule| %>
+                <% choices = [] %>
+                <% assignments = 0 %>
+                <% no_assignments = 0 %>
+                <% @schedules.order(:week).each do |schedule| %>
                 <tr>
                   <td><%= schedule.week %> (<%= @dates[(schedule.week - 1)].strftime("%m-%d") %>)</td>
                   <td><%= schedule_proposal(schedule.proposal) %></td> 
+                  <td><%= schedule.choice %></td>
+                  <% if schedule.choice.eql?(0) %>
+                    <% no_assignments += 1 %>
+                  <% elsif schedule.choice.eql?('') %>
+                    
+                  <% else %>
+                    <% choices << schedule.choice %>
+                    <% assignments += 1 %>
+                  <% end %>
                 </tr>
                 <% end %>
               </tbody>
             </table>
             <%= link_to "Apply Schedule", export_scheduled_proposals_schedules_path(run_id: @schedule_run.id, case: @case_num), method: :post, class: "btn btn-primary" %>
+          </div>
+
+          <div>
+            <h2 style ="color: #0000FF;"><u>Statistics for Above HMC Results</u></h2>
+            <h5>Number of proposals: <%= proposals_count(@schedules) %></h5>
+            <h5>Number of preferred assignments: <%= assignments %></h5>
+            <h5>Number of 1st choice assignments: <%= choice_assignment(choices, 1) %></h5>
+            <h5>Number of 2nd choice assignments: <%= choice_assignment(choices, 2) %></h5>
+            <h5>Number of 3rd choice assignments: <%= choice_assignment(choices, 3) %></h5>
+            <h5>Number of 4th choice assignments: <%= choice_assignment(choices, 4) %></h5>
+            <h5>Number of 5th choice assignments: <%= choice_assignment(choices, 5) %></h5>
+            <h5>Number of non-preferred assignments: <%= no_assignments %></h5>
+            <h5>Number of manual assignments:
+              <%= proposal_manual_assignments(@schedules.pluck(:proposal)) %>
+            </h5>
           </div>
         </div>
       </div>
