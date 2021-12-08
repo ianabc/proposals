@@ -57,13 +57,7 @@
                       <td><%= run.weeks %></td>
                       <td><%= run.startweek %></td>
                       <td><%= run.start_time %></td>
-                      <% if run.end_time.blank? %>
-                        <td>
-                          <%= link_to 'Abort the run', abort_run_schedules_path(run_id: run.id), method: :post %>
-                        </td>
-                      <% else %>
-                        <td><%= schedule_run_time(run) %></td>
-                      <% end %>
+                      <td><%= schedule_run_time(run) %></td>
                       <td><%= run.cases %></td>
                       <td><%= run.schedules&.first&.top_score %></td>
                       <% if run.end_time.present? %>
