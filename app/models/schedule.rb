@@ -4,14 +4,14 @@ class Schedule < ApplicationRecord
   validates :case_num, :week, :hmc_score, :schedule_run_id, presence: true
 
   def choice
-    proposal = Proposal.find_by(code: self.proposal)
-    return '' if proposal.blank? || proposal.assigned_date.nil?
+    proposal = Proposal.find(self.proposal)
+    return '' if proposal.blank?
 
     proposal_preferred_dates = proposal.preferred_dates
     return '' if proposal_preferred_dates.blank?
 
-    assigned_date = proposal.assigned_date.split(' - ')
-    proposal_choice(assigned_date, proposal_preferred_dates)
+    location_dates = dates
+    proposal_choice(location_dates, proposal_preferred_dates)
   end
 
   def dates
@@ -34,11 +34,12 @@ class Schedule < ApplicationRecord
 
   private
 
-  def proposal_choice(assigned_date, proposal_preferred_dates)
+  def proposal_choice(location_dates, proposal_preferred_dates)
+    start_date_of_proposal = location_dates[(week - 1)]
     choice = 0
     proposal_preferred_dates.each_slice(2) do |good_start, _good_end|
       choice += 1
-      return choice if good_start == Date.parse(assigned_date.first)
+      return choice if good_start == start_date_of_proposal
     end
     0
   end

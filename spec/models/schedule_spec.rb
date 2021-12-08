@@ -33,9 +33,9 @@ RSpec.describe Schedule, type: :model do
 
   describe '#choice' do
     context "when proposal or assigned_date is empty" do
-      let(:proposal) { create(:proposal, assigned_date: "2023-01-15 - 2023-01-20") }
+      let(:proposal) { create(:proposal, assigned_date: "2023-01-15 - 2023-01-20", code: "23wt4ed") }
       let(:schedule_run) { create(:schedule_run) }
-      let(:schedule) { create(:schedule, schedule_run_id: schedule_run.id, proposal: "") }
+      let(:schedule) { create(:schedule, schedule_run_id: schedule_run.id, proposal: "23wetdf45") }
 
       it 'returns empty string' do
         expect(schedule.choice).to eq("")

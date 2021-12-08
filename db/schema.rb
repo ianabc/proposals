@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_08_075829) do
+ActiveRecord::Schema.define(version: 2021_12_08_184324) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -388,7 +388,7 @@ ActiveRecord::Schema.define(version: 2021_12_08_075829) do
     t.string "outcome"
     t.string "editflow_id"
     t.text "cover_letter"
-    t.string "assigned_date"
+    t.date "assigned_date"
     t.string "same_week_as"
     t.string "week_after"
     t.integer "assigned_location_id"

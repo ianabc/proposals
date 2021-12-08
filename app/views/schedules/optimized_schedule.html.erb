@@ -68,7 +68,7 @@
             <h5>Number of 5th choice assignments: <%= choice_assignment(choices, 5) %></h5>
             <h5>Number of non-preferred assignments: <%= no_assignments %></h5>
             <h5>Number of manual assignments:
-              <!-- TODO: manual assignments -->
+              <%= proposal_manual_assignments(@schedules.pluck(:proposal)) %>
             </h5>
           </div>
         </div>
