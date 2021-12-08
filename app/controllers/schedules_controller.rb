@@ -24,7 +24,7 @@ class SchedulesController < ApplicationController
   def new_schedule_run; end
 
   def run_hmc_program
-    schedule_run = ScheduleRun.new(run_params)
+    schedule_run = ScheduleRun.new(run_params.merge(start_time: DateTime.now))
     if schedule_run.save
       hmc_program(schedule_run)
     else
