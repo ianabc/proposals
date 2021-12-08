@@ -62,7 +62,7 @@
                           <%= link_to 'Abort the run', abort_run_schedules_path(run_id: run.id), method: :post %>
                         </td>
                       <% else %>
-                        <td><%= ((run.end_time - run.start_time) / 3600).round(2) %> hours</td>  
+                        <td><%= Time.at(s.end_time - s.start_time).utc.strftime("%H:%M:%S") %></td>  
                       <% end %>
                       <td><%= run.cases %></td>
                       <td><%= run.schedules.first.top_score %></td>               
