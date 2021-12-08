@@ -2,7 +2,7 @@ module SchedulesHelper
   def schedule_proposal(proposal_code)
     return '' if proposal_code.blank?
 
-    return '(excluded date)' if proposal_code.match?('w66')
+    return '(excluded date)' if proposal_code.match?('w66') # placeholder code
 
     proposal = Proposal.find(proposal_code)
     proposal.present? ? "[#{proposal.code}] #{proposal.title}" : ''
@@ -41,7 +41,7 @@ module SchedulesHelper
     schedules.each do |schedule|
       code = schedule.proposal
       count += 1 if code.match?(' and ')
-      count += 1 unless code.blank? || code.match?('w66')
+      count += 1 unless code.blank? || code.match?('w66') # placeholder code
     end
     count
   end

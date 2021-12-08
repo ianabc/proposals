@@ -55,6 +55,8 @@ class SchedulesController < ApplicationController
                                case_num: params[:case].to_i)
     program_weeks = schedules&.first&.dates
     proposals =  schedules.each_with_object([]) do |schedule, props|
+                   next if schedule.proposal&.match?('w66') # placeholder code
+
                    props += update_proposal_date(schedule, program_weeks)
                  end
 
