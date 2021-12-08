@@ -11,7 +11,7 @@ class ScheduledProposalService
       api_key: ENV["WORKSHOPS_API_KEY"],
       updated_by: "Proposals import",
       event: event_data,
-      memberships: memberships
+      memberships: memberships_data
     }
   end
 
@@ -23,7 +23,7 @@ class ScheduledProposalService
       name: @proposal.title,
       start_date: @proposal.applied_date,
       end_date: event_end_date,
-      event_type: "5-Day Workshop",
+      event_type: @proposal.proposal_type.name,
       location: @proposal.assigned_location.code,
       press_release: proposal_press_release,
       description: proposal_objective,
@@ -32,6 +32,11 @@ class ScheduledProposalService
   end
 
   def event_end_date
+    if @proposal.proposal_type.name.match?(/\d-Day/)
+      number = @proposal.proposal_type.name.split('-').first.to_i
+      return @proposal.applied_date + number.days
+    end
+
     @proposal.applied_date + 5.days
   end
 
@@ -60,29 +65,29 @@ class ScheduledProposalService
     "#{subject}, #{ams_subject_one}, #{ams_subject_two}"
   end
 
-  def memberships
+  def memberships_data
     members = []
     @proposal.invites.find_each do |invite|
+      person = invite.person
       members << {
         role: invite.invited_as,
         person: {
-          firstname: invite.person.firstname,
-          lastname: invite.person.lastname,
-          email: invite.person.email,
-          affiliation: invite.person.affiliation,
-          department: invite.person.department,
-          title: invite.person.title,
-          academic_status: invite.person.academic_status,
-          phd_year: invite.person.first_phd_year,
-          url: invite.person.url,
-          address1: invite.person.street_1,
-          address2: invite.person.street_2,
-          city: invite.person.city,
-          region: invite.person.region,
-          country: invite.person.country,
-          postal_code: invite.person.postal_code,
-          research_areas: invite.person.research_areas,
-          biography: invite.person.biography
+          firstname: person.firstname,
+          lastname: person.lastname,
+          email: person.email,
+          affiliation: person.affiliation,
+          department: person.department,
+          title: person.title,
+          academic_status: person.academic_status,
+          phd_year: person.first_phd_year,
+          url: person.url,
+          address1: person.street_1,
+          address2: person.street_2,
+          city: person.city,
+          region: person.region,
+          country: person.country,
+          postal_code: person.postal_code,
+          biography: person.biography
         }
       }
     end

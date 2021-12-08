@@ -49,13 +49,31 @@ class SchedulesController < ApplicationController
   end
 
   def export_scheduled_proposals
-    # TODO: applied_date
-    schedules = Schedule.where(schedule_run_id: @schedule_run.id, case_num: params[:case])
-    proposals = schedules.pluck(:proposal) - [""]
+    schedules = Schedule.where(schedule_run_id: @schedule_run.id,
+                               case_num: params[:case].to_i)
+    program_weeks = schedules&.first&.dates
+    proposals = schedules.each_with_object([]) do |schedule, props|
+                  date = program_weeks[(schedule.week - 1)]
+                  if schedule.proposal.match?(' and ')
+                    prop1, prop2 = schedule.proposal.split(' and ')
+                    props << prop1
+                    props << prop2
+                    update_proposal_applied_date(prop1, date)
+                    update_proposal_applied_date(prop2, date)
+                  else
+                    props << schedule.proposal
+                    update_proposal_applied_date(schedule.proposal, date)
+                  end
+                end
+
     ExportScheduledProposalsJob.perform_async(proposals, @schedule_run)
   end
 
   private
+
+  def update_proposal_applied_date(proposal_code, date)
+    Proposal.find(proposal_code)&.update(applied_date: date)
+  end
 
   def run_params
     params.permit(:weeks, :runs, :cases, :location_id, :year, :test_mode)

@@ -7,13 +7,12 @@ class ExportScheduledProposalsJob < ApplicationJob
       next if proposal.blank?
 
       request_body = ScheduledProposalService.new(proposal).event
-      url = URI('https://staging.birs.ca/api/v1/evets.json')
+      url = ENV['WORKSHOPS_API_URL']
 
-      http = Net::HTTP.new(url.host, url.port)
-      request = Net::HTTP::Post.new(url, { 'Content-Type' => 'application/json' })
-      request.body = request_body.to_json
-
-      http.request(request)
+      response = RestClient.post url, request_body.to_json, content_type: :json, accept: :json
+      Rails.logger.info("Posted proposal #{code} to Workshops. Response: #{response}")
+    rescue => error
+      Rails.logger.info("Error posting proposal #{code} to Workshops: #{error}. Reponse: #{response}")
     end
   end
 end
