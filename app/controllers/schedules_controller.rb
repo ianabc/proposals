@@ -4,7 +4,7 @@ class SchedulesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: %i[create]
   before_action :json_only, :authenticate_api_key, only: %i[create]
   before_action :set_location, only: %w[new_schedule_run]
-  before_action :set_schedule_run, only: %w[abort_run optimized_schedule]
+  before_action :set_schedule_run, only: %w[abort_run optimized_schedule export_scheduled_proposals]
 
   def new; end
 
@@ -38,12 +38,21 @@ class SchedulesController < ApplicationController
   end
 
   def optimized_schedule
-    @case_num = if params[:page].to_i > @schedule_run.cases
+    @case_num = if params[:page].blank?
+                  1
+                elsif params[:page].to_i > @schedule_run.cases
                   @schedule_run.cases
                 else
                   params[:page] >= "1" ? params[:page] : 1
                 end
     @schedules = Schedule.where(schedule_run_id: @schedule_run.id, case_num: @case_num)
+  end
+
+  def export_scheduled_proposals
+    # TODO: applied_date
+    schedules = Schedule.where(schedule_run_id: @schedule_run.id, case_num: params[:case])
+    proposals = schedules.pluck(:proposal) - [""]
+    ExportScheduledProposalsJob.perform_async(proposals, @schedule_run)
   end
 
   private

@@ -50,6 +50,12 @@
               <%= f.text_field :country %>
             </div>
             <div class="mb-3">
+              <%= f.label :'Time Zone', class: "control-label" %>
+              <div class="controls" style="width: 375px;">
+                <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.us_zones, { default: "Pacific Time (US & Canada)" }, { class: 'form-select' } %>
+              </div>
+            </div>
+            <div class="mb-3">
               <%= f.label :'Start Date' , class: 'form-label' %><br>
               <%= f.text_field :start_date, type: 'date', value: @location.start_date, data: {'action': 'change->location#excludeDatesList', 'location-target': 'startDate'} %>
             </div>
