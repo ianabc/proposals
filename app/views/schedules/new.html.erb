@@ -65,11 +65,7 @@
                         <td><%= run.start_time - run.end_time %></td>  
                       <% end %>
                       <td><%= run.cases %></td>
-                      <% if run.schedules.present? %>
-                        <td><%= run.schedules.first.top_score %></td>
-                      <% else %>
-                        <td></td>
-                      <% end %>
+                      <td><%= run.schedules.first.top_score %></td>               
                       <% if run.end_time.present? %>
                         <td>
                           <%= link_to 'View results', optimized_schedule_schedules_url(run_id: run.id) %>
