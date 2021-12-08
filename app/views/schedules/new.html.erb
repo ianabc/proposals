@@ -35,13 +35,13 @@
               <table class="table" border="1">
                 <thead>
                   <tr>
-                    <th >Id</th>
+                    <th >Run Id</th>
                     <th>Location</th>
                     <th>Weeks</th>
                     <th>First Week</th>
                     <th>Run Started</th>
                     <th>Run Time</th>
-                    <th>iterations</th>
+                    <th>Iterations</th>
                     <th>Number of Cases</th>
                     <th>Top Score</th>
                     <th></th>
@@ -62,7 +62,7 @@
                           <%= link_to 'Abort the run', abort_run_schedules_path(run_id: run.id), method: :post %>
                         </td>
                       <% else %>
-                        <td><%= run.start_time - run.end_time %></td>  
+                        <td><%= (run.end_time - run.start_time) / 3600 %> hours</td>  
                       <% end %>
                       <td><%= run.cases %></td>
                       <td><%= run.schedules.first.top_score %></td>               
