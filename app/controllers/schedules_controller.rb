@@ -58,7 +58,7 @@ class SchedulesController < ApplicationController
                    props += update_proposal_date(schedule, program_weeks)
                  end
 
-    ExportScheduledProposalsJob.perform_async(proposals, @schedule_run)
+    ExportScheduledProposalsJob.perform_now(proposals, @schedule_run)
   end
 
   private
