@@ -52,6 +52,7 @@ Rails.application.routes.draw do
       post :run_hmc_program
       post :abort_run
       get :optimized_schedule
+      post :export_scheduled_proposals
     end
   end
 
