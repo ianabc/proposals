@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_07_110350) do
+ActiveRecord::Schema.define(version: 2021_12_08_075829) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -156,6 +156,7 @@ ActiveRecord::Schema.define(version: 2021_12_07_110350) do
     t.date "start_date"
     t.date "end_date"
     t.text "exclude_dates", default: [], array: true
+    t.string "time_zone"
   end
 
   create_table "logs", force: :cascade do |t|
@@ -392,6 +393,7 @@ ActiveRecord::Schema.define(version: 2021_12_07_110350) do
     t.string "week_after"
     t.integer "assigned_location_id"
     t.string "assigned_size"
+    t.date "applied_date"
     t.index ["code"], name: "index_proposals_on_code", unique: true
     t.index ["proposal_form_id"], name: "index_proposals_on_proposal_form_id"
     t.index ["proposal_type_id"], name: "index_proposals_on_proposal_type_id"
