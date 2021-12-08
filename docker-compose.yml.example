@@ -82,6 +82,9 @@ services:
       - HMC_ACCESS=123
       - HMC_SERVER=hmc_host
       - HMC_PORT=2000
+      - SCHEDULE_API_KEY=
+      - WORKSHOPS_API_URL=
+      - WORKSHOPS_API_KEY=
 
 
 volumes:
