@@ -41,9 +41,9 @@ RSpec.describe SchedulesHelper, type: :helper do
   describe "#schedule_proposal" do
     let(:proposal) { create(:proposal, code: "23wt32") }
     let(:schedule_run) { create(:schedule_run) }
-    let(:schedule1) { create(:schedule, proposal: "23wt32", schedule_run_id: schedule_run.id)}
-    let(:schedule2) { create(:schedule, proposal: "214t3e", schedule_run_id: schedule_run.id)}
-    let(:schedule) { create(:schedule, proposal: "", schedule_run_id: schedule_run.id)}
+    let(:schedule1) { create(:schedule, proposal: "23wt32", schedule_run_id: schedule_run.id) }
+    let(:schedule2) { create(:schedule, proposal: "214t3e", schedule_run_id: schedule_run.id) }
+    let(:schedule) { create(:schedule, proposal: "", schedule_run_id: schedule_run.id) }
     let(:proposal1) { create(:proposal, code: "") }
 
     it "returns proposal [code,title] if it has code" do

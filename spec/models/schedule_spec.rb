@@ -23,7 +23,7 @@ RSpec.describe Schedule, type: :model do
 
     it "has a schedule_run_id" do
       p = build(:schedule, schedule_run_id: '')
-      expect(p.valid?).to be_falsey 
+      expect(p.valid?).to be_falsey
     end
   end
 
@@ -34,7 +34,7 @@ RSpec.describe Schedule, type: :model do
   describe '#choice' do
     context "when proposal or assigned_date is empty" do
       let(:proposal) { create(:proposal, assigned_date: "2023-01-15 - 2023-01-20") }
-      let(:schedule_run) {create(:schedule_run) }
+      let(:schedule_run) { create(:schedule_run) }
       let(:schedule) { create(:schedule, schedule_run_id: schedule_run.id, proposal: "") }
 
       it 'returns empty string' do
@@ -44,7 +44,7 @@ RSpec.describe Schedule, type: :model do
 
     context "when proposal preferred_dates are empty" do
       let(:proposal) { create(:proposal, assigned_date: "2023-01-15 - 2023-01-20") }
-      let(:schedule_run) {create(:schedule_run) }
+      let(:schedule_run) { create(:schedule_run) }
       let(:schedule) { create(:schedule, schedule_run_id: schedule_run.id) }
 
       it 'returns empty string' do
