@@ -38,13 +38,18 @@
                 <% @schedules.each do |schedule| %>
                 <tr>
                   <!--TODO: pending (data on the basis of selected case)-->
-                  <td><%= schedule.week %></td> 
+                  <td><%= schedule.week %>
+                    <% if find_schedule_proposal(schedule.proposal).present? %>
+                      (<%= find_schedule_proposal(schedule.proposal).applied_date %>)
+                    <% end %>
+                  </td> 
                   <td><%= schedule_proposal(schedule.proposal) %></td> 
                   <!--TODO: <td></td> -->
                 </tr>
                 <% end %>
               </tbody>
             </table>
+            <%= link_to "Apply Schedule", export_scheduled_proposals_schedules_path(run_id: @schedule_run.id, case: @case_num), class: "btn btn-primary" %>
           </div>
         </div>
       </div>
