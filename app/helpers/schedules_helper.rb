@@ -45,4 +45,10 @@ module SchedulesHelper
     end
     count
   end
+
+  def link_to_results(schedules)
+    return '(no results yet)' if schedules.blank?
+
+    link_to 'View results', optimized_schedule_schedules_url(run_id: run.id)
+  end
 end

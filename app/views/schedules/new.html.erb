@@ -60,13 +60,7 @@
                       <td><%= schedule_run_time(run) %></td>
                       <td><%= run.cases %></td>
                       <td><%= run.schedules&.first&.top_score %></td>
-                      <% if run.schedules.present? %>
-                        <td>
-                          <%= link_to 'View results', optimized_schedule_schedules_url(run_id: run.id) %>
-                        </td>
-                      <% else %>
-                        <td>(no results yet)</td>
-                      <% end %>
+                      <td><%= link_to_results(run.schedules) %></td>
                     </tr>
                   <% end %>
                 </tbody>
