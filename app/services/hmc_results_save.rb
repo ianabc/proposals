@@ -29,6 +29,8 @@ class HmcResultsSave
   end
 
   def save
+    ScheduleRun.find_by(id: @run_id)&.update(end_time: DateTime.current)
+
     @run_data.each do |case_data|
       save_schedule(case_data) unless @errors.present?
     end
