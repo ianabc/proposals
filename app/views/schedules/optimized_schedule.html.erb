@@ -59,7 +59,7 @@
 
           <div>
             <h2 style ="color: #0000FF;"><u>Statistics for Above HMC Results</u></h2>
-            <h5>Number of proposals: <%= (@schedules.pluck(:proposal) - [""]).count %></h5>
+            <h5>Number of proposals: <%= proposals_count(@schedules) %></h5>
             <h5>Number of preferred assignments: <%= assignments %></h5>
             <h5>Number of 1st choice assignments: <%= choice_assignment(choices, 1) %></h5>
             <h5>Number of 2nd choice assignments: <%= choice_assignment(choices, 2) %></h5>

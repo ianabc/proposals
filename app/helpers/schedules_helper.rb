@@ -33,4 +33,13 @@ module SchedulesHelper
 
     Time.at(run.end_time - run.start_time).utc.strftime("%H:%M:%S")
   end
+
+  def proposals_count(schedules)
+    count = 0
+    schedules.each do |schedule|
+      count += 1 if schedule.proposal.match?(' and ')
+      count += 1 unless schedule.proposal.blank?
+    end
+    count
+  end
 end
