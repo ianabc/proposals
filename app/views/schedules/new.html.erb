@@ -35,12 +35,13 @@
               <table class="table" border="1">
                 <thead>
                   <tr>
-                    <th >Id</th>
-                    <th>Loc</th>
+                    <th >Run Id</th>
+                    <th>Location</th>
                     <th>Weeks</th>
                     <th>First Week</th>
+                    <th>Run Started</th>
                     <th>Run Time</th>
-                    <th>iterations</th>
+                    <th>Iterations</th>
                     <th>Number of Cases</th>
                     <th>Top Score</th>
                     <th></th>
@@ -49,20 +50,22 @@
                 <tbody>
                   <% ScheduleRun.all&.find_each do |run| %>
                     <tr>
-                      <td><%= run.id %></td>
+                      <td>
+                         <%= link_to run.id, optimized_schedule_schedules_url(run_id: run.id) %>
+                      </td>
                       <td><%= run.location.name %></td>
                       <td><%= run.weeks %></td>
                       <td><%= run.startweek %></td>
+                      <td><%= run.start_time %></td>
                       <% if run.end_time.nil? %>
                         <td>
                           <%= link_to 'Abort the run', abort_run_schedules_path(run_id: run.id), method: :post %>
                         </td>
                       <% else %>
-                        <td><%= run.end_time %></td>
+                        <td><%= Time.at(s.end_time - s.start_time).utc.strftime("%H:%M:%S") %></td>  
                       <% end %>
-                      <td><%= run.runs %></td>
                       <td><%= run.cases %></td>
-                      <td></td>
+                      <td><%= run.schedules.first.top_score %></td>               
                       <% if run.end_time.present? %>
                         <td>
                           <%= link_to 'View results', optimized_schedule_schedules_url(run_id: run.id) %>
