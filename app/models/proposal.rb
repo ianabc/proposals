@@ -135,6 +135,8 @@ class Proposal < ApplicationRecord
   }
 
   def self.find(param)
+    return if param.blank?
+
     param.to_s.match?(/\D/) ? find_by(code: param) : super
   end
 

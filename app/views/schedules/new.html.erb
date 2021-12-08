@@ -35,7 +35,7 @@
               <table class="table" border="1">
                 <thead>
                   <tr>
-                    <th >Run Id</th>
+                    <th>Run Id</th>
                     <th>Location</th>
                     <th>Weeks</th>
                     <th>First Week</th>
@@ -60,7 +60,7 @@
                       <td><%= schedule_run_time(run) %></td>
                       <td><%= run.cases %></td>
                       <td><%= run.schedules&.first&.top_score %></td>
-                      <td><%= link_to_results(run.schedules) %></td>
+                      <td><%= link_to_results(run) %></td>
                     </tr>
                   <% end %>
                 </tbody>
