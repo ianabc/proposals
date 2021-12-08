@@ -37,11 +37,7 @@
               <tbody>
                 <% @schedules.each do |schedule| %>
                 <tr>
-                  <!--TODO: pending (data on the basis of selected case)-->
-                  <td><%= schedule.week %>
-                    <% if find_schedule_proposal(schedule.proposal).present? %>
-                      (<%= find_schedule_proposal(schedule.proposal).applied_date %>)
-                    <% end %>
+                  <td><%= schedule.week %> (<%= @dates[(schedule.week - 1)].strftime("%m-%d") %>)
                   </td> 
                   <td><%= schedule_proposal(schedule.proposal) %></td> 
                   <!--TODO: <td></td> -->

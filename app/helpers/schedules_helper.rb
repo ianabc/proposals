@@ -2,13 +2,7 @@ module SchedulesHelper
   def schedule_proposal(proposal_code)
     return '' if proposal_code.blank?
 
-    proposal = Proposal.find_by(code: proposal_code)
+    proposal = Proposal.find(proposal_code)
     proposal.present? ? "[#{proposal.code}] #{proposal.title}" : ''
-  end
-
-  def find_schedule_proposal(proposal_code)
-    return '' if proposal_code.blank?
-
-    Proposal.find_by(code: proposal_code)
   end
 end

@@ -45,7 +45,9 @@ class SchedulesController < ApplicationController
                 else
                   params[:page] >= "1" ? params[:page] : 1
                 end
-    @schedules = Schedule.where(schedule_run_id: @schedule_run.id, case_num: @case_num)
+    @schedules = Schedule.where(schedule_run_id: @schedule_run.id,
+                                case_num: @case_num)
+    @dates = @schedules&.first&.dates
   end
 
   def export_scheduled_proposals
