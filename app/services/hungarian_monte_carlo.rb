@@ -39,13 +39,16 @@ class HungarianMonteCarlo
   end
 
   def update_schedule_runs(socket)
-    output = socket.gets.chomp
-    if output.match?('HMC launched')
+    output = ''
+    while line = socket&.gets
+      output << line
+    end
+
+    if output.match?('Launching HungarianMonteCarlo')
       pid = output.split(':').last.strip.to_i
-      update_schedule_run(pid)
+      update_schedule_run(pid) unless pid.blank?
     else
-      @errors['HMC runtime error'] = "HMC failed to launch for run
-                                      #{@schedule_run.id}!".squish
+      @errors['HMC runtime error'] = "HMC may not have launched".squish
     end
   end
 
