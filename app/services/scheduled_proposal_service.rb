@@ -60,8 +60,8 @@ class ScheduledProposalService
 
   def proposal_subjects
     subject = @proposal.subject.title
-    ams_subject_one = @proposal.ams_subjects.first.title
-    ams_subject_two = @proposal.ams_subjects.last.title
+    ams_subject_one = @proposal.ams_subjects.first.title.gsub(/^\d+\ /, '')
+    ams_subject_two = @proposal.ams_subjects.last.title.gsub(/^\d+\ /, '')
     "#{subject}, #{ams_subject_one}, #{ams_subject_two}"
   end
 
