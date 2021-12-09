@@ -102,7 +102,7 @@ module SubmittedProposalsHelper
   end
 
   def invites_logs(log)
-    "#{log.user&.fullname} invited #{log.data['firstname'].last}
-    #{log.data['lastname'].last} #{log.data['email'].last} as #{log.data['invited_as'].last} at #{log.created_at}"
+    "#{log.user&.fullname} invited #{log.data['firstname']&.last}
+    #{log.data['lastname']&.last} #{log.data['email']&.last} as #{log.data['invited_as']&.last} at #{log&.created_at}"
   end
 end

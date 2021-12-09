@@ -7,6 +7,7 @@ class SubmitProposalsController < ApplicationController
 
   def create
     @proposal.update(proposal_params)
+    update_assigned_date
     update_proposal_ams_subject_code
     @submission = SubmitProposalService.new(@proposal, params)
     @submission.save_answers
@@ -113,7 +114,8 @@ class SubmitProposalsController < ApplicationController
 
   def proposal_params
     params.permit(:title, :year, :subject_id, :ams_subject_ids, :location_ids,
-                  :no_latex, :preamble, :bibliography, :cover_letter, :same_week_as, :week_after, :assigned_date)
+                  :no_latex, :preamble, :bibliography, :cover_letter,
+                  :same_week_as, :week_after, :assigned_date)
           .merge(no_latex: params[:no_latex] == 'on')
   end
 
@@ -265,6 +267,14 @@ class SubmitProposalsController < ApplicationController
                             ams_subject_one: @proposal.ams_subjects.first.id,
                             ams_subject_two: @proposal.ams_subjects.last.id,
                             version: version, send_to_editflow: nil)
+  end
+
+  def update_assigned_date
+    date = params[:assigned_date]
+    return if date.blank?
+
+    date = Date.parse(date.split(' - ').first)
+    @proposal.update(assigned_date: date)
   end
 
   def log_activity(invite)

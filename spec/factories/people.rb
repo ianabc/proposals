@@ -1,10 +1,11 @@
 # spec/factories/people.rb
-require 'factory_bot_rails'
+# require 'factory_bot_rails'
 require 'faker'
 
 FactoryBot.define do
   sequence(:firstname) { |n| "#{n}-#{Faker::Name.first_name}" }
   sequence(:lastname) { Faker::Name.last_name }
+  sequence(:country) { set_valid_country }
   sequence(:email) { |n| "person-#{n}@" + Faker::Internet.domain_name }
 
   factory :person do |f|
@@ -17,13 +18,13 @@ FactoryBot.define do
     f.biography { Faker::Lorem.paragraph }
     f.retired { false }
     f.deceased { false }
-    f.country { Faker::Address.country }
+    f.country { set_valid_country }
     f.academic_status { Faker::Educator.degree }
     f.first_phd_year { Date.current.year - 5 }
   end
 
   after(:create) do |person|
-    if person.instance_of?(Person) # person is DemographicData object sometimes (!?)
+    if person.instance_of?(Person) # person is sometimes not a Person object(!?)
       person.demographic_data = create(:demographic_data, person: person)
     end
   end

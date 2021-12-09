@@ -48,11 +48,16 @@ RSpec.describe Person, type: :model do
     before do
       proposal_roles.last.role.update(name: 'lead_organizer')
       person.lead_organizer?
-      person.update(street_1: nil, city: nil)
+      person.update(street_1: nil, city: nil, department: nil)
     end
-    it '' do
-      expect(person.errors.full_messages).to eq(["Street 1 can't be blank", "City can't be blank",
+    it 'validates mandatory fields' do
+      expect(person.errors.full_messages).to eq(["Street 1 can't be blank",
+                                                 "City can't be blank",
                                                  "Department can't be blank"])
+    end
+    it 'has a valid county' do
+      expect(person.country).not_to be_blank
+      expect(Country.find_country_by_name(person.country)).not_to be_nil
     end
   end
 

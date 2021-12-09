@@ -22,7 +22,7 @@ module InvitesHelper
   end
 
   def confirmed_minimum_participants(proposal)
-    participants = proposal.demographics_data&.count
+    participants = proposal.demographics_data.count
     participants >= 10
   end
 end

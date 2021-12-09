@@ -18,7 +18,7 @@
           <div class="card-body">
             <div>
               <h2>Start a new Schedule</h2>
-              <%= form_with(url: form_schedules_path, method: :get) do |f| %>
+              <%= form_with(url: new_schedule_run_schedules_path, method: :get) do |f| %>
                 <div class="col-lg-8">
                   <div class="mb-3">
                     <%= f.label :locations, "Select the location for schedule:", class: 'form-label' %>
@@ -29,6 +29,43 @@
                   </div>
                 </div>
               <% end %>
+            </div>
+            <div>
+              <h2 class="mt-4 mb-3" style ="color: #166688;" >Schedule Optimization Results</h2>
+              <table class="table" border="1">
+                <thead>
+                  <tr>
+                    <th>Run Id</th>
+                    <th>Location code</th>
+                    <th>Weeks</th>
+                    <th>First Week</th>
+                    <th>Run Started</th>
+                    <th>Run Time</th>
+                    <th>Iterations</th>
+                    <th>Number of Cases</th>
+                    <th>Top Score</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% ScheduleRun.all&.find_each do |run| %>
+                    <tr>
+                      <td>
+                         <%= link_to_schedule_result(run, run.id) %>
+                      </td>
+                      <td><%= run.location.code %></td>
+                      <td><%= run.weeks %></td>
+                      <td><%= run.startweek %></td>
+                      <td><%= run.start_time&.to_formatted_s(:short) %></td>
+                      <td><%= schedule_run_time(run) %></td>
+                      <td><%= run.runs %></td>
+                      <td><%= run.cases %></td>
+                      <td><%= run.schedules&.first&.top_score %></td>
+                      <td><%= link_to_results(run) %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

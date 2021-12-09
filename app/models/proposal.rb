@@ -134,6 +134,12 @@ class Proposal < ApplicationRecord
     joins(:proposal_type).where(proposal_type: { name: type })
   }
 
+  def self.find(param)
+    return if param.blank?
+
+    param.to_s.match?(/\D/) ? find_by(code: param) : super
+  end
+
   def editable?
     draft? || revision_requested? || revision_requested_spc?
   end
@@ -231,6 +237,8 @@ class Proposal < ApplicationRecord
 
   def preferred_dates
     answer = preferred_impossible_field
+    return '' if answer.blank?
+
     (0..4).each_with_object([]) do |i, preferred_dates|
       next if answer[i].blank?
 
@@ -256,6 +264,8 @@ class Proposal < ApplicationRecord
   def preferred_impossible_field
     proposal_fields = answers.joins(:proposal_field).where("proposal_fields.fieldable_type =?",
                                                            "ProposalFields::PreferredImpossibleDate")
+
+    return '' if proposal_fields.blank?
 
     JSON.parse(proposal_fields.first.answer)
   end

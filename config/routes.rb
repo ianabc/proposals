@@ -48,8 +48,11 @@ Rails.application.routes.draw do
 
   resources :schedules do
     collection do
-      get :form
+      get :new_schedule_run
       post :run_hmc_program
+      post :abort_run
+      get :optimized_schedule
+      post :export_scheduled_proposals
     end
   end
 

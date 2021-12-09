@@ -7,20 +7,20 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </a></li>
-          <li class="breadcrumb-item active" aria-current="page">Schedule</li>
-          <li class="breadcrumb-item active" aria-current="page">Form</li>
+          <li class="breadcrumb-item active" aria-current="page"><%= link_to "Schedule", new_schedule_path %></li>
+          <li class="breadcrumb-item active" aria-current="page">New Schedule Run</li>
         </ol>
       </nav>
     </div>
     <div class="row">
-      <div class="col-12">
+      <div class="col-12" data-controller="schedules">
         <div class="card">
           <div class="card-body">
             <div>
               <h1 class="mb-3" style ="color: #166688; ">Generate Schedule For <%= @location&.name %> (<%= @location&.code %>):</h1>
-              <%= form_with(url: run_hmc_program_schedules_path, method: :post) do |f| %>
+              <form id="schedule_run_parameters">
                 <div>
-                  <%= f.hidden_field :location_id, value: @location&.id %>
+                  <input type="text" name="location_id" hidden="true" value="<%= @location&.id %>">
                   <table class="table" border="1">
                     <thead>
                       <tr>
@@ -39,16 +39,28 @@
                       </tr>
                       <tr>
                         <td>Program Start Date:</td>
-                        <td>
-                          <%= link_to @location&.start_date, edit_location_path(@location) %>
-                        </td>
+                        <% if @location&.start_date.present? %>
+                          <td>
+                            <%= link_to @location.start_date, edit_location_path(@location) %>
+                          </td>
+                        <% else %>
+                          <td>
+                            <%= link_to 'Add Start Date', edit_location_path(@location) %>
+                          </td>
+                        <% end %>
                         <td></td>
                       </tr>
                       <tr>
                         <td>Program End Date:</td>
-                        <td>
-                          <%= link_to @location&.end_date, edit_location_path(@location) %>
-                        </td>
+                        <% if @location&.start_date.present? %>
+                          <td>
+                            <%= link_to @location&.end_date, edit_location_path(@location) %>
+                          </td>
+                        <% else %>
+                          <td>
+                            <%= link_to 'Add End Date', edit_location_path(@location) %>
+                          </td>
+                        <% end %>
                         <td></td>
                       </tr>
                       <tr>
@@ -61,7 +73,7 @@
                       <tr>
                         <td>Number of weeks in program year:</td>
                         <td>
-                          <input type="text" name="weeks" value="<%= weeks_in_location(@location) %>">
+                          <input type="text" name="weeks" value="<%= @location.num_weeks %>">
                         </td>
                         <td>
                           <p>In 2010, BIRS had workshops for 48 weeks.</p>
@@ -82,7 +94,7 @@
                       <tr>
                         <td>Number of cases in the result set:</td>
                         <td>
-                          <input type="text" name="cases">
+                          <input type="text" name="cases" value="25">
                         </td>
                         <td>
                           <p>Each iteration produces a set of results called "cases". This parameter is the number of cases to show in the results, ordered from most optimized to least.</p>
@@ -105,10 +117,10 @@
                     </tbody>
                   </table>
                   <div>
-                    <%= f.submit "Run HMC with the above parameters", class:  'btn btn-light' %>
+                    <span data-action="click->schedules#runHmcProgram" class="btn btn-light">Run HMC with the above parameters</span>
                   </div>
                 </div>
-              <% end %>
+              </form>
             </div>
           </div>
         </div>

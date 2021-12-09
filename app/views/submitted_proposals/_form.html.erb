@@ -101,7 +101,7 @@
                           </div>
                           <div class="mb-3">
                             <%= label_tag :Assigned_date %>
-                            <%= select_tag :assigned_date, options_for_select(assigned_dates(@proposal.assigned_location), @proposal.assigned_location), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <%= select_tag :assigned_date, options_for_select(assigned_dates(@proposal.assigned_location), @proposal.assigned_date), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                           </div>
                           <div class="mb-3">
                             <%= label_tag :Same_week_as %>
