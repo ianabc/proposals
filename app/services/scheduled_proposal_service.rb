@@ -32,12 +32,9 @@ class ScheduledProposalService
   end
 
   def event_end_date
-    if @proposal.proposal_type.name.match?(/\d-Day/)
-      number = @proposal.proposal_type.name.split('-').first.to_i
-      return @proposal.applied_date + number.days
-    end
+    return (@proposal.applied_date + 5.days) if @proposal.proposal_type.length.blank?
 
-    @proposal.applied_date + 5.days
+    @proposal.applied_date + @proposal.proposal_type.length.days
   end
 
   def proposal_press_release
@@ -60,35 +57,50 @@ class ScheduledProposalService
 
   def proposal_subjects
     subject = @proposal.subject.title
-    ams_subject_one = @proposal.ams_subjects.first.title
-    ams_subject_two = @proposal.ams_subjects.last.title
+    ams_subject_one = @proposal.ams_subjects.first.title.gsub(/^\d+\ /, '')
+    ams_subject_two = @proposal.ams_subjects.last.title.gsub(/^\d+\ /, '')
     "#{subject}, #{ams_subject_one}, #{ams_subject_two}"
   end
 
+  def workshops_role(invited_role)
+    return "Organizer" if invited_role.downcase.match?('organizer')
+
+    "Virtual Participant"
+  end
+
+  def person_data(person)
+    {
+      firstname: person.firstname,
+      lastname: person.lastname,
+      email: person.email,
+      affiliation: person.affiliation,
+      department: person.department,
+      title: person.title,
+      academic_status: person.academic_status,
+      phd_year: person.first_phd_year,
+      url: person.url,
+      address1: person.street_1,
+      address2: person.street_2,
+      city: person.city,
+      region: person.region,
+      country: person.country,
+      postal_code: person.postal_code,
+      biography: person.biography
+    }
+  end
+
   def memberships_data
-    members = []
+    members = [{
+      role: 'Contact Organizer',
+      person: person_data(@proposal.lead_organizer)
+    }]
+
     @proposal.invites.find_each do |invite|
-      person = invite.person
+      next if invite.person.blank?
+
       members << {
-        role: invite.invited_as,
-        person: {
-          firstname: person.firstname,
-          lastname: person.lastname,
-          email: person.email,
-          affiliation: person.affiliation,
-          department: person.department,
-          title: person.title,
-          academic_status: person.academic_status,
-          phd_year: person.first_phd_year,
-          url: person.url,
-          address1: person.street_1,
-          address2: person.street_2,
-          city: person.city,
-          region: person.region,
-          country: person.country,
-          postal_code: person.postal_code,
-          biography: person.biography
-        }
+        role: workshops_role(invite.invited_as),
+        person: person_data(invite.person)
       }
     end
 

@@ -54,18 +54,24 @@ class SchedulesController < ApplicationController
     schedules = Schedule.where(schedule_run_id: @schedule_run.id,
                                case_num: params[:case].to_i)
     program_weeks = schedules&.first&.dates
-    proposals =  schedules.each_with_object([]) do |schedule, props|
-                   next if schedule.proposal&.match?('w66') # placeholder code
+    proposals = []
+    schedules.each do |schedule|
+      next if schedule.proposal&.match?('w66') # placeholder code
 
-                   props += update_proposal_date(schedule, program_weeks)
-                 end
+      proposals += update_proposal_date(schedule, program_weeks)
+    end
 
-    ExportScheduledProposalsJob.perform_now(proposals, @schedule_run)
+    ExportScheduledProposalsJob.perform_now(proposals)
+
+    redirect_to new_schedule_path, notice: 'Proposals have been updated with
+      selected dates, and exported to Workshops.'.squish
   end
 
   private
 
   def update_proposal_date(schedule, program_weeks)
+    return [] if schedule.proposal.blank?
+
     date = program_weeks[(schedule.week - 1)]
     if schedule.proposal.match?(' and ')
       prop1, prop2 = schedule.proposal.split(' and ')
