@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_08_075829) do
+ActiveRecord::Schema.define(version: 2021_12_09_034854) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -347,6 +347,7 @@ ActiveRecord::Schema.define(version: 2021_12_08_075829) do
     t.datetime "closed_date"
     t.text "participant_description"
     t.text "organizer_description"
+    t.integer "length"
     t.index ["code"], name: "index_proposal_types_on_code", unique: true
   end
 

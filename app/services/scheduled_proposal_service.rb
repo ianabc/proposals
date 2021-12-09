@@ -37,7 +37,7 @@ class ScheduledProposalService
       return @proposal.applied_date + number.days
     end
 
-    @proposal.applied_date + 5.days
+    @proposal.applied_date + @proposal.proposal_type.length.days
   end
 
   def proposal_press_release
