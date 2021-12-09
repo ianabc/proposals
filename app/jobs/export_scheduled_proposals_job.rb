@@ -6,7 +6,7 @@ class ExportScheduledProposalsJob < ApplicationJob
     Rails.logger.info("WORKSHOPS_API_URL not set!") if url.blank?
     url
   end
-  
+
   def publish_proposal(proposal)
     request_body = ScheduledProposalService.new(proposal).event
     response = RestClient.post url, request_body.to_json, content_type: :json, accept: :json
