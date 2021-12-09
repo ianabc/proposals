@@ -32,10 +32,7 @@ class ScheduledProposalService
   end
 
   def event_end_date
-    if @proposal.proposal_type.name.match?(/\d-Day/)
-      number = @proposal.proposal_type.name.split('-').first.to_i
-      return @proposal.applied_date + number.days
-    end
+    return (@proposal.applied_date + 5.days) if @proposal.proposal_type.length.blank?
 
     @proposal.applied_date + @proposal.proposal_type.length.days
   end
