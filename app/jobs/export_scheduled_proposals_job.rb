@@ -7,12 +7,12 @@ class ExportScheduledProposalsJob < ApplicationJob
     url
   end
 
-  def publish_proposal(proposal)
+  def publish_proposal(proposal, url)
     request_body = ScheduledProposalService.new(proposal).event
     response = RestClient.post url, request_body.to_json, content_type: :json, accept: :json
-    Rails.logger.info("Posted proposal #{code} to Workshops. Response: #{response.body}")
+    Rails.logger.info("Posted proposal #{proposal.code} to Workshops. Response: #{response}")
   rescue => e
-    Rails.logger.info("Error posting proposal #{code} to Workshops: #{e}. Reponse: #{response.body}")
+    Rails.logger.info("Error posting proposal #{proposal.code} to Workshops: #{e}. Reponse: #{response}")
   end
 
   def perform(proposal_codes)
@@ -23,7 +23,7 @@ class ExportScheduledProposalsJob < ApplicationJob
       proposal = Proposal.find(code)
       next if proposal.blank?
 
-      publish_proposal(proposal)
+      publish_proposal(proposal, url)
     end
   end
 end
