@@ -29,9 +29,7 @@ module SchedulesHelper
   def schedule_run_time(run)
     return '' if run.start_time.blank?
 
-    if run.end_time.blank?
-      return (link_to 'Abort the run', abort_run_schedules_path(run_id: run.id), method: :post)
-    end
+    return (link_to 'Abort the run', abort_run_schedules_path(run_id: run.id), method: :post) if run.end_time.blank?
 
     Time.at(run.end_time - run.start_time).utc.strftime("%H:%M:%S")
   end
@@ -50,5 +48,11 @@ module SchedulesHelper
     return '(no results yet)' if run.schedules.blank?
 
     link_to 'View results', optimized_schedule_schedules_url(run_id: run.id)
+  end
+
+  def link_to_schedule_result(run, id)
+    return id if run.schedules.blank?
+
+    link_to id, optimized_schedule_schedules_url(run_id: run.id)
   end
 end
