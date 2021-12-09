@@ -99,6 +99,8 @@ class ScheduledProposalService
     }]
 
     @proposal.invites.find_each do |invite|
+      next if invite.person.blank?
+
       members << {
         role: workshops_role(invite.invited_as),
         person: person_data(invite.person)
