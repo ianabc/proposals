@@ -60,9 +60,24 @@ class ScheduledProposalService
 
   def proposal_subjects
     subject = @proposal.subject.title
-    ams_subject_one = @proposal.ams_subjects.first.title
-    ams_subject_two = @proposal.ams_subjects.last.title
-    "#{subject}, #{ams_subject_one}, #{ams_subject_two}"
+    ams_subjects = proposal_ams_subjects
+    "#{subject},#{ams_subjects}"
+  end
+
+  def proposal_ams_subjects
+    ams_subject_one = first_ams_subject
+    ams_subject_two = second_ams_subject
+    "#{ams_subject_one},#{ams_subject_two}"
+  end
+
+  def first_ams_subject
+    remove_number = @proposal.ams_subjects.first.title.split.first
+    @proposal.ams_subjects.first.title.remove(remove_number)
+  end
+
+  def second_ams_subject
+    remove_number = @proposal.ams_subjects.last.title.split.first
+    @proposal.ams_subjects.last.title.remove(remove_number)
   end
 
   def workshops_role(invited_role)
