@@ -1,14 +1,17 @@
 class ExportScheduledProposalsJob < ApplicationJob
   queue_as :default
 
-  def perform(codes)
+  def workshops_api
     url = ENV['WORKSHOPS_API_URL']
-    if url.blank?
-      Rails.logger.info("Error: WORKSHOPS_API_URL not set!")
-      return
-    end
+    Rails.logger.info("WORKSHOPS_API_URL not set!") and return if url.blank?
 
-    codes.each do |code|
+    url
+  end
+
+  def perform(proposal_codes)
+    url = workshops_api || return
+
+    proposal_codes.each do |code|
       proposal = Proposal.find(code)
       next if proposal.blank?
 
