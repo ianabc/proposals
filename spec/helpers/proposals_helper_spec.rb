@@ -87,9 +87,12 @@ RSpec.describe ProposalsHelper, type: :helper do
 
   describe "#assigned_dates" do
     context "for valid parameters" do
-      let(:location) { create(:location) }
+      let(:location) { create(:location, start_date: '2023-01-29', end_date: '2023-02-17 ') }
       it "returns the range of dates" do
-        dates = assigned_dates(location)
+        dates = ["", "2023-01-29 00:00:00 -0800 - 2023-02-03 00:00:00 -0800",
+                 "2023-02-05 00:00:00 -0800 - 2023-02-10 00:00:00 -0800",
+                 "2023-02-12 00:00:00 -0800 - 2023-02-17 00:00:00 -0800"]
+
         expect(assigned_dates(location)).to match_array(dates)
       end
     end
@@ -110,15 +113,14 @@ RSpec.describe ProposalsHelper, type: :helper do
     end
   end
 
-  # describe "#proposal_version" do
-  #   let(:proposal) { create(:proposal) }
-  #   let(:proposal_version) { create(:proposal_versionproposal_id: proposal.id) }
-  #   it "returns the version of proposal" do
-  #     debugger
-  #     proposal_version(proposal_version, proposal)
-  #     expect(response.body).to eq(proposal_version)
-  #   end
-  # end
+  describe "#proposal_version" do
+    let(:proposal) { create(:proposal) }
+    let(:version) { create(:proposal_version, proposal_id: proposal.id) }
+    it "returns the version of proposal" do
+      version
+      expect(proposal_version(1, proposal)).to eq(version)
+    end
+  end
 
   describe "#proposal_version_title" do
     let(:proposal) { create(:proposal, title: 'Test') }
@@ -161,20 +163,6 @@ RSpec.describe ProposalsHelper, type: :helper do
     end
   end
 
-  describe "#nationality_data" do
-    let(:proposal) { create(:proposal) }
-    it "returns the nationality" do
-      expect(nationality_data(proposal)).to match_array([])
-    end
-  end
-
-  describe "#ethnicity_data" do
-    let(:proposal) { create(:proposal) }
-    it "returns the ethnicity" do
-      expect(ethnicity_data(proposal)).to match_array([])
-    end
-  end
-
   describe "#invite_deadline_date_color" do
     let(:invite) { create(:invite, status: 'pending') }
     it "it changes the color of text" do
@@ -207,26 +195,78 @@ RSpec.describe ProposalsHelper, type: :helper do
     end
   end
 
-  # describe "#career_labels" do
-  #   let(:proposal) { create(:proposal) }
-  #   let(:person) { create(:person, proposal_id:proposal.id) }
-  #   it "returns the lables" do
-  #     expect(career_labels(proposal)).to match_array([])
-  #   end
-  # end
+  describe "#career_labels" do
+    let(:person) { create(:person, :with_proposals) }
+    before do
+      invites = person.proposals.first.invites
+      invites.update_all(invited_as: "Participant")
+      invites.map(&:person).each { |p| p.update_columns(academic_status: "IT", other_academic_status: "Physics") }
+    end
+    it "returns the lables" do
+      expect(career_labels(person.proposals.first)).to match_array(%w[IT Physics])
+    end
 
-  # describe "#proposal_status" do
-  #   let(:proposal){ create(:proposal, status: :revision_submitted) }
-  #   it "return the status of the proposal" do
-  #     # status = proposal.status.split('_').map(:capitalize).join(' ')
-  #     expect(proposal_status(proposal.status)).to eq("Revision Submitted")
-  #   end
-  # end
+    it 'returns the values' do
+      expect(career_values(person.proposals.first)).to match_array([3, 3])
+    end
+  end
 
-  # describe "#proposal_status_class" do
-  #   let(:proposal){ create(:proposal, status: :revision_submitted) }
-  #   it "return the status of the proposal" do
-  #     expect(proposal_status_class(proposal.status)).to eq(proposal.status)
-  #   end
-  # end
+  describe "#proposal_status" do
+    context "when status is revision_submitted it capitalize" do
+      let(:proposal) { create(:proposal, status: :revision_submitted) }
+      it { expect(proposal_status(proposal.status)).to eq("Revision Submitted") }
+    end
+
+    context "when status is draft" do
+      let(:proposal) { create(:proposal, status: :draft) }
+      it { expect(proposal_status(proposal.status)).to eq("Draft") }
+    end
+  end
+
+  describe "#proposal_status_class" do
+    let(:proposal) { create(:proposal, status: :revision_submitted) }
+    it "return the status of the proposal" do
+      expect(proposal_status_class(proposal.status)).to eq('text-revision-submitted')
+    end
+  end
+
+  describe "#invite_status" do
+    context "when status is cancelled" do
+      let(:invite) { create(:invite) }
+      it "return if status is cancelled" do
+        expect(invite_status(invite.response, 'cancelled')).to eq("Invite has been cancelled")
+      end
+    end
+    context "when response is yes or may be" do
+      let(:invite) { create(:invite, response: 'yes') }
+      it "accepts the invitation" do
+        invite_status(invite.response, invite)
+        expect(invite_status(invite.response, invite)).to eq("Invitation accepted")
+      end
+    end
+    context "when response is no" do
+      let(:invite) { create(:invite, response: 'no') }
+      it "declines th einvitation" do
+        expect(invite_status(invite.response, invite)).to eq("Invitation declined")
+      end
+    end
+    context "when response is nil" do
+      let(:invite) { create(:invite, response: nil) }
+      it "did not respond to invitation yet" do
+        expect(invite_status(invite.response, invite)).to eq("Not yet responded to invitation")
+      end
+    end
+  end
+
+  describe "#specific_proposal_statuses" do
+    let(:statuses) do
+      [["Draft", 0], ["Submitted", 1], ["Initial review", 2],
+       ["Revision requested", 3], ["Revision submitted", 4],
+       ["In progress", 5], ["Decision pending", 6], ["Decision email sent", 7], ["Revision requested spc", 10],
+       ["Revision submitted spc", 11], ["In progress spc", 12], ["Shortlisted", 13]]
+    end
+    it "retunrs the specific statuses" do
+      expect(specific_proposal_statuses).to match_array(statuses)
+    end
+  end
 end

@@ -15,6 +15,18 @@ RSpec.describe "Proposals", type: :request do
     it { expect(response).to have_http_status(:ok) }
   end
 
+
+  describe "PATCH /ranking" do
+    let(:proposal) { create(:proposal) }
+    let(:location) { create(:location) }
+    let(:proposal_location) { create(:proposal_location, proposal_id:proposal.id, location_id: location.id)}
+    before do
+      proposal_location
+      patch ranking_proposal_path(proposal,  location_id: location.id)
+    end
+    it { expect(response).to have_http_status(:ok) }
+  end
+
   describe "GET /new" do
     before { get new_proposal_path }
     it { expect(response).to have_http_status(:ok) }

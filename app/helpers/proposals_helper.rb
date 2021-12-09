@@ -19,7 +19,7 @@ module ProposalsHelper
   def proposal_type_year(proposal_type)
     return [Date.current.year + 2] if proposal_type.year.blank?
 
-    proposal_type.year&.split(",")&.map { |year| year }
+    proposal_type.year.split(",").map { |year| year }
   end
 
   def approved_proposals(proposal)
@@ -117,7 +117,7 @@ module ProposalsHelper
   end
 
   def proposal_status(status)
-    status&.split('_')&.map(&:capitalize)&.join(' ')
+    status.split('_').map(&:capitalize).join(' ')
   end
 
   def proposal_status_class(status)
