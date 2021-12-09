@@ -15,14 +15,13 @@ RSpec.describe "Proposals", type: :request do
     it { expect(response).to have_http_status(:ok) }
   end
 
-
   describe "PATCH /ranking" do
     let(:proposal) { create(:proposal) }
     let(:location) { create(:location) }
-    let(:proposal_location) { create(:proposal_location, proposal_id:proposal.id, location_id: location.id)}
+    let(:proposal_location) { create(:proposal_location, proposal_id: proposal.id, location_id: location.id) }
     before do
       proposal_location
-      patch ranking_proposal_path(proposal,  location_id: location.id)
+      patch ranking_proposal_path(proposal, location_id: location.id)
     end
     it { expect(response).to have_http_status(:ok) }
   end
@@ -115,7 +114,7 @@ RSpec.describe "Proposals", type: :request do
         file << fixture_file_upload(Rails.root.join('spec/fixtures/files/proposal_booklet.pdf'),
                                     'application/pdf')
         expect do
-          post upload_file_proposal_url(proposal), files: file
+          post upload_file_proposal_url(proposal), params: { files: file }
         end.to change(ActiveStorage::Attachment, :count).by(1)
       end
     end
@@ -125,7 +124,7 @@ RSpec.describe "Proposals", type: :request do
         file = []
         file << fixture_file_upload(Rails.root.join('spec/fixtures/files/review_sample.xlsx'))
         expect do
-          post upload_file_proposal_url(proposal), files: file
+          post upload_file_proposal_url(proposal), params: { files: file }
         end.to change(ActiveStorage::Attachment, :count).by(0)
       end
     end

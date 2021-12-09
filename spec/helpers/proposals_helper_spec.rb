@@ -198,9 +198,11 @@ RSpec.describe ProposalsHelper, type: :helper do
   describe "#career_labels" do
     let(:person) { create(:person, :with_proposals) }
     before do
-      invites = person.proposals.first.invites
-      invites.update_all(invited_as: "Participant")
-      invites.map(&:person).each { |p| p.update_columns(academic_status: "IT", other_academic_status: "Physics") }
+      invites = person.proposals.first.invites.each { |invite| invite.update(invited_as: "Participant") }
+      invites.map(&:person).each do |p|
+        p.update(academic_status: "IT", other_academic_status: "Physics", country: 'USA', first_phd_year: '1998',
+                 department: 'IT', affiliation: 'affiliation')
+      end
     end
     it "returns the lables" do
       expect(career_labels(person.proposals.first)).to match_array(%w[IT Physics])
