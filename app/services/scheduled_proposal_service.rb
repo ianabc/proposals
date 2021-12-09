@@ -66,41 +66,42 @@ class ScheduledProposalService
   end
 
   def workshops_role(invited_role)
-    case invited_role.downcase
-    when "lead organizer"
-      "Contact Organizer"
-    when "organizer"
-      "Organizer"
-    else
-      "Virtual Participant"
-    end
+    return "Organizer" if invited_role.downcase.match?('organizer')
+
+    "Virtual Participant"
+  end
+
+  def person_data(person)
+    {
+      firstname: person.firstname,
+      lastname: person.lastname,
+      email: person.email,
+      affiliation: person.affiliation,
+      department: person.department,
+      title: person.title,
+      academic_status: person.academic_status,
+      phd_year: person.first_phd_year,
+      url: person.url,
+      address1: person.street_1,
+      address2: person.street_2,
+      city: person.city,
+      region: person.region,
+      country: person.country,
+      postal_code: person.postal_code,
+      biography: person.biography
+    }
   end
 
   def memberships_data
-    members = []
-    @proposal.invites.find_each do |invite|
-      person = invite.person
+    members = [{
+      role: 'Contact Organizer',
+      person: person_data(@proposal.lead_organizer)
+    }]
 
+    @proposal.invites.find_each do |invite|
       members << {
         role: workshops_role(invite.invited_as),
-        person: {
-          firstname: person.firstname,
-          lastname: person.lastname,
-          email: person.email,
-          affiliation: person.affiliation,
-          department: person.department,
-          title: person.title,
-          academic_status: person.academic_status,
-          phd_year: person.first_phd_year,
-          url: person.url,
-          address1: person.street_1,
-          address2: person.street_2,
-          city: person.city,
-          region: person.region,
-          country: person.country,
-          postal_code: person.postal_code,
-          biography: person.biography
-        }
+        person: person_data(invite.person)
       }
     end
 
