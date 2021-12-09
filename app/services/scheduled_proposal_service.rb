@@ -65,12 +65,24 @@ class ScheduledProposalService
     "#{subject}, #{ams_subject_one}, #{ams_subject_two}"
   end
 
+  def workshops_role(invited_role)
+    case invited_role.downcase
+    when "lead organizer"
+      "Contact Organizer"
+    when "organizer"
+      "Organizer"
+    else
+      "Virtual Participant"
+    end
+  end
+
   def memberships_data
     members = []
     @proposal.invites.find_each do |invite|
       person = invite.person
+
       members << {
-        role: invite.invited_as,
+        role: workshops_role(invite.invited_as),
         person: {
           firstname: person.firstname,
           lastname: person.lastname,
