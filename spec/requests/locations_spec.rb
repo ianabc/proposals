@@ -100,7 +100,7 @@ RSpec.describe "/locations", type: :request do
       end
 
       it "does not update Location" do
-        expect(response).to have_http_status(422)
+        expect(response).to have_http_status(302)
       end
     end
   end
