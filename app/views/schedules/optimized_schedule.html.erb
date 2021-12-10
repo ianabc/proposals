@@ -39,8 +39,8 @@
                 <% no_assignments = 0 %>
                 <% @schedules.order(:week).each do |schedule| %>
                 <tr>
-                  <td><%= schedule.week %> (<%= @dates[(schedule.week - 1)].strftime("%m-%d") %>)</td>
-                  <td><%= schedule_proposal(schedule.proposal) %></td> 
+                  <td><%= schedule.week %> (<%= @dates[(schedule.week - 1)]&.strftime("%m-%d") %>)</td>
+                  <td><%= schedule_proposal(schedule.proposal)&.html_safe %></td> 
                   <td><%= schedule.choice %></td>
                   <% if schedule.choice.eql?(0) %>
                     <% no_assignments += 1 %>

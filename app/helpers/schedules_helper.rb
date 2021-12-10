@@ -5,7 +5,12 @@ module SchedulesHelper
     return '(excluded date)' if proposal_code.match?('w66') # placeholder code
 
     proposal = Proposal.find(proposal_code)
-    proposal.present? ? "[#{proposal.code}] #{proposal.title}" : ''
+    if proposal.present?
+      "[#{link_to proposal.code, submitted_proposal_path(proposal),
+                  target: :blank}] #{proposal.title}"
+    else
+      ''
+    end
   end
 
   def choice_assignment(choices, choose)
