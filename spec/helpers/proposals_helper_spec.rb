@@ -89,16 +89,23 @@ RSpec.describe ProposalsHelper, type: :helper do
     context "for valid parameters" do
       let(:location) { create(:location, start_date: '2023-01-29', end_date: '2023-02-17 ') }
       it "returns the range of dates" do
-        dates = ["", "2023-01-29 00:00:00 -0800 - 2023-02-03 00:00:00 -0800",
-                 "2023-02-05 00:00:00 -0800 - 2023-02-10 00:00:00 -0800",
-                 "2023-02-12 00:00:00 -0800 - 2023-02-17 00:00:00 -0800"]
+        dates = ["", "2023-01-29 - 2023-02-03",
+                 "2023-02-05 - 2023-02-10",
+                 "2023-02-12 - 2023-02-17"]
 
         expect(assigned_dates(location)).to match_array(dates)
       end
     end
+    context "when results do not match" do
+      let(:location) { create(:location, start_date: '2023-01-29', end_date: '2023-02-17 ') }
+      it "returns the range of dates" do
+        dates = ["", "2023-02-5 - 2023-02-10"]
+        expect(assigned_dates(location)).not_to match_array(dates)
+      end
+    end
     context "for invalid parameters" do
       let(:location) { create(:location, start_date: "") }
-      it "does not returns the range of dates" do
+      it "does not return the range of dates" do
         expect(assigned_dates(location)).to match_array([])
       end
     end
