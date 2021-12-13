@@ -259,6 +259,11 @@ class Proposal < ApplicationRecord
     end
   end
 
+  def birs_emails
+    emails = [['birs-director@birs.ca', 'birs-director@birs.ca'], ['birs@birs.ca', 'birs@birs.ca']]
+    emails.map { |disp, _value| disp }
+  end
+
   private
 
   def preferred_impossible_field
