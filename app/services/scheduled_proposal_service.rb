@@ -24,7 +24,7 @@ class ScheduledProposalService
       start_date: @proposal.applied_date,
       end_date: event_end_date,
       event_type: @proposal.proposal_type.name,
-      location: @proposal.assigned_location.code,
+      location: @proposal.assigned_location&.code,
       press_release: proposal_press_release,
       description: proposal_objective,
       subjects: proposal_subjects

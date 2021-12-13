@@ -101,32 +101,32 @@ RSpec.describe "/roles", type: :request do
   end
 
   describe "POST /new_role" do
-      context "with valid parameters" do
-        let(:role_params) do
-          {
-            user_id: user.id
-          }
-        end
-        it "creates a new Role" do
-          expect do
-            post new_role_role_url(role), params: role_params
-          end.to change(UserRole, :count).by(1)
-        end
+    context "with valid parameters" do
+      let(:role_params) do
+        {
+          user_id: user.id
+        }
       end
-      context "with invalid parameters" do
-        let(:role_params) do
-          {
-            user_id: ''
-          }
-        end
-        before do
+      it "creates a new Role" do
+        expect do
           post new_role_role_url(role), params: role_params
-        end
-        it "does not create a new Role" do
-          expect(response).to redirect_to(role_path(role))
-        end
+        end.to change(UserRole, :count).by(1)
       end
     end
+    context "with invalid parameters" do
+      let(:role_params) do
+        {
+          user_id: ''
+        }
+      end
+      before do
+        post new_role_role_url(role), params: role_params
+      end
+      it "does not create a new Role" do
+        expect(response).to redirect_to(role_path(role))
+      end
+    end
+  end
 
   describe "POST /remove_user" do
     let(:role_params) do

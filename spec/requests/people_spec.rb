@@ -29,6 +29,7 @@ RSpec.describe "/person", type: :request do
 
     context "with valid parameters" do
       before do
+        person.update(department: 'computer_science')
         patch person_url(person), params: { person: person_params }
       end
 

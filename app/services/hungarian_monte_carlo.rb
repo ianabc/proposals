@@ -17,7 +17,7 @@ class HungarianMonteCarlo
     socket = hmc_connect
     return if @errors.present?
 
-    socket.puts "#{@hmc_access_code}" if hmc_reply(socket, 'Access code')
+    socket.puts @hmc_access_code.to_s if hmc_reply(socket, 'Access code')
     socket.puts "newrun" if hmc_reply(socket, 'READY')
     socket.puts formatted_run_params if hmc_reply(socket, 'Run parameters')
     socket.puts proposal_data.join("\n") if hmc_reply(socket, 'Send proposals')
@@ -28,7 +28,7 @@ class HungarianMonteCarlo
 
   def hmc_reply(socket, prompt)
     socket.gets&.chomp&.match?(prompt)
-  rescue => e
+  rescue StandardError => e
     @errors['HMC'] = "Error reading socket! #{e.message}"
   end
 
@@ -46,7 +46,7 @@ class HungarianMonteCarlo
 
     if output.match?('Launching HungarianMonteCarlo')
       pid = output.split(':').last.strip.to_i
-      update_schedule_run(pid) unless pid.blank?
+      update_schedule_run(pid) if pid.present?
     else
       @errors['HMC runtime error'] = "HMC may not have launched".squish
     end
@@ -188,7 +188,6 @@ class HungarianMonteCarlo
 
   def save_schedule_run
     @schedule_run.save
-
   rescue ActiveRecord::Error => e
     @errors['ScheduleRun'] = "Error saving ScheduleRun record: #{e.message}."
     @errors['ScheduleRun'] << "\n\n#{@schedule_run.inspect}"
@@ -199,7 +198,6 @@ class HungarianMonteCarlo
 
     @schedule_run.update_columns(startweek: @location.start_date,
                                  weeks: @location.num_weeks)
-
   rescue ActiveRecord::ActiveRecordError => e
     @errors['ScheduleRun'] = "Error updating ScheduleRun record: #{e.message}."
   end

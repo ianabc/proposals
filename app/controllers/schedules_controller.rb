@@ -45,21 +45,14 @@ class SchedulesController < ApplicationController
                 else
                   params[:page] >= "1" ? params[:page] : 1
                 end
-    @schedules = Schedule.where(schedule_run_id: @schedule_run.id,
-                                case_num: @case_num)
-    @dates = @schedules&.first&.dates
+    schedule_case_run
   end
 
   def export_scheduled_proposals
     schedules = Schedule.where(schedule_run_id: @schedule_run.id,
                                case_num: params[:case].to_i)
     program_weeks = schedules&.first&.dates
-    proposals = []
-    schedules.each do |schedule|
-      next if schedule.proposal&.match?('w66') # placeholder code
-
-      proposals += update_proposal_date(schedule, program_weeks)
-    end
+    proposals = proposal_update_schedules_date(schedules, program_weeks)
 
     ExportScheduledProposalsJob.perform_now(proposals)
 
@@ -69,23 +62,38 @@ class SchedulesController < ApplicationController
 
   private
 
+  def proposal_update_schedules_date(schedules, program_weeks)
+    proposals = []
+    schedules.each do |schedule|
+      next if schedule.proposal&.match?('w66') # placeholder code
+
+      proposals += update_proposal_date(schedule, program_weeks)
+    end
+    proposals
+  end
+
   def update_proposal_date(schedule, program_weeks)
     return [] if schedule.proposal.blank?
 
     date = program_weeks[(schedule.week - 1)]
+    proposal_date_condition(schedule, date)
+  end
+
+  def proposal_date_condition(schedule, date)
     if schedule.proposal.match?(' and ')
       prop1, prop2 = schedule.proposal.split(' and ')
       update_proposal_applied_date(prop1, date)
       update_proposal_applied_date(prop2, date)
-      return [prop1, prop2]
+      [prop1, prop2]
     else
       update_proposal_applied_date(schedule.proposal, date)
-      return [schedule.proposal]
+      [schedule.proposal]
     end
   end
 
   def update_proposal_applied_date(proposal_code, date)
-    Proposal.find(proposal_code)&.update(applied_date: date)
+    proposal = Proposal.find(proposal_code)
+    proposal.update(applied_date: date) if proposal.present?
   end
 
   def run_params
@@ -115,6 +123,12 @@ class SchedulesController < ApplicationController
 
   def set_location
     @location = Location.find_by(id: params[:location])
+  end
+
+  def schedule_case_run
+    @schedules = Schedule.where(schedule_run_id: @schedule_run.id,
+                                case_num: @case_num)
+    @dates = @schedules&.first&.dates
   end
 
   def authenticate_api_key

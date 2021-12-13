@@ -1,4 +1,5 @@
 import consumer from "./consumer"
+import toastr from 'toastr'
 
 consumer.subscriptions.create("ReviewChannel", {
   connected() {
