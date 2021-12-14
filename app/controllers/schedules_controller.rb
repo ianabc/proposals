@@ -4,7 +4,8 @@ class SchedulesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: %i[create]
   before_action :json_only, :authenticate_api_key, only: %i[create]
   before_action :set_location, only: %w[new_schedule_run]
-  before_action :set_schedule_run, only: %w[abort_run optimized_schedule export_scheduled_proposals]
+  before_action :set_schedule_run, only: %w[abort_run optimized_schedule export_scheduled_proposals
+                                            download_csv]
 
   def new; end
 
@@ -65,6 +66,13 @@ class SchedulesController < ApplicationController
 
     redirect_to new_schedule_path, notice: 'Proposals have been updated with
       selected dates, and exported to Workshops.'.squish
+  end
+
+  def download_csv
+    return if @schedule_run.blank? || params[:case_num].empty?
+
+    case_num = params[:case_num].to_i
+    send_data @schedule_run.to_csv(case_num), filename: "optimized_scheduled_proposals.csv"
   end
 
   private
