@@ -17,7 +17,7 @@ class EmailsController < ApplicationController
 
   def email_types
     email_templates = []
-    email_templates << EmailTemplate.where(email_type: %w[approval_type reject_type])
+    email_templates << EmailTemplate.where(email_type: %w[approval_type reject_type decision_email_type])
     templates = []
     templates = make_templates(email_templates, templates) if email_templates
     render json: { email_templates: templates }, status: :ok
@@ -28,6 +28,7 @@ class EmailsController < ApplicationController
   def make_templates(email_templates, templates)
     email_templates.flatten.each do |template|
       email_type = template.email_type.split('_').first.capitalize
+      email_type += ' Email' if email_type == 'Decision'
       templates << "#{email_type}: #{template.title}"
     end
     templates
