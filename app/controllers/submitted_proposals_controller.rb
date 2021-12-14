@@ -426,7 +426,11 @@ class SubmittedProposalsController < ApplicationController
 
   def template_params
     templates = params[:templates].split(": ")
-    type = "#{templates.first.downcase}_type" if templates.first.present?
+    if templates.first == "Decision Email"
+      type = "#{templates.first.downcase.tr!(' ', '_')}_type"
+    elsif templates.first.present?
+      type = "#{templates.first.downcase}_type"
+    end
     template = templates.last
     @email_template = EmailTemplate.find_by(email_type: type, title: template)
     @email_template.update(subject: params[:subject], body: params[:body]) if @email_template.present?
