@@ -4,7 +4,7 @@ class SchedulesController < ApplicationController
   skip_before_action :verify_authenticity_token, only: %i[create]
   before_action :json_only, :authenticate_api_key, only: %i[create]
   before_action :set_location, only: %w[new_schedule_run]
-  before_action :set_schedule_run, only: %w[abort_run optimized_schedule]
+  before_action :set_schedule_run, only: %w[abort_run optimized_schedule export_scheduled_proposals]
 
   def new; end
 
@@ -24,7 +24,7 @@ class SchedulesController < ApplicationController
   def new_schedule_run; end
 
   def run_hmc_program
-    schedule_run = ScheduleRun.new(run_params)
+    schedule_run = ScheduleRun.new(run_params.merge(start_time: DateTime.now))
     if schedule_run.save
       hmc_program(schedule_run)
     else
@@ -38,15 +38,55 @@ class SchedulesController < ApplicationController
   end
 
   def optimized_schedule
-    @case_num = if params[:page].to_i > @schedule_run.cases
+    @case_num = if params[:page].blank?
+                  1
+                elsif params[:page].to_i > @schedule_run.cases
                   @schedule_run.cases
                 else
                   params[:page] >= "1" ? params[:page] : 1
                 end
-    @schedules = Schedule.where(schedule_run_id: @schedule_run.id, case_num: @case_num)
+    @schedules = Schedule.where(schedule_run_id: @schedule_run.id,
+                                case_num: @case_num)
+    @dates = @schedules&.first&.dates
+  end
+
+  def export_scheduled_proposals
+    schedules = Schedule.where(schedule_run_id: @schedule_run.id,
+                               case_num: params[:case].to_i)
+    program_weeks = schedules&.first&.dates
+    proposals = []
+    schedules.each do |schedule|
+      next if schedule.proposal&.match?('w66') # placeholder code
+
+      proposals += update_proposal_date(schedule, program_weeks)
+    end
+
+    ExportScheduledProposalsJob.perform_now(proposals)
+
+    redirect_to new_schedule_path, notice: 'Proposals have been updated with
+      selected dates, and exported to Workshops.'.squish
   end
 
   private
+
+  def update_proposal_date(schedule, program_weeks)
+    return [] if schedule.proposal.blank?
+
+    date = program_weeks[(schedule.week - 1)]
+    if schedule.proposal.match?(' and ')
+      prop1, prop2 = schedule.proposal.split(' and ')
+      update_proposal_applied_date(prop1, date)
+      update_proposal_applied_date(prop2, date)
+      return [prop1, prop2]
+    else
+      update_proposal_applied_date(schedule.proposal, date)
+      return [schedule.proposal]
+    end
+  end
+
+  def update_proposal_applied_date(proposal_code, date)
+    Proposal.find(proposal_code)&.update(applied_date: date)
+  end
 
   def run_params
     params.permit(:weeks, :runs, :cases, :location_id, :year, :test_mode)
@@ -56,7 +96,7 @@ class SchedulesController < ApplicationController
     params.require(:schedule)
           .permit(:SCHEDULE_API_KEY, :schedule_run_id,
                   run_data: [:case_num, :hmc_score,
-                             assignments: [:week, :proposal]])
+                             { assignments: %i[week proposal] }])
   end
 
   def hmc_program(schedule_run)
