@@ -48,6 +48,7 @@ Rails.application.routes.draw do
 
   resources :schedules do
     collection do
+      get :download_csv
       get :new_schedule_run
       post :run_hmc_program
       post :abort_run
