@@ -15,6 +15,7 @@ FactoryBot.define do
         'citizenships_other' => '',
         'underRepresented' => %w[Yes No].sample,
         'indigenous_person' => 'Yes',
+        'academic_status' => 'Software Engineer',
         'indigenous_person_yes' => [['First Nation', 'First Nation'],
                                     %w[Métis Métis], %w[Inuit Inuit]].sample
       }
