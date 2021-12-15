@@ -12,7 +12,8 @@ RSpec.describe SchedulesHelper, type: :helper do
     it "returns proposal [code,title] if it has code" do
       proposal
       schedule1
-      expect(schedule_proposal(schedule1.proposal)).to eq("[#{proposal.code}] #{proposal.title}")
+      expect(schedule_proposal(schedule1.proposal)).to eq("[#{link_to proposal.code, submitted_proposal_path(proposal),
+                                                                      target: :blank}] #{proposal.title}")
     end
 
     it "returns no proposal [code,title] if it has no code" do

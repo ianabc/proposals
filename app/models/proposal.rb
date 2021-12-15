@@ -47,6 +47,8 @@ class Proposal < ApplicationRecord
   pg_search_scope :search_proposal_type, against: %i[proposal_type_id]
   pg_search_scope :search_proposal_status, against: %i[status]
   pg_search_scope :search_proposal_year, against: %i[year]
+  pg_search_scope :search_proposal_location, against: %i[assigned_location_id]
+  pg_search_scope :search_proposal_outcome, against: %i[outcome]
   belongs_to :assigned_location, class_name: 'Location', optional: true
 
   enum status: {
@@ -257,6 +259,11 @@ class Proposal < ApplicationRecord
       impossible_dates << Date.strptime(date.first.strip, '%m/%d/%Y')
       impossible_dates << Date.strptime(date.last, '%m/%d/%Y')
     end
+  end
+
+  def birs_emails
+    emails = [['birs-director@birs.ca', 'birs-director@birs.ca'], ['birs@birs.ca', 'birs@birs.ca']]
+    emails.map { |disp, _value| disp }
   end
 
   private

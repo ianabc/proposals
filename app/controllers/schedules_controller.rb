@@ -114,7 +114,7 @@ class SchedulesController < ApplicationController
       render json: { errors: hmc.errors }, status: :unprocessable_entity
     else
       HmcJob.new(hmc).perform(schedule_run)
-      head :accepted
+      render js: "window.location='#{new_schedule_url}'"
     end
   end
 
