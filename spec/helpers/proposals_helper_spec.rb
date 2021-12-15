@@ -86,43 +86,55 @@ RSpec.describe ProposalsHelper, type: :helper do
   end
 
   describe "#assigned_dates" do
-    context "when start date is blank" do
-      let(:location) { create(:location) }
-      it "creates range of dates" do
-        assigned_dates(location)
-        expect(response).to have_http_status(:ok)
+    context "for valid parameters" do
+      let(:location) { create(:location, start_date: '2023-01-29', end_date: '2023-02-17 ') }
+      it "returns the range of dates" do
+        dates = ["", "2023-01-29 - 2023-02-03",
+                 "2023-02-05 - 2023-02-10",
+                 "2023-02-12 - 2023-02-17"]
+
+        expect(assigned_dates(location)).to match_array(dates)
       end
-      it "does not return range of dates" do
-        assigned_dates("")
-        expect(response).to have_http_status(:ok)
+    end
+    context "when results do not match" do
+      let(:location) { create(:location, start_date: '2023-01-29', end_date: '2023-02-17 ') }
+      it "returns the range of dates" do
+        dates = ["", "2023-02-5 - 2023-02-10"]
+        expect(assigned_dates(location)).not_to match_array(dates)
+      end
+    end
+    context "for invalid parameters" do
+      let(:location) { create(:location, start_date: "") }
+      it "does not return the range of dates" do
+        expect(assigned_dates(location)).to match_array([])
       end
     end
   end
 
   describe "#approved_proposals" do
     let(:proposal) { create(:proposal) }
-    it "creates a successful response" do
-      approved_proposals(proposal)
-      expect(response).to have_http_status(:ok)
+    let(:proposals) { create_list(:proposal, 3, outcome: 'Approved') }
+    it "return the code for approved proposals" do
+      codes = [""] + proposals.pluck(:code)
+      expect(approved_proposals(proposal)).to match_array(codes)
     end
   end
 
   describe "#proposal_version" do
     let(:proposal) { create(:proposal) }
-    let(:version) { create(:proposal_version) }
+    let(:version) { create(:proposal_version, proposal_id: proposal.id) }
     it "returns the version of proposal" do
-      proposal_version(version, proposal)
-      expect(response).to have_http_status(:ok)
+      version
+      expect(proposal_version(1, proposal)).to eq(version)
     end
   end
 
   describe "#proposal_version_title" do
-    let(:proposal) { create(:proposal) }
+    let(:proposal) { create(:proposal, title: 'Test') }
     let(:proposal_version) { create(:proposal_version, proposal_id: proposal.id) }
     it "returns the title of proposal version" do
       proposal_version
-      proposal_version_title(1, proposal)
-      expect(response).to have_http_status(:ok)
+      expect(proposal_version_title(1, proposal)).to eq(proposal_version.title)
     end
   end
 
@@ -130,8 +142,7 @@ RSpec.describe ProposalsHelper, type: :helper do
     let(:person) { create(:person) }
     let(:invite) { create(:invite, person_id: person.id) }
     it "returns the last name of invite" do
-      invite_last_name(invite)
-      expect(response).to have_http_status(:ok)
+      expect(invite_last_name(invite)).to eq(invite.lastname)
     end
   end
 
@@ -139,26 +150,132 @@ RSpec.describe ProposalsHelper, type: :helper do
     let(:person) { create(:person) }
     let(:invite) { create(:invite, person_id: person.id) }
     it "returns the first name of invite" do
-      invite_first_name(invite)
-      expect(response).to have_http_status(:ok)
+      expect(invite_first_name(invite)).to eq(invite.firstname)
     end
   end
 
   describe "#no_of_participants" do
     let(:proposal) { create(:proposal) }
-    let(:invite) { create(:invite) }
-    it "returns the last name of invite" do
-      no_of_participants(invite, proposal.id)
-      expect(response).to have_http_status(:ok)
+    let(:invites) { create_list(:invite, 2, proposal_id: proposal.id, invited_as: "Organizer") }
+    it "returns total  participants" do
+      expect(no_of_participants(proposal.id, "Organizer")).to eq(invites)
     end
   end
 
   describe "#confirmed_participants" do
     let(:proposal) { create(:proposal) }
-    let(:invite) { create(:invite) }
-    it "returns the last name of invite" do
-      confirmed_participants(invite, proposal.id)
+    let(:invites) { create_list(:invite, 2, proposal_id: proposal.id, invited_as: "Organizer", status: "confirmed") }
+    it "returns confirmed participants" do
+      expect(confirmed_participants(proposal.id, "Organizer")).to eq(invites)
+    end
+  end
+
+  describe "#invite_deadline_date_color" do
+    let(:invite) { create(:invite, status: 'pending') }
+    it "it changes the color of text" do
+      invite_deadline_date_color(invite)
       expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "#invite_response_color" do
+    context "when status is yes or may be" do
+      let(:invite) { create(:invite, response: 'yes') }
+      it "changes the color of response" do
+        invite_response_color(invite.response)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+    context "when status is no" do
+      let(:invite) { create(:invite, response: 'no') }
+      it "changes the color of response" do
+        invite_response_color(invite.response)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+    context "when status is nil" do
+      let(:invite) { create(:invite, response: nil) }
+      it "changes the color of response" do
+        invite_response_color(invite.response)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
+
+  describe "#career_labels" do
+    let(:person) { create(:person, :with_proposals) }
+    before do
+      invites = person.proposals.first.invites.each { |invite| invite.update(invited_as: "Participant") }
+      invites.map(&:person).each do |p|
+        p.update(academic_status: "IT", other_academic_status: "Physics", country: 'USA', first_phd_year: '1998',
+                 department: 'IT', affiliation: 'affiliation')
+      end
+    end
+    it "returns the lables" do
+      expect(career_labels(person.proposals.first)).to match_array(%w[IT Physics])
+    end
+
+    it 'returns the values' do
+      expect(career_values(person.proposals.first)).to match_array([3, 3])
+    end
+  end
+
+  describe "#proposal_status" do
+    context "when status is revision_submitted it capitalize" do
+      let(:proposal) { create(:proposal, status: :revision_submitted) }
+      it { expect(proposal_status(proposal.status)).to eq("Revision Submitted") }
+    end
+
+    context "when status is draft" do
+      let(:proposal) { create(:proposal, status: :draft) }
+      it { expect(proposal_status(proposal.status)).to eq("Draft") }
+    end
+  end
+
+  describe "#proposal_status_class" do
+    let(:proposal) { create(:proposal, status: :revision_submitted) }
+    it "return the status of the proposal" do
+      expect(proposal_status_class(proposal.status)).to eq('text-revision-submitted')
+    end
+  end
+
+  describe "#invite_status" do
+    context "when status is cancelled" do
+      let(:invite) { create(:invite) }
+      it "return if status is cancelled" do
+        expect(invite_status(invite.response, 'cancelled')).to eq("Invite has been cancelled")
+      end
+    end
+    context "when response is yes or may be" do
+      let(:invite) { create(:invite, response: 'yes') }
+      it "accepts the invitation" do
+        invite_status(invite.response, invite)
+        expect(invite_status(invite.response, invite)).to eq("Invitation accepted")
+      end
+    end
+    context "when response is no" do
+      let(:invite) { create(:invite, response: 'no') }
+      it "declines th einvitation" do
+        expect(invite_status(invite.response, invite)).to eq("Invitation declined")
+      end
+    end
+    context "when response is nil" do
+      let(:invite) { create(:invite, response: nil) }
+      it "did not respond to invitation yet" do
+        expect(invite_status(invite.response, invite)).to eq("Not yet responded to invitation")
+      end
+    end
+  end
+
+  describe "#specific_proposal_statuses" do
+    let(:statuses) do
+      [["Draft", 0], ["Submitted", 1], ["Initial review", 2],
+       ["Revision requested", 3], ["Revision submitted", 4],
+       ["In progress", 5], ["Decision pending", 6], ["Decision email sent", 7], ["Revision requested spc", 10],
+       ["Revision submitted spc", 11], ["In progress spc", 12], ["Shortlisted", 13]]
+    end
+    it "retunrs the specific statuses" do
+      expect(specific_proposal_statuses).to match_array(statuses)
     end
   end
 end
