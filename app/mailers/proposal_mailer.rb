@@ -12,6 +12,7 @@ class ProposalMailer < ApplicationMailer
 
   def staff_send_emails
     @email = params[:email_data]
+    preview_placeholders
     @organizer = params[:organizer]
     mail_attachments
     send_mails
@@ -19,6 +20,7 @@ class ProposalMailer < ApplicationMailer
 
   def new_staff_send_emails
     @email = params[:email_data]
+    preview_placeholders
     @organizer = params[:organizer]
     mail_attachments
     new_send_mails
@@ -72,5 +74,32 @@ class ProposalMailer < ApplicationMailer
         content: file.blob.download
       }
     end
+  end
+
+  def preview_placeholders
+    subject_placeholder
+    body_placeholders
+  end
+
+  def subject_placeholder
+    template_subject = @email&.subject
+    return if template_subject.blank?
+
+    placeholder = { "[PROPOSAL NUMBER]" => @email.proposal&.code }
+    placeholder.each { |k, v| template_subject.gsub!(k, v) }
+  end
+
+  def body_placeholders
+    @template_body = @email&.body
+    return if @template_body.blank?
+
+    placing_holders
+  end
+
+  def placing_holders
+    placeholders = { "[WORKSHOP CODE]" => @email.proposal&.code,
+                     "[WORKSHOP TITLE]" => @email.proposal&.title,
+                     "[INSERT DATES]" => @email.proposal&.applied_date.to_s }
+    placeholders.each { |k, v| @template_body.gsub!(k, v) }
   end
 end
