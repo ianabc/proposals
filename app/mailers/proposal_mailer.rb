@@ -7,7 +7,7 @@ class ProposalMailer < ApplicationMailer
 
     attachments["#{@proposal.code}-proposal.pdf"] = proposal_pdf
 
-    mail(to: email, subject: "BIRS Proposal #{@proposal.code}: #{@proposal.title}")
+    proposal_mail(email)
   end
 
   def staff_send_emails
@@ -25,6 +25,15 @@ class ProposalMailer < ApplicationMailer
   end
 
   private
+
+  def proposal_mail(email)
+    if @proposal.submitted?
+      mail(to: email, subject: "BIRS Proposal #{@proposal.code}: #{@proposal.title}",
+           cc: @proposal.birs_emails)
+    else
+      mail(to: email, subject: "BIRS Proposal #{@proposal.code}: #{@proposal.title}")
+    end
+  end
 
   def new_send_mails
     email_address = params[:email]

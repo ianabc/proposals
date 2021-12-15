@@ -1,5 +1,6 @@
 class Location < ApplicationRecord
   validates :name, :city, :country, :code, presence: true
+  validates :code, uniqueness: true
   has_many :proposal_type_locations, dependent: :destroy
   has_many :proposal_types, through: :proposal_type_locations
   has_many :proposal_locations, dependent: :destroy
@@ -20,15 +21,7 @@ class Location < ApplicationRecord
   def num_weeks
     return 0 if start_date.blank? || end_date.blank?
 
-    weeks = (end_date.to_time - start_date.to_time).seconds.in_weeks.to_i.abs
-    return weeks if exclude_dates.blank?
-
-    remove_excluded_dates(weeks)
-  end
-
-  def remove_excluded_dates(weeks)
-    exclude_dates.delete("")
-    weeks - exclude_dates.count
+    (end_date.to_time - start_date.to_time).seconds.in_weeks.to_i.abs
   end
 
   def excluded_dates
@@ -63,7 +56,6 @@ class Location < ApplicationRecord
     date = Date.parse(ds)
     errors.add(field, "#{ds} must be after Start Date") if date < start_date
     errors.add(field, "#{ds} must be before End Date") if date > end_date
-    
   rescue Date::Error
     errors.add(field, "#{ds} is not a valid date string.")
   end

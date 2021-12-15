@@ -11,6 +11,8 @@ class ProposalFiltersQuery
     @result = filter_by_subject_area(params[:subject_area])
     @result = filter_by_proposal_type(params[:proposal_type])
     @result = filter_by_status(params[:status])
+    @result = filter_by_location(params[:location])
+    @result = filter_by_outcome(params[:outcome])
 
     @result
   end
@@ -47,5 +49,17 @@ class ProposalFiltersQuery
       r << @result.search_proposal_status(status).sort_by { |p| p.code || '' }
     end
     @result = r.flatten
+  end
+
+  def filter_by_location(location)
+    return @result if location.blank?
+
+    @result.search_proposal_location(location)
+  end
+
+  def filter_by_outcome(outcome)
+    return @result if outcome.blank?
+
+    @result.search_proposal_outcome(outcome)
   end
 end
