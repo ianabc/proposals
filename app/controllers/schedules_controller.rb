@@ -93,7 +93,8 @@ class SchedulesController < ApplicationController
   end
 
   def update_proposal_applied_date(proposal_code, date)
-    Proposal.find(proposal_code)&.update(applied_date: date)
+    proposal = Proposal.find(proposal_code)
+    proposal.update(applied_date: date) if proposal.present?
   end
 
   def run_params

@@ -86,7 +86,6 @@
                             <% end %>
                           </div>
                         </div>
-                        </div>
                         <% if @current_user&.staff_member? %>
                           <div>
                             <%= label_tag :assigned_location_id %>
@@ -100,7 +99,11 @@
                           <div class="mb-3">
                             <%= f.text_field :assigned_size, class: 'form-control w-25', disabled: true, value: @proposal.assigned_size %>
                           </div>
-                           <div>
+                          <div class="mb-3">  
+                            <%= label_tag :applied_date %>
+                            <%= f.text_field :applied_date, class: 'form-control w-25', disabled: true, value: @proposal.applied_date %>
+                          </div>
+                          <div>
                             <%= label_tag :assigned_date %>
                           </div>
                           <div class="mb-3">
@@ -125,7 +128,7 @@
                           <%= f.select :year, options_for_select(proposal_type_year(@proposal.proposal_type),  @proposal.year), {}, disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                         </div>
                         <div class="mb-3 row">
-                          <h3 class="form-section">Subject Areas</h4>
+                          <h3 class="form-section">Subject Areas</h3>
                           <div class="col-6 mt-2">
                             <label class="required">Subject Area</label>
                             <%= f.select :subject_id, options_for_select(subjects_area, @proposal.subject&.id), { include_blank: '' }, disabled: action, class: "form-select", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
@@ -147,6 +150,7 @@
                               <%= f.select :ams_subjects, options_for_select(ams_subjects_code, proposal_ams_subjects_code(@proposal, 'code2')), { include_blank: '' }, disabled: action, class: "form-select", name:'ams_subjects[code2]', data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                             </div>
                           </div>
+                        </div>
                           <div>
                             <% if params[:action] == 'edit' %>
                             <%= render partial: 'lead_organizer' %>
@@ -316,7 +320,6 @@
                             <button id="changeTab" class="p-2 btn btn-primary" data-action='click->submit-proposals#nextTab'>Next</button>
                           </div>
                         </div>
-                      </div>
 
                       <div class="tab-pane <%= active_tab(@proposal, 'two', params[:tab]) %> overflow-hidden" id="tab-2" role="tabpanel">
                         <div class="mb-3">
