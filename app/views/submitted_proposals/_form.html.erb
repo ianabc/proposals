@@ -99,6 +99,10 @@
                           <div class="mb-3">
                             <%= select_tag :assigned_size, options_for_select(['', 'Full', 'Half'], @proposal.assigned_size), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
                           </div>
+                          <div class="mb-3">  
+                            <%= label_tag :applied_date %>
+                            <%= f.text_field :applied_date, class: 'form-control w-25', disabled: true, value: @proposal.applied_date %>
+                          </div>
                           <div class="mb-3">
                             <%= label_tag :Assigned_date %>
                             <%= select_tag :assigned_date, options_for_select(assigned_dates(@proposal.assigned_location), @proposal.assigned_date), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
