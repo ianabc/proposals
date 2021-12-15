@@ -299,4 +299,9 @@ module ProposalsHelper
   def proposal_version(version, proposal)
     ProposalVersion.find_by(version: version, proposal_id: proposal.id)
   end
+
+  def proposal_outcome
+    outcome = [%w[Approved Approved], %w[Rejected Rejected], %w[Declined Declined]]
+    outcome.map { |disp, _value| disp }
+  end
 end
