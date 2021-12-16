@@ -12,7 +12,9 @@ class ProposalMailer < ApplicationMailer
 
   def staff_send_emails
     @email = params[:email_data]
-    preview_placeholders
+
+    preview_placeholders if @email.proposal.decision_email_sent?
+
     @organizer = params[:organizer]
     mail_attachments
     send_mails
@@ -20,7 +22,7 @@ class ProposalMailer < ApplicationMailer
 
   def new_staff_send_emails
     @email = params[:email_data]
-    preview_placeholders
+    preview_placeholders if @email.proposal.decision_email_sent?
     @organizer = params[:organizer]
     mail_attachments
     new_send_mails
@@ -77,6 +79,8 @@ class ProposalMailer < ApplicationMailer
   end
 
   def preview_placeholders
+    return if @email.proposal&.code.blank?
+
     subject_placeholder
     body_placeholders
   end
