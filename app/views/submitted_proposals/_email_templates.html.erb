@@ -10,12 +10,12 @@
           <div class="mb-3">
             <div class="mb-3">
               <label>CC</label>
-              <input type="text" name="cc_email" class="form-control">
+              <input type="text" name="cc_email" class="form-control" value="birs@birs.ca">
               <small>This text field supports a list of cc emails i.e. birs@example.com, noreply@example.com..</small>
             </div>
             <div class="mb-3">
               <label>BCC</label>
-              <input type="text" name="bcc_email" class="form-control" value="<%= current_user.email %>">
+              <input type="text" name="bcc_email" class="form-control" value="<%= current_user.email %>, birs-director@birs.ca, projects@birs.ca">
               <small>This text field supports a list of bcc emails i.e. birs@example.com, noreply@example.com..</small>
             </div>
             <div class="mb-3">
