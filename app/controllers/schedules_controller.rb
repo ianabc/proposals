@@ -69,9 +69,16 @@ class SchedulesController < ApplicationController
   end
 
   def download_csv
-    return if @schedule_run.blank? || params[:case_num].empty?
+    if @schedule_run.blank?
+      redirect_to new_schedule_path, alert: "Schedule run is empty"
+      return
+    end
 
-    case_num = params[:case_num].to_i
+    case_num = if params[:case_num].blank?
+                 1
+               else
+                 params[:case_num].to_i
+               end
     send_data @schedule_run.to_csv(case_num), filename: "optimized_scheduled_proposals.csv"
   end
 
