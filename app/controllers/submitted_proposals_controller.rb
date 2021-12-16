@@ -438,7 +438,7 @@ class SubmittedProposalsController < ApplicationController
 
   def send_email_proposals
     add_files
-    organizers_email = @proposal.invites.where(invited_as: 'Organizer')&.pluck(:email)
+    organizers_email = @proposal.invites.where(invited_as: 'Organizer', status: :confirmed)&.pluck(:email)
     @email.new_email_organizers(organizers_email) if @email.save
     @errors << @email.errors.full_messages unless @email.errors.empty?
   end
