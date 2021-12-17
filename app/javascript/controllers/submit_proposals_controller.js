@@ -129,8 +129,4 @@ export default class extends Controller {
       this.latexBibliographyTarget.classList.remove("hidden")
     }
   }
-
-  saveAssignedDate () {
-    alert('fick')
-  }
 }
