@@ -105,4 +105,8 @@ module SubmittedProposalsHelper
     "#{log.user&.fullname} invited #{log.data['firstname']&.last}
     #{log.data['lastname']&.last} #{log.data['email']&.last} as #{log.data['invited_as']&.last} at #{log&.created_at}"
   end
+
+  def seleted_assigned_date(proposal)
+    proposal.assigned_date ? "#{proposal.assigned_date.to_s} - #{(proposal.assigned_date + 5.days).to_s}" : ''
+  end
 end
