@@ -103,11 +103,12 @@ class ProposalMailer < ApplicationMailer
   def placing_holders
     placeholders = { "[WORKSHOP CODE]" => @email.proposal&.code,
                      "[WORKSHOP TITLE]" => @email.proposal&.title,
-                     "[INSERT DATES]" => workshop_date_range }
+                     "[INSERT ASSIGNED DATES]" => workshop_date_range(@email.proposal&.assigned_date),
+                     "[INSERT APPLIED DATES]" => workshop_date_range(@email.proposal&.applied_date) }
     placeholders.each { |k, v| @template_body.gsub!(k, v) }
   end
 
-  def workshop_date_range
-    @email.proposal&.applied_date ? "#{@email.proposal.applied_date} to #{@email.proposal.applied_date + 5.days}" : ''
+  def workshop_date_range(date)
+    date ? "#{date} to #{date + 5.days}" : ''
   end
 end
