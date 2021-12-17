@@ -76,7 +76,10 @@ export default class extends Controller {
     }
     else {
       let _this = this
-      $.post(`/emails/email_types`, function(data) {
+      $.post(`/emails/email_types`, { ids: proposalIds }, function(data) {
+        $.each(data.emails, function(index, email) {
+          $('#to_organizer_emails').append(`<span class="ms-5">${index + 1}. ${email} </span><br>`)
+        })
         const selectBox = _this.templatesTarget;
         selectBox.innerHTML = '';
         const opt = document.createElement('option');

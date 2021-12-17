@@ -1,5 +1,6 @@
 class EmailsController < ApplicationController
   load_and_authorize_resource
+  before_action :set_organizer_emails, only: %i[email_types]
 
   def new
     @email_templates = EmailTemplate.all
@@ -20,7 +21,7 @@ class EmailsController < ApplicationController
     email_templates << EmailTemplate.where(email_type: %w[approval_type reject_type decision_email_type])
     templates = []
     templates = make_templates(email_templates, templates) if email_templates
-    render json: { email_templates: templates }, status: :ok
+    render json: { email_templates: templates, emails: @organizer_emails }, status: :ok
   end
 
   private
@@ -40,5 +41,11 @@ class EmailsController < ApplicationController
     email_type = email_type.split.join('_') if email_type == 'revision'
     email_type = email_type.split.join('_') if email_type == 'revision spc'
     email_type
+  end
+
+  def set_organizer_emails
+    proposals = Proposal.where(id: params[:ids])
+    organizer_emails = Invite.where(proposal_id: params[:ids], invited_as: 'Organizer', status: :confirmed).pluck(:email)
+    @organizer_emails = proposals.map(&:lead_organizer).pluck(:email) + organizer_emails
   end
 end

@@ -9,6 +9,13 @@
         <div class="modal-body text-justify" style="text-align: justify;" >
           <div class="mb-3">
             <div class="mb-3">
+              <label for="to_organizer_emails">To:</label>
+              <div id="to_organizer_emails"></div>
+              <br>
+              <!-- <input type="text" name="to_organizer_emails" id="to_organizer_emails" class="form-control"> -->
+              <!-- <small>This text field supports a list of Organizors emails i.e. birs@example.com, noreply@example.com..</small> -->
+            </div>
+            <div class="mb-3">
               <label>CC</label>
               <input type="text" name="cc_email" class="form-control" value="birs@birs.ca">
               <small>This text field supports a list of cc emails i.e. birs@example.com, noreply@example.com..</small>
@@ -20,11 +27,11 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Subject</label>
-              <input type="text" name="subject" class="form-control w-50" id="birs_email_subject" required="true">
+              <input type="text" name="subject" class="form-control" id="birs_email_subject" required="true">
             </div>
             <div class="mb-3">
               <label class='form-label required'>Template</label>
-              <%= select_tag :templates, options_for_select([]), class: 'form-select w-25', data: {'action': 'click->submitted-proposals#emailTemplate', 'submitted-proposals-target': 'templates'}, required: true %>
+              <%= select_tag :templates, options_for_select([]), class: 'form-select', data: {'action': 'change->submitted-proposals#emailTemplate', 'submitted-proposals-target': 'templates'}, required: true %>
             </div>
             <div class="mb-3">
               <p>Attachments</p>
