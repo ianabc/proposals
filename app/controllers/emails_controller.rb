@@ -46,6 +46,6 @@ class EmailsController < ApplicationController
   def set_organizer_emails
     proposals = Proposal.where(id: params[:ids])
     organizer_emails = Invite.where(proposal_id: params[:ids], invited_as: 'Organizer', status: :confirmed).pluck(:email)
-    @organizer_emails = organizer_emails + proposals.map(&:lead_organizer).pluck(:email)
+    @organizer_emails = proposals.map(&:lead_organizer).pluck(:email) + organizer_emails
   end
 end
