@@ -21,7 +21,7 @@
           <div class="card" style="background: #f4f7fc">
             <div class="card-body">
             <%= form_with(url: submit_proposals_path(proposal: @proposal.id), html: {'data-turbo':false, id: 'submit_proposal' }) do  |f| %>
-              <div data-controller="submit-proposals proposal-form nested-invites"
+              <div data-controller="submit-proposals proposal-form nested-invites auto-save-proposal"
                 data-submit-proposals-proposal-type-id-value="<%= @proposal.proposal_type.id %>"
                 data-submit-proposals-proposal-value="<%= @proposal.id %>"data-nested-invites-wrapper-selector-value=".nested-invites-wrapper"
                 data-nested-invites-max-participant-value="<%= @proposal.proposal_type.participant %>"
@@ -29,6 +29,7 @@
                 data-nested-invites-organizer-value="<%= confirmed_participants(@proposal.id, 'Organizer').count %>"
                 data-nested-invites-participant-value="<%= confirmed_participants(@proposal.id, 'Participant').count %>" 
               >
+                <input type="hidden" id="proposal_id" name="proposal_id" value="<%= @proposal.id %>">
                 <div class="col-12 col-lg-12">
                   <div class="tab">
                     <ul id="tabs" class="nav nav-tabs row" role="tablist">
@@ -97,7 +98,7 @@
                             <%= label_tag :assigned_size %>
                           </div>
                           <div class="mb-3">
-                            <%= select_tag :assigned_size, options_for_select(['', 'Full', 'Half'], @proposal.assigned_size), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <%= select_tag :assigned_size, options_for_select(['', 'Full', 'Half'], @proposal.assigned_size), class: "form-select w-25", data: {'action': 'change->auto-save-proposal#onBlur'} %>
                           </div>
                           <div class="mb-3">  
                             <%= label_tag :applied_date %>
@@ -105,15 +106,15 @@
                           </div>
                           <div class="mb-3">
                             <%= label_tag :Assigned_date %>
-                            <%= select_tag :assigned_date, options_for_select(assigned_dates(@proposal.assigned_location), @proposal.assigned_date), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <%= select_tag :assigned_date, options_for_select(assigned_dates(@proposal.assigned_location), seleted_assigned_date(@proposal)), disabled: action, class: "form-select w-25", data: {'action': 'change->auto-save-proposal#onBlur'} %>
                           </div>
                           <div class="mb-3">
                             <%= label_tag :Same_week_as %>
-                            <%= select_tag :same_week_as, options_for_select(approved_proposals(@proposal), @proposal.same_week_as), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <%= select_tag :same_week_as, options_for_select(approved_proposals(@proposal), @proposal.same_week_as), disabled: action, class: "form-select w-25", data: {'action': 'change->auto-save-proposal#onBlur'} %>
                           </div>
                           <div class="mb-3">
                             <%= label_tag :week_after %>
-                            <%= select_tag :week_after, options_for_select(approved_proposals(@proposal), @proposal.week_after), disabled: action, class: "form-select w-25", data: {'action': 'focus->auto-save-proposal#onFocus blur->auto-save-proposal#onBlur'} %>
+                            <%= select_tag :week_after, options_for_select(approved_proposals(@proposal), @proposal.week_after), disabled: action, class: "form-select w-25", data: {'action': 'change->auto-save-proposal#onBlur'} %>
                           </div>
                         <% end %>
                         <div class="mb-3">
