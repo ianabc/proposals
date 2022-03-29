@@ -17,7 +17,7 @@ class Invite < ApplicationRecord
   validate :deadline_not_in_past, :proposal_title
   validate :one_invite_per_person, on: :create
   after_commit :log_activity
-
+  default_scope { order(created_at: :asc) }
   enum status: { pending: 0, confirmed: 1, cancelled: 2 }
   enum response: { yes: 0, maybe: 1, no: 2 }
 

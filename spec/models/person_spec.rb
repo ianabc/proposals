@@ -130,15 +130,14 @@ RSpec.describe Person, type: :model do
     context 'When region is blank' do
       let(:person) { create(:person) }
       before do
-        person.update(region: nil, country: 'Canada')
+        person.update(region: nil, country: 'Turkey')
       end
       it '' do
-        expect(person.errors.full_messages).to eq(["Department can't be blank",
-                                                   "Missing data:  You must select a Province"])
+        expect(person.errors.full_messages).to eq(["Department can't be blank"])
       end
     end
     context 'When State is present' do
-      let(:person) { create(:person, country: 'Canada') }
+      let(:person) { create(:person, country: 'Turkey') }
       before do
         person.update(state: "xyz", province: nil)
       end
@@ -147,7 +146,7 @@ RSpec.describe Person, type: :model do
       end
     end
     context 'When Province is present' do
-      let(:person) { create(:person, country: 'United States of America') }
+      let(:person) { create(:person, country: 'Egypt') }
       before do
         person.update(state: nil, province: "xyz")
       end
