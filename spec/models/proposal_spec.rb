@@ -54,4 +54,25 @@ RSpec.describe Proposal, type: :model do
       expect(proposal.lead_organizer).to eq(proposal.people.last)
     end
   end
+
+  describe '#subjects' do
+    context 'When subject is not present' do
+      let(:proposal) { build :proposal, is_submission: true, subject: nil }
+
+      it 'please select a subject area' do
+        proposal.save
+        expect(proposal.errors.full_messages).to include('Subject area: please select a subject area')
+      end
+    end
+
+    context 'When ams_subject code count is less than 2' do
+      let(:proposal) { build :proposal, is_submission: true }
+      let!(:proposal_ams_subject) { create :proposal_ams_subject, proposal: proposal }
+
+      it 'please select 2 AMS Subjects' do
+        proposal.save
+        expect(proposal.errors.full_messages).to include('Ams subjects: please select 2 AMS Subjects')
+      end
+    end
+  end
 end

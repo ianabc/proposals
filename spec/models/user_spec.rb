@@ -18,7 +18,7 @@ RSpec.describe User, type: :model do
   describe 'associations' do
     it { should have_many(:user_roles).dependent(:destroy) }
     it { should have_many(:roles).through(:user_roles) }
-    it { should have_one(:person) }
+    # it { should have_one(:person) }
     it { should have_many(:feedback) }
   end
 

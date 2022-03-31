@@ -27,11 +27,11 @@ RSpec.describe 'EditFlowService' do
     end
   end
 
-  it 'accepts a proposal' do
+  it 'accept a proposal' do
     expect(@efs.class).to eq(EditFlowService)
   end
 
-  it "assigns the lead organizer's country code" do
+  it "assigns country code of lead organizer" do
     country = @proposal.lead_organizer.country
     code = Country.find_country_by_name(country).alpha2
     expect(@efs.proposal_country.alpha2).to eq(code)
@@ -43,7 +43,7 @@ RSpec.describe 'EditFlowService' do
       expect(@efs.ams_subject_code(:first)).to eq('123-XX')
     end
 
-    it 'raises an exception if the proposal has a missing AMS subject' do
+    it 'raises an exception if proposal has a missing AMS subject' do
       new_efs = EditFlowService.new(create(:proposal))
       expect { new_efs.ams_subject_code(:first) }.to raise_error(RuntimeError)
     end
@@ -56,7 +56,7 @@ RSpec.describe 'EditFlowService' do
       expect(@efs.proposal_country).to eq(country)
     end
 
-    it 'raises a RunTime error if organizer has no country' do
+    it 'raises a RunTime error if there is no country for the organizer' do
       @proposal.lead_organizer.update_columns(country: nil)
 
       expect { @efs.proposal_country }.to raise_error(RuntimeError)
