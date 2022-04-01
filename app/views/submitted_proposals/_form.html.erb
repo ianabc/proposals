@@ -92,7 +92,7 @@
                             <%= label_tag :assigned_location_id %>
                           </div>
                           <div class="mb-3">
-                            <%= f.text_field :assigned_location_id, class: 'form-control w-25', disabled: true, value: @proposal.assigned_location&.code %>
+                            <%= f.text_field :assigned_location_id, class: 'form-control w-25', value: @proposal.assigned_location&.code %>
                           </div>
                           <div>
                             <%= label_tag :assigned_size %>
@@ -102,7 +102,7 @@
                           </div>
                           <div class="mb-3">  
                             <%= label_tag :applied_date %>
-                            <%= f.text_field :applied_date, class: 'form-control w-25', disabled: true, value: @proposal.applied_date %>
+                            <%= f.text_field :applied_date, class: 'form-control w-25', value: @proposal.applied_date %>
                           </div>
                           <div class="mb-3">
                             <%= label_tag :Assigned_date %>
