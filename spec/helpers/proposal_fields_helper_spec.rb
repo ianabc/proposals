@@ -46,14 +46,7 @@ RSpec.describe ProposalFieldsHelper, type: :helper do
 
   describe "#multichoice_answer" do
     let(:proposal) { create(:proposal) }
-
-    let(:field) { create(:proposal_field, :multi_choice_field) }
-
     let(:proposal) { create(:proposal) }
-    let(:proposal) { create(:proposal) }
-
-    let(:field) { create(:proposal_field, :multi_choice_field) }
-
     let(:field) { create(:proposal_field, :multi_choice_field) }
 
     context 'when multichoice filed has answer' do
@@ -103,6 +96,31 @@ RSpec.describe ProposalFieldsHelper, type: :helper do
       loc = "#{field.location&.name} (#{field.location&.city}, #{field.location&.country})"
       location = "#{loc} - Based question"
       expect(location_name(field)).to eq(location)
+    end
+  end
+
+  describe '#answer' do
+    let(:locations) { create_list(:location, 4) }
+    let!(:proposal_type) { create(:proposal_type, locations: locations) }
+    let!(:proposal) { create(:proposal, proposal_type: proposal_type) }
+    let!(:field) { create(:proposal_field, :multi_choice_field) }
+
+    context 'when proposal is present' do
+      let!(:answer_obj) { create(:answer, proposal: proposal, proposal_field: field) }
+      
+      it 'It should return an anwser containing proposal and field' do
+        expect(answer(field, proposal)).to be_present
+      end
+      it 'expecting a string response' do 
+        expect(answer(field, proposal)).to be_a(String)
+      end
+    end
+
+    context 'when proposal is not present' do
+      proposal = nil
+      it 'It should return an anser containing proposal and field' do
+        expect(answer(field, proposal)).not_to be_present
+      end
     end
   end
 end
