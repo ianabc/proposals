@@ -69,7 +69,7 @@ class BookletPdfService
 
     year = proposal&.year || (Date.current.year + 2)
     title_page(year)
-
+    
     if @table == "toc"
       proposal_table_of_content
     else
@@ -175,6 +175,7 @@ class BookletPdfService
   end
 
   def proposals_heading
+    multiple_booklet(table, @proposal)
     @proposals = @proposals_ids.split(",").first.to_i
     @proposals_ids.split(',').each do |id|
       proposal = Proposal.find_by(id: id)
@@ -190,7 +191,8 @@ class BookletPdfService
     @text << "\n\\subsection*{#{proposal.proposal_type&.name} }\n\n"
     @text << participant_confirmed_count
     @text << lead_organizer_info
-    all_text = ProposalPdfService.new(@current_proposal.id, @temp_file, 'all', @user).booklet_content
+    proposals_heading
+    all_text = ProposalPdfService.new(@proposal.id, @temp_file, 'all', @user).booklet_content
     @text << all_text if all_text.present?
   end
 
