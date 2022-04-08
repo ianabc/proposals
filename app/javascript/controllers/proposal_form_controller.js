@@ -95,20 +95,6 @@ export default class extends Controller {
       })
   }
 
-  latix () {
-    let data = event.target.dataset
-    let _this = this
-    let textField
-    for (var i = 0; i < this.textFieldTargets.length; i++) {
-      textField = this.textFieldTargets [`${i}`]
-      if(textField.dataset.value === data.value) {
-        $.post("/proposals/" + data.propid + "/latix",
-          { latix: textField.value },
-          function() {});
-      }
-    }
-  }
-
   latex () {
     let data = event.target.dataset
     let _this = this
