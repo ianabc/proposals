@@ -19,8 +19,8 @@ class ProposalPdfService
   def generate_pdf_with_reviews
     @input << "\\subsection*{Reviews:}\n\n\n"
     return unless proposal.reviews.first.files.attached?
-    latix, file_errors = add_review_attachments(proposal.reviews.first, @input, proposal, file_errors)
-    @input = latix if latix.present?
+    latex, file_errors = add_review_attachments(proposal.reviews.first, @input, proposal, file_errors)
+    @input = latex if latex.present?
   end
 
   def generate_latex_file
