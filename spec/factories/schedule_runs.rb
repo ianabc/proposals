@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :schedule_run do
     start_time { Time.current }
-    end_time { Time.current + 1.week }
+    end_time { 1.week.from_now }
     startweek { Date.current }
     pid { 5 }
     weeks { 2 }

@@ -4,9 +4,7 @@
 module FactoryHelpers
   def set_valid_country
     country = Faker::Address.country
-    while Country.find_country_by_name(country).nil?
-      country = Faker::Address.country
-    end
+    country = Faker::Address.country while Country.find_country_by_name(country).nil?
     country
   end
 end

@@ -24,7 +24,7 @@ class FeedbacksController < ApplicationController
   def update
     raise CanCan::AccessDenied unless can? :manage, @feedback
 
-    @feedback.toggle!(:reviewed)
+    @feedback.toggle(:reviewed)
     redirect_to feedback_path
   end
 
