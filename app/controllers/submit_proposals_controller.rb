@@ -19,12 +19,11 @@ class SubmitProposalsController < ApplicationController
     else
       session[:is_submission] = @proposal.is_submission = @submission.final?
       if @proposal.is_submission && @submission.errors?
-          flash[:alert] = []
+        flash[:alert] = []
         @submission.error_messages.each do |msg|
-          flash[:alert] << "#{msg}"
+          flash[:alert] << "#{msg}.to_s"
           flash[:alert]
         end
-
         redirect_to edit_proposal_path(@proposal)
         return
       end
