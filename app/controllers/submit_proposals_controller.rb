@@ -19,8 +19,11 @@ class SubmitProposalsController < ApplicationController
     else
       session[:is_submission] = @proposal.is_submission = @submission.final?
       if @proposal.is_submission && @submission.errors?
-        redirect_to edit_proposal_path(@proposal), alert: "Your submission has
-            errors: #{@submission.error_messages}.".squish
+        flash[:alert] = []
+        @submission.error_messages.each do |msg|
+          flash[:alert] << "#{msg}.to_s"
+        end
+        redirect_to edit_proposal_path(@proposal)
         return
       end
       unless @proposal.is_submission
