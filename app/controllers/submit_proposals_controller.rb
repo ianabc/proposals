@@ -22,7 +22,6 @@ class SubmitProposalsController < ApplicationController
         flash[:alert] = []
         @submission.error_messages.each do |msg|
           flash[:alert] << "#{msg}.to_s"
-          flash[:alert]
         end
         redirect_to edit_proposal_path(@proposal)
         return
