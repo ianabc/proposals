@@ -105,7 +105,8 @@ RSpec.describe "/schedules", type: :request do
       let(:schedule) { create(:schedule, schedule_run_id: schedule_run.id) }
 
       let(:output) do
-        '[Sun, 08 Jan 2023, Sun, 15 Jan 2023, Sun, 22 Jan 2023, Sun, 29 Jan 2023, Sun, 05 Feb 2023, Sun, 12 Feb 2023, Sun, 19 Feb 2023]'
+        '[Sun, 08 Jan 2023, Sun, 15 Jan 2023, Sun, 22 Jan 2023, Sun, 29 Jan 2023, Sun, 05 Feb 2023, Sun, 12 Feb 2023,
+        Sun, 19 Feb 2023]'
       end
 
       it 'returns empty array' do
