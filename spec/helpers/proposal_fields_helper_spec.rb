@@ -107,11 +107,11 @@ RSpec.describe ProposalFieldsHelper, type: :helper do
 
     context 'when proposal is present' do
       let!(:answer_obj) { create(:answer, proposal: proposal, proposal_field: field) }
-      
+
       it 'It should return an anwser containing proposal and field' do
         expect(answer(field, proposal)).to be_present
       end
-      it 'expecting a string response' do 
+      it 'expecting a string response' do
         expect(answer(field, proposal)).to be_a(String)
       end
     end

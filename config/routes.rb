@@ -56,6 +56,7 @@ Rails.application.routes.draw do
       post :export_scheduled_proposals
     end
   end
+  delete '/schedule_runs/:id', to: 'schedule_runs#destroy', as: 'destroy_schedule_runs'
 
   get :invite, to: 'invites#show'
   get 'cancelled' => 'invites#cancelled'

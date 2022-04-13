@@ -1,5 +1,5 @@
 class ScheduleRun < ApplicationRecord
-  has_many :schedules
+  has_many :schedules, dependent: :destroy
   belongs_to :location
 
   validates :runs, :cases, :year, :location, presence: true
