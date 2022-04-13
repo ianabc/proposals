@@ -9,5 +9,9 @@ FactoryBot.define do
     co_organizer { 3 }
     participant_description { Faker::Lorem.paragraph }
     organizer_description { Faker::Lorem.paragraph }
+    max_no_of_preferred_dates { 2 }
+    min_no_of_preferred_dates { 2 }
+    max_no_of_impossible_dates { 2 }
+    min_no_of_impossible_dates { 2 }
   end
 end

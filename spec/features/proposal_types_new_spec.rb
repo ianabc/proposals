@@ -28,6 +28,10 @@ RSpec.feature "Proposal Type new", type: :feature do
     fill_in 'proposal_type_code', with: '2021xx2'
     fill_in 'proposal_type_open_date', with: Date.current
     fill_in 'proposal_type_closed_date', with: Date.current + 1.week
+    fill_in 'proposal_type_max_no_of_preferred_dates', with: 2
+    fill_in 'proposal_type_min_no_of_preferred_dates', with: 2
+    fill_in 'proposal_type_max_no_of_impossible_dates', with: 2
+    fill_in 'proposal_type_min_no_of_impossible_dates', with: 2
     fill_in 'proposal_type_organizer_description', with: 'A long text passage which describes organizers'
     fill_in 'proposal_type_participant_description', with: 'A long text paragraph which describes participants'
     select Location.first.name

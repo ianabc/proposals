@@ -35,11 +35,11 @@ RSpec.feature "Locations show", type: :feature do
   end
 
   scenario "there is a Start Date field containing the start date" do
-    expect(find_by_id('location_start_date').text).to eq("#{@location.start_date}")
+    expect(find_by_id('location_start_date').text).to eq(@location.start_date.to_s)
   end
 
   scenario "there is a End Date field containing the end date" do
-    expect(find_by_id('location_end_date').text).to eq("#{@location.end_date}")
+    expect(find_by_id('location_end_date').text).to eq(@location.end_date.to_s)
   end
 
   scenario "click on edit" do

@@ -89,21 +89,20 @@ RSpec.feature "Locations new", type: :feature do
       fill_in 'location_end_date', with: end_date
       click_button 'Create New Location'
 
-      expect(page.body).to have_text('Start date 2023-06-04 - cannot be greater
-                                      than End Date 2023-05-19'.squish)
+      expect(page.body).to have_text("Start date #{@program_year}-06-04 - cannot be greater
+                                      than End Date #{@program_year}-05-19".squish)
     end
 
     scenario "start date equal to end date" do
       start_date = Date.parse("#{@program_year}-06-04")
       end_date = Date.parse("#{@program_year}-06-04")
-
       fill_in 'location_start_date', with: start_date
       fill_in 'location_end_date', with: end_date
 
       click_button 'Create New Location'
 
-      expect(page.body).to have_text('Start date 2023-06-04 - cannot be same as
-                                      End Date 2023-06-04'.squish)
+      expect(page.body).to have_text("Start date #{@program_year}-06-04 - cannot be same as
+                                      End Date #{@program_year}-06-04".squish)
     end
 
     scenario "start date is a Sunday" do
