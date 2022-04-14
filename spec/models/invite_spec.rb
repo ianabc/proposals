@@ -25,11 +25,29 @@ RSpec.describe Invite, type: :model do
       invite = build(:invite, invited_as: '')
       expect(invite.valid?).to be_falsey
     end
+
+    it "requires an invite as" do
+      invite = build(:invite, deadline_date: '')
+      expect(invite.valid?).to be_falsey
+    end
   end
 
   describe 'associations' do
     it { should belong_to(:proposal) }
     it { should belong_to(:person) }
+  end
+
+  describe '#email_downcase' do
+    let(:invite) { create(:invite, invited_as: "Organizer") }
+    it "downcase email if it contains uppercase" do
+      invite.update_column(:email, 'TEST@Test.com')
+      expect(invite.email_downcase).to eq 'test@test.com'
+    end
+
+    it "downcase email if it contains no uppercase" do
+      invite.update_column(:email, 'test@test.com')
+      expect(invite.email_downcase).to eq nil
+    end
   end
 
   describe '#invited_as?' do

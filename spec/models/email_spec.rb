@@ -17,6 +17,7 @@ RSpec.describe Email, type: :model do
 
   describe 'associations' do
     it { should belong_to(:proposal) }
+    it { should have_many_attached(:files) }
   end
 
   describe '#update_status' do
@@ -26,7 +27,7 @@ RSpec.describe Email, type: :model do
       before do
         proposal.update(status: 'revision_submitted')
       end
-      it '' do
+      it 'Expecting required status according to condition' do
         expect(proposal.reload.status).to eq('revision_submitted')
         expect(birs_email.update_status(proposal, 'Revision')).to be_truthy
       end
@@ -35,7 +36,7 @@ RSpec.describe Email, type: :model do
       before do
         proposal.update(status: 'revision_submitted_spc')
       end
-      it '' do
+      it 'Expecting required status according to condition' do
         expect(proposal.reload.status).to eq('revision_submitted_spc')
         expect(birs_email.update_status(proposal, 'Revision SPC')).to be_truthy
       end
@@ -44,7 +45,7 @@ RSpec.describe Email, type: :model do
       before do
         proposal.update(status: 'decision_pending', outcome: 'rejected')
       end
-      it '' do
+      it 'Expecting required status according to condition' do
         expect(proposal.reload.status).to eq('decision_pending')
         expect(proposal.reload.outcome).to eq('rejected')
         expect(birs_email.update_status(proposal, 'Reject')).to be_truthy
@@ -54,7 +55,7 @@ RSpec.describe Email, type: :model do
       before do
         proposal.update(status: 'decision_pending', outcome: 'approved')
       end
-      it '' do
+      it 'Expecting required status according to condition' do
         expect(proposal.reload.status).to eq('decision_pending')
         expect(proposal.reload.outcome).to eq('approved')
         expect(birs_email.update_status(proposal, 'Approval')).to be_truthy
@@ -64,12 +65,21 @@ RSpec.describe Email, type: :model do
       before do
         proposal.update(status: 'decision_pending')
       end
-      it '' do
+      it 'Expecting required status according to condition' do
         expect(proposal.reload.status).to eq('decision_pending')
         expect(birs_email.update_status(proposal, 'Decision')).to be_truthy
       end
     end
 
     it { expect(birs_email.update_status(proposal, 'Draft')).to be_falsey }
+  end
+
+  describe '#all_emails' do
+    let(:proposal) { create(:proposal) }
+    let(:birs_email) { create(:birs_email, proposal: proposal) }
+    let(:email) { ['test1@test.com', 'test2@test.com', 'test3@test.com'] }
+    it 'fetching all emails' do
+      expect(birs_email.all_emails(email)).to eq([email])
+    end
   end
 end

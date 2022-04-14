@@ -84,7 +84,8 @@
                       <tr>
                         <td>Number of iterations to run:</td>
                         <td>
-                          <input type="text" name="runs" value="5000000">
+                          <input type="range" min="10000" max="5000000" value="10000" name="runs" id="slider" class="slider-bar-update">
+                          <p>Value: <span id="slider-val"></span></p>
                         </td>
                         <td>
                           <p>As this number increases, the level of optimization increases, as does the time it takes to run. Adding more iterations will not improve optimization past the upper bound for a given data set, but it will increase the time it takes for the run to complete.
