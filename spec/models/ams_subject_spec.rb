@@ -20,5 +20,6 @@ RSpec.describe AmsSubject, type: :model do
     it { should have_many(:proposals).through(:proposal_ams_subjects) }
     it { should have_many(:ams_subject_categories).dependent(:destroy) }
     it { should have_many(:subject_categories).through(:ams_subject_categories) }
+    it { should belong_to(:subject).optional }
   end
 end

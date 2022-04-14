@@ -10,5 +10,6 @@ RSpec.describe Answer, type: :model do
   describe 'associations' do
     it { should belong_to(:proposal) }
     it { should belong_to(:proposal_field) }
+    it { should have_one_attached(:file) }
   end
 end
