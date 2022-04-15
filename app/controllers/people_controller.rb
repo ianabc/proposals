@@ -12,8 +12,7 @@ class PeopleController < ApplicationController
 
   def update
     if @person.update(person_params)
-      flash[:notice] = t('people.update.success')
-      redirect_to new_survey_path(code: params[:code], response: params[:response])
+      redirect_to new_survey_path(code: params[:code], response: params[:response]), notice: t('people.update.success')
     else
       @invited_as = invite&.invited_as
       render :new
