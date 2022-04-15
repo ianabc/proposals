@@ -63,3 +63,13 @@ en:
       not_saved:
         one: "1 error prohibited this %{resource} from being saved:"
         other: "%{count} errors prohibited this %{resource} from being saved:"
+  schedule_runs:
+    destroy:
+      success: "Schedule result is deleted successfully"
+  locations:
+    create:
+      success: "Location was successfully created."
+    destroy:
+      success: "Location was successfully destroyed."
+    update:
+      success: "Location was successfully updated."

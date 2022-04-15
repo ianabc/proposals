@@ -1,6 +1,10 @@
 class ApplicationController < ActionController::Base
   before_action :assign_ability, :set_current_user
 
+  def set_locale
+    I18n.locale = params[:locale] || I18n.default_locale
+  end
+
   def assign_ability
     @ability = Ability.new(current_user)
   end
