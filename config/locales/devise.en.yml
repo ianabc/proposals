@@ -73,3 +73,6 @@ en:
       success: "Location was successfully destroyed."
     update:
       success: "Location was successfully updated."
+  people:
+    update:
+      success: "Thank you. Please continue to complete the Diversity and Inclusivity Survey."
