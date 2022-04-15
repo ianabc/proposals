@@ -25,7 +25,7 @@ class SubmitProposalService
   end
 
   def error_messages
-    @errors.uniq.flatten.join(', ')
+    @errors.uniq.flatten
   end
 
   def final?

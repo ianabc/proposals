@@ -16,7 +16,7 @@ RSpec.describe ScheduleRun, type: :model do
 
     context 'When dates passed is not empty' do
       let(:schedule_run) { create :schedule_run }
-      let(:dates) { ['22-03-2022', '22-03-2022', '22-03-2022', '22-03-2022'] }
+      let(:dates) { %w[22-03-2022 22-03-2022 22-03-2022 22-03-2022] }
       let(:output) { '22-03-2022, 22-03-2022, 22-03-2022, 22-03-2022' }
 
       it 'returns , seperated string of dates' do
@@ -27,25 +27,27 @@ RSpec.describe ScheduleRun, type: :model do
 
   describe '#each_schedule_row' do
     context 'When proposal is blank' do
-      let(:proposal) { create :proposal}
-      let(:schedule) {create :schedule}
-      let(:schedule_run) {create :schedule_run}
-      let(:outcome) {[schedule.week,schedule.proposal,'','']}
+      let(:proposal) { create :proposal }
+      let(:schedule) { create :schedule }
+      let(:schedule_run) { create :schedule_run }
+      let(:outcome) { [schedule.week, schedule.proposal, '', ''] }
 
       it 'returns nothing' do
-        expect(schedule_run.each_schedule_row(schedule,nil)).to eq(outcome)
+        expect(schedule_run.each_schedule_row(schedule, nil)).to eq(outcome)
       end
     end
 
     context 'When proposal is not blank' do
-      let(:proposal) { create :proposal}
-      let(:schedule) {create :schedule}
-      let(:schedule_run) {create :schedule_run}
-      let(:outcome) {[schedule.week, schedule.proposal, schedule_run.string_dates(proposal.preferred_dates),
-       schedule_run.string_dates(proposal.impossible_dates)]}
+      let(:proposal) { create :proposal }
+      let(:schedule) { create :schedule }
+      let(:schedule_run) { create :schedule_run }
+      let(:outcome) do
+        [schedule.week, schedule.proposal, schedule_run.string_dates(proposal.preferred_dates),
+         schedule_run.string_dates(proposal.impossible_dates)]
+      end
 
       it 'returns nothing' do
-        expect(schedule_run.each_schedule_row(schedule,proposal)).to eq(outcome)
+        expect(schedule_run.each_schedule_row(schedule, proposal)).to eq(outcome)
       end
     end
   end

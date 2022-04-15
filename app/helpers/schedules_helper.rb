@@ -55,6 +55,13 @@ module SchedulesHelper
     link_to 'View results', optimized_schedule_schedules_url(run_id: run.id)
   end
 
+  def delete_shedule_run(run)
+    return if run.schedules.blank?
+
+    link_to 'Delete', destroy_schedule_runs_url(run), method: :delete,
+                                                      data: { confirm: "Are you sure to delete this record?" }
+  end
+
   def link_to_schedule_result(run, id)
     return id if run.schedules.blank?
 

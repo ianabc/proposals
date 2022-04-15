@@ -61,7 +61,7 @@
                       <td><%= run.runs %></td>
                       <td><%= run.cases %></td>
                       <td><%= run.schedules&.first&.top_score %></td>
-                      <td><%= link_to_results(run) %></td>
+                      <td><%= link_to_results(run) %><br><%= delete_shedule_run(run) %></td>
                     </tr>
                   <% end %>
                 </tbody>

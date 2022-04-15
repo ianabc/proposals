@@ -8,6 +8,6 @@ RSpec.describe ProposalFields::File, type: :model do
   end
 
   describe 'associations' do
-    it { should have_many(:proposal_fields) }
+    it { should have_many(:proposal_fields).dependent(:destroy) }
   end
 end

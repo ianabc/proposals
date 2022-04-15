@@ -14,7 +14,7 @@ class SubjectCategoriesController < ApplicationController
     @subject_category = SubjectCategory.new(subject_category_params)
 
     if @subject_category.save
-      redirect_to subject_categories_path, notice: 'Subject Category successfully created'
+      redirect_to subject_categories_path, notice: t('subject_categories.create.success')
     else
       redirect_to new_subject_category_path(@subject_category), alert: @subject_category.errors.full_messages
     end
@@ -26,7 +26,7 @@ class SubjectCategoriesController < ApplicationController
 
   def update
     if @subject_category.update(subject_category_params)
-      redirect_to subject_categories_path, notice: 'Subject Category successfully updated'
+      redirect_to subject_categories_path, notice: t('subject_categories.update.success')
     else
       redirect_to edit_subject_category_path(@subject_category), alert: @subject_category.errors.full_messages
     end

@@ -58,9 +58,7 @@ RSpec.describe 'EditFlowService' do
 
     it 'raises a RunTime error if there is no country for the organizer' do
       @proposal.lead_organizer.update_columns(country: nil)
-
       expect { @efs.proposal_country }.to raise_error(RuntimeError)
-
       @proposal.lead_organizer.update(country: 'France')
     end
   end
