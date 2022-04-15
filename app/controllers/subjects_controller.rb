@@ -7,11 +7,11 @@ class SubjectsController < ApplicationController
   def update
     if @subject.update(subject_params)
       redirect_to subject_category_url(@subject_category),
-                  notice: 'Subject was successfully updated'
+                  notice: t('subjects.update.success')
     else
       redirect_to edit_subject_category_subject_path(@subject_category, @subject),
                   status: :unprocessable_entity,
-                  alert: "Unable to update subject."
+                  alert: t('subjects.update.failure')
     end
   end
 
@@ -19,7 +19,7 @@ class SubjectsController < ApplicationController
     subject = @subject.subject_area_categories.find_by(subject_category_id: @subject_category.id)
     subject.destroy
     redirect_to subject_category_url(@subject_category),
-                notice: 'Subject was successfully deleted.'
+                notice: t('subjects.destroy.success')
   end
 
   private

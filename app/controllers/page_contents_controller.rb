@@ -5,7 +5,7 @@ class PageContentsController < ApplicationController
   def edit; end
 
   def update
-    redirect_to guidelines_path, notice: "Guidelines was successfully updated" if @guideline.update(page_params)
+    redirect_to guidelines_path, notice: t('page_contents.update.success') if @guideline.update(page_params)
   end
 
   private
