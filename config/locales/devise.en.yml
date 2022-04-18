@@ -84,6 +84,7 @@ en:
   ams_subject:
     update:
       success: "AMS Subject was successfully updated."
+      failure: "Unable to update AMS subject."
     destroy:
       success: "AMS Subject was successfully deleted."
   proposal_fields:
