@@ -157,6 +157,7 @@ ActiveRecord::Schema.define(version: 2021_12_09_034854) do
     t.date "end_date"
     t.text "exclude_dates", default: [], array: true
     t.string "time_zone"
+    t.index ["code"], name: "index_locations_on_code", unique: true
   end
 
   create_table "logs", force: :cascade do |t|

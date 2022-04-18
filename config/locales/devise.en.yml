@@ -118,3 +118,11 @@ en:
       success: "Subject Category successfully created."
     update:
       success: "Subject Category successfully updated."
+  invites:
+    cancel:
+      success: "Invite has been cancelled!"
+      failure: "Invite has been cancelled!"
+    cancel_confirmed_invite:
+      success: "Invite has been cancelled!"
+    new_invite:
+      success: "Invite has become new invite!"
