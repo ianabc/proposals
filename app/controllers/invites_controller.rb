@@ -58,9 +58,9 @@ class InvitesController < ApplicationController
     @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
     @invite.update(status: 'cancelled')
     if current_user.staff_member?
-      redirect_to edit_submitted_proposal_url(@invite.proposal), notice: 'Invite has been cancelled!'
+      redirect_to edit_submitted_proposal_url(@invite.proposal), notice: t('invites.cancel.success')
     else
-      redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
+      redirect_to edit_proposal_path(@invite.proposal), notice: t('invites.cancel.failure')
     end
   end
 
@@ -70,9 +70,9 @@ class InvitesController < ApplicationController
     @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
     @invite.update(status: 'cancelled')
     if current_user.staff_member?
-      redirect_to edit_submitted_proposal_url(@invite.proposal), notice: 'Invite has been cancelled!'
+      redirect_to edit_submitted_proposal_url(@invite.proposal), notice: t('invites.cancel_confirmed_invite.success')
     else
-      redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has been cancelled!'
+      redirect_to edit_proposal_path(@invite.proposal), notice: t('invites.cancel_confirmed_invite.success')
     end
   end
 
@@ -80,9 +80,9 @@ class InvitesController < ApplicationController
     @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
     @invite.update(status: 'pending')
     if current_user.staff_member?
-      redirect_to edit_submitted_proposal_url(@invite.proposal), notice: 'Invite has become new invite!'
+      redirect_to edit_submitted_proposal_url(@invite.proposal), notice: t('invites.new_invite.success')
     else
-      redirect_to edit_proposal_path(@invite.proposal), notice: 'Invite has become new invite!'
+      redirect_to edit_proposal_path(@invite.proposal), notice: t('invites.new_invite.success')
     end
   end
 
