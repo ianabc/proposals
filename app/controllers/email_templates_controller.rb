@@ -13,7 +13,7 @@ class EmailTemplatesController < ApplicationController
   def create
     @email_template = EmailTemplate.new(email_template_params)
     if @email_template.save
-      redirect_to email_templates_path, notice: 'Email Template successfully created'
+      redirect_to email_templates_path, notice: t('email_templates.create.success')
     else
       redirect_to new_email_template_path(@email_template), alert: @email_template.errors.full_messages
     end
@@ -25,7 +25,7 @@ class EmailTemplatesController < ApplicationController
 
   def update
     if @email_template.update(email_template_params)
-      redirect_to email_templates_path, notice: 'Email Template successfully updated'
+      redirect_to email_templates_path, notice: t('email_templates.update.success')
     else
       redirect_to edit_email_template_path(@email_template), alert: @email_template.errors.full_messages
     end
@@ -33,7 +33,7 @@ class EmailTemplatesController < ApplicationController
 
   def destroy
     @email_template.destroy
-    redirect_to email_templates_path, notice: 'Email Template successfully deleted'
+    redirect_to email_templates_path, notice: t('email_templates.destroy.success')
   end
 
   private
