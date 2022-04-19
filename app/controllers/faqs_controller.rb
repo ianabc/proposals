@@ -13,9 +13,9 @@ class FaqsController < ApplicationController
   def create
     @faq = Faq.new(faq_params)
     if @faq.save
-      redirect_to faqs_path, notice: 'Your faq has been saved.'
+      redirect_to faqs_path, notice: t('faqs.create.success')
     else
-      render :new, alert: 'There is error while saving faq.'
+      render :new, alert: t('faqs.create.failure')
     end
   end
 
@@ -23,14 +23,14 @@ class FaqsController < ApplicationController
 
   def update
     if @faq.update(faq_params)
-      redirect_to faqs_path, notice: "Faq has been updated!"
+      redirect_to faqs_path, notice: t('faqs.update.success')
     else
       redirect_to faqs_path, alert: @faq.errors.full_messages.join(' ,')
     end
   end
 
   def destroy
-    redirect_to faqs_path, notice: "Faq has been deleted!" if @faq.destroy
+    redirect_to faqs_path, notice: t('faqs.destroy.success') if @faq.destroy
   end
 
   def move
