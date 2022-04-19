@@ -127,3 +127,7 @@ en:
       success: "Invite has been cancelled!"
     new_invite:
       success: "Invite has become new invite!"
+  schedule_runs:
+    destroy:
+      success: "Schedule result is deleted successfully"
+  

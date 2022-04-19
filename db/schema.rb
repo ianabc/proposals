@@ -484,6 +484,7 @@ ActiveRecord::Schema.define(version: 2021_12_09_034854) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "code"
+    t.index ["code"], name: "index_subject_categories_on_code", unique: true
   end
 
   create_table "subjects", force: :cascade do |t|

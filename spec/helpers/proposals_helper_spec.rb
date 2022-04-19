@@ -278,4 +278,36 @@ RSpec.describe ProposalsHelper, type: :helper do
       expect(specific_proposal_statuses).to match_array(statuses)
     end
   end
+
+  describe '#nationality_data' do
+    let(:proposal) { create(:proposal) }
+
+    it 'returning hash' do
+      expect(nationality_data(proposal)).to be_a Hash
+    end
+  end
+
+  describe '#ethnicity_data' do
+    let(:proposal) { create(:proposal) }
+
+    it 'returning hash' do
+      expect(ethnicity_data(proposal)).to be_a Hash
+    end
+  end
+
+  describe '#gender_labels' do
+    let(:proposal) { create(:proposal) }
+
+    it 'returning hash' do
+      expect(gender_labels(proposal)).to be_a Array
+    end
+  end
+
+  describe '#gender_values' do
+    let(:proposal) { create(:proposal) }
+
+    it 'returning hash' do
+      expect(gender_values(proposal)).to be_a Array
+    end
+  end
 end
