@@ -18,6 +18,8 @@ class Invite < ApplicationRecord
   validate :one_invite_per_person, on: :create
   after_commit :log_activity
   default_scope { order(created_at: :asc) }
+  scope :organizer, -> { where(invited_as: "Organizer") }
+  scope :participant, -> { where(invited_as: "Participant") }
   enum status: { pending: 0, confirmed: 1, cancelled: 2 }
   enum response: { yes: 0, maybe: 1, no: 2 }
 
