@@ -9,7 +9,7 @@ class ProfileController < ApplicationController
 
   def update
     if @person.update(person_params)
-      redirect_to profile_path, notice: "Your Personal data is updated!"
+      redirect_to profile_path, notice: t('profile.update.success')
     else
       redirect_to profile_path, alert: @person.errors.full_messages
     end

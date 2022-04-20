@@ -12,7 +12,7 @@ class Invite < ApplicationRecord
   before_save :email_downcase
 
   validates :firstname, :lastname, :email, :invited_as,
-            :deadline_date, :person_id, presence: true
+            :deadline_date, presence: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
   validate :deadline_not_in_past, :proposal_title
   validate :one_invite_per_person, on: :create

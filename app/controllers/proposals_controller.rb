@@ -98,7 +98,7 @@ class ProposalsController < ApplicationController
     @proposal.destroy
     respond_to do |format|
       format.html do
-        redirect_to proposals_url, notice: "Proposal was successfully deleted."
+        redirect_to proposals_url, notice: t('proposals.destroy.success')
       end
       format.json { head :no_content }
     end
