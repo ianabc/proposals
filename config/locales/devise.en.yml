@@ -130,4 +130,18 @@ en:
   schedule_runs:
     destroy:
       success: "Schedule result is deleted successfully"
-  
+  proposals:
+    destroy:
+      success: "Proposal was successfully deleted."
+  people:
+    update:
+      success: "Thank you. Please continue to complete the Diversity and Inclusivity Survey."
+  profile:
+    update:
+      success: "Your Personal data is updated!"
+  proposal_forms:
+    create:
+      success: "Proposal form was successfully created!"
+    update:
+      success: "Proposal form was successfully updated"
+      failure: "Unable to update proposal form."

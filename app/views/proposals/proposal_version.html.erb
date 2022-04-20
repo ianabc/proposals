@@ -148,23 +148,15 @@
                                 <%= render partial: 'lead_organizer' %>
                                 <div>
                                   <h3 class="form-section">Supporting Organizers:</h3>
-                                  <% if @proposal.invites %>
-                                    <% @proposal.invites.each do |invite|%>
-                                      <% if invite.invited_as == 'Organizer' %>
-                                        <%= render partial: 'organizer', locals: { invite: invite } %>
-                                      <% end %>
-                                    <% end %>
+                                  <% if @proposal.invites.organizer %>
+                                    <%= render partial: 'organizer', locals: { invites: @proposal.invites.organizer } %>
                                   <% end %>
                                 </div>
                                 <div class="mt-4">
                                   <div class="mb-3">
                                     <h3 class="form-section">Participants:</h3>
-                                    <% if @proposal.invites %>
-                                      <% @proposal.invites.each do |invite|%>
-                                        <% if invite.invited_as == 'Participant' %>
-                                          <%= render partial: 'organizer', locals: { invite: invite } %>
-                                        <% end %>
-                                      <% end %>
+                                    <% if @proposal.invites.participant %>
+                                      <%= render partial: 'organizer', locals: { invites: @proposal.invites.participant } %>
                                     <% end %>
                                   </div>
                                 </div>

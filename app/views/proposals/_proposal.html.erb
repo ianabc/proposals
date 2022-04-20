@@ -159,11 +159,7 @@
                               <p><%= @proposal.proposal_type.organizer_description&.html_safe %></p>
 
                               <% if @proposal.invites.organizer %>
-                                <%# @proposal.invites.each do |invite|%>
-                                  <%# if invite.invited_as == 'Organizer' %>
-                                    <%= render partial: 'organizer', locals: { invites: @proposal.invites.organizer } %>
-                                  <%# end %>
-                                <%# end %>
+                                <%= render partial: 'organizer', locals: { invites: @proposal.invites.organizer } %>
                               <% end %>
                               <div>
                                 <% if max_invitations(@proposal, 'Organizer') %>
@@ -194,11 +190,7 @@
                                 <p><%= @proposal.proposal_type.participant_description&.html_safe %></p>
 
                                 <% if @proposal.invites.participant %>
-                                  <%# @proposal.invites.each do |invite|%>
-                                    <%# if invite.invited_as == 'Participant' %>
-                                      <%= render partial: 'organizer', locals: { invites: @proposal.invites.participant } %>
-                                    <%# end %>
-                                  <%# end %>
+                                  <%= render partial: 'organizer', locals: { invites: @proposal.invites.participant } %>
                                 <% end %>
                                 <div>
                                   <% if max_invitations(@proposal, 'Participant') %>
@@ -243,22 +235,14 @@
                               <div>
                                 <h3 class="form-section">Supporting Organizers:</h3>
                                 <% if @proposal.invites.organizer %>
-                                  <%# @proposal.invites.each do |invite|%>
-                                    <%# if invite.invited_as == 'Organizer' %>
-                                      <%= render partial: 'organizer', locals: { invites: @proposal.invites.organizer } %>
-                                    <%# end %>
-                                  <%# end %>
+                                  <%= render partial: 'organizer', locals: { invites: @proposal.invites.organizer } %>
                                 <% end %>
                               </div>
                               <div class="mt-4">
                                 <div class="mb-3">
                                   <h3 class="form-section">Participants:</h3>
                                   <% if @proposal.invites.participant %>
-                                    <%# @proposal.invites.each do |invite|%>
-                                      <%# if invite.invited_as == 'Participant' %>
-                                        <%= render partial: 'organizer', locals: { invites: @proposal.invites.participant } %>
-                                      <%# end %>
-                                    <%# end %>
+                                    <%= render partial: 'organizer', locals: { invites: @proposal.invites.participant } %>
                                   <% end %>
                                 </div>
                               </div>

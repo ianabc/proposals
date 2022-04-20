@@ -36,11 +36,11 @@ class ProposalFormsController < ApplicationController
       version_update_form
       redirect_to proposal_type_proposal_form_path(@proposal_type,
                                                    @proposal_form),
-                  notice: 'Proposal form was successfully updated'
+                  notice: t('proposal_forms.update.success')
     else
       redirect_to edit_proposal_type_proposal_form_path,
                   status: :unprocessable_entity,
-                  alert: "Unable to update proposal form."
+                  alert: t('proposal_forms.update.failure')
     end
   end
 
@@ -48,7 +48,7 @@ class ProposalFormsController < ApplicationController
     version_form_create
     if @proposal_form.save
       redirect_to proposal_type_proposal_forms_path,
-                  notice: 'Proposal form was successfully created!'
+                  notice: t('proposal_forms.create.success')
     else
       redirect_to new_proposal_type_proposal_form_path,
                   alert: "Title can't be blank"
