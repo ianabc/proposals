@@ -188,7 +188,6 @@ class HungarianMonteCarlo
 
   def save_schedule_run
     @schedule_run.save
-
   rescue ActiveRecord::Error => e
     @errors['ScheduleRun'] = "Error saving ScheduleRun record: #{e.message}."
     @errors['ScheduleRun'] << "\n\n#{@schedule_run.inspect}"

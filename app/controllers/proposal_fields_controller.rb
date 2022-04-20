@@ -99,7 +99,7 @@ class ProposalFieldsController < ApplicationController
     if update_condition
       @proposal_form.update(updated_by: current_user)
       redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
-                  notice: "Field was successfully updated."
+                  notice: t('proposal_fields.valid_position_update_field.success')
     else
       redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
                   alert: @proposal_form.errors

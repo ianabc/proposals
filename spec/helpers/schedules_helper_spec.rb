@@ -27,6 +27,11 @@ RSpec.describe SchedulesHelper, type: :helper do
       schedule2
       expect(schedule_proposal(schedule2.proposal)).to eq("")
     end
+
+    it "returns exclude date if proposal code is w66" do
+      proposal_code = 'w66'
+      expect(schedule_proposal(proposal_code)).to eq("(excluded date)")
+    end
   end
 
   describe "#proposals_count" do
@@ -138,6 +143,22 @@ RSpec.describe SchedulesHelper, type: :helper do
     context "when choices exist" do
       it "returns count" do
         expect(choice_assignment([1, 2, 3, 4, 5], 3)).to eq(1)
+      end
+    end
+  end
+
+  describe '#delete_shedule_run' do
+    let(:proposal) { create(:proposal, code: '3W3', assigned_date: 'Tue, 14 Dec 2021') }
+    let(:schedule_run) { create(:schedule_run) }
+
+    it 'when no shedules are present and it returns from first line' do
+      expect(delete_shedule_run(schedule_run)).not_to be_present
+    end
+    context 'when shedules are present' do
+      let!(:schedules) { create_list(:schedule, 5, schedule_run_id: schedule_run.id, proposal: proposal.code) }
+
+      it 'when shedules are present' do
+        expect(delete_shedule_run(schedule_run)).to be_present
       end
     end
   end

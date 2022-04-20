@@ -12,12 +12,14 @@ class Invite < ApplicationRecord
   before_save :email_downcase
 
   validates :firstname, :lastname, :email, :invited_as,
-            :deadline_date, :person_id, presence: true
+            :deadline_date, presence: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
   validate :deadline_not_in_past, :proposal_title
   validate :one_invite_per_person, on: :create
   after_commit :log_activity
   default_scope { order(created_at: :asc) }
+  scope :organizer, -> { where(invited_as: "Organizer") }
+  scope :participant, -> { where(invited_as: "Participant") }
   enum status: { pending: 0, confirmed: 1, cancelled: 2 }
   enum response: { yes: 0, maybe: 1, no: 2 }
 

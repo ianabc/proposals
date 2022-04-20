@@ -1,52 +1,51 @@
-<div class="mb-3 row border m-1">
-  <div class="col-6 mt-2">
-    <div class="mb-3">
-      <label for="firstname">First Name: </label>
-      <label for="firstname"><%= invite_first_name(invite) %></label>
-    </div>
-    <div class="mb-3">
-      <label for="lastname">Last Name: </label>
-      <label for="lastname"><%= invite_last_name(invite) %></label>
-    </div>
-    <div class="mb-3">
-      <label for="email">Email: </label>
-      <label for="email"><%= invite.email %></label>
-    </div>
-    <% if invite.person.affiliation.present? %>
-      <div class="mb-3">
-        <label>Affiliation: </label>
-        <label><%= invite.person.affiliation %></label>
-      </div>
+<div class="mb-3 m-1">
+  <table class="table invitation-table">
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Affiliation</th>
+        <th>Academic Status</th>
+        <th>Status</th>
+        <th>Invitation Date</th>
+        <th>Deadline Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <% invites.each do |invite| %>
+      <tbody>
+        <tr>
+          <td><%= invite_first_name(invite) %></td>
+          <td><%= invite_last_name(invite) %></td>
+          <td><%= invite.email %></td>
+          <% if invite.person.affiliation.present? %>
+            <td><%= invite.person.affiliation %></td>
+          <% else %>
+            <td>-</td>
+          <% end %>
+          <% if invite.invited_as == 'Participant' && invite.person.academic_status.present? %>
+            <td><%= invite.person.academic_status %></td>
+          <% else %>
+            <td>-</td>
+          <% end %>
+          <td> <label for="status" class=<%= invite_response_color(invite.response) %> ><%= invite_status(invite.response, invite.status) %></label> </td>
+          <td><%= invite.created_at.to_date %></td>
+          <td><%= invite.deadline_date.to_date %></td>
+          
+          <div>
+            <% if invite.pending? && params[:action] == 'edit' %>
+              <div><td><%= link_to '<i class="align-middle"></i>Cancel Invite'.html_safe, cancel_url(code: invite.code), class: 'btn', method: :post %>
+              <%= link_to '<i class="align-middle"></i>Invite Reminder'.html_safe, invite_reminder_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn', method: :post %></td></div>
+            <% elsif invite.confirmed? && params[:action] == 'edit' %>
+              <div><td><%= link_to '<i class="align-middle"></i>Cancel Invite'.html_safe, cancel_confirmed_invite_url(code: invite.code), class: 'btn', method: :post %>
+              <%= link_to '<i class="align-middle"></i>Send New Invite'.html_safe, new_invite_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn', method: :post %></td></div>
+            <% else %>
+              <td>-</td>
+            <% end %>
+          </div>
+        </tr>
+      </tbody>
     <% end %>
-    <% if invite.invited_as == 'Participant' && invite.person.academic_status.present? %>
-      <div class="mb-3">
-        <label>Academic Status: </label>
-        <label><%= invite.person.academic_status %></label>
-      </div>
-    <% end %>
-  </div>
-  <div class="col-6 mt-2">
-    <div class="mb-3">
-      <label for="status">Status: </label>
-      <label for="status" class=<%= invite_response_color(invite.response) %> ><%= invite_status(invite.response, invite.status) %></label>
-    </div>
-    <div class="mb-3">
-      <label for="created_at">Invitation Date: </label>
-      <label for="created_at"><%= invite.created_at.to_date %></label>
-    </div>
-    <div class="mb-3 <%= invite_deadline_date_color(invite) %>">
-      <label for="deadline_date">Deadline Date: </label>
-      <label for="deadline_date"><%= invite.deadline_date.to_date %></label>
-    </div>
-    <div class="float-end mb-3">
-      <% if invite.pending? && params[:action] == 'edit' %>
-        <%= link_to 'Cancel Invite', cancel_url(code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
-        <%= link_to 'Invite Reminder', invite_reminder_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
-      <% elsif invite.confirmed? && params[:action] == 'edit' %>
-        <%= link_to 'Cancel Invite', cancel_confirmed_invite_url(code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
-        <%= link_to 'Send New Invite', new_invite_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn btn-sm btn-primary', method: :post %>
-      <% end %>
-    </div>
-  </div>
+  </table>
 </div>
-

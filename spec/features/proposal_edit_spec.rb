@@ -38,10 +38,12 @@ RSpec.feature "Proposal edit", type: :feature do
   end
 
   def shows_person_info(person)
-    expect(page).to have_text("First Name: #{person.firstname}")
-    expect(page).to have_text("Last Name: #{person.lastname}")
-    expect(page).to have_text("Affiliation: #{person.affiliation}")
-    expect(page).to have_text("Email: #{person.email}")
+    expect(page).to have_text("First Name:")
+    expect(page).to have_text(person.firstname)
+    expect(page).to have_text("Last Name:")
+    expect(page).to have_text(person.lastname)
+    expect(page).to have_text("Email:")
+    expect(page).to have_text(person.email)
   end
 
   scenario "the Lead Organizer's information is shown" do

@@ -84,6 +84,7 @@ en:
   ams_subject:
     update:
       success: "AMS Subject was successfully updated."
+      failure: "Unable to update AMS subject."
     destroy:
       success: "AMS Subject was successfully deleted."
   proposal_fields:
@@ -118,3 +119,29 @@ en:
       success: "Subject Category successfully created."
     update:
       success: "Subject Category successfully updated."
+  invites:
+    cancel:
+      success: "Invite has been cancelled!"
+      failure: "Invite has been cancelled!"
+    cancel_confirmed_invite:
+      success: "Invite has been cancelled!"
+    new_invite:
+      success: "Invite has become new invite!"
+  schedule_runs:
+    destroy:
+      success: "Schedule result is deleted successfully"
+  proposals:
+    destroy:
+      success: "Proposal was successfully deleted."
+  people:
+    update:
+      success: "Thank you. Please continue to complete the Diversity and Inclusivity Survey."
+  profile:
+    update:
+      success: "Your Personal data is updated!"
+  proposal_forms:
+    create:
+      success: "Proposal form was successfully created!"
+    update:
+      success: "Proposal form was successfully updated"
+      failure: "Unable to update proposal form."
