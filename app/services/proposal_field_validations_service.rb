@@ -52,15 +52,23 @@ class ProposalFieldValidationsService
     preferred_dates = preferred.reject { |date| date == '' }
     uniq_dates = JSON.parse(@answer).reject { |date| date == '' }
 
-    @errors << 'At least 2 preferred dates must be selected' if preferred_dates.count < 2
     @errors << "You can't select the same date twice" unless uniq_dates.uniq.count == uniq_dates.count
-    @errors << "You can choose maximum #{proposal.proposal_type.max_no_of_preferred_dates}
-    preferred dates" if preferred_dates.count > proposal.proposal_type.max_no_of_preferred_dates
-    @errors << "You have to choose #{proposal.proposal_type.min_no_of_preferred_dates} 
-    preferred dates" if preferred_dates.count < proposal.proposal_type.min_no_of_preferred_dates
-    @errors << "You can choose maximum #{proposal.proposal_type.max_no_of_impossible_dates} 
-    impossible dates" if proposal.impossible_dates.count > proposal.proposal_type.max_no_of_impossible_dates
-    @errors << "You have to choose #{proposal.proposal_type.min_no_of_impossible_dates} impossible dates" if proposal.impossible_dates.count < proposal.proposal_type.min_no_of_impossible_dates
+    if preferred_dates.count > proposal.proposal_type.max_no_of_preferred_dates
+      @errors << "You can choose maximum #{proposal.proposal_type.max_no_of_preferred_dates}
+      preferred dates"
+    end
+    if preferred_dates.count < proposal.proposal_type.min_no_of_preferred_dates
+      @errors << "You have to choose atleast #{proposal.proposal_type.min_no_of_preferred_dates}
+      preferred dates"
+    end
+    if proposal.impossible_dates.count > proposal.proposal_type.max_no_of_impossible_dates
+      @errors << "You can choose maximum #{proposal.proposal_type.max_no_of_impossible_dates}
+      impossible dates"
+    end
+    if proposal.impossible_dates.count < proposal.proposal_type.min_no_of_impossible_dates
+      @errors << "You have to choose atleast #{proposal.proposal_type.min_no_of_impossible_dates}
+      impossible dates"
+    end
   end
 
   def attached_file

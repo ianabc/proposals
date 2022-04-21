@@ -88,7 +88,7 @@ class ProposalFieldsController < ApplicationController
     if @proposal_field.insert_at(@proposal_field.position)
       @proposal_form.update(updated_by: current_user)
       redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
-                  notice: "Field was successfully created."
+                  notice: t('proposal_fields.valid_position_create_field.success')
     else
       redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
                   alert: @proposal_form.errors

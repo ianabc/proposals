@@ -471,10 +471,10 @@ class SubmittedProposalsController < ApplicationController
   def page_redirect
     if params[:action] == "show"
       redirect_to submitted_proposal_url(@proposal),
-                  notice: "Sent email to proposal organizers."
+                  notice: t('submit_proposals.page_redirect.alert')
     else
       redirect_to edit_submitted_proposal_url(@proposal),
-                  notice: "Sent email to proposal organizers."
+                  notice: t('submit_proposals.page_redirect.alert')
     end
   end
 
