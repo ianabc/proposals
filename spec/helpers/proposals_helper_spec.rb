@@ -310,4 +310,69 @@ RSpec.describe ProposalsHelper, type: :helper do
       expect(gender_values(proposal)).to be_a Array
     end
   end
+
+  describe '#proposal_outcome' do
+    let(:proposal) { create(:proposal) }
+
+    it { expect(proposal_outcome).to be_present }
+    it { expect(proposal_outcome).to eq %w[Approved Rejected Declined] }
+    it { expect(proposal_outcome).to be_a Array }
+  end
+
+  describe '#single_gender_delete' do
+    let(:data) { { "test_val01" => "Male", "test_val02" => "Female" } }
+    it 'return records after deleting single gender' do
+      option = "test_val02"
+      val = "test_val03"
+
+      expect(single_gender_delete(data, option, val)).to be_present
+      expect(single_gender_delete(data, option, val)).to be_a Hash
+    end
+  end
+
+  describe '#single_data_delete' do
+    let(:data) { { "test_val01" => "Male", "test_val02" => "Female" } }
+    it 'when no case will call' do
+      expect(single_data_delete(data)).to be_present
+    end
+  end
+
+  describe '#single_data_delete' do
+    let(:data) { { "Prefer not to answer" => "Male", "test_val02" => "Female" } }
+    it 'when first case will call' do
+      response = single_data_delete(data)
+      expect(response).to be_present
+      expect(response.count).to eq 2
+      expect(response.last).not_to be_a Hash
+    end
+  end
+
+  describe '#single_data_delete' do
+    let(:data) { { "Gender fluid and/or non-binary person" => "Male", "test_val02" => "Female" } }
+    it 'when second case will call' do
+      response = single_data_delete(data)
+      expect(response).to be_present
+      expect(response.count).to eq 2
+      expect(response.last).not_to be_a Hash
+    end
+  end
+
+  describe '#gender_delete' do
+    let(:data) { { "Prefer not to answer" => "test_val01", "Gender fluid and/or non-binary person" => "test_val02" } }
+    it 'return records after deleting' do
+      values = "Male"
+      expect(gender_delete(data, values)).to be_present
+      expect(gender_delete(data, values)).to be_a Hash
+    end
+  end
+
+  describe '#stem_graph_data' do
+    let(:person) { create(:person) }
+    let(:proposal) { create(:proposal) }
+    let(:demographic_data) { create(:demographic_data, person: person) }
+
+    it 'with no demographic_data' do
+      expect(stem_graph_data(proposal)).not_to be_present
+    end
+  end
 end
