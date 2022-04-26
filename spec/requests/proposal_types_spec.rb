@@ -57,7 +57,9 @@ RSpec.describe "/proposal_types", type: :request do
         { name: ' ', participant: '1', co_organizer: '1', code: '2021xx2', open_date: Time.current.to_date,
           closed_date: Time.current.to_date + 1.week,
           participant_description: 'some participants description',
-          organizer_description: 'some organizers description' }
+          organizer_description: 'some organizers description',
+          min_no_of_preferred_dates: 2, max_no_of_preferred_dates: 4,
+          min_no_of_impossible_dates: 1, max_no_of_impossible_dates: 2 }
       end
 
       it "does not create a new proposal_type" do

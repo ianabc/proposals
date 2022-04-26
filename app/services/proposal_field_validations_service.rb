@@ -49,9 +49,10 @@ class ProposalFieldValidationsService
     return unless @answer
 
     preferred = JSON.parse(@answer)&.first(5)
+    impossible = JSON.parse(@answer)&.last(2)
     preferred_dates = preferred.reject { |date| date == '' }
+    impossible_dates = impossible.reject { |date| date == '' }
     uniq_dates = JSON.parse(@answer).reject { |date| date == '' }
-
     @errors << "You can't select the same date twice" unless uniq_dates.uniq.count == uniq_dates.count
     if preferred_dates.count > proposal.proposal_type.max_no_of_preferred_dates
       @errors << "You can choose maximum #{proposal.proposal_type.max_no_of_preferred_dates}
@@ -61,11 +62,11 @@ class ProposalFieldValidationsService
       @errors << "You have to choose atleast #{proposal.proposal_type.min_no_of_preferred_dates}
       preferred dates"
     end
-    if proposal.impossible_dates.count > proposal.proposal_type.max_no_of_impossible_dates
+    if impossible_dates.count > proposal.proposal_type.max_no_of_impossible_dates
       @errors << "You can choose maximum #{proposal.proposal_type.max_no_of_impossible_dates}
       impossible dates"
     end
-    if proposal.impossible_dates.count < proposal.proposal_type.min_no_of_impossible_dates
+    if impossible_dates.count < proposal.proposal_type.min_no_of_impossible_dates
       @errors << "You have to choose atleast #{proposal.proposal_type.min_no_of_impossible_dates}
       impossible dates"
     end

@@ -94,6 +94,23 @@ RSpec.describe Person, type: :model do
     end
   end
 
+  describe '#person_proposal' do
+    context 'when there is no proposal present with status submitted' do
+      let(:person) { create(:person, :with_proposals) }
+
+      it { expect(person.person_proposal).to be_falsey }
+    end
+
+    context 'when there is proposal present with status submitted' do
+      let(:person) { create(:person, :with_proposals) }
+
+      it 'submitted proposals' do
+        person.proposals.first.update(status: "submitted")
+        expect(person.person_proposal).to be_truthy
+      end
+    end
+  end
+
   describe '#common_fields' do
     context 'when multiple fields are blank' do
       let(:person) { create(:person) }
