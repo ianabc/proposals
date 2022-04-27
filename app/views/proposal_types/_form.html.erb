@@ -66,22 +66,22 @@
 
             <div class="mb-3">
               <%= f.label :'Maximum number of Preferred Dates' , class: 'form-label' %><br>
-              <%= f.number_field :max_no_of_preferred_dates%>
+              <%= f.number_field :max_no_of_preferred_dates, min: 2, max: 5, class: 'set-dates-width' %>
             </div>
 
             <div class="mb-3">
               <%= f.label :'Minimum number of Preferred Dates' , class: 'form-label' %><br>
-              <%= f.number_field :min_no_of_preferred_dates%>
+              <%= f.number_field :min_no_of_preferred_dates, min: 2, max: 5, class: 'set-dates-width' %>
             </div>
 
             <div class="mb-3">
               <%= f.label :'Maximum number of impossible Dates' , class: 'form-label' %><br>
-              <%= f.number_field :max_no_of_impossible_dates%>
+              <%= f.number_field :max_no_of_impossible_dates, min: 0, max: 2, class: 'set-dates-width' %>
             </div>
 
             <div class="mb-3">
               <%= f.label :'Minimum number of impossible Dates' , class: 'form-label' %><br>
-              <%= f.number_field :min_no_of_impossible_dates%>
+              <%= f.number_field :min_no_of_impossible_dates, min: 0, max: 2, class: 'set-dates-width' %>
             </div>
 
             <div class="mb-3">

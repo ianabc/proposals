@@ -90,6 +90,8 @@ en:
   proposal_fields:
     valid_position_update_field:
       success: "Field was successfully updated."
+    valid_position_create_field:
+      success: "Field was successfully created."
   email_templates:
     create:
       success: "Email Template successfully created."
@@ -145,3 +147,13 @@ en:
     update:
       success: "Proposal form was successfully updated"
       failure: "Unable to update proposal form."
+  submit_proposals:
+    create:
+      alert: "Draft saved."
+    staff_redirect:
+      alert: "Proposal has been updated successfully!"
+    page_redirect:
+      alert: "Sent email to proposal organizers."
+  people:
+    new:
+      alert: "Something went wrong."

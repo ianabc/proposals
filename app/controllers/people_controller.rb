@@ -7,7 +7,7 @@ class PeopleController < ApplicationController
     @proposal = invite&.proposal
     @response = params[:response]
 
-    redirect_to root_path, alert: 'Something went wrong.' unless @person
+    redirect_to root_path, alert: t('people.new.alert') unless @person
   end
 
   def update

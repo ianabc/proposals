@@ -21,13 +21,13 @@ class SubmitProposalsController < ApplicationController
       if @proposal.is_submission && @submission.errors?
         flash[:alert] = []
         @submission.error_messages.each do |msg|
-          flash[:alert] << "#{msg}.to_s"
+          flash[:alert] << msg.to_s
         end
         redirect_to edit_proposal_path(@proposal)
         return
       end
       unless @proposal.is_submission
-        redirect_to edit_proposal_path(@proposal), notice: 'Draft saved.'
+        redirect_to edit_proposal_path(@proposal), notice: t('submit_proposals.create.alert')
         return
       end
       @attachment = generate_proposal_pdf || return
@@ -200,7 +200,7 @@ class SubmitProposalsController < ApplicationController
       redirect_to edit_submitted_proposal_url(@proposal), alert: "Your submission has
           errors: #{@submission.error_messages}.".squish
     else
-      redirect_to submitted_proposals_url(@proposal), notice: 'Proposal has been updated successfully!'
+      redirect_to submitted_proposals_url(@proposal), notice: t('submit_proposals.staff_redirect.alert')
     end
   end
 

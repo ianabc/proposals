@@ -95,11 +95,11 @@ class ProposalFormsController < ApplicationController
   def update_proposal_form(form)
     if form.update(proposal_form_params)
       redirect_to edit_proposal_type_proposal_form_path,
-                  notice: 'Proposal form was successfully updated'
+                  notice: t('proposal_forms.update.success')
     else
       redirect_to edit_proposal_type_proposal_form_path,
                   status: :unprocessable_entity,
-                  alert: "Unable to update proposal form."
+                  alert: t('proposal_forms.update.failure')
     end
   end
 
