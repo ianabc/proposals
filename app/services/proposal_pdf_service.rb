@@ -133,6 +133,13 @@ class ProposalPdfService
     delatex(affil)
   end
 
+  def proposal_cover_letter
+    return if proposal.cover_letter.blank?
+
+    @text << "\\subsection*{Cover Letter:}\n\n"
+    @text << "#{proposal.cover_letter} \\\\ \n"
+  end
+
   def proposal_details
     code = proposal.code.blank? ? '' : "#{proposal.code}: "
     @text = if @proposal_version
@@ -140,6 +147,7 @@ class ProposalPdfService
             else
               "\\section*{\\centering #{code} #{proposal_title(proposal)} }\n\n"
             end
+    proposal_cover_letter
     proposal_participants_count
     proposal_organizers_count
     proposal_lead_organizer
