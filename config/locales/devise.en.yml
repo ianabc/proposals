@@ -157,3 +157,10 @@ en:
   people:
     new:
       alert: "Something went wrong."
+  survey:
+    check_params:
+      alert: "Response is empty."
+      alert_first: "Invite is empty."
+  schedules:
+    download_csv:
+      alert: "Schedule run is empty"
