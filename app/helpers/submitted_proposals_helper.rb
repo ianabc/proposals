@@ -107,6 +107,6 @@ module SubmittedProposalsHelper
   end
 
   def seleted_assigned_date(proposal)
-    proposal.assigned_date ? "#{proposal.assigned_date.to_s} - #{(proposal.assigned_date + 5.days).to_s}" : ''
+    proposal.assigned_date ? "#{proposal.assigned_date} - #{proposal.assigned_date + 5.days}" : ''
   end
 end

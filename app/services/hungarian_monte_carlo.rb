@@ -198,7 +198,6 @@ class HungarianMonteCarlo
 
     @schedule_run.update_columns(startweek: @location.start_date,
                                  weeks: @location.num_weeks)
-
   rescue ActiveRecord::ActiveRecordError => e
     @errors['ScheduleRun'] = "Error updating ScheduleRun record: #{e.message}."
   end

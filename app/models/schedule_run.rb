@@ -2,7 +2,7 @@ class ScheduleRun < ApplicationRecord
   has_many :schedules, dependent: :destroy
   belongs_to :location
 
-  validates :runs, :cases, :year, :location, presence: true
+  validates :runs, :cases, :year, presence: true
 
   def to_csv(case_num)
     schedules = Schedule.where(schedule_run_id: id, case_num: case_num)
