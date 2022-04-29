@@ -70,7 +70,7 @@ class SchedulesController < ApplicationController
 
   def download_csv
     if @schedule_run.blank?
-      redirect_to new_schedule_path, alert: "Schedule run is empty"
+      redirect_to new_schedule_path, alert: t('schedules.download_csv.alert')
       return
     end
 

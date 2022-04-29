@@ -52,4 +52,22 @@ RSpec.describe Schedule, type: :model do
       end
     end
   end
+
+  describe '#top_score' do
+    let(:proposal) { create(:proposal, assigned_date: "2023-01-15 - 2023-01-20", code: "23wt4ed") }
+      let(:schedule_run) { create(:schedule_run) }
+      let(:schedule) { create(:schedule, schedule_run_id: schedule_run.id, proposal: proposal) }
+    it 'expecting response accordingly' do
+      expect(schedule.top_score).to be_present
+    end
+  end
+
+  describe '#dates' do
+    let(:proposal) { create(:proposal, assigned_date: "2023-01-15 - 2023-01-20", code: "23wt4ed") }
+      let(:schedule_run) { create(:schedule_run) }
+      let(:schedule) { create(:schedule, schedule_run_id: schedule_run.id, proposal: proposal) }
+    it 'if schedule run location week is not zero ' do
+      expect(schedule.dates).to be_present
+    end
+  end
 end

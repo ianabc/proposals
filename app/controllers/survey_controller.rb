@@ -28,10 +28,10 @@ class SurveyController < ApplicationController
     invite_response_save if @invite && params[:response].present?
 
     if @invite.nil?
-      redirect_to root_path, alert: 'Invite is empty.'
+      redirect_to root_path, alert: t('survey.check_params.alert_first')
       return false
     elsif params[:response].empty?
-      redirect_to root_path, alert: 'Response is empty.'
+      redirect_to root_path, alert: t('survey.check_params.alert')
       return false
     end
     true
