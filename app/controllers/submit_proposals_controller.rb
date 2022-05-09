@@ -8,6 +8,7 @@ class SubmitProposalsController < ApplicationController
   def create
     @proposal.update(proposal_params)
     update_assigned_date
+    update_applied_date
     update_proposal_ams_subject_code
     @submission = SubmitProposalService.new(@proposal, params)
     @submission.save_answers
@@ -278,6 +279,14 @@ class SubmitProposalsController < ApplicationController
 
     date = Date.parse(date.split(' - ').first)
     @proposal.update(assigned_date: date)
+  end
+
+  def update_applied_date
+    date = params[:applied_date]
+    return if date.blank?
+
+    date = Date.parse(date.split(' - ').first)
+    @proposal.update(applied_date: date)
   end
 
   def log_activity(invite)
