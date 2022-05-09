@@ -151,9 +151,6 @@ RSpec.describe SchedulesHelper, type: :helper do
     let(:proposal) { create(:proposal, code: '3W3', assigned_date: 'Tue, 14 Dec 2021') }
     let(:schedule_run) { create(:schedule_run) }
 
-    it 'when no shedules are present and it returns from first line' do
-      expect(delete_shedule_run(schedule_run)).not_to be_present
-    end
     context 'when shedules are present' do
       let!(:schedules) { create_list(:schedule, 5, schedule_run_id: schedule_run.id, proposal: proposal.code) }
 
