@@ -48,16 +48,16 @@ class SchedulesController < ApplicationController
                 end
     @schedules = Schedule.where(schedule_run_id: @schedule_run.id,
                                 case_num: @case_num)
-    @dates = @schedules&.first&.dates
+    @dates = @schedules.first&.dates
   end
 
   def export_scheduled_proposals
     schedules = Schedule.where(schedule_run_id: @schedule_run.id,
                                case_num: params[:case].to_i)
-    program_weeks = schedules&.first&.dates
+    program_weeks = schedules.first&.dates
     proposals = []
     schedules.each do |schedule|
-      next if schedule.proposal&.match?('w66') # placeholder code
+      next if schedule.proposal.match?('w66') # placeholder code
 
       proposals += update_proposal_date(schedule, program_weeks)
     end
