@@ -56,8 +56,6 @@ module SchedulesHelper
   end
 
   def delete_shedule_run(run)
-    return if run.schedules.blank?
-
     link_to 'Delete', destroy_schedule_runs_url(run), method: :delete,
                                                       data: { confirm: "Are you sure to delete this record?" }
   end
