@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "Proposals", type: :request do
   let(:user) { create(:user) }
-  let(:person) { create(:person, :with_proposals, user: user) }
+  let!(:person) { create(:person, :with_proposals, user: user) }
   let(:proposal) { person.proposals.first }
 
   before { authenticate_for_controllers(person) }
@@ -21,7 +21,7 @@ RSpec.describe "Proposals", type: :request do
     let(:proposal_location) { create(:proposal_location, proposal_id: proposal.id, location_id: location.id) }
     before do
       proposal_location
-      patch ranking_proposal_path(proposal, location_id: location.id)
+      patch ranking_proposal_path(proposal, location_id: location.id, position: 2)
     end
     it { expect(response).to have_http_status(:ok) }
   end
@@ -69,6 +69,12 @@ RSpec.describe "Proposals", type: :request do
 
   describe "GET /edit" do
     before { get edit_proposal_path(proposal) }
+
+    it { expect(response).to have_http_status(:ok) }
+  end
+
+  describe "GET /locations" do
+    before { get locations_proposal_path(proposal) }
 
     it { expect(response).to have_http_status(:ok) }
   end
