@@ -50,6 +50,15 @@ class Invite < ApplicationRecord
     invited_as == 'Organizer' ? 'Supporting Organizer' : 'Participant'
   end
 
+  def update_invited_person(affiliation)
+    person = self.person
+    person.affiliation = affiliation
+    person.firstname = firstname
+    person.lastname = lastname
+    person.email = email
+    return true if person.save(validate: false)
+  end
+
   private
 
   def downcase_email

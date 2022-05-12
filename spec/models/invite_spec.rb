@@ -58,6 +58,13 @@ RSpec.describe Invite, type: :model do
     end
   end
 
+  describe '#update_invited_person' do
+    let(:invite) { create(:invite, invited_as: "Organizer") }
+    it "returns a Supporting Organizer" do
+      expect(invite.update_invited_person("Test Affiliation")).to be_truthy
+    end
+  end
+
   describe '#proposal_title' do
     context 'when proposal title present' do
       let(:invite) do

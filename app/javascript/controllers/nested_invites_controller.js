@@ -76,6 +76,17 @@ export default class extends Controller {
     )
   }
 
+  editPreview ()  {
+    event.preventDefault()
+    let id = event.currentTarget.dataset.id;
+    let invitedAs = event.currentTarget.id;
+    $.get(`/invites/show_invite_modal/${id}`, function(data) {
+        $('#invite-modal-body').html(data)
+        $('#invite-modal').modal('show')
+      }
+    )
+  }
+
   sendInvite () {
     let id = event.currentTarget.dataset.id;
     let invitedAs = ''

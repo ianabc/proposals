@@ -1,0 +1,31 @@
+<div class="modal fade" id="invite-modal" tabindex="-1" aria-labelledby="email-previewLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><span id="subject"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-justify" style="text-align: justify;">
+          <%= form_with(model: @invite, url: proposal_invite_path(proposal_id: @invite.proposal_id, invite_id: @invite.id ), remote: true, method: :patch) do |f| %>
+
+            <%= f.label :firstname %>
+            <%= f.text_field :firstname, class: 'form-control' %>
+            <%= f.label :lastname %>
+            <%= f.text_field :lastname, class: 'form-control' %>
+            <%= f.label :email %>
+            <%= f.text_field :email, class: 'form-control' %>
+            <%= f.label :affiliation %>
+            <%= f.text_field :affiliation, :value => get_affiliation(f.object), class: 'form-control' %>
+            <br>
+
+            <div class="actions">
+              <%= f.submit :Update, class: 'btn btn-primary' %>
+            </div>
+            <% end %>
+      </div>
+      <div class="modal-footer" data-controller="nested-invites">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
