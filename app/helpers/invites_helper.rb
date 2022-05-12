@@ -7,6 +7,10 @@ module InvitesHelper
     Invite.responses.map { |k, _v| [k.capitalize, k] }
   end
 
+  def get_affiliation(invite)
+    invite.person.affiliation
+  end
+
   def max_invitations(proposal, invited_as)
     max_invitations = confirmed_participants(proposal.id, invited_as).count
     invited_as = invited_as == 'Participant' ? invited_as.downcase : 'co_organizer'
