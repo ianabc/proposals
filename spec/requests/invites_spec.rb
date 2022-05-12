@@ -91,6 +91,29 @@ RSpec.describe "/proposals/:proposal_id/invites", type: :request do
     end
   end
 
+  describe "GET /show_invite_modal" do
+    it "open a modal and response should be ok" do
+      get show_invite_modal_url(invite.id)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "PATCH /update" do
+    let(:params) do
+      {
+        invite: {
+          firstname: "Test FirstName",
+          lastname: "Test LastName",
+          affiliation: "Test Affiliation"
+        }
+      }
+    end
+    it "update invite data from params" do
+      patch proposal_invite_url(proposal.id, invite.id), params: params
+      expect(response).to have_http_status(302)
+    end
+  end
+
   describe "POST /cancel" do
     context 'when deadline_date is less than current date' do
       let(:invite1) { create(:invite, status: 'cancelled', deadline_date: Time.zone.now) }

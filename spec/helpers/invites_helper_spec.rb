@@ -47,4 +47,12 @@ RSpec.describe InvitesHelper, type: :helper do
       expect(confirmed_minimum_participants(proposal)).to be_falsey
     end
   end
+
+  describe '#get_affiliation' do
+    it 'returns true if no of participant reached to 10' do
+      invite.person.update(affiliation: "Test Affiliation")
+      expect(get_affiliation(invite)).to be_a String
+      expect(get_affiliation(invite)).to eq "Test Affiliation"
+    end
+  end
 end

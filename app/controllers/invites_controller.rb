@@ -13,6 +13,25 @@ class InvitesController < ApplicationController
     render layout: 'devise'
   end
 
+  def show_invite_modal
+    @invite = Invite.find(params[:id])
+
+    render partial: 'submitted_proposals/invite_modal', locals: { invite: @invite }
+  end
+
+  def update
+    @proposal = Proposal.find(params[:proposal_id])
+    @invite = @proposal.invites.find(params[:id])
+    if @invite.update(invite_params)
+      if @invite.update_invited_person(params["invite"]["affiliation"])
+        flash[:success] = t('invites.update.success')
+      else
+        flash[:alert] = t('invites.update.failure')
+      end
+    end
+    redirect_to edit_submitted_proposal_url(@invite.proposal_id)
+  end
+
   def invite_email
     @inviters = if params[:id].eql?("0")
                   Invite.where(proposal_id: @proposal.id, invited_as: params[:invited_as])

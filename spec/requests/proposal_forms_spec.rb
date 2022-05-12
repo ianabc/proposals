@@ -93,6 +93,18 @@ RSpec.describe "/proposal_forms", type: :request do
       get edit_proposal_type_proposal_form_url(proposal_type, proposal_form)
       expect(response).to have_http_status(302)
     end
+    it 'render a successful response when proposal form is not active' do
+      proposal_form.update(status: 'draft')
+      get edit_proposal_type_proposal_form_url(proposal_type, proposal_form)
+      expect(response).to have_http_status(200)
+    end
+    context 'when cloned is present in params' do
+      let(:params) { { cloned: true } }
+      it 'render a successful response' do
+        get edit_proposal_type_proposal_form_url(proposal_type, proposal_form), params: params
+        expect(response).to have_http_status(200)
+      end
+    end
   end
 
   describe "PATCH /update" do
@@ -107,6 +119,18 @@ RSpec.describe "/proposal_forms", type: :request do
         expect(proposal_form.reload.status).to eq('active')
       end
       it { expect(proposal_form.reload.updated_by).to eq(@user) }
+    end
+
+    context "when proposal_form status is draft" do
+      let(:params) { { proposal_form: { status: 'draft' } } }
+      before do
+        authenticate_for_controllers
+        patch proposal_type_proposal_form_url(proposal_type, proposal_form, params: params)
+      end
+
+      it "updates the status to draft" do
+        expect(response).to have_http_status(302)
+      end
     end
 
     context "with invalid parameters" do

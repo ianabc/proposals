@@ -82,6 +82,23 @@ RSpec.describe "/submitted_proposals", type: :request do
     it { expect(response).to have_http_status(:ok) }
   end
 
+  describe "POST /edit_flow when ids are in params" do
+    let(:params) do
+      { ids: proposal.id }
+    end
+    it 'when status is unprocessable_entity' do
+      post edit_flow_submitted_proposals_url, params: params
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "POST /edit_flow when ids are not in params" do
+    it 'when status is unprocessable_entity' do
+      post edit_flow_submitted_proposals_url
+      expect(response).to have_http_status(302)
+    end
+  end
+
   describe "POST /staff_discussion" do
     let(:params) { { discussion: "Testing.." } }
     context 'when valid params' do

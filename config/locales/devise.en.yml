@@ -122,6 +122,9 @@ en:
     update:
       success: "Subject Category successfully updated."
   invites:
+    update:
+      success: "invite information is updated successfully"
+      failure: "Something went wrong"
     cancel:
       success: "Invite has been cancelled!"
       failure: "Invite has been cancelled!"

@@ -40,11 +40,14 @@
                       <h5 class="text-danger">No reply yet</h5>
                     <% end %>
                   </div>
+                  <div class="card-footer">
+                    <div class="d-flex justify-content-end">Submitted at: <%= feedback.created_at.to_date %></div>
+                  </div>
                 </div>
             </div>
           <% end %>
         <% else %>
-          <% @feedback.each do |feedback| %>  
+          <% @feedback.each do |feedback| %>
             <div class="card-body cursor-pointer"  data-controller="feedback">
                 <div class="card">
                   <div class="card-header">
@@ -69,7 +72,12 @@
                           </div>
                         </div>
                       </div>
+                    <% else %>
+                      <div class="bg-light rounded-pill p-3"><%= feedback.reply %></div>
                     <% end %>
+                  </div>
+                  <div class="card-footer">
+                    <div class="d-flex justify-content-end">Submitted at: <%= feedback.created_at.to_date %></div>
                   </div>
                 </div>
             </div>
