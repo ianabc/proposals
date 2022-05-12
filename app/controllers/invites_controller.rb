@@ -20,12 +20,13 @@ class InvitesController < ApplicationController
   end
 
   def update
-    @invite = Invite.find(params[:id])
+    @proposal = Proposal.find(params[:proposal_id])
+    @invite = @proposal.invites.find(params[:id])
     if @invite.update(invite_params)
       if @invite.update_invited_person(params["invite"]["affiliation"])
-        flash[:success] = "invite information is updated successfully"
+        flash[:success] = t('invites.update.success')
       else
-        flash[:alert] = "Something went wrong"
+        flash[:alert] = t('invites.update.failure')
       end
     end
     redirect_to edit_submitted_proposal_url(@invite.proposal_id)
