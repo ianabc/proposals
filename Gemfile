@@ -30,6 +30,7 @@ gem 'sass-rails', '>= 6'
 gem 'tinymce-rails'
 gem 'turbo-rails', '~> 0.8.2'
 gem 'webpacker', '~> 5.0'
+gem 'email_verifier'
 
 group :development, :test do
   gem 'byebug'
