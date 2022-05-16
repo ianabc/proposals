@@ -130,6 +130,9 @@ Rails.application.configure do
     host: ENV['APPLICATION_HOST']
   }
 
+  # Tinymce config 
+  config.assets.precompile += %w[tinymce/tiny_mce.js tinymce/langs/en.js tinymce/themes/advanced/editor_template.js]
+
   ## SMTP Settings
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.raise_delivery_errors = true
