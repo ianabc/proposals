@@ -121,7 +121,7 @@ export default class extends Controller {
         processData: false,
         contentType: false,
         data: data,
-        success: function (data) {
+        success: function () {
           toastr.success("Emails have been sent!")
           setTimeout(function() {
             window.location.reload();
