@@ -20,6 +20,11 @@ RSpec.describe "/person", type: :request do
       get new_person_url(code: invite.code, response: 'yes')
       expect(response).to have_http_status(:ok)
     end
+
+    it "renders a successful response when invite is not present" do
+      get new_person_url(code: 'test', response: 'yes')
+      expect(response).to have_http_status(:ok)
+    end
   end
 
   describe "PATCH /update" do
@@ -34,6 +39,27 @@ RSpec.describe "/person", type: :request do
 
       it "updates the requested Person" do
         expect(person.reload.department).to eq('computer_science')
+      end
+    end
+  end
+
+  describe "PATCH /update" do
+    let(:person_params) do
+      { department: 'computer_science',
+        firstname: nil }
+    end
+
+    context "with invalid parameters" do
+      it "not updated the requested Person" do
+        patch person_url(person), params: { person: person_params, code: invite.code }
+
+        expect(person.reload.department).to eq(nil)
+      end
+
+      it "if invite is not present" do
+        patch person_url(person), params: { person: person_params }
+
+        expect(response).to have_http_status(:ok)
       end
     end
   end

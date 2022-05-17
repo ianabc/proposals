@@ -290,4 +290,16 @@ RSpec.describe "/submitted_proposals", type: :request do
       expect(response).to have_http_status(200)
     end
   end
+
+  describe ' POST /submitted_proposals/revise_proposal_editflow' do
+    it 'revise proposal editflow when not progress spc' do
+      post revise_proposal_editflow_submitted_proposals_url(proposal_id: proposal.id)
+      expect(response).to have_http_status(302)
+    end
+    it 'revise proposal editflow when progress spc and editflow id is blank' do
+      proposal.update(status: "revision_submitted_spc")
+      post revise_proposal_editflow_submitted_proposals_url(proposal_id: proposal.id)
+      expect(response).to have_http_status(302)
+    end
+  end
 end
