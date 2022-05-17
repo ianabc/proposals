@@ -33,7 +33,7 @@
                       <tr>
                         <td>Program Year:</td>
                         <td>
-                          <%= select_tag "year", options_for_select([[(Date.current.year + 2), (Date.current.year + 2)], [2022, 2022], [2024, 2024], [2025, 2025], [2026, 2026], [2027, 2027], [2028, 2028], [2029, 2029]]), { class: 'form-select mb-3 p-1', style: 'width: 116px;'}%>
+                          <%= select_tag "year", options_for_select(program_years), { class: 'form-select mb-3 p-1', style: 'width: 116px;'}%>
                         </td>
                         <td></td>
                       </tr>
