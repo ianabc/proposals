@@ -59,6 +59,7 @@ Rails.application.routes.draw do
   delete '/schedule_runs/:id', to: 'schedule_runs#destroy', as: 'destroy_schedule_runs'
 
   get :invite, to: 'invites#show'
+  get 'invites/show_invite_modal/:id', to: 'invites#show_invite_modal', as: 'show_invite_modal'
   get 'cancelled' => 'invites#cancelled'
   post 'cancel' => 'invites#cancel'
   post 'cancel_confirmed_invite' => 'invites#cancel_confirmed_invite'
