@@ -104,20 +104,36 @@ export default class extends Controller {
     });
     if(this.templatesTarget.value) {
       $('#birs_email_body').val(tinyMCE.get('birs_email_body').getContent())
-      $.post(`/submitted_proposals/approve_decline_proposals?proposal_ids=${proposalIds}`,
-        $("#approve_decline_proposals").serialize(), function() {
+      var data = new FormData();
+      var form_data = $('#approve_decline_proposals').serializeArray();
+        $.each(form_data, function (key, input) {
+          data.append(input.name, input.value);
+      });
+
+      var file_data = $('#decision_email_files')[0].files;
+        for (var i = 0; i < file_data.length; i++) {
+          data.append("attachments[]", file_data[i]);
+        }
+
+      $.ajax({
+        url: `/submitted_proposals/approve_decline_proposals?proposal_ids=${proposalIds}`,
+        method: "post",
+        processData: false,
+        contentType: false,
+        data: data,
+        success: function () {
           toastr.success("Emails have been sent!")
           setTimeout(function() {
             window.location.reload();
           }, 2000)
+        },
+        error: function (e) {
+          let errors = e.responseJSON
+          $.each(errors, function(index, error) {
+            toastr.error(error)
+          })
         }
-      )
-      .fail(function(response) {
-        let errors = response.responseJSON
-        $.each(errors, function(index, error) {
-          toastr.error(error)
-        })
-      });
+      })
     }
     else {
       toastr.error("Please select any template")

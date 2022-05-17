@@ -31,3 +31,11 @@
 
 en:
   hello: "Hello world"
+  errors:
+    messages:
+      email_verifier: 
+        email_not_real: must point to a real mail account
+        out_of_mail_server: appears to point to dead mail server
+        no_mail_server: appears to point to domain which doesn't handle e-mail
+        failure:  delivery failed! The email you have entered not found.
+        exception: could not be sent

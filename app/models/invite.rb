@@ -13,7 +13,8 @@ class Invite < ApplicationRecord
 
   validates :firstname, :lastname, :email, :invited_as,
             :deadline_date, presence: true
-  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates_email_realness_of :email
+
   validate :deadline_not_in_past, :proposal_title
   validate :one_invite_per_person, on: :create
   after_commit :log_activity

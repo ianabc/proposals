@@ -28,5 +28,9 @@ module Proposals
 
       "<div class=\"field_with_errors has-validation\">#{html_tag}</div>".html_safe
     }
+
+    EmailVerifier.config do |config|
+      config.verifier_email = "realname@realdomain.com"
+    end
   end
 end

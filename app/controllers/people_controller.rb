@@ -23,14 +23,14 @@ class PeopleController < ApplicationController
   private
 
   def person_params
-    params.require(:person).permit(:affiliation, :department, :academic_status,
+    params.require(:person).permit(:firstname, :lastname, :affiliation, :department, :academic_status,
                                    :title, :first_phd_year, :country, :region,
                                    :city, :street_1, :street_2, :postal_code,
                                    :other_academic_status, :province, :state)
   end
 
   def set_person
-    @person = invited_person || current_user&.person
+    @person = invited_person || current_user.person
   end
 
   def invite

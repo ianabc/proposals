@@ -25,6 +25,73 @@ RSpec.describe "/schedules", type: :request do
     end
   end
 
+  describe "POST /create" do
+    it "render a successful response when request format is not json" do
+      post '/schedules'
+      expect(response).to have_http_status(406)
+    end
+  end
+
+  describe "POST /create" do
+    it "render a successful response when no API key present" do
+      ENV['SCHEDULE_API_KEY'] = ''
+      post '/schedules', params: {
+            some_field: "test",
+        },
+        as: :json
+      expect(response).to have_http_status(401)
+    end
+  end
+
+  describe "POST /create" do
+    it "render a successful response when API key is invalid" do
+      ENV['SCHEDULE_API_KEY'] = 'test'
+      post '/schedules', params: {
+          schedule: {
+            SCHEDULE_API_KEY: "test_invalid" }
+        },
+        as: :json
+      expect(response).to have_http_status(401)
+    end
+  end
+
+  describe "POST /create" do
+    it "render a successful response when API key is valid and record not saved" do
+      ENV['SCHEDULE_API_KEY'] = 'test'
+      post '/schedules', params: {
+          schedule: {
+            SCHEDULE_API_KEY: "test",
+            schedule_run_id: schedule_run.id,
+            run_data: [
+              case_num: 1,
+              hmc_score: 2,
+              assignments: ['one','two']
+            ] }
+        },
+        as: :json
+      expect(response).to have_http_status(422)
+    end
+  end
+
+  describe "POST /create" do
+    it "render a successful response when API key is valid and record saved successfully" do
+      ENV['SCHEDULE_API_KEY'] = 'test'
+      post '/schedules', params: {
+                                    schedule: {
+                                                SCHEDULE_API_KEY: "test",
+                                                schedule_run_id: schedule_run.id,
+                                                run_data: [
+                                                            case_num: 1,
+                                                            hmc_score: 2,
+                                                            assignments:  [week: "1", proposal: "ss"]  
+                                                          ] 
+                                              }
+                                  },
+        as: :json 
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
   describe "GET /optimized_schedule" do
     context 'when page is not present in params' do
       let(:params) do
@@ -306,6 +373,7 @@ RSpec.describe "/schedules", type: :request do
       it 'returns nill' do
         expect(proposal.preferred_dates).to eq('')
       end
+
     end
   end
 

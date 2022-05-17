@@ -32,6 +32,17 @@ RSpec.describe Email, type: :model do
         expect(birs_email.update_status(proposal, 'Revision')).to be_truthy
       end
     end
+
+    context 'when status is invalid Revision ' do
+      before do
+        proposal.update(status: 'draft')
+      end
+      it 'Expecting required status according to condition' do
+        expect(proposal.reload.status).to eq('draft')
+        expect(birs_email.update_status(proposal, 'Revision')).to be_falsey
+      end
+    end
+
     context 'when status is Revision SPC' do
       before do
         proposal.update(status: 'revision_submitted_spc')
@@ -41,6 +52,17 @@ RSpec.describe Email, type: :model do
         expect(birs_email.update_status(proposal, 'Revision SPC')).to be_truthy
       end
     end
+
+    context 'when status is invalid Revision SPC' do
+      before do
+        proposal.update(status: 'draft')
+      end
+      it 'Expecting required status according to condition' do
+        expect(proposal.reload.status).to eq('draft')
+        expect(birs_email.update_status(proposal, 'Revision SPC')).to be_falsey
+      end
+    end
+
     context 'when status is Reject' do
       before do
         proposal.update(status: 'decision_pending', outcome: 'rejected')
@@ -51,6 +73,18 @@ RSpec.describe Email, type: :model do
         expect(birs_email.update_status(proposal, 'Reject')).to be_truthy
       end
     end
+
+    context 'when status is invalid Reject' do
+      before do
+        proposal.update(status: 'draft', outcome: 'rejected')
+      end
+      it 'Expecting required status according to condition' do
+        expect(proposal.reload.status).to eq('draft')
+        expect(proposal.reload.outcome).to eq('rejected')
+        expect(birs_email.update_status(proposal, 'Reject')).to be_falsey
+      end
+    end
+
     context 'when status is Approval' do
       before do
         proposal.update(status: 'decision_pending', outcome: 'approved')
@@ -61,6 +95,18 @@ RSpec.describe Email, type: :model do
         expect(birs_email.update_status(proposal, 'Approval')).to be_truthy
       end
     end
+
+    context 'when status is invalid Approval' do
+      before do
+        proposal.update(status: 'draft', outcome: 'approved')
+      end
+      it 'Expecting required status according to condition' do
+        expect(proposal.reload.status).to eq('draft')
+        expect(proposal.reload.outcome).to eq('approved')
+        expect(birs_email.update_status(proposal, 'Approval')).to be_falsey
+      end
+    end
+
     context 'when status is Decision' do
       before do
         proposal.update(status: 'decision_pending')
@@ -71,6 +117,17 @@ RSpec.describe Email, type: :model do
       end
     end
 
+    context 'when status is invalid Decision' do
+      before do
+        proposal.update(status: 'draft')
+      end
+      it 'Expecting required status according to condition' do
+        expect(proposal.reload.status).to eq('draft')
+        expect(birs_email.update_status(proposal, 'Decision')).to be_falsey
+      end
+    end
+
+    
     it { expect(birs_email.update_status(proposal, 'Draft')).to be_falsey }
   end
 

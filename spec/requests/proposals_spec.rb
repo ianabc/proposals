@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "Proposals", type: :request do
   let(:user) { create(:user) }
-  let(:person) { create(:person, :with_proposals, user: user) }
+  let!(:person) { create(:person, :with_proposals, user: user) }
   let(:proposal) { person.proposals.first }
 
   before { authenticate_for_controllers(person) }
@@ -21,7 +21,7 @@ RSpec.describe "Proposals", type: :request do
     let(:proposal_location) { create(:proposal_location, proposal_id: proposal.id, location_id: location.id) }
     before do
       proposal_location
-      patch ranking_proposal_path(proposal, location_id: location.id)
+      patch ranking_proposal_path(proposal, location_id: location.id, position: 2)
     end
     it { expect(response).to have_http_status(:ok) }
   end
@@ -73,6 +73,12 @@ RSpec.describe "Proposals", type: :request do
     it { expect(response).to have_http_status(:ok) }
   end
 
+  describe "GET /locations" do
+    before { get locations_proposal_path(proposal) }
+
+    it { expect(response).to have_http_status(:ok) }
+  end
+
   describe "print latex" do
     it 'latex input' do
       post "/proposals/#{proposal.id}/latex"
@@ -80,7 +86,12 @@ RSpec.describe "Proposals", type: :request do
     end
 
     it 'latex output' do
-      get "/proposals/#{proposal.id}/rendered_proposal.pdf"
+      get rendered_proposal_proposal_url(proposal)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'latex field' do
+      get rendered_field_proposal_url(proposal)
       expect(response).to have_http_status(:ok)
     end
   end
@@ -143,6 +154,13 @@ RSpec.describe "Proposals", type: :request do
       expect do
         post remove_file_proposal_url(proposal), params: { attachment_id: proposal.files.first.id }
       end.to change(ActiveStorage::Attachment, :count).by(0)
+    end
+  end
+
+  describe "GET /locations(" do
+    it 'proposal location' do
+      get locations_proposal_url(proposal)
+      expect(response).to have_http_status(:ok)
     end
   end
 end

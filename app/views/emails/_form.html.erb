@@ -29,7 +29,7 @@
       </div>
       <div class="mb-3">
         <p>Attachments</p>
-        <%= f.file_field :files, multiple: true %>
+        <%= f.file_field :files, multiple: true, type: :file %>
       </div>
       <div>
         <%= f.label :body, class: 'form-label' %>
