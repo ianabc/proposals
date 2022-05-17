@@ -86,7 +86,12 @@ RSpec.describe "Proposals", type: :request do
     end
 
     it 'latex output' do
-      get "/proposals/#{proposal.id}/rendered_proposal.pdf"
+      get rendered_proposal_proposal_url(proposal)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'latex field' do
+      get rendered_field_proposal_url(proposal)
       expect(response).to have_http_status(:ok)
     end
   end
@@ -151,4 +156,12 @@ RSpec.describe "Proposals", type: :request do
       end.to change(ActiveStorage::Attachment, :count).by(0)
     end
   end
+
+  describe "GET /locations(" do
+    it 'proposal location' do
+      get locations_proposal_url(proposal)
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
 end
