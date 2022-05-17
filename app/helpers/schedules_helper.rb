@@ -65,4 +65,12 @@ module SchedulesHelper
 
     link_to id, optimized_schedule_schedules_url(run_id: run.id)
   end
+
+  def program_years
+    years = []
+    (0..7).each do |i|
+      years.append([Date.current.year + i, Date.current.year + i])
+    end
+    return years
+  end
 end
