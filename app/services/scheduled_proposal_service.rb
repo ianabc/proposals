@@ -8,7 +8,7 @@ class ScheduledProposalService
 
   def event
     {
-      api_key: ENV["WORKSHOPS_API_KEY"],
+      api_key: ENV.fetch("WORKSHOPS_API_KEY", nil),
       updated_by: "Proposals import",
       event: event_data,
       memberships: memberships_data

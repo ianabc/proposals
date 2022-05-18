@@ -177,9 +177,9 @@ class HungarianMonteCarlo
   end
 
   def set_hmc_params
-    @hmc_server = ENV['HMC_SERVER']
-    @hmc_port = ENV['HMC_PORT']
-    @hmc_access_code = ENV['HMC_ACCESS']
+    @hmc_server = ENV.fetch('HMC_SERVER', nil)
+    @hmc_port = ENV.fetch('HMC_PORT', nil)
+    @hmc_access_code = ENV.fetch('HMC_ACCESS', nil)
 
     return unless [@hmc_server, @hmc_port, @hmc_access_code].any?(&:blank?)
 
