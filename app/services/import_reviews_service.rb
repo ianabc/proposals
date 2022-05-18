@@ -9,9 +9,9 @@ class ImportReviewsService
   def proposal_reviews
     edit_flow_query = EditFlowService.new(@proposal).mutation
 
-    response = RestClient.post ENV['EDITFLOW_API_URL'],
+    response = RestClient.post ENV.fetch('EDITFLOW_API_URL', nil),
                                { query: edit_flow_query },
-                               { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
+                               { x_editflow_api_token: ENV.fetch('EDITFLOW_API_TOKEN', nil) }
 
     if response.body.include?("errors")
       display_errors(response)

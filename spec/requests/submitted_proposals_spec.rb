@@ -83,6 +83,8 @@ RSpec.describe "/submitted_proposals", type: :request do
   end
 
   describe "POST /edit_flow when ids are in params" do
+    let(:subject) { create(:subject) }
+    let!(:ams_subject) { create(:ams_subject, subject: subject) }
     let(:params) do
       { ids: proposal.id }
     end
@@ -122,20 +124,98 @@ RSpec.describe "/submitted_proposals", type: :request do
     end
   end
 
-  describe "POST /send_emails" do
+  describe "POST /send_emails with wrong params" do
     let(:email_template) { create(:email_template, email_type: :revision_type) }
     let(:params) do
       { cc_email: '',
         bcc_email: '',
         subject: email_template.subject,
         body: email_template.body,
-        templates: "Revision: Revise Proposal" }
-    end
-    before do
-      post send_emails_submitted_proposal_path(proposal, params: params)
+        templates: "Test: Test Proposal" }
     end
 
     it "send emails to lead_organizer" do
+      post send_emails_submitted_proposal_path(proposal, params: params)
+      expect(response).to redirect_to(edit_submitted_proposal_path(proposal))
+    end
+  end
+
+  describe "POST /send_emails with params Revision" do
+    let(:email_template) { create(:email_template, email_type: :revision_type) }
+    let(:params) do
+      { cc_email: '',
+        bcc_email: '',
+        subject: email_template.subject,
+        body: email_template.body,
+        templates: "Revision: Revision Proposal" }
+    end
+
+    it "send emails to lead_organizer" do
+      post send_emails_submitted_proposal_path(proposal, params: params)
+      expect(response).to redirect_to(edit_submitted_proposal_path(proposal))
+    end
+  end
+
+  describe "POST /send_emails with params Revision" do
+    let(:email_template) { create(:email_template, email_type: :revision_type) }
+    let(:params) do
+      { cc_email: '',
+        bcc_email: '',
+        subject: email_template.subject,
+        body: email_template.body,
+        templates: "Revision: Revision Proposal" }
+    end
+
+    it "send emails to lead_organizer" do
+      post send_emails_submitted_proposal_path(proposal, params: params)
+      expect(response).to redirect_to(edit_submitted_proposal_path(proposal))
+    end
+  end
+
+  describe "POST /send_emails with params Approve" do
+    let(:email_template) { create(:email_template, email_type: :revision_type) }
+    let(:params) do
+      { cc_email: '',
+        bcc_email: '',
+        subject: email_template.subject,
+        body: email_template.body,
+        templates: "Revision SPC: Revision SPC Proposal" }
+    end
+
+    it "send emails to lead_organizer" do
+      post send_emails_submitted_proposal_path(proposal, params: params)
+      expect(response).to redirect_to(edit_submitted_proposal_path(proposal))
+    end
+  end
+
+  describe "POST /send_emails with params Reject" do
+    let(:email_template) { create(:email_template, email_type: :revision_type) }
+    let(:params) do
+      { cc_email: '',
+        bcc_email: '',
+        subject: email_template.subject,
+        body: email_template.body,
+        templates: "Reject: Reject Proposal" }
+    end
+
+    it "send emails to lead_organizer" do
+      post send_emails_submitted_proposal_path(proposal, params: params)
+      expect(response).to redirect_to(edit_submitted_proposal_path(proposal))
+    end
+  end
+
+  describe "POST /send_emails with params Decision" do
+    let(:email_template) { create(:email_template, email_type: :revision_type) }
+    let(:params) do
+      { cc_email: '',
+        bcc_email: '',
+        subject: email_template.subject,
+        body: email_template.body,
+        templates: "Decision Decision Proposal" }
+    end
+
+    it "send emails to lead_organizer" do
+      post send_emails_submitted_proposal_path(proposal, params: params)
       expect(response).to redirect_to(edit_submitted_proposal_path(proposal))
     end
   end
@@ -301,5 +381,44 @@ RSpec.describe "/submitted_proposals", type: :request do
       post revise_proposal_editflow_submitted_proposals_url(proposal_id: proposal.id)
       expect(response).to have_http_status(302)
     end
+  end
+
+  describe 'GET/ download_review_booklet_submitted_proposals' do
+    it 'when file is not present' do
+      get download_review_booklet_submitted_proposals_path
+      expect(response).to have_http_status(200)
+    end
+  end
+
+  describe 'GET/ reviews_excel_booklet_submitted_proposals' do
+    let(:subject) { create(:subject) }
+    let!(:review) { create(:review, person_id: person.id) }
+
+    it 'when file is not present' do
+      params = { proposals: proposal.id,
+                 format: :xlsx }
+      proposal.update(subject_id: subject.id)
+      get reviews_excel_booklet_submitted_proposals_path, params: params
+      expect(response).to have_http_status(200)
+    end
+
+    it 'when reviews are present for proposal' do
+      params = { proposals: proposal.id,
+                 format: :xlsx }
+      proposal.update(subject_id: subject.id)
+      review.update(proposal_id: proposal.id)
+      get reviews_excel_booklet_submitted_proposals_path, params: params
+      expect(response).to have_http_status(200)
+    end
+
+    # it 'when editflow_id is present for proposal' do
+    #   params = { proposals: proposal.id,
+    #             format: :xlsx }
+    #   EDITFLOW_API_URL = 'test/editflow/api/id'
+    #   EDITFLOW_API_TOKEN = 'test/editflow/api/token'
+    #   proposal.update(subject_id: subject.id, editflow_id: Time.now)
+    #   get reviews_excel_booklet_submitted_proposals_path(), params: params
+    #   expect(response).to have_http_status(200)
+    # end
   end
 end

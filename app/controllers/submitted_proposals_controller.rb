@@ -203,9 +203,9 @@ class SubmittedProposalsController < ApplicationController
     params.require(:proposal).permit(id: [])
   end
 
-  def query_params?
-    params.values.any?(&:present?)
-  end
+  # def query_params?
+  #   params.values.any?(&:present?)
+  # end
 
   def outcome_location_params
     params.require(:proposal).permit(:outcome, :assigned_location_id, :assigned_size)
@@ -217,7 +217,7 @@ class SubmittedProposalsController < ApplicationController
 
   def set_proposals
     @proposals = Proposal.order(:code, :created_at)
-    @proposals = ProposalFiltersQuery.new(@proposals).find(params) if query_params?
+    @proposals = ProposalFiltersQuery.new(@proposals).find(params)
   end
 
   def change_status
@@ -270,12 +270,11 @@ class SubmittedProposalsController < ApplicationController
       Rails.logger.info { "\n\nErrors in #{@proposal.code}: #{e.message}\n\n" }
       flash[:alert] = "Errors in #{@proposal.code}: #{e.message}"
     end
-
     return if flash[:alert].present?
 
-    response = RestClient.post ENV['EDITFLOW_API_URL'],
+    response = RestClient.post ENV.fetch('EDITFLOW_API_URL', nil),
                                { query: edit_flow_query, fileMain: File.open(@pdf_path) },
-                               { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
+                               { x_editflow_api_token: ENV.fetch('EDITFLOW_API_TOKEN', nil) }
 
     query_response_body(response)
     Rails.logger.info { "\n\n*****************************************\n\n" }

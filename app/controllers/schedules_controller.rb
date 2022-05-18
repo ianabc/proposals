@@ -140,7 +140,7 @@ class SchedulesController < ApplicationController
       return
     end
 
-    if schedule_params['SCHEDULE_API_KEY'] != ENV['SCHEDULE_API_KEY']
+    if schedule_params['SCHEDULE_API_KEY'] != ENV.fetch('SCHEDULE_API_KEY', nil)
       render json: { error: "Invalid API key." }, status: :unauthorized
       return
     end
