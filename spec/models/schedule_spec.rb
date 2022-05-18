@@ -32,22 +32,24 @@ RSpec.describe Schedule, type: :model do
   end
 
   describe '#choice' do
-    context "when proposal or assigned_date is empty" do
+    context "when proposal is empty" do
       let(:proposal) { create(:proposal, assigned_date: "2023-01-15 - 2023-01-20", code: "23wt4ed") }
       let(:schedule_run) { create(:schedule_run) }
       let(:schedule) { create(:schedule, schedule_run_id: schedule_run.id, proposal: "23wetdf45") }
 
-      it 'returns empty string' do
+      it 'returns empty string when proposal not found' do
         expect(schedule.choice).to eq("")
       end
     end
 
-    context "when proposal preferred_dates are empty" do
+    context "when proposal is present" do
       let(:proposal) { create(:proposal, assigned_date: "2023-01-15 - 2023-01-20") }
       let(:schedule_run) { create(:schedule_run) }
       let(:schedule) { create(:schedule, schedule_run_id: schedule_run.id) }
+      let(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
 
-      it 'returns empty string' do
+      it 'returns empty string when proposal preferred_dates are empty' do
+        schedule.update(proposal: proposal.id)
         expect(schedule.choice).to eq("")
       end
     end
@@ -68,6 +70,11 @@ RSpec.describe Schedule, type: :model do
     let(:schedule) { create(:schedule, schedule_run_id: schedule_run.id, proposal: proposal) }
     it 'if schedule run location week is not zero ' do
       expect(schedule.dates).to be_present
+    end
+
+    it 'if schedule run location week is zero ' do
+      schedule_run.location.update(start_date: '')
+      expect(schedule.dates).not_to be_present
     end
   end
 end
