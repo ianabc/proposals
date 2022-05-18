@@ -159,4 +159,11 @@ RSpec.describe SchedulesHelper, type: :helper do
       end
     end
   end
+
+  describe '#program_years' do
+    it 'returns list of years in array' do
+      expect(program_years).to be_present
+      expect(program_years).to be_a Array
+    end
+  end
 end
