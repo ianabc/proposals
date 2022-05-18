@@ -10,12 +10,14 @@ RSpec.describe "/person", type: :request do
     create(:role_privilege,
            permission_type: "Manage", privilege_name: "Person", role_id: role.id)
   end
-  before do
-    role_privilege
-    user.roles << role
-    sign_in user
-  end
+
   describe "GET /new" do
+    before do
+      role_privilege
+      user.roles << role
+      sign_in user
+    end
+
     it "renders a successful response" do
       get new_person_url(code: invite.code, response: 'yes')
       expect(response).to have_http_status(:ok)
@@ -27,7 +29,29 @@ RSpec.describe "/person", type: :request do
     end
   end
 
+  describe 'when user person is not present' do
+    let(:user1) { create(:user, person: nil) }
+
+    before do
+      role_privilege
+      user1.roles << role
+      sign_in user1
+    end
+
+    it 'redirect to root_path when person is not present' do
+      get new_person_url(code: 'test', response: 'yes')
+      # expect(response).to have_http_status(302)
+      expect(response).to redirect_to(root_path)
+    end
+  end
+
   describe "PATCH /update" do
+    before do
+      role_privilege
+      user.roles << role
+      sign_in user
+    end
+
     let(:person_params) do
       { department: 'computer_science' }
     end
@@ -44,6 +68,12 @@ RSpec.describe "/person", type: :request do
   end
 
   describe "PATCH /update" do
+    before do
+      role_privilege
+      user.roles << role
+      sign_in user
+    end
+
     let(:person_params) do
       { department: 'computer_science',
         firstname: nil }
