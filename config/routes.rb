@@ -168,4 +168,13 @@ Rails.application.routes.draw do
 
   # Serve websocket cable requests in-process (passenger runs separate process)
   mount ActionCable.server => '/cable'
+
+  Rails.application.routes.draw do
+  if Rails.env.test?
+    namespace :test do
+      resource :session, only: %i[create]
+    end
+  end
+end
+
 end
