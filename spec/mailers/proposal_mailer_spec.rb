@@ -1,11 +1,25 @@
 require "rails_helper"
 
 RSpec.describe ProposalMailer, type: :mailer do
-  describe 'proposal_submission' do
+  describe 'proposal_submission with submitted status' do
     let(:proposal) { create(:proposal, :with_organizers) }
     let(:proposal_role) { create(:proposal_role, proposal: proposal) }
     before do
       proposal.update(status: :submitted, code: '23w501', title: 'BANFF')
+      proposal_role.role.update(name: 'lead_organizer')
+    end
+    let(:email) { ProposalMailer.with(proposal: proposal).proposal_submission }
+
+    it "sends an proposal_submission email" do
+      expect(email.subject).to eq("BIRS Proposal #{proposal.code}: #{proposal.title}")
+    end
+  end
+
+  describe 'proposal_submission with nil status' do
+    let(:proposal) { create(:proposal, :with_organizers) }
+    let(:proposal_role) { create(:proposal_role, proposal: proposal) }
+    before do
+      proposal.update(status: nil, code: '23w501', title: 'BANFF')
       proposal_role.role.update(name: 'lead_organizer')
     end
     let(:email) { ProposalMailer.with(proposal: proposal).proposal_submission }

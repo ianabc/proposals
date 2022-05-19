@@ -89,6 +89,34 @@ RSpec.describe "/submit_proposals", type: :request do
       end
     end
 
+    context 'with valid invite params, as lead organizer and false create_invite' do
+      before do
+        params[:create_invite] = false
+        @prop = @person.proposals.first
+        expect(@person.user.lead_organizer?(@prop)).to be_truthy
+        @invites_count = @prop.invites.count
+        post submit_proposals_url, params: params.merge(proposal: @prop.id), xhr: true
+      end
+
+      it { expect(response).to have_http_status(:ok) }
+
+      it "updates the proposal invites count" do
+        expect(@prop.invites.count).to eq(@invites_count + 1)
+      end
+    end
+
+    context 'with valid invite params, as lead organizer and nil create_invite' do
+      before do
+        params[:create_invite] = nil
+        @prop = @person.proposals.first
+        expect(@person.user.lead_organizer?(@prop)).to be_truthy
+        @invites_count = @prop.invites.count
+        post submit_proposals_url, params: params.merge(proposal: @prop.id), xhr: true
+      end
+
+      it { expect(response).to have_http_status(302) }
+    end
+
     context 'with valid invite params, not as lead organizer' do
       before do
         expect(proposal.invites.count).to eq(0)
@@ -107,10 +135,10 @@ RSpec.describe "/submit_proposals", type: :request do
         @prop = @person.proposals.first
         @invites_count = @prop.invites.count
 
-        post submit_proposals_url, params: params.merge(proposal: @prop.id), xhr: true
+        post submit_proposals_url, params: params.merge(proposal: @prop.id), xhr: false
       end
 
-      it { expect(response).to have_http_status(:ok) }
+      it { expect(response).to have_http_status(302) }
 
       it "does not update the proposal invites count" do
         expect(proposal.invites.count).not_to eq(@invites_count + 1)
