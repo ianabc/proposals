@@ -18,7 +18,7 @@ RSpec.describe ProposalBookletJob, type: :job do
 
     it "When booklet is created for single proposals" do
       proposals.first.update(subject_id: subject.first.id)
-      proposals_ids = "#{proposals.first.id}"
+      proposals_ids = proposals.first.id.to_s
       counter = 1
       table = 'toc'
       response = ProposalBookletJob.perform_now(proposals_ids, table, counter, user)
