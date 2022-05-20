@@ -55,7 +55,7 @@ class Proposal < ApplicationRecord
     draft: 0,
     submitted: 1,
     initial_review: 2,
-    revision_requested: 3,
+    revision_requested_before_review: 3,
     revision_submitted: 4,
     in_progress: 5,
     decision_pending: 6,
@@ -72,7 +72,7 @@ class Proposal < ApplicationRecord
     state :draft, initial: true
     state :submitted
     state :initial_review
-    state :revision_requested
+    state :revision_requested_before_review
     state :revision_requested_spc
     state :revision_submitted
     state :revision_submitted_spc
@@ -99,7 +99,7 @@ class Proposal < ApplicationRecord
     end
 
     event :requested do
-      transitions from: %i[initial_review decision_pending revision_submitted], to: :revision_requested
+      transitions from: %i[initial_review decision_pending revision_submitted], to: :revision_requested_before_review
     end
 
     event :requested_spc do
@@ -108,7 +108,7 @@ class Proposal < ApplicationRecord
     end
 
     event :revision do
-      transitions from: :revision_requested, to: :revision_submitted
+      transitions from: :revision_requested_before_review, to: :revision_submitted
     end
 
     event :revision_spc do
@@ -143,7 +143,7 @@ class Proposal < ApplicationRecord
   end
 
   def editable?
-    draft? || revision_requested? || revision_requested_spc?
+    draft? || revision_requested_before_review? || revision_requested_spc?
   end
 
   def demographics_data
@@ -278,7 +278,7 @@ class Proposal < ApplicationRecord
   end
 
   def not_before_opening
-    return if draft? || revision_requested? || revision_requested_spc? || allow_late_submission
+    return if draft? || revision_requested_before_review? || revision_requested_spc? || allow_late_submission
 
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 

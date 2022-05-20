@@ -7,7 +7,7 @@ class ProposalVersion < ApplicationRecord
     draft: 0,
     submitted: 1,
     initial_review: 2,
-    revision_requested: 3,
+    revision_requested_before_review: 3,
     revision_submitted: 4,
     in_progress: 5,
     decision_pending: 6,

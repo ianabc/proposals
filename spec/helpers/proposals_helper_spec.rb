@@ -270,7 +270,7 @@ RSpec.describe ProposalsHelper, type: :helper do
   describe "#specific_proposal_statuses" do
     let(:statuses) do
       [["Draft", 0], ["Submitted", 1], ["Initial review", 2],
-       ["Revision requested", 3], ["Revision submitted", 4],
+       ["Revision requested before review", 3], ["Revision submitted", 4],
        ["In progress", 5], ["Decision pending", 6], ["Decision email sent", 7], ["Revision requested spc", 10],
        ["Revision submitted spc", 11], ["In progress spc", 12], ["Shortlisted", 13]]
     end

@@ -234,7 +234,7 @@ class SubmitProposalsController < ApplicationController
   end
 
   def proposal_revision_status
-    @proposal.allow_late_submission = true if @proposal.revision_requested?
+    @proposal.allow_late_submission = true if @proposal.revision_requested_before_review?
     @proposal.revision!
     change_proposal_version
     send_mail
