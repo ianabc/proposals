@@ -1,8 +1,8 @@
 class Person < ApplicationRecord
   attr_accessor :province, :state, :skip_person_validation
 
-  validates :firstname, :lastname, presence: true
-  validates :email, presence: true, uniqueness: true
+  validates :firstname, :lastname, presence: true, length: { maximum: 35 }
+  validates :email, presence: true, uniqueness: true, length: { maximum: 254 }
   belongs_to :user, optional: true
   has_many :proposal_roles, dependent: :destroy
   has_many :proposals, through: :proposal_roles
