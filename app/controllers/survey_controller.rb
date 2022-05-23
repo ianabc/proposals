@@ -105,7 +105,7 @@ class SurveyController < ApplicationController
   end
 
   def post_demographic_form_path
-    message = 'Thank you for filling out our form!'
+    message = 'Thank you for filling out our form! '
 
     if @invite.blank?
       redirect_to new_proposal_path, notice: message
