@@ -20,20 +20,20 @@
                 <%= f.fields_for :person, resource.person do |p| %>
                 <div class="form-group mb-3">
                   <%= p.label :firstname, "Given Name" %>
-                  <%= p.text_field :firstname, autofocus: true, class:'form-control form-control-lg', placeholder: 'Enter your first name' %>
+                  <%= p.text_field :firstname, autofocus: true, maxlength: 35, class:'form-control form-control-lg', placeholder: 'Enter your first name' %>
                 </div>
                 <div class="form-group mb-3">
                   <%= p.label :lastname, "Family Name" %>
-                  <%= p.text_field :lastname, class:'form-control form-control-lg', placeholder: 'Enter your last name' %>
+                  <%= p.text_field :lastname, maxlength: 35, class:'form-control form-control-lg', placeholder: 'Enter your last name' %>
                 </div>
                 <div class="form-group mb-3">
                   <%= p.label :email, "E-mail" %>
-                  <%= p.email_field :email, class:"form-control form-control-lg", placeholder:"Enter your e-mail address", autocomplete: "email" %>
+                  <%= p.email_field :email, maxlength: 254, class:"form-control form-control-lg", placeholder:"Enter your e-mail address", autocomplete: "email" %>
                 </div>
                 <% end %>
                 <div class="form-group mb-3">
                   <%= f.label :password, "Password" %>
-                  <%= f.password_field :password, class:"form-control form-control-lg", placeholder:"Enter a new password", autocomplete: "new-password" %>
+                  <%= f.password_field :password, maxlength: 64, class:"form-control form-control-lg", placeholder:"Enter a new password", autocomplete: "new-password" %>
                   <% if @minimum_password_length %>
                   <div class="text-muted font-italic">
                     <small>password strength: <span class="text-success font-weight-700"><%= @minimum_password_length %> characters minimum</span>

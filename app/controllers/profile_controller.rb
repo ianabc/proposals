@@ -2,6 +2,7 @@ class ProfileController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_user
   before_action :person, only: %i[edit update demographic_data]
+  before_action :set_user, only: %i[update]
 
   def edit
     @result = @person&.demographic_data&.result
@@ -9,6 +10,7 @@ class ProfileController < ApplicationController
 
   def update
     if @person.update(person_params)
+      update_user_email
       redirect_to profile_path, notice: t('profile.update.success')
     else
       redirect_to profile_path, alert: @person.errors.full_messages
@@ -45,5 +47,15 @@ class ProfileController < ApplicationController
 
   def authorize_user
     raise CanCan::AccessDenied if current_user.staff_member?
+  end
+
+  def update_user_email
+    @user.email = @person.email
+    @user.skip_reconfirmation!
+    @user.save!
+  end
+
+  def set_user
+    @user = current_user
   end
 end

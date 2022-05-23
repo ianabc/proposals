@@ -58,7 +58,7 @@
                     <div class="tab-content">
                       <div class="tab-pane active" id="tab-1" role="tabpanel">
                         <h4 class="tab-title"></h4>
-                        <% if @proposal.revision_requested_spc? || @proposal.cover_letter.present? %>
+                        <% if @proposal.revision_requested_after_review? || @proposal.cover_letter.present? %>
                           <div class="mb-3">
                             <h3 class="required">Cover Letter</h3>
                             <p>
@@ -92,7 +92,7 @@
                             <%= label_tag :assigned_location_id %>
                           </div>
                           <div class="mb-3">
-                            <%= f.text_field :assigned_location_id, class: 'form-control w-25', value: @proposal.assigned_location&.code %>
+                            <%= f.text_field :assigned_location_id, id: 'location_field', class: 'form-control w-25 d-inline-block', value: @proposal.assigned_location&.code %>       
                           </div>
                           <div>
                             <%= label_tag :assigned_size %>
@@ -299,8 +299,11 @@
                               <% end %>
                             </div>
                           </div>
-                          <div class="d-flex flex-row-reverse">
-                            <button id="changeTab" class="p-2 btn btn-primary" data-action='click->submit-proposals#nextTab'>Next</button>
+                          <div class="d-flex flex-row-reverse">                          
+                            <button id="changeTab" class="p-2 btn btn-primary" data-action='click->submit-proposals#nextTab'>Next</button> &nbsp;&nbsp;
+                            <% if params[:action] == 'edit' %>
+                              <%= f.submit 'Update', disabled: action, class:'btn btn-primary p-2  d-inline-block' %>
+                            <% end %>
                           </div>
                         </div>
                       </div>
@@ -330,6 +333,9 @@
                         <div class="d-flex">
                           <%= link_to "Print Proposal", rendered_proposal_proposal_path(@proposal.id, :format => :pdf), target: '_blank', class: 'me-auto p-2 btn btn-primary',
                             :'data-action' => 'click->proposal-form#latex', :'data-value' => 'all' %>
+                          <% if params[:action] == 'edit' %>
+                            <%= f.submit 'Update', disabled: action, class:'btn btn-primary p-2  d-inline-block mr-auto' %>
+                          <% end %>
                           <button id="changeTab" class="p-2 mx-2 btn btn-primary" data-action='click->submit-proposals#previousTab'>Back</button>
                           <button id="changeTab" class="p-2 btn btn-primary" data-action='click->submit-proposals#nextTab'>Next</button>
                          </div>
@@ -444,7 +450,7 @@
                               </div>
                             </div>
                           </div>
-                          <div class="d-flex flex-row-reverse">
+                          <div class="d-flex flex-row-reverse">          
                             <button id="changeTab" class="p-2 btn btn-primary" data-action='click->submit-proposals#nextTab'>Next</button>
                           </div>
                         </div>
