@@ -62,7 +62,7 @@ class Proposal < ApplicationRecord
     decision_email_sent: 7,
     approved: 8,
     declined: 9,
-    revision_requested_spc: 10,
+    revision_requested_after_review: 10,
     revision_submitted_spc: 11,
     in_progress_spc: 12,
     shortlisted: 13
@@ -73,7 +73,7 @@ class Proposal < ApplicationRecord
     state :submitted
     state :initial_review
     state :revision_requested_before_review
-    state :revision_requested_spc
+    state :revision_requested_after_review
     state :revision_submitted
     state :revision_submitted_spc
     state :in_progress
@@ -104,7 +104,7 @@ class Proposal < ApplicationRecord
 
     event :requested_spc do
       transitions from: %i[initial_review decision_pending revision_submitted_spc shortlisted],
-                  to: :revision_requested_spc
+                  to: :revision_requested_after_review
     end
 
     event :revision do
@@ -112,7 +112,7 @@ class Proposal < ApplicationRecord
     end
 
     event :revision_spc do
-      transitions from: :revision_requested_spc, to: :revision_submitted_spc
+      transitions from: :revision_requested_after_review, to: :revision_submitted_spc
     end
 
     event :decision do
@@ -143,7 +143,7 @@ class Proposal < ApplicationRecord
   end
 
   def editable?
-    draft? || revision_requested_before_review? || revision_requested_spc?
+    draft? || revision_requested_before_review? || revision_requested_after_review?
   end
 
   def demographics_data
@@ -278,7 +278,7 @@ class Proposal < ApplicationRecord
   end
 
   def not_before_opening
-    return if draft? || revision_requested_before_review? || revision_requested_spc? || allow_late_submission
+    return if draft? || revision_requested_before_review? || revision_requested_after_review? || allow_late_submission
 
     return unless DateTime.current.to_date > proposal_type.closed_date.to_date
 
@@ -300,7 +300,7 @@ class Proposal < ApplicationRecord
   end
 
   def cover_letter_field
-    return unless revision_requested_spc?
+    return unless revision_requested_after_review?
 
     errors.add('Cover Letter:', "shouldn't be empty.") if cover_letter.blank?
   end

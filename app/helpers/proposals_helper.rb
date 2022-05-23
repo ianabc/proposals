@@ -128,7 +128,7 @@ module ProposalsHelper
       "submitted" => "text-proposal-submitted",
       "initial_review" => "text-warning",
       "revision_requested_before_review" => "text-danger",
-      "revision_requested_spc" => "text-danger",
+      "revision_requested_after_review" => "text-danger",
       "revision_submitted" => "text-revision-submitted",
       "revision_submitted_spc" => "text-revision-submitted",
       "in_progress" => "text-success",

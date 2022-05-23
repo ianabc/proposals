@@ -14,7 +14,7 @@ class ProposalVersion < ApplicationRecord
     decision_email_sent: 7,
     approved: 8,
     declined: 9,
-    revision_requested_spc: 10,
+    revision_requested_after_review: 10,
     revision_submitted_spc: 11,
     in_progress_spc: 12,
     shortlisted: 13
