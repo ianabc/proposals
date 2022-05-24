@@ -9,31 +9,30 @@
           <div class="text-center mt-4">
             <h1 class="h2">Create An Account</h1>
             <p class="lead">
-              Please enter your name, e-mail address, and a password.
+              Please enter your name, email address, and a password.
             </p>
           </div>
           <div class="card">
             <div class="card-body">
               <div class="m-sm-4">
                 <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: {'data-turbo':'false', 'role': 'form', 'class': 'has-validation'}) do |f| %>
-
                 <%= f.fields_for :person, resource.person do |p| %>
                 <div class="form-group mb-3">
                   <%= p.label :firstname, "Given Name" %>
-                  <%= p.text_field :firstname, autofocus: true, maxlength: 35, class:'form-control form-control-lg', placeholder: 'Enter your first name' %>
+                  <%= p.text_field :firstname, autofocus: true, maxlength: 35, class:'form-control form-control-lg', placeholder: 'Enter your first name', required: true%>
                 </div>
                 <div class="form-group mb-3">
                   <%= p.label :lastname, "Family Name" %>
-                  <%= p.text_field :lastname, maxlength: 35, class:'form-control form-control-lg', placeholder: 'Enter your last name' %>
+                  <%= p.text_field :lastname, maxlength: 35, class:'form-control form-control-lg', placeholder: 'Enter your last name', required: true %>
                 </div>
                 <div class="form-group mb-3">
                   <%= p.label :email, "E-mail" %>
-                  <%= p.email_field :email, maxlength: 254, class:"form-control form-control-lg", placeholder:"Enter your e-mail address", autocomplete: "email" %>
+                  <%= p.email_field :email, maxlength: 254, class:"form-control form-control-lg", placeholder:"Enter your email address", autocomplete: "email", required: true, type: "email"%>
                 </div>
                 <% end %>
                 <div class="form-group mb-3">
                   <%= f.label :password, "Password" %>
-                  <%= f.password_field :password, maxlength: 64, class:"form-control form-control-lg", placeholder:"Enter a new password", autocomplete: "new-password" %>
+                  <%= f.password_field :password, maxlength: 64, class:"form-control form-control-lg", placeholder:"Enter a new password", autocomplete: "new-password", required: true%>
                   <% if @minimum_password_length %>
                   <div class="text-muted font-italic">
                     <small>password strength: <span class="text-success font-weight-700"><%= @minimum_password_length %> characters minimum</span>
@@ -43,7 +42,7 @@
                 </div>
                 <div class="form-group mb-3">
                   <%= f.label :password_confirmation, "Confirm Password" %>
-                  <%= f.password_field :password_confirmation, class:"form-control form-control-lg", placeholder:"Re-enter the password", autocomplete: "new-password" %>
+                  <%= f.password_field :password_confirmation, class:"form-control form-control-lg", placeholder:"Re-enter the password", autocomplete: "new-password", required: true%>
                 </div>
                 <div class="text-center mt-3">
                   <%= f.submit "Sign up", class: 'btn btn-lg btn-primary' %>
@@ -60,4 +59,3 @@
     </div>
   </div>
 </main>
-
