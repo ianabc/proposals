@@ -76,6 +76,8 @@ en:
   people:
     update:
       success: "Thank you. Please continue to complete the Diversity and Inclusivity Survey."
+    new:
+      alert: "Something went wrong."
   proposal_types:
     create:
       success: "Proposal Type successfully created."
@@ -138,9 +140,6 @@ en:
   proposals:
     destroy:
       success: "Proposal was successfully deleted."
-  people:
-    update:
-      success: "Thank you. Please continue to complete the Diversity and Inclusivity Survey."
   profile:
     update:
       success: "Your Personal data is updated!"
@@ -157,9 +156,6 @@ en:
       alert: "Proposal has been updated successfully!"
     page_redirect:
       alert: "Sent email to proposal organizers."
-  people:
-    new:
-      alert: "Something went wrong."
   survey:
     check_params:
       alert: "Response is empty."
