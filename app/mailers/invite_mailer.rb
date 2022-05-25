@@ -41,6 +41,15 @@ class InviteMailer < ApplicationMailer
     mail(to: @person.email, subject: 'Invite Declined')
   end
 
+
+  def invite_uncertain
+    @invite = params[:invite]
+    @proposal = @invite.proposal
+    @person = @invite.person
+
+    mail(to: @person.email, subject: 'Invite Uncertain')
+  end
+
   def invite_reminder
     @invite = params[:invite]
     @invited_as = invited_as_text(@invite)

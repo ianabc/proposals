@@ -107,8 +107,10 @@ module ProposalsHelper
     return "Invite has been cancelled" if status == 'cancelled'
 
     case response
-    when "yes", "maybe"
+    when "yes"
       "Invitation accepted"
+    when "maybe"
+      "Invitation pending"
     when nil
       "Not yet responded to invitation"
     when "no"
@@ -141,8 +143,10 @@ module ProposalsHelper
 
   def invite_response_color(status)
     case status
-    when "yes", "maybe"
+    when "yes"
       "text-success"
+    when "maybe"
+      "text-warning"
     when nil
       "text-primary"
     when "no"
