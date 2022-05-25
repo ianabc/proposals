@@ -341,10 +341,10 @@ class SubmittedProposalsController < ApplicationController
 
     return unless cover_letter_file
 
-    response = RestClient.post ENV['EDITFLOW_API_URL'],
+    response = RestClient.post ENV.fetch('EDITFLOW_API_URL', nil),
                                { query: revise_query, fileMain: File.open(@pdf_path),
                                  fileRevisionLetter: File.open(@letter_path) },
-                               { x_editflow_api_token: ENV['EDITFLOW_API_TOKEN'] }
+                               { x_editflow_api_token: ENV.fetch('EDITFLOW_API_TOKEN', nil) }
 
     mutation_response_body(response, params[:version].to_i)
   end
