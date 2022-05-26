@@ -183,7 +183,7 @@ class SubmitProposalsController < ApplicationController
   def preview_placeholders
     @template_body = @email_template&.body
     if @template_body.blank?
-      redirect_to new_email_template_path, alert: 'No email template found!'
+      redirect_to new_email_template_path, alert: t('submit_proposals.preview_placeholders.failure')
       return
     end
     placing_holders

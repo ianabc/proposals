@@ -46,7 +46,7 @@ class InvitesController < ApplicationController
 
   def inviter_response
     if invalid_response?
-      redirect_to invite_url(code: @invite&.code), alert: 'Invalid answer'
+      redirect_to invite_url(code: @invite&.code), alert: t('invites.inviter_response.failure')
       return
     end
 
@@ -61,7 +61,7 @@ class InvitesController < ApplicationController
       InviteMailer.with(invite: @invite, organizers: @organizers).invite_reminder.deliver_later
       check_user
     else
-      redirect_to edit_proposal_path(@proposal), notice: "You have already responded to the invite."
+      redirect_to edit_proposal_path(@proposal), notice: t('invites.invite_reminder.success')
     end
   end
 
@@ -108,7 +108,14 @@ class InvitesController < ApplicationController
   private
 
   def set_invite_status
-    response_params == 'no' ? nil : 'confirmed'
+    case response_params
+    when 'no'
+      nil
+    when 'maybe'
+      'pending'
+    when 'yes'
+      'confirmed'
+    end
   end
 
   def set_invite_proposal
@@ -130,9 +137,9 @@ class InvitesController < ApplicationController
   end
 
   def redirect_on_response
-    if @invite.no? && @invite.save
+    if (@invite.no? || @invite.maybe?) && @invite.save
       send_email_on_response
-    elsif %(yes maybe).include? @invite.response
+    elsif @invite.yes?
       session[:is_invited_person] = true
       redirect_to new_person_path(code: @invite.code, response: @invite.response)
     else
@@ -164,9 +171,14 @@ class InvitesController < ApplicationController
   end
 
   def send_email_on_response
-    return unless @invite.no?
+    return unless @invite.no? || @invite.maybe?
 
-    InviteMailer.with(invite: @invite).invite_decline.deliver_later
+    if @invite.no?
+      InviteMailer.with(invite: @invite).invite_decline.deliver_later
+    elsif @invite.maybe?
+      InviteMailer.with(invite: @invite).invite_uncertain.deliver_later
+    end
+
     redirect_to thanks_proposal_invites_path(@invite.proposal)
   end
 

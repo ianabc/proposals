@@ -91,7 +91,7 @@ class SubmittedProposalsController < ApplicationController
     respond_to do |format|
       format.html do
         redirect_to submitted_proposals_url,
-                    notice: "Proposal was successfully deleted."
+                    notice: t('submitted_proposals.destroy.success')
       end
       format.json { head :no_content }
     end
@@ -315,7 +315,7 @@ class SubmittedProposalsController < ApplicationController
 
   def check_proposal_editflow_id
     if @proposal.editflow_id.blank?
-      redirect_to versions_proposal_url(@proposal), alert: "Proposal has not editflow_id!"
+      redirect_to versions_proposal_url(@proposal), alert: t('submitted_proposals.check_proposal_editflow_id.failure')
     else
       revision_proposal
     end
@@ -327,7 +327,7 @@ class SubmittedProposalsController < ApplicationController
     if @errors.present?
       redirect_to versions_proposal_url(@proposal), alert: @errors
     else
-      redirect_to versions_proposal_url(@proposal), notice: "Proposal is successfully sent to EditFlow!"
+      redirect_to versions_proposal_url(@proposal), notice: t('submitted_proposals.revision_proposal.success')
     end
     nil
   end

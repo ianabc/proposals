@@ -7,7 +7,7 @@ class FeedbackMailer < ApplicationMailer
     if @proposal&.code
       mail(to: email, subject: "[#{@proposal.code}] Proposals feedback")
     else
-      mail(to: email, subject: "Proposals feedback")
+      mail(to: email, subject: t('feedback_mailer.new_feedback_email.subject'))
     end
   end
 end
