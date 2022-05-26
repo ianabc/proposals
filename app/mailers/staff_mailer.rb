@@ -12,6 +12,6 @@ class StaffMailer < ApplicationMailer
       @body << "* #{error}\n"
     end
 
-    mail(to: to_email, subject: "BIRS Proposal Reviews file problems")
+    mail(to: to_email, subject: t('staff_mailer.review_file_problems.subject'))
   end
 end
