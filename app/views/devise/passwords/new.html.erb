@@ -15,13 +15,14 @@
           <div class="card">
             <div class="card-body">
               <div class="m-sm-4">
-                <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, 'data-turbo':'false' }) do |f| %>
+                <%= form_with(model: resource, local: true,url: password_path(resource_name), data: { controller: 'user' }) do |f| %>
                   <div class="mb-3">
                     <label class="mb-1">Email</label>
-                    <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "Enter your e-mail address", class:"form-control form-control-lg" %>
+                    <%= f.email_field :email,data: { user_target: "field", action: "keyup-> user#validate"}, type: "email" ,autofocus: true, autocomplete: "email", placeholder: "Enter your e-mail address", class:"form-control form-control-lg" %>
                   </div>
+                  <p data-user-target="error" class="text-danger bold"></p>
                   <div class="text-left mt-3">
-                    <%= f.submit "Reset password", class: "btn btn-lg btn-primary" %>
+                    <%= f.submit "Reset password", class: "btn btn-lg btn-primary",data: { user_target: "btn"} %>
                   </div>
                 <% end %>
               </div>
