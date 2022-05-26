@@ -108,11 +108,12 @@ class InvitesController < ApplicationController
   private
 
   def set_invite_status
-    if response_params == 'no'
+    case response_params
+    when 'no'
       nil
-    elsif response_params == 'maybe'
+    when 'maybe'
       'pending'
-    else
+    when 'yes'
       'confirmed'
     end
   end
@@ -170,14 +171,14 @@ class InvitesController < ApplicationController
   end
 
   def send_email_on_response
-    return unless (@invite.no? || @invite.maybe?)
+    return unless @invite.no? || @invite.maybe?
 
     if @invite.no?
       InviteMailer.with(invite: @invite).invite_decline.deliver_later
     elsif @invite.maybe?
       InviteMailer.with(invite: @invite).invite_uncertain.deliver_later
     end
-    
+
     redirect_to thanks_proposal_invites_path(@invite.proposal)
   end
 
