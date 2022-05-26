@@ -112,7 +112,7 @@ module SurveyHelper
                  ['West Asian (e.g., Iranian, Afghan)', 'West Asian (e.g., Iranian, Afghan)'],
                  %w[White White], %w[Other Other],
                  ['Prefer not to answer (Please note: If you choose this response, none of your other
-                  responses to this question will be considered in the data analysis.)'.squish, 'Prefer not to answer']]
+                  responses to this question will be considered in the data analysis.)'.squish, 'Prefer not to answer (Please note: If you choose this response, none of your other responses to this question will be considered in the data analysis.)']]
     ethnicity.map { |disp, _value| disp }
   end
 

@@ -37,7 +37,7 @@
                         <div>
                           <label>If you identify as biracial or multiracial, please select all that apply by holding down Ctrl/⌘ while you select.</label>
                         </div>
-                        <%= f.select "ethnicity", options_for_select(ethnicity_options),{ include_blank: '' }, data: {'survey-target': 'ethnicity',action: 'change->survey#handleEthnicityOptions'}, class: "form-control overflow-scroll", multiple: true, required: true %>
+                        <%= f.select "ethnicity", options_for_select(ethnicity_options),{}, data: {'survey-target': 'ethnicity',action: 'change->survey#handleEthnicityOptions'}, class: "form-control overflow-scroll", multiple: true, required: true %>
                       </div>
                       <div class="hidden" data-survey-target="otherEthnicity">
                         <%= f.label 'Other: ', class: 'required mt-3 '%>
