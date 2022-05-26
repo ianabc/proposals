@@ -15,7 +15,7 @@ class FeedbacksController < ApplicationController
     @feedback.user = current_user
     if @feedback.save
       FeedbackMailer.with(feedback: @feedback).new_feedback_email.deliver_later
-      redirect_to feedbacks_path, notice: 'Your feedback has been submitted.'
+      redirect_to feedbacks_path, notice: t('feedback.create.success')
     else
       render :new, alert: "Error: #{@feedback.errors.full_messages}"
     end
@@ -35,7 +35,7 @@ class FeedbacksController < ApplicationController
       render json: {}, status: :ok
     else
       render json: { error: @feedback.errors.full_messages },
-                   status: :internal_server_error
+             status: :internal_server_error
     end
   end
 

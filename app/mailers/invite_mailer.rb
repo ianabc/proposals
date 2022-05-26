@@ -30,7 +30,7 @@ class InviteMailer < ApplicationMailer
     @proposal = @invite.proposal
     @person = @invite.person
 
-    mail(to: @person.email, subject: 'BIRS Proposal Confirmation of Interest')
+    mail(to: @person.email, subject: t('invite_mailer.invite_acceptance.subject'))
   end
 
   def invite_decline
@@ -38,16 +38,15 @@ class InviteMailer < ApplicationMailer
     @proposal = @invite.proposal
     @person = @invite.person
 
-    mail(to: @person.email, subject: 'Invite Declined')
+    mail(to: @person.email, subject: t('invite_mailer.invite_decline.subject'))
   end
-
 
   def invite_uncertain
     @invite = params[:invite]
     @proposal = @invite.proposal
     @person = @invite.person
 
-    mail(to: @person.email, subject: 'Invite Uncertain')
+    mail(to: @person.email, subject: t('invite_mailer.invite_uncertain.subject'))
   end
 
   def invite_reminder

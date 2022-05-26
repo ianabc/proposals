@@ -46,7 +46,7 @@ class InvitesController < ApplicationController
 
   def inviter_response
     if invalid_response?
-      redirect_to invite_url(code: @invite&.code), alert: 'Invalid answer'
+      redirect_to invite_url(code: @invite&.code), alert: t('invites.inviter_response.failure')
       return
     end
 
@@ -61,7 +61,7 @@ class InvitesController < ApplicationController
       InviteMailer.with(invite: @invite, organizers: @organizers).invite_reminder.deliver_later
       check_user
     else
-      redirect_to edit_proposal_path(@proposal), notice: "You have already responded to the invite."
+      redirect_to edit_proposal_path(@proposal), notice: t('invites.invite_reminder.success')
     end
   end
 

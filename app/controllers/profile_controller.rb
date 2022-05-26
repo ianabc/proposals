@@ -21,7 +21,7 @@ class ProfileController < ApplicationController
     demographic_data = person.demographic_data
     demographic_data.result = questionnaire_answers
     if demographic_data.save
-      redirect_to profile_path, notice: "Your demographic data is updated!"
+      redirect_to profile_path, notice: t('profile.demographic_data.success')
     else
       redirect_to profile_path
     end
