@@ -124,6 +124,10 @@ en:
     update:
       success: "Subject Category successfully updated."
   invites:
+    inviter_response:
+      failure: "Invalid answer"
+    invite_reminder:
+      success: "You have already responded to the invite."
     update:
       success: "invite information is updated successfully"
       failure: "Something went wrong"
@@ -141,6 +145,8 @@ en:
     destroy:
       success: "Proposal was successfully deleted."
   profile:
+    demographic_data:
+      success: "Your demographic data is updated!"
     update:
       success: "Your Personal data is updated!"
   proposal_forms:
@@ -150,12 +156,21 @@ en:
       success: "Proposal form was successfully updated"
       failure: "Unable to update proposal form."
   submit_proposals:
+    preview_placeholders:
+      failure: "No email template found!"
     create:
       alert: "Draft saved."
     staff_redirect:
       alert: "Proposal has been updated successfully!"
     page_redirect:
       alert: "Sent email to proposal organizers."
+  submitted_proposals:
+    revision_proposal:
+      success: "Proposal is successfully sent to EditFlow!"
+    check_proposal_editflow_id:
+      failure: "Proposal has not editflow_id!"
+    destroy:
+      success: "Proposal was successfully deleted."
   survey:
     check_params:
       alert: "Response is empty."
@@ -163,3 +178,19 @@ en:
   schedules:
     download_csv:
       alert: "Schedule run is empty"
+  feedback:
+    create:
+      success: "Your feedback has been submitted."
+  invite_mailer:
+    invite_uncertain:
+      subject: "Invite Uncertain"
+    invite_decline:
+      subject: "Invite Declined"
+    invite_acceptance:
+      subject: "BIRS Proposal Confirmation of Interest"
+  feedback_mailer:
+    new_feedback_email:
+      subject: "Proposals feedback"
+  staff_mailer:
+    review_file_problems:
+      subject: "BIRS Proposal Reviews file problems"
