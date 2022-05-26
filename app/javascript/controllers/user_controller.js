@@ -1,4 +1,3 @@
-import { end } from "@popperjs/core";
 import { Controller } from "stimulus"
 
 export default class extends Controller {
