@@ -41,7 +41,6 @@
                 </td></div>
               <% elsif invite.confirmed? && params[:action] == 'edit' %>
                 <div><td><%= link_to '<i class="align-middle"></i>Cancel Invite'.html_safe, cancel_confirmed_invite_url(code: invite.code), class: 'btn', method: :post %>
-                <%= link_to '<i class="align-middle"></i>Send New Invite'.html_safe, new_invite_proposal_invite_url(invite.proposal, invite, code: invite.code), class: 'btn', method: :post %><br>
                   <button id="edit-invite-id" class="align-middle btn" data-action="click->nested-invites#editPreview" data-id="<%= invite.id %>">Edit Invite</button>
                 </td></div>
               <% else %>
