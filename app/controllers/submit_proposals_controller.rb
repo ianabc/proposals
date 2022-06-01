@@ -169,6 +169,11 @@ class SubmitProposalsController < ApplicationController
 
   def invalid_email_error_message
     @errors << @invite.errors.full_messages
+
+    @errors.first.delete("Person must exist") if @errors.first.include?("Person must exist")
+    if @errors.first.include?("Email can't be blank")
+      @errors.first.delete("Email appears to point to domain which doesn't handle e-mail")
+    end
     @errors.flatten!
     return unless @invite.errors.added? :email, "is invalid"
 
