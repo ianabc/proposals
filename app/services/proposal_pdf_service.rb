@@ -55,9 +55,6 @@ class ProposalPdfService
     error_output = "<h2 class=\"text-danger\">LaTeX Error Log:</h2>\n\n"
     error_output << "<h4>Last 20 lines:</h4>\n\n"
     error_output << "<pre>\n#{error_summary}\n</pre>\n\n"
-    error_output << %q[
-      <%= link_to "Edit Proposal", edit_proposal_path(@proposal, tab: "tab-2"),
-      class: 'btn btn-primary mb-4' %>]
     error_output << %q(
       <button class="btn btn-primary mb-4 latex-show-more" type="button"
                      data-bs-toggle="collapse" data-bs-target="#latex-error"

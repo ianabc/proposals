@@ -49,7 +49,6 @@ class Person < ApplicationRecord
 
     person_academic_data
     errors.add('Country', "can't be blank") if country.blank?
-    self.first_phd_year = nil if first_phd_year == "N/A"
     check_academic_status
     return unless country == 'Canada' || country == 'United States of America'
 
