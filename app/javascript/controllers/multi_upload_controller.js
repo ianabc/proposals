@@ -29,13 +29,17 @@ export default class extends Controller {
   }
 
   removeFile() {
-    let url = "/proposals/" + event.target.dataset.proposalId + "/remove_file"
-    var data = new FormData()
-    data.append("attachment_id", event.target.dataset.attachmentId)
-    Rails.ajax({
-      url,
-      type: "POST",
-      data
-    })
-  }
+    var result = confirm("Are you sure to delete?");
+    if(result){
+        let url = "/proposals/" + event.target.dataset.proposalId + "/remove_file"
+        var data = new FormData()
+        data.append("attachment_id", event.target.dataset.attachmentId)
+        Rails.ajax({
+          url,
+          type: "POST",
+          data
+        })
+      }
+    }
+   
 }

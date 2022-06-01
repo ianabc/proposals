@@ -130,9 +130,6 @@ RSpec.describe Person, type: :model do
       before do
         person.update(first_phd_year: :'N/A')
       end
-      it '' do
-        expect(person.first_phd_year).to eq nil
-      end
     end
     context 'When other academic status is blank' do
       let(:person) { create(:person, academic_status: 'Other') }
