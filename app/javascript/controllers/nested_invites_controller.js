@@ -65,6 +65,21 @@ export default class extends Controller {
   invitePreview ()  {
     event.preventDefault()
 
+    let role = event.target.id
+    if( role === 'organizer' ) { 
+      document.getElementById("participant_firstname").disabled = true;
+      document.getElementById("participant_lastname").disabled = true;
+      document.getElementById("participant_email").disabled = true;
+      document.getElementById("participant_deadline").disabled = true;
+      document.getElementById("participant_invited_as").disabled = true;
+    }else if( role === 'participant' ){
+      document.getElementById("organizer_firstname").disabled = true;
+      document.getElementById("organizer_lastname").disabled = true;
+      document.getElementById("organizer_email").disabled = true;
+      document.getElementById("organizer_deadline").disabled = true;
+      document.getElementById("organizer_invited_as").disabled = true;
+    }
+
     let id = event.currentTarget.dataset.id;
     let invitedAs = event.currentTarget.id
     $.post(`/submit_proposals/invitation_template?proposal=${id}&invited_as=${invitedAs}`, function(data) {
@@ -114,6 +129,7 @@ export default class extends Controller {
         toastr.error(error)
       })
     });
+    $('#email-preview').modal('hide');
   }
 
   sendInviteEmails(id, invitedAs, inviteId, data) {
