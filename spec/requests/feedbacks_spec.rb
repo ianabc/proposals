@@ -93,6 +93,11 @@ RSpec.describe "/feedbacks", type: :request do
         patch add_reply_feedback_url(feedback), params: { feedback_reply: 'Test reply' }
         expect(feedback.reload.reply).to eq("Test reply")
       end
+
+      it "it does not add a reply" do
+        patch add_reply_feedback_url(feedback), params: { feedback_reply: nil }
+        expect(response).to have_http_status(:internal_server_error)
+      end
     end
   end
 end

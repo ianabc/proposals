@@ -30,7 +30,7 @@ RSpec.describe "/subjects", type: :request do
 
     context "with invalid parameters" do
       let(:params) do
-        { subject: { title: 'category' },
+        { subject: { title: nil },
           subject_category_ids: subject_category.id }
       end
       before do
@@ -39,7 +39,7 @@ RSpec.describe "/subjects", type: :request do
       end
 
       it "will not update subject" do
-        expect(subject.reload.title).to eq(subject.title)
+        expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end
