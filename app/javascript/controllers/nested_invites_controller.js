@@ -130,6 +130,7 @@ export default class extends Controller {
       })
     });
     $('#email-preview').modal('hide');
+    document.location.reload(true);
   }
 
   sendInviteEmails(id, invitedAs, inviteId, data) {
