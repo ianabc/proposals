@@ -13,7 +13,7 @@ class Invite < ApplicationRecord
 
   validates :firstname, :lastname, :email, :invited_as,
             :deadline_date, presence: true
-  validates_email_realness_of :email
+  # validates_email_realness_of :email
 
   validate :deadline_not_in_past, :proposal_title
   validate :one_invite_per_person, on: :create
