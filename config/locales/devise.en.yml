@@ -148,7 +148,7 @@ en:
     demographic_data:
       success: "Your demographic data is updated!"
     update:
-      success: "Your Personal data is updated!"
+      success: "Your personal data is updated!"
   proposal_forms:
     create:
       success: "Proposal form was successfully created!"
