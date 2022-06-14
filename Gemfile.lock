@@ -417,7 +417,7 @@ DEPENDENCIES
   simplecov
   simplecov-lcov
   spring
-  tinymce-rails
+  tinymce-rails (5.10.2)
   turbo-rails (~> 0.8.2)
   web-console (>= 4.1.0)
   webdrivers
