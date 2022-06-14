@@ -119,7 +119,7 @@ module ProposalsHelper
   end
 
   def proposal_status(status)
-    status.split('_').map(&:capitalize).join(' ')
+    status&.split('_')&.map(&:capitalize)&.join(' ')
   end
 
   def proposal_status_class(status)
