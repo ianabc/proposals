@@ -28,7 +28,7 @@ gem 'redis'
 gem 'rest-client'
 gem 'rollbar'
 gem 'sass-rails', '>= 6'
-gem 'tinymce-rails'
+gem 'tinymce-rails', '5.10.2'
 gem 'turbo-rails', '~> 0.8.2'
 gem 'webpacker', '~> 5.0'
 
