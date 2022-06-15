@@ -4,23 +4,26 @@ export default class extends Controller {
   
   static targets = ['citizenship', 'otherCitizenship', 'ethnicity', 'otherEthnicity',
                    'gender', 'otherGender', 'indigenous', 'indigenousYes', 'disability']
+  static values = { result: String }                  
 
   connect() {
+
+    this.checkConditions()
+
     if(this.citizenshipTarget.value) {
       this.handleCitizenshipOptions(this.citizenshipTarget.value)
     }
     if(this.ethnicityTarget.value) {
       this.handleEthnicityOptions(this.ethnicityTarget.value)
     }
-    this.checkConditions()
   }
 
   checkConditions() {
+    if(this.resultValue === 'Yes'){
+      this.handleIndigenousOptions(this.indigenousTarget.value)
+    }
     if(this.genderTarget.value) {
       this.handleGenderOptions(this.genderTarget.value)
-    }
-    if(this.indigenousTarget.value) {
-      this.handleIndigenousOptions(this.indigenousTarget.value)
     }
   }
   
@@ -55,13 +58,18 @@ export default class extends Controller {
   }
 
   handleIndigenousOptions(targetValue) {
-    if (this.indigenousTarget.value === 'Yes' || targetValue === 'Yes') {
-      this.indigenousYesTarget.classList.remove("hidden")
-      $("#indigenous_person_yes").prop('required', true);
-    } else {
+      if (this.indigenousTarget.value === 'Yes' || targetValue === 'Yes') {
+        this.indigenousYesTarget.classList.remove("hidden")
+        $("#indigenous_person_yes").prop('required', true);
+      } else {
+        this.indigenousYesTarget.classList.add("hidden")
+        $("#indigenous_person_yes").prop('required', false);
+      }
+  }
+
+  hideIndigenousOptions(targetValue) {
       this.indigenousYesTarget.classList.add("hidden")
       $("#indigenous_person_yes").prop('required', false);
-    }
   }
 
   handleDisabilityOptions() {

@@ -1,11 +1,16 @@
 <main class="content">
   <div class="container-fluid">
     <div class="header">
+       <% if params[:action] == 'show' %>
+       <div class="d-flex flex-row-reverse float-end" >
+           <%= link_to "Edit Proposal", edit_proposal_path(@proposal) ,class:'btn btn-primary' %>
+        </div>
+        <% end %>
       <h1 class="header-title">
         Proposals
       </h1>
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb" data-turbo="false">
+       <nav aria-label="breadcrumb">
+         <ol class="breadcrumb" data-turbo="false">
            <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </a></li>
           <li class="breadcrumb-item active" aria-current="page"><%= link_to "Proposals", proposals_path %></li>
           <% if params[:action] == 'edit' %>
@@ -157,7 +162,6 @@
                             <div>
                               <h3 class="form-section">Add Supporting Organizers:</h3>
                               <p><%= @proposal.proposal_type.organizer_description&.html_safe %></p>
-
                               <% if @proposal.invites.organizer %>
                                 <%= render partial: 'organizer', locals: { invites: @proposal.invites.organizer } %>
                               <% end %>

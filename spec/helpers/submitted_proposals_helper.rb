@@ -12,6 +12,54 @@ RSpec.describe SubmittedProposalsHelper, type: :helper do
     end
   end
 
+  describe '#all_proposal_types' do
+    it 'submitted_graph_data' do
+      expect(all_proposal_types).to be_present
+    end
+  end
+
+  describe '#proposal_career_stage' do
+    let!(:proposal) { create(:proposal) }
+    let!(:proposal_roles) { create_list(:proposal_role, 3, proposal: proposal) }
+
+    it 'with lead organizer' do
+      proposal_roles.last.role.update(name: 'lead_organizer')
+      expect(proposal_career_stage("firstname", "lastname", proposal)).to be_present
+    end
+
+    it 'with no lead organizer' do
+      expect(proposal_career_stage("firstname", "lastname", proposal)).to be_present
+    end
+  end
+
+  describe '#invites_logs' do
+    let(:log) { create(:log) }
+
+    it 'with log' do
+      log.data['firstname'] = "test"
+      log.data['lastname'] = "lastname"
+      log.data['email'] = "email"
+      log.data['invited_as'] = "invited_as"
+      response = invites_logs(log)
+      expect(response).to be_present
+    end
+
+    it 'without log.user' do
+      log.user = nil
+      response = invites_logs(log)
+      expect(response).to be_present
+    end
+  end
+
+  describe '#proposal_logs' do
+    let(:proposal) { create(:proposal) }
+
+    it 'proposal_logs' do
+      response = proposal_logs(proposal)
+      expect(response).to be_present
+    end
+  end
+
   describe '#review_dates' do
     let(:proposal) { create(:proposal) }
     let(:person) { create(:person) }
@@ -59,6 +107,10 @@ RSpec.describe SubmittedProposalsHelper, type: :helper do
       response = submitted_graph_data('test1', 'test2', proposals)
       expect(response).not_to be_present
     end
+  end
+
+  describe '#submitted_graph_data' do
+    let(:proposals) { create_list(:proposal, 3) }
 
     it '#submitted_nationality_data' do
       response = submitted_nationality_data(proposals)

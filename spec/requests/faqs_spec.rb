@@ -99,6 +99,6 @@ RSpec.describe "/faqs", type: :request do
       delete faq_url(faq.id)
     end
 
-    it { expect(Faq.all.count).to eq(0) }
+    it { expect(response).to redirect_to faqs_path }
   end
 end
