@@ -4,6 +4,7 @@
       <div class="mb-3"> 
         <div>
           <label class="form-label required">1. What is your country of citizenship?</label>
+          <div>
           <%= f.select "citizenships", options_for_select(citizenship_options, @result["citizenships"]), {}, data: {'survey-target': 'citizenship', action: 'change->survey#handleCitizenshipOptions'}, class: "form-control", multiple: true, required: true %>
         </div>
         <div class="hidden" data-survey-target="otherCitizenship">
@@ -11,17 +12,25 @@
           <%= f.text_field :citizenships_other, id: 'citizenship_other', class: 'form-control', value: @result["citizenships"][1] == "Other" ? @result["citizenships_other"] : nil %>
         </div>
       </div>
+    </div>
+  </div>
 
       <div class="mb-3">
         <div>
           <label class="form-label required">2. Do you identify as an Indigenous person?</label>
-          <%= f.select "indigenous_person", options_for_select(indigenous_person_options, @result["indigenous_person"]),{ include_blank: '' }, data: {'survey-target': 'indigenous', action: 'change->survey#handleIndigenousOptions'}, class: "form-select", required: true %>
+          <div data-controller="survey" data-survey-result-value="<%= @result["indigenous_person"] %>">
+            <%= f.radio_button :indigenous_person, "Yes", checked: indigenous_radio_option(@result, "Yes"), data:{'survey-target': 'indigenous', action: 'change->survey#handleIndigenousOptions'} %> Yes <br />
+            <%= f.radio_button :indigenous_person, "No", checked: indigenous_radio_option(@result, "No"), data:{ action: 'change->survey#hideIndigenousOptions'} %> No <br />
+            <%= f.radio_button :indigenous_person, "Prefer not to answer", checked: indigenous_radio_option(@result, "Prefer not to answer"), data:{ action: 'change->survey#hideIndigenousOptions'}%> Prefer not to answer <br />
+
           <div class="hidden mt-3" data-survey-target="indigenousYes">
-            <%= f.select "indigenous_person_yes", options_for_select(indigenous_person_yes_options, @result["indigenous_person_yes"]), {}, class: "form-control", id: 'indigenous_person_yes', multiple: true %>
+          <%= f.select "indigenous_person_yes", options_for_select(indigenous_person_yes_options, @result["indigenous_person_yes"]), {}, class: "form-control", id: 'indigenous_person_yes', multiple: true %>
+          </div>
+
           </div>
         </div>
       </div>
-      
+
       <div class="mb-3">
         <div>
           <label class="form-label required">3. How do you describe your ethnicity?</label>
@@ -50,8 +59,10 @@
       <div class="mb-3">
         <div>
           <label class="form-label required">5. Do you identify as a member of the 2SLGBTQIA+ community?</label>
-          <%= f.select(:community, options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']], @result["community"]),{ include_blank: '' }, {class: "form-select", required: true}) %>
-        </div>
+          </div>
+            <%= f.radio_button :community, "Yes", checked: community_radio_option(@result, "Yes") %> Yes <br />
+            <%= f.radio_button :community, "No", checked: community_radio_option(@result, "No")%> No <br />
+            <%= f.radio_button :community, "Prefer not to answer", checked: community_radio_option(@result, "Prefer not to answer") %> Prefer not to answer <br />
       </div>
 
       <div class="mb-3">
@@ -64,10 +75,12 @@
               </em>
             </label>
           </div>
-          <%= f.select "disability", options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']], @result["disability"]),{ include_blank: '' }, data:{'survey-target': 'disability', action: 'change->survey#handleDisabilityOptions'}, class: "form-select", required: true %>
+            <%= f.radio_button :disability, "Yes", checked: disability_radio_option(@result, "Yes"),data:{'survey-target': 'disability', action: 'click->survey#handleDisabilityOptions'} %> Yes <br />
+            <%= f.radio_button :disability, "No", checked: disability_radio_option(@result, "No")%> No <br />
+            <%= f.radio_button :disability, "Prefer not to answer", checked: disability_radio_option(@result, "Prefer not to answer"), data:{'survey-target': 'disability', action: 'click->survey#handleDisabilityOptions'} %> Prefer not to answer <br />
         </div>
       </div>
-      
+    
       <div class="mb-3">
         <div>
           <label class="form-label required">7. Do you consider yourself to be part of an under-represented minority in the country of your current affiliation?</label>
@@ -78,7 +91,11 @@
               </em>
             </label>
           </div>
-          <%= f.select(:minorities, options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']], @result["minorities"]),{ include_blank: '' }, {class: "form-select", required: true}) %>
+          <div>
+            <%= f.radio_button :minorities, "Yes", checked: minorities_radio_option(@result, "Yes") %> Yes <br />
+            <%= f.radio_button :minorities, "No", checked: minorities_radio_option(@result, "No")%> No <br />
+            <%= f.radio_button :minorities, "Prefer not to answer", checked: minorities_radio_option(@result, "Prefer not to answer") %> Prefer not to answer <br />
+          </div>
         </div>
       </div>
 
@@ -92,9 +109,13 @@
               </em>
             </label>
           </div>
-          <%= f.select(:stem, options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']], @result["stem"]),{ include_blank: '' }, {class: "form-select", required: true}) %>
-        </div>
+          <div>
+            <%= f.radio_button :stem, "Yes", checked: stem_radio_option(@result, "Yes") %> Yes <br />
+            <%= f.radio_button :stem, "No", checked: stem_radio_option(@result, "No")%> No <br />
+            <%= f.radio_button :stem, "Prefer not to answer", checked: stem_radio_option(@result, "Prefer not to answer") %> Prefer not to answer <br />
+          </div>
       </div>
+    </div>
       
       <div class="mb-3">
         <div>
@@ -105,9 +126,11 @@
               <%= link_to "FAQs", faqs_survey_index_path, target: "_blank" %>.
               </em>
             </label>
+          <div>
+            <%= f.radio_button :underRepresented, "Yes", checked: under_represented_radio_option(@result, "Yes") %> Yes <br />
+            <%= f.radio_button :underRepresented, "No", checked: under_represented_radio_option(@result, "No")%> No <br />
+            <%= f.radio_button :underRepresented, "Prefer not to answer", checked: under_represented_radio_option(@result, "Prefer not to answer") %> Prefer not to answer <br />
           </div>
-          <%= f.select(:underRepresented, options_for_select([['Yes', 'Yes'], ['No', 'No'], ['Prefer not to answer', 'Prefer not to answer']], @result["underRepresented"]),{ include_blank: '' }, {class: "form-select", required: true}) %>
-        </div>
       </div>
 
       <div class="mb-3">
