@@ -136,4 +136,28 @@ module SurveyHelper
                       ['Prefer not to answer', 'Prefer not to answer']]
     indigenous_yes.map { |disp, _value| disp }
   end
+
+  def indigenous_radio_option(results, option)
+    results["indigenous_person"] === option ? true : false # rubocop:disable Style/CaseEquality
+  end
+
+  def community_radio_option(results, option)
+    results["community"] === option ? true : false # rubocop:disable Style/CaseEquality
+  end
+
+  def minorities_radio_option(results, option)
+    results["minorities"] === option ? true : false # rubocop:disable Style/CaseEquality
+  end
+
+  def stem_radio_option(results, option)
+    results["stem"] === option ? true : false # rubocop:disable Style/CaseEquality
+  end
+
+  def under_represented_radio_option(results, option)
+    results["underRepresented"] === option ? true : false # rubocop:disable Style/CaseEquality
+  end
+
+  def disability_radio_option(results, option)
+    results["disability"] === option ? true : false # rubocop:disable Style/CaseEquality
+  end
 end
