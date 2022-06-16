@@ -64,20 +64,23 @@ export default class extends Controller {
 
   invitePreview ()  {
     event.preventDefault()
-
     let role = event.target.id
-    if( role === 'organizer' ) { 
-      document.getElementById("participant_firstname").disabled = true;
-      document.getElementById("participant_lastname").disabled = true;
-      document.getElementById("participant_email").disabled = true;
-      document.getElementById("participant_deadline").disabled = true;
-      document.getElementById("participant_invited_as").disabled = true;
+    if( role === 'organizer' ) {
+      if (document.getElementById("participant_firstname") != null){
+        document.getElementById("participant_firstname").disabled = true;
+        document.getElementById("participant_lastname").disabled = true;
+        document.getElementById("participant_email").disabled = true;
+        document.getElementById("participant_deadline").disabled = true;
+        document.getElementById("participant_invited_as").disabled = true;
+      }
     }else if( role === 'participant' ){
-      document.getElementById("organizer_firstname").disabled = true;
-      document.getElementById("organizer_lastname").disabled = true;
-      document.getElementById("organizer_email").disabled = true;
-      document.getElementById("organizer_deadline").disabled = true;
-      document.getElementById("organizer_invited_as").disabled = true;
+      if (document.getElementById("organizer_firstname") != null){
+        document.getElementById("organizer_firstname").disabled = true;
+        document.getElementById("organizer_lastname").disabled = true;
+        document.getElementById("organizer_email").disabled = true;
+        document.getElementById("organizer_deadline").disabled = true;
+        document.getElementById("organizer_invited_as").disabled = true;
+      }
     }
 
     let id = event.currentTarget.dataset.id;
@@ -169,9 +172,9 @@ export default class extends Controller {
         data: formData,
         success: () => {
           toastr.success('Invitation has been sent!')
-          // setTimeout(function() {
+          setTimeout(function() {
             window.location.reload();
-          // }, 2000)
+          }, 2000)
         }
       })
     }
