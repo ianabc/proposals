@@ -172,9 +172,9 @@ export default class extends Controller {
         data: formData,
         success: () => {
           toastr.success('Invitation has been sent!')
-          setTimeout(function() {
+         setTimeout(function() {
             window.location.reload();
-          }, 2000)
+            }, 2000)
         }
       })
     }
