@@ -133,7 +133,7 @@ export default class extends Controller {
       })
     });
     $('#email-preview').modal('hide');
-    // document.location.reload(true);
+    document.location.reload(true);
   }
 
   sendInviteEmails(id, invitedAs, inviteId, data) {
@@ -172,9 +172,9 @@ export default class extends Controller {
         data: formData,
         success: () => {
           toastr.success('Invitation has been sent!')
-         // setTimeout(function() {
+          setTimeout(function() {
             window.location.reload();
-            // }, 2000)
+          }, 2000)
         }
       })
     }
