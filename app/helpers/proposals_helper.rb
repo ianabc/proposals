@@ -289,11 +289,11 @@ module ProposalsHelper
   end
 
   def invite_first_name(invite)
-    invite.person&.firstname || invite.firstname
+    invite.firstname || invite.person&.firstname
   end
 
   def invite_last_name(invite)
-    invite.person&.lastname || invite.lastname
+    invite.lastname || invite.person&.lastname
   end
 
   def proposal_version_title(version, proposal)
