@@ -132,8 +132,6 @@ export default class extends Controller {
         toastr.error(error)
       })
     });
-    $('#email-preview').modal('hide');
-    document.location.reload(true);
   }
 
   sendInviteEmails(id, invitedAs, inviteId, data) {
