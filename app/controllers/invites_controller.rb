@@ -40,6 +40,11 @@ class InvitesController < ApplicationController
 
     @inviters = if params[:id].eql?("0")
                   puts "This is 1st stop"
+                  invited_as_test = params[:invited_as]
+                  puts invited_as_test
+                  puts "above is invited_as value"
+                  proposal_value_test = @proposal.id
+                  puts "above is proposal id"
                   Invite.where(proposal_id: @proposal.id, invited_as: params[:invited_as])
                 else
                   puts "This is 2nd stop"
