@@ -33,24 +33,11 @@ class InvitesController < ApplicationController
   end
 
   def invite_email
-    puts "before test value"
-    testing = params[:id]
-    puts testing
-    puts "after test value"
-
     @inviters = if params[:id].eql?("0")
-                  puts "This is 1st stop"
-                  invited_as_test = params[:invited_as]
-                  puts invited_as_test
-                  puts "above is invited_as value"
-                  proposal_value_test = @proposal.id
-                  puts "above is proposal id"
                   Invite.where(proposal_id: @proposal.id, invited_as: params[:invited_as])
                 else
-                  puts "This is 2nd stop"
                   Invite.where(proposal_id: @proposal.id, invited_as: params[:invited_as]).where('id > ?', params[:id])
                 end
-    puts @inviters
 
     send_invite_emails
 
@@ -175,19 +162,8 @@ class InvitesController < ApplicationController
   end
 
   def send_invite_emails
-    puts "Testing before params check"
-    test_values = params
-    puts test_values
-    puts "Testing after params check"
-
-    puts "Testing before inviter check"
-    inviter_value_check = @inviters
-    puts inviter_value_check.count
-    puts "Testing after inviter check"
-
     @email_body = params[:body]
     @inviters.each do |invite|
-      puts "This is 7th stop"
       InviteMailer.with(invite: invite, body: @email_body).invite_email.deliver_later
       InviteMailer.with(invite: invite, lead_organizer: @proposal.lead_organizer,
                         body: @email_body).invite_email.deliver_later
