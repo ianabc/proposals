@@ -59,6 +59,7 @@ class SubmitProposalsController < ApplicationController
     @errors = []
     @counter = 0
     params[:invites_attributes].each_value do |invite|
+      debugger
       @invite = @proposal.invites.new(invite_params(invite))
       invite_save
       next if @invite.errors.empty?
@@ -70,7 +71,7 @@ class SubmitProposalsController < ApplicationController
 
   def invite_save
     return unless @invite.save
-
+    debugger
     log_activity(@invite)
     @counter += 1
   end

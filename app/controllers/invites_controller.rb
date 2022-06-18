@@ -33,6 +33,7 @@ class InvitesController < ApplicationController
   end
 
   def invite_email
+    debugger
     @inviters = if params[:id].eql?("0")
                   Invite.where(proposal_id: @proposal.id, invited_as: params[:invited_as])
                 else
@@ -162,6 +163,7 @@ class InvitesController < ApplicationController
   end
 
   def send_invite_emails
+    debugger
     @email_body = params[:body]
     @inviters.each do |invite|
       InviteMailer.with(invite: invite, body: @email_body).invite_email.deliver_later
