@@ -33,6 +33,11 @@ class InvitesController < ApplicationController
   end
 
   def invite_email
+    puts "before test value"
+    testing = params[:id]
+    puts testing
+    puts "after test value"
+
     @inviters = if params[:id].eql?("0")
                   puts "This is 1st stop"
                   Invite.where(proposal_id: @proposal.id, invited_as: params[:invited_as])
@@ -166,8 +171,15 @@ class InvitesController < ApplicationController
 
   def send_invite_emails
     puts "Testing before params check"
-    debug(params)
-    puts "Testing before params check"
+    test_values = params
+    puts test_values
+    puts "Testing after params check"
+
+    puts "Testing before inviter check"
+    inviter_value_check = @inviters
+    puts inviter_value_check.count
+    puts "Testing after inviter check"
+
     @email_body = params[:body]
     @inviters.each do |invite|
       puts "This is 7th stop"
