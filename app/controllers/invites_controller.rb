@@ -33,11 +33,15 @@ class InvitesController < ApplicationController
   end
 
   def invite_email
+    puts "This is 3rd stop"
     @inviters = if params[:id].eql?("0")
+                  puts "This is 4th stop"
                   Invite.where(proposal_id: @proposal.id, invited_as: params[:invited_as])
                 else
+                  puts "This is 5th stop"
                   Invite.where(proposal_id: @proposal.id, invited_as: params[:invited_as]).where('id > ?', params[:id])
                 end
+    puts @inviters
 
     send_invite_emails
 
@@ -162,9 +166,10 @@ class InvitesController < ApplicationController
   end
 
   def send_invite_emails
+    puts "This is 6th stop"
     @email_body = params[:body]
     @inviters.each do |invite|
-    debugger
+      puts "This is 7th stop"
       InviteMailer.with(invite: invite, body: @email_body).invite_email.deliver_later
       InviteMailer.with(invite: invite, lead_organizer: @proposal.lead_organizer,
                         body: @email_body).invite_email.deliver_later

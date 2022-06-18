@@ -60,6 +60,7 @@ class SubmitProposalsController < ApplicationController
     @counter = 0
     params[:invites_attributes].each_value do |invite|
       @invite = @proposal.invites.new(invite_params(invite))
+      puts "This is 1st stop"
       invite_save
       next if @invite.errors.empty?
 
@@ -70,6 +71,7 @@ class SubmitProposalsController < ApplicationController
 
   def invite_save
     return unless @invite.save
+    puts "This is 2nd stop"
     log_activity(@invite)
     @counter += 1
   end
