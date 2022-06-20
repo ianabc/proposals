@@ -31,7 +31,10 @@
 
             <div class="mb-3">
               <h4>Body: </h4>
-              <%= text_area_tag :body, "#{@email_template.body}", { class: 'tinymce' } %>
+              <label class="form-control"><%= sanitize @email_template.body %></label>
+            </div>
+            <div class="text-end m-3">
+              <%= link_to "Back", email_templates_path, class: 'btn btn-primary' %>
             </div>
           </div>
         </div>
