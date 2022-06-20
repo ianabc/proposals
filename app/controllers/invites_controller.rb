@@ -84,7 +84,7 @@ class InvitesController < ApplicationController
   end
 
   def cancel_confirmed_invite
-    @proposal_role = @invite.person.proposal_roles.first
+    @proposal_role = @invite.proposal.proposal_roles.find_by(person_id: @invite.person.id)
     @proposal_role.destroy
     @invite.skip_deadline_validation = true if @invite.deadline_date < Date.current
     @invite.update(status: 'cancelled')
@@ -162,6 +162,7 @@ class InvitesController < ApplicationController
   end
 
   def send_invite_emails
+
     @email_body = params[:body]
     @inviters.each do |invite|
       InviteMailer.with(invite: invite, body: @email_body).invite_email.deliver_later
