@@ -115,11 +115,11 @@ export default class extends Controller {
     var body = $('#email_body').text()
     $.post(`/submit_proposals?proposal=${id}&create_invite=true.js`,
       $('form#submit_proposal').serialize(), function(data) {
-        if (body.includes("supporting organizer")) {
+        if (body.toLowerCase().includes("supporting organizer")) {
           invitedAs = 'Organizer'
           inviteId = inviteOrganizer
         }
-        else if (body.includes("participant")) {
+        else if (body.toLowerCase().includes("participant")) {
           invitedAs = 'Participant'
           inviteId = inviteParticipant
         }
