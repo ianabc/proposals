@@ -8,6 +8,7 @@ class FeedbacksController < ApplicationController
 
   def new
     @feedback = Feedback.new
+    @proposals = current_user.person.proposals
   end
 
   def create
@@ -42,7 +43,7 @@ class FeedbacksController < ApplicationController
   private
 
   def feedback_params
-    params.require(:feedback).permit(:content)
+    params.require(:feedback).permit(:content, :proposal_id)
   end
 
   def set_feedback
