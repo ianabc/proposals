@@ -13,6 +13,7 @@ class FeedbacksController < ApplicationController
 
   def create
     @feedback = Feedback.new(feedback_params)
+    @proposals = current_user.person.proposals
     @feedback.user = current_user
     if @feedback.save
       FeedbackMailer.with(feedback: @feedback).new_feedback_email.deliver_later

@@ -5,7 +5,7 @@ RSpec.describe FeedbackMailer, type: :mailer do
   describe 'new_feedback_email' do
     let(:proposal) { create(:proposal, :with_organizers, status: :draft) }
     let(:user) { create(:user) }
-    let(:feedback) { create(:feedback, user: user) }
+    let(:feedback) { create(:feedback, user: user, proposal: proposal) }
     let(:email) { FeedbackMailer.with(feedback: feedback).new_feedback_email }
     context 'when proposal is in draft state' do
       it "sends an email" do
