@@ -8,13 +8,15 @@ class FeedbacksController < ApplicationController
 
   def new
     @feedback = Feedback.new
+    @proposals = current_user.person.proposals
   end
 
   def create
     @feedback = Feedback.new(feedback_params)
+    @proposals = current_user.person.proposals
     @feedback.user = current_user
     if @feedback.save
-      FeedbackMailer.with(feedback: @feedback).new_feedback_email.deliver_later
+      FeedbackMailer.with(feedback: @feedback).new_feedback_email(@feedback.proposal_id).deliver_later
       redirect_to feedbacks_path, notice: t('feedback.create.success')
     else
       render :new, alert: "Error: #{@feedback.errors.full_messages}"
@@ -42,7 +44,7 @@ class FeedbacksController < ApplicationController
   private
 
   def feedback_params
-    params.require(:feedback).permit(:content)
+    params.require(:feedback).permit(:content, :proposal_id)
   end
 
   def set_feedback

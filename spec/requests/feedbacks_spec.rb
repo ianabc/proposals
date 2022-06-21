@@ -1,7 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe "/feedbacks", type: :request do
-  let(:feedback) { create(:feedback) }
+  let(:proposal) { create(:proposal) }
+  let(:feedback) { create(:feedback, proposal: proposal) }
   let(:role) { create(:role, name: 'Staff') }
   let(:user) { create(:user) }
   let(:role_privilege) do
@@ -34,7 +35,8 @@ RSpec.describe "/feedbacks", type: :request do
 
   describe "POST /create" do
     let(:feedback_params) do
-      { content: 'I am writing a feedback' }
+      { content: 'I am writing a feedback',
+        proposal_id: proposal.id }
     end
     context "with valid parameters" do
       it "creates a new feedback" do
@@ -46,7 +48,8 @@ RSpec.describe "/feedbacks", type: :request do
 
     context "with invalid parameters" do
       let(:feedback_params) do
-        { content: '' }
+        { content: '',
+          proposal_id: proposal.id }
       end
       it "does not create a new Feedback" do
         expect do
