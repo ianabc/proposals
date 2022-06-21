@@ -22,7 +22,7 @@
               <h2>Proposal</h2>
               <p>Please select a proposal</p>
               <div class="proposal-feedback w-25">
-              <%= f.select :proposal_id,  proposals.map { |proposal| [proposal.title, proposal.id ] } %>
+              <%= f.select :proposal_id,  proposals&.map { |proposal| [proposal.title, proposal.id ] } %>
               </div>
             </div>
             <div class="mb-3">

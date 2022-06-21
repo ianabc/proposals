@@ -16,7 +16,7 @@ class FeedbacksController < ApplicationController
     @proposals = current_user.person.proposals
     @feedback.user = current_user
     if @feedback.save
-      FeedbackMailer.with(feedback: @feedback).new_feedback_email.deliver_later
+      FeedbackMailer.with(feedback: @feedback).new_feedback_email(@feedback.proposal_id).deliver_later
       redirect_to feedbacks_path, notice: t('feedback.create.success')
     else
       render :new, alert: "Error: #{@feedback.errors.full_messages}"
