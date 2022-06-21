@@ -11,7 +11,6 @@ class ProposalFieldValidationsService
     return unless proposal
 
     @answer = Answer.find_by(proposal_field_id: field.id, proposal_id: proposal.id)&.answer
-
     check_validations(field.validations)
     @errors
   end
@@ -46,8 +45,13 @@ class ProposalFieldValidationsService
   end
 
   def preferred_impossible_dates_validation
-    return unless @answer
-
+    if @answer.nil?
+      @errors << "You have to choose atleast #{proposal.proposal_type.min_no_of_preferred_dates}
+      preferred dates"
+      @errors << "You have to choose atleast #{proposal.proposal_type.min_no_of_impossible_dates}
+      impossible dates"
+      return
+    end
     preferred = JSON.parse(@answer)&.first(5)
     impossible = JSON.parse(@answer)&.last(2)
     preferred_dates = preferred.reject { |date| date == '' }
