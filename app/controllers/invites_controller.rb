@@ -29,7 +29,11 @@ class InvitesController < ApplicationController
         flash[:alert] = t('invites.update.failure')
       end
     end
-    redirect_to edit_submitted_proposal_url(@invite.proposal_id)
+    if lead_organizer?
+      redirect_to edit_proposal_path(@invite.proposal_id)
+    else
+      redirect_to edit_submitted_proposal_url(@invite.proposal_id)
+    end
   end
 
   def invite_email
@@ -106,6 +110,10 @@ class InvitesController < ApplicationController
   end
 
   private
+
+  def lead_organizer?
+    @invite.proposal.lead_organizer == current_user.person
+  end
 
   def set_invite_status
     case response_params

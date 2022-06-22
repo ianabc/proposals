@@ -29,4 +29,8 @@ module InvitesHelper
     participants = proposal.demographics_data.count
     participants >= 10
   end
+
+  def lead_organizer(invite, user)
+    invite.proposal.lead_organizer == user.person
+  end
 end
