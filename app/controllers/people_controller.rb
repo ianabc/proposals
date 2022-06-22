@@ -20,6 +20,31 @@ class PeopleController < ApplicationController
     end
   end
 
+  def show_person_modal
+    @proposal = Proposal.find(params[:id])
+    @person = @proposal.lead_organizer
+
+    render partial: 'submitted_proposals/person_modal', locals: { person: @person, proposal: @proposal }
+  end
+
+  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
+  def update_lead_organizer
+    @proposal = Proposal.find(params[:id])
+    @person = Person.find(params[:person_id])
+    @person.firstname = params['person']['firstname']
+    @person.lastname = params['person']['lastname']
+    @person.email = params['person']['email']
+    @person.affiliation = params['person']['affiliation']
+    if @person.save(validate: false)
+      redirect_to edit_submitted_proposal_path(@proposal.id), notice: t('people.update_lead_organizer.success')
+    else
+      redirect_to edit_submitted_proposal_path(@proposal.id), alert: t('people.update_lead_organizer.failure')
+    end
+  end
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
+
   private
 
   def person_params

@@ -23,6 +23,7 @@ class Proposal < ApplicationRecord
   has_many :emails, dependent: :destroy
   has_many :reviews, dependent: :destroy
   has_many :proposal_versions, dependent: :destroy
+  has_many :feedbacks, dependent: :destroy
 
   before_save :strip_whitespace
   before_save :create_code, if: :is_submission
