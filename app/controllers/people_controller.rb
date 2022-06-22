@@ -35,9 +35,9 @@ class PeopleController < ApplicationController
     @person.email = params['person']['email']
     @person.affiliation = params['person']['affiliation']
     if @person.save(validate: false)
-      redirect_to edit_submitted_proposal_path(@proposal.id), notice: 'Lead organizer is updated successfully'
+      redirect_to edit_submitted_proposal_path(@proposal.id), notice: t('people.update_lead_organizer.success')
     else
-      redirect_to edit_submitted_proposal_path(@proposal.id), alert: 'Something went wrong'
+      redirect_to edit_submitted_proposal_path(@proposal.id), alert: t('people.update_lead_organizer.failure')
     end
   end
 
