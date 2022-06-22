@@ -30,7 +30,7 @@ module InvitesHelper
     participants >= 10
   end
 
-  def is_lead_organizer(invite, user)
+  def lead_organizer(invite, user)
     invite.proposal.lead_organizer == user.person
   end
 end
