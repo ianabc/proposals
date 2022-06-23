@@ -6,7 +6,8 @@ class Invite < ApplicationRecord
   belongs_to :person
   belongs_to :proposal
 
-  before_validation :downcase_email, :assign_person
+  before_validation :downcase_email
+  before_validation :assign_person, on: :create
   before_save :generate_code
   before_save :strip_whitespace
   before_save :email_downcase
