@@ -186,9 +186,8 @@ class Proposal < ApplicationRecord
     invites.where(invited_as: 'Participant').where(response: %w[yes maybe])
   end
 
-  def participants_career(career)
-    person_ids = participants.map(&:person_id)
-    Person.where(id: person_ids).where(academic_status: career)
+  def get_confirmed_participant(proposal)
+    proposal.invites.where(status: 1, invited_as: "Participant").map(&:person)
   end
 
   def self.supporting_organizer_fullnames(proposal)
