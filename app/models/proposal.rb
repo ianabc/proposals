@@ -23,6 +23,7 @@ class Proposal < ApplicationRecord
   has_many :emails, dependent: :destroy
   has_many :reviews, dependent: :destroy
   has_many :proposal_versions, dependent: :destroy
+  has_many :feedbacks, dependent: :destroy
 
   before_save :strip_whitespace
   before_save :create_code, if: :is_submission
@@ -185,9 +186,8 @@ class Proposal < ApplicationRecord
     invites.where(invited_as: 'Participant').where(response: %w[yes maybe])
   end
 
-  def participants_career(career)
-    person_ids = participants.map(&:person_id)
-    Person.where(id: person_ids).where(academic_status: career)
+  def get_confirmed_participant(proposal)
+    proposal.invites.where(status: 1, invited_as: "Participant").map(&:person)
   end
 
   def self.supporting_organizer_fullnames(proposal)

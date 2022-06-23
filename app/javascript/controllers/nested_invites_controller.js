@@ -105,6 +105,17 @@ export default class extends Controller {
     )
   }
 
+  editLeadPreview () {
+    event.preventDefault()
+    let id = event.currentTarget.dataset.id;
+    let invitedAs = event.currentTarget.id;
+    $.get(`/person/show_person_modal/${id}`, function(data) {
+        $('#invite-person-body').html(data)
+        $('#person-modal').modal('show')
+      }
+    )
+  }
+
   sendInvite () {
     let id = event.currentTarget.dataset.id;
     let invitedAs = ''
@@ -115,11 +126,11 @@ export default class extends Controller {
     var body = $('#email_body').text()
     $.post(`/submit_proposals?proposal=${id}&create_invite=true.js`,
       $('form#submit_proposal').serialize(), function(data) {
-        if (body.includes("supporting organizer")) {
+        if (body.toLowerCase().includes("supporting organizer")) {
           invitedAs = 'Organizer'
           inviteId = inviteOrganizer
         }
-        else if (body.includes("participant")) {
+        else if (body.toLowerCase().includes("participant")) {
           invitedAs = 'Participant'
           inviteId = inviteParticipant
         }
