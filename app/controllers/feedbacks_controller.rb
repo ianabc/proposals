@@ -11,7 +11,7 @@ class FeedbacksController < ApplicationController
     @proposals = current_user.person.proposals
   end
 
-  def create
+  def create # rubocop:disable Metrics/AbcSize
     @feedback = Feedback.new(feedback_params)
     @proposals = current_user.person.proposals
     @feedback.user = current_user
@@ -34,6 +34,7 @@ class FeedbacksController < ApplicationController
     raise CanCan::AccessDenied unless can? :manage, @feedback
 
     if @feedback.update(reply: params[:feedback_reply])
+      FeedbackMailer.with(feedback: @feedback).feedback_reply_email(@feedback.proposal_id).deliver_later
       render json: {}, status: :ok
     else
       render json: { error: @feedback.errors.full_messages },
