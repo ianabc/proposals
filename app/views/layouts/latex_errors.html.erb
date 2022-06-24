@@ -24,6 +24,9 @@
               <div class="card">
                 <div class="card-body">
                   <div  data-controller="proposal_form">
+                      <div class="d-flex flex-row-reverse float-end" >
+                         <%= link_to "Edit Proposal", edit_proposal_path(@proposal) ,class:'btn btn-primary' %>
+                      </div>
                     <%= yield %>
                   </div>
                 </div>
