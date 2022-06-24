@@ -1,6 +1,15 @@
 <main class="content">
   <div class="container-fluid">
     <div class="header">
+        <% if params[:action] == 'show'%>
+         <% unless proposal.submitted? || proposal.revision_submitted? ||
+            proposal.revision_submitted_spc? || proposal.approved? || proposal.declined? || proposal.decision_email_sent? || proposal.decision_pending? || proposal.initial_review? || proposal.in_progress? || proposal.in_progress_spc? %>
+          
+          <div class="d-flex flex-row-reverse float-end" >
+               <%= link_to "Edit Proposal", edit_proposal_path(@proposal) ,class:'btn btn-primary' %>
+          </div>
+          <% end %>
+        <% end %>
       <h1 class="header-title">
         Proposals
       </h1>
