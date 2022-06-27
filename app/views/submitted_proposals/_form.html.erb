@@ -1,6 +1,11 @@
 <main class="content">
   <div class="container-fluid">
     <div class="header">
+       <% if params[:action] == 'show'%>  
+        <div class="d-flex flex-row-reverse float-end" >
+           <%= link_to "Edit Proposal", edit_submitted_proposal_url(@proposal) ,class:'btn btn-primary' %>
+        </div>
+      <% end %>
       <h1 class="header-title">
         Proposals
       </h1>
