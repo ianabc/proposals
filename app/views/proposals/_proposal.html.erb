@@ -1,6 +1,15 @@
 <main class="content">
   <div class="container-fluid">
     <div class="header">
+        <% if params[:action] == 'show'%>
+         <% unless proposal.submitted? || proposal.revision_submitted? ||
+            proposal.revision_submitted_spc? || proposal.approved? || proposal.declined? || proposal.decision_email_sent? || proposal.decision_pending? || proposal.initial_review? || proposal.in_progress? || proposal.in_progress_spc? %>
+          
+          <div class="d-flex flex-row-reverse float-end" >
+               <%= link_to "Edit Proposal", edit_proposal_path(@proposal) ,class:'btn btn-primary' %>
+          </div>
+          <% end %>
+        <% end %>
       <h1 class="header-title">
         Proposals
       </h1>
@@ -294,7 +303,10 @@
                           </div>
 
                           <div class="d-flex flex-row-reverse">
-                            <button id="changeTab" class="p-2 btn btn-primary" data-action='click->submit-proposals#nextTab'>Next</button>
+                            <button id="changeTab" class="p-2 btn btn-primary" data-action='click->submit-proposals#nextTab'>Next</button> &nbsp;&nbsp;
+                            <% if params[:action] == 'edit' %>
+                              <%= f.submit 'Update', disabled: action, class:'btn btn-primary p-2  d-inline-block' %>
+                            <% end %>
                           </div>
                         </div>
 
@@ -329,6 +341,9 @@
                       <div class="d-flex justify-content-between">
                         <%= link_to "Print Proposal", rendered_proposal_proposal_path(@proposal.id, :format => :pdf), target: '_blank', class: 'p-2 mx-2 btn btn-primary' %>
                         <div>
+                           <% if params[:action] == 'edit' %>
+                            <%= f.submit 'Update', disabled: action, class:'btn btn-primary p-2  d-inline-block mr-auto' %>
+                          <% end %>
                           <button id="changeTab" class="p-2 mx-2 btn btn-primary" data-action='click->submit-proposals#previousTab'>Back</button>
                           <button id="changeTab" class="p-2 btn btn-primary" data-action='click->submit-proposals#nextTab'>Next</button>
                         </div>
