@@ -67,12 +67,12 @@ module LatexAttachments
   def add_file_to_tex(num, filename, full_filename)
     num += 1
     # scale first page 0.8 to avoid the page content overlapping the heading
-    tex = "\\includepdf[scale=0.8,pages=1,pagecommand={\\subsection*
+    tex = "\\includepdf[scale=0.75,pages=1,pagecommand={\\subsection*
            {File Attachment #{num}: #{filename}}}]{#{full_filename}}\n"
 
     # Only include the subsection heading on the 1st page of the attached file
     if PDF::Reader.new(full_filename).page_count > 1
-      tex << "\\includepdf[scale=1,pages=2-,pagecommand={
+      tex << "\\includepdf[scale=0.75,pages=2-,pagecommand={
               \\thispagestyle{empty}}]{#{full_filename}}\n"
     end
 
