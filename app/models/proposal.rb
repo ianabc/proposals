@@ -307,7 +307,7 @@ class Proposal < ApplicationRecord
 
   def next_number
     year_code = []
-    codes = Proposal.all.pluck(:code)
+    codes = Proposal.where.not(code: :nil).pluck(:code)
     codes.each do |code|
       year_code << code if code[0, 2].to_i == proposal_type.year[-2..].to_i
     end
