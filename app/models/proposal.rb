@@ -306,8 +306,12 @@ class Proposal < ApplicationRecord
   end
 
   def next_number
-    codes = Proposal.submitted_type(proposal_type.name).pluck(:code)
-    last_code = codes.reject { |c| c.to_s.empty? }.max
+    year_code = []
+    codes = Proposal.where.not(code: :nil).pluck(:code)
+    codes.each do |code|
+      year_code << code if code[0, 2].to_i == proposal_type.year[-2..].to_i
+    end
+    last_code = year_code.reject { |c| c.to_s.empty? }.max
 
     return '001' if last_code.blank?
 
@@ -317,8 +321,8 @@ class Proposal < ApplicationRecord
   def create_code
     return if code.present?
 
-    tc = proposal_type.code || 'xx'
-    self.code = year.to_s[-2..] + tc + next_number
+    tc = "w5"
+    self.code = proposal_type.year.to_s[-2..] + tc + next_number
   end
 
   def preferred_locations

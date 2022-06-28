@@ -104,7 +104,7 @@ class SurveyController < ApplicationController
     user.save
   end
 
-  def post_demographic_form_path
+  def post_demographic_form_path # rubocop:disable Metrics/MethodLength
     message = 'Thank you for filling out our form! '
 
     if @invite.blank?
