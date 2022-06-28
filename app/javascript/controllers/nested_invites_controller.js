@@ -141,7 +141,9 @@ export default class extends Controller {
     if(data.errors.length > 0 && data.counter === 0) {
        $.each(data.errors, function(index, error) {
         toastr.error(error)
-        window.stop();
+        setTimeout(function() {
+          window.location.reload();
+        }, 2000)
       })
     }
     else if(data.errors.length > 0 && data.counter > 0) {
