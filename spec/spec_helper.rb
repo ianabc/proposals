@@ -120,7 +120,7 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 end
 
-def set_session(vars = {})
+def session_mock(vars = {})
   post test_session_path, params: { session_vars: vars }
   expect(response).to have_http_status(:created)
 

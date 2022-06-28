@@ -127,7 +127,6 @@ RSpec.describe Email, type: :model do
       end
     end
 
-    
     it { expect(birs_email.update_status(proposal, 'Draft')).to be_falsey }
   end
 

@@ -93,7 +93,7 @@ RSpec.describe "/survey", type: :request do
 
     before do
       invite.update(status: 'confirmed')
-      set_session(is_invited_person: 'true')
+      session_mock(is_invited_person: 'true')
     end
 
     it "renders a successful response" do
@@ -122,7 +122,7 @@ RSpec.describe "/survey", type: :request do
 
     before do
       invite.update(status: 'confirmed')
-      set_session(is_invited_person: 'true')
+      session_mock(is_invited_person: 'true')
     end
 
     it "renders a successful response" do
@@ -151,7 +151,7 @@ RSpec.describe "/survey", type: :request do
 
     before do
       invite.update(status: 'confirmed')
-      set_session(is_invited_person: 'true')
+      session_mock(is_invited_person: 'true')
     end
 
     it "renders a successful response" do
@@ -181,7 +181,7 @@ RSpec.describe "/survey", type: :request do
 
     before do
       invite.update(status: 'confirmed')
-      set_session(is_invited_person: 'true')
+      session_mock(is_invited_person: 'true')
     end
 
     it "renders a successful response" do
@@ -211,7 +211,7 @@ RSpec.describe "/survey", type: :request do
 
     before do
       invite.update(status: 'confirmed')
-      set_session(is_invited_person: 'true')
+      session_mock(is_invited_person: 'true')
     end
 
     it "renders a successful response" do
@@ -240,7 +240,7 @@ RSpec.describe "/survey", type: :request do
 
     before do
       invite.update(status: 'confirmed')
-      set_session(is_invited_person: 'true')
+      session_mock(is_invited_person: 'true')
     end
 
     it "renders a successful response" do

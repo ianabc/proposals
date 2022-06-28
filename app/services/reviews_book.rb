@@ -1,4 +1,4 @@
-class ReviewsBook
+class ReviewsBook # rubocop:disable Metrics/ClassLength
   attr_reader :proposals_id, :text, :temp_file, :errors, :year, :content_type, :table
 
   include LatexAttachments
@@ -12,7 +12,7 @@ class ReviewsBook
     @table = table
   end
 
-  def generate_booklet
+  def generate_booklet # rubocop:disable Metrics/MethodLength
     @number = 0
 
     @proposals = Proposal.where(id: @proposals_id)

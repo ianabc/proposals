@@ -1,5 +1,5 @@
 module EmailTemplatesHelper
-  def types_of_email
+  def types_of_email # rubocop:disable Metrics/MethodLength
     EmailTemplate.email_types.map do |k, _v|
       [
         case k&.split('_')&.first&.capitalize
@@ -21,7 +21,7 @@ module EmailTemplatesHelper
     end
   end
 
-  def name_of_templates
+  def name_of_templates # rubocop:disable Metrics/MethodLength
     templates = EmailTemplate.all.map do |template|
       email_type = template.email_type.split('_').first.capitalize
       case email_type
