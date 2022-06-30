@@ -99,6 +99,8 @@ Rails.application.routes.draw do
   end
 
   resources :people, path: :person
+  get 'person/show_person_modal/:id', to: 'people#show_person_modal', as: 'show_person_modal'
+  patch 'person/update_lead_organizer/:id', to: 'people#update_lead_organizer', as: 'update_lead_organizer'
 
   resources :submit_proposals do
     collection do

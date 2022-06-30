@@ -38,6 +38,7 @@ class SubmitProposalService
     check_field_validations(id)
 
     answer = Answer.find_by(proposal_field_id: id, proposal: proposal)
+    value = nil if value.instance_of?(Array) && value&.all?(&:blank?)
     if answer
       answer.update(answer: value)
     else

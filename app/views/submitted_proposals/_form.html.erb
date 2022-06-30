@@ -1,6 +1,11 @@
 <main class="content">
   <div class="container-fluid">
     <div class="header">
+       <% if params[:action] == 'show'%>  
+        <div class="d-flex flex-row-reverse float-end" >
+           <%= link_to "Edit Proposal", edit_submitted_proposal_url(@proposal) ,class:'btn btn-primary' %>
+        </div>
+      <% end %>
       <h1 class="header-title">
         Proposals
       </h1>
@@ -217,14 +222,11 @@
                                 </div>
                               </div>
                             <% end %>
-                            <div class="mt-4">
+                             <div class="mt-4">
                               <div class="mb-3">
-                                <% unless @careers.blank? %>
+                                <% unless @proposal.get_confirmed_participant(@proposal).blank? %>
                                   <h3 class="form-section">Confirmed Participants:</h3>
-                                  <% @careers.uniq.each do |career| %>
-                                    <h4><%= career %></h4>
-                                      <%= render partial: 'confirm_participant', locals: { confirmed_participants: @proposal.participants_career(career) } %>
-                                  <% end %>
+                                      <%= render partial: 'proposals/confirm_participant', locals: { confirmed_participants: @proposal.get_confirmed_participant(@proposal) } %>
                                 <% end %>
                               </div>
                             </div>
@@ -248,12 +250,9 @@
                               </div>
                               <div class="mt-4">
                                 <div class="mb-3">
-                                  <% if @careers %>
+                                  <% unless @proposal.get_confirmed_participant(@proposal).blank? %>
                                     <h3 class="form-section">Confirmed Participants:</h3>
-                                    <% @careers.uniq.each do |career| %>
-                                      <h4><%= career %></h4>
-                                        <%= render partial: 'proposals/confirm_participant', locals: { confirmed_participants: @proposal.participants_career(career) } %>
-                                    <% end %>
+                                        <%= render partial: 'proposals/confirm_participant', locals: { confirmed_participants: @proposal.get_confirmed_participant(@proposal) } %>
                                   <% end %>
                                 </div>
                               </div>

@@ -42,6 +42,11 @@
                   </div>
                   <div class="card-footer">
                     <div class="d-flex justify-content-end">Submitted at: <%= feedback.created_at.to_date %></div>
+                    <% if feedback&.proposal&.title %>
+                      <div class="d-flex justify-content-start">Proposal: <%= feedback.proposal.title %></div>
+                    <% else %>
+                      <p class="d-flex justify-content-start"> Proposal: Not Available </p>
+                    <% end %>
                   </div>
                 </div>
             </div>
@@ -78,6 +83,12 @@
                   </div>
                   <div class="card-footer">
                     <div class="d-flex justify-content-end">Submitted at: <%= feedback.created_at.to_date %></div>
+        
+                    <% if feedback&.proposal&.title %>
+                      <div class="d-flex justify-content-start">Proposal: <%= feedback.proposal.title %></div>
+                    <% else %>
+                      <p class="d-flex justify-content-start"> Proposal: Not Available </p>
+                    <% end %>
                   </div>
                 </div>
             </div>

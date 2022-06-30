@@ -126,6 +126,7 @@ ActiveRecord::Schema.define(version: 2021_12_09_034854) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "reply"
     t.boolean "reviewed"
+    t.integer "proposal_id"
     t.index ["user_id"], name: "index_feedbacks_on_user_id"
   end
 
