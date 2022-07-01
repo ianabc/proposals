@@ -157,6 +157,7 @@ en:
   proposal_forms:
     create:
       success: "Proposal form was successfully created!"
+      alert: "Title can't be blank"
     update:
       success: "Proposal form was successfully updated"
       failure: "Unable to update proposal form."
@@ -170,6 +171,8 @@ en:
     page_redirect:
       alert: "Sent email to proposal organizers."
   submitted_proposals:
+    revise_proposal_editflow:
+      alert: "Proposal status should be initial_review or revision_submitted_spc."
     revision_proposal:
       success: "Proposal is successfully sent to EditFlow!"
     check_proposal_editflow_id:
