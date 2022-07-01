@@ -93,6 +93,7 @@ RSpec.describe "/proposals/:proposal_id/invites", type: :request do
 
   describe "GET /show_invite_modal" do
     it "open a modal and response should be ok" do
+      invite.update(status: 1)
       get show_invite_modal_url(invite.id)
       expect(response).to have_http_status(:ok)
     end
