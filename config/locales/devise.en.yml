@@ -93,6 +93,8 @@ en:
     destroy:
       success: "AMS Subject was successfully deleted."
   proposal_fields:
+    redirect:
+      alert: 'Postion should be greater than 0'
     valid_position_update_field:
       success: "Field was successfully updated."
     valid_position_create_field:
