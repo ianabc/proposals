@@ -43,13 +43,15 @@ class SurveyController < ApplicationController
     demographic_data
   end
 
-  def questionnaire_answers
+  def questionnaire_answers # rubocop:disable Metrics/MethodLength
     answers = questionnaire_params
     questionnaire_params.each do |key, value|
       if value.is_a?(Array) && value.any? { |answr| answr.match?(/^Prefer not/) }
-        answers[key] = ['Prefer not to answer (Please note: If you choose this response, none of your other responses to this question will be considered in the data analysis.)']
+        answers[key] = ['Prefer not to answer (Please note: If you choose this response,
+         none of your other responses to this question will be considered in the data analysis.)']
       elsif value.is_a?(String) && value.match?(/^Prefer not/)
-        answers[key] = 'Prefer not to answer (Please note: If you choose this response, none of your other responses to this question will be considered in the data analysis.)'
+        answers[key] = 'Prefer not to answer (Please note: If you choose this response,
+         none of your other responses to this question will be considered in the data analysis.)'
       end
     end
 
