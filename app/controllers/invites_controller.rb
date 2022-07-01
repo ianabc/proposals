@@ -14,7 +14,7 @@ class InvitesController < ApplicationController
   end
 
   def show_invite_modal
-    @invite = Invite.find(params[:id])
+    @invite = Invite.confirmed.find(params[:id])
 
     render partial: 'submitted_proposals/invite_modal', locals: { invite: @invite }
   end
