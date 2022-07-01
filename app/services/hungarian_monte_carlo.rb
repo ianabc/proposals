@@ -17,7 +17,7 @@ class HungarianMonteCarlo
     socket = hmc_connect
     return if @errors.present?
 
-    socket.puts "#{@hmc_access_code}" if hmc_reply(socket, 'Access code')
+    socket.puts "#{@hmc_access_code}.to_s" if hmc_reply(socket, 'Access code')
     socket.puts "newrun" if hmc_reply(socket, 'READY')
     socket.puts formatted_run_params if hmc_reply(socket, 'Run parameters')
     socket.puts proposal_data.join("\n") if hmc_reply(socket, 'Send proposals')
@@ -40,13 +40,11 @@ class HungarianMonteCarlo
 
   def update_schedule_runs(socket)
     output = ''
-    while line = socket&.gets
-      output << line
-    end
+    output << line while line == socket&.gets
 
     if output.match?('Launching HungarianMonteCarlo')
       pid = output.split(':').last.strip.to_i
-      update_schedule_run(pid) unless pid.blank?
+      update_schedule_run(pid) if pid.present?
     else
       @errors['HMC runtime error'] = "HMC may not have launched".squish
     end
