@@ -129,6 +129,8 @@ en:
     update:
       success: "Subject Category successfully updated."
   invites:
+    show:
+      alert: "Invite code is invalid"
     inviter_response:
       failure: "Invalid answer"
     invite_reminder:
@@ -147,6 +149,8 @@ en:
     destroy:
       success: "Schedule result is deleted successfully"
   proposals:
+    delete_file_message:
+      success: "File has been removed!"
     destroy:
       success: "Proposal was successfully deleted."
   profile:
@@ -171,6 +175,8 @@ en:
     page_redirect:
       alert: "Sent email to proposal organizers."
   submitted_proposals:
+    staff_discussion:
+      success: "Your comment was added!"
     revise_proposal_editflow:
       alert: "Proposal status should be initial_review or revision_submitted_spc."
     revision_proposal:

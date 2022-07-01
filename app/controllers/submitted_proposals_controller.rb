@@ -58,7 +58,7 @@ class SubmittedProposalsController < ApplicationController
     if @staff_discussion.update(discussion: discussion,
                                 proposal_id: @proposal.id)
       redirect_to submitted_proposal_url(@proposal),
-                  notice: "Your comment was added!"
+                  notice: t('submitted_proposals.staff_discussion.success')
     else
       redirect_to submitted_proposal_url(@proposal),
                   alert: @staff_discussion.errors.full_messages

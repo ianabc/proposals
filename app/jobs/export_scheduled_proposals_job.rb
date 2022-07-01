@@ -2,7 +2,7 @@ class ExportScheduledProposalsJob < ApplicationJob
   queue_as :default
 
   def workshops_api
-    url = ENV['WORKSHOPS_API_URL']
+    url = ENV.fetch('WORKSHOPS_API_URL', nil)
     Rails.logger.info("WORKSHOPS_API_URL not set!") if url.blank?
     url
   end
