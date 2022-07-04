@@ -457,7 +457,28 @@ RSpec.describe ProposalFieldsHelper, type: :helper do
       let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
       let!(:validations) { create(:validation, proposal_field: field, validation_type: 8, value: '1') }
 
-      it "returns false no error added" do
+      it "returns false and answer is present" do
+        proposal_type.update(max_no_of_preferred_dates: 0, max_no_of_impossible_dates: 0)
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is '5-day workshop preferred/Impossible dates'" do
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 8, value: '1') }
+
+      it "returns false and answer is present and errors conditions rae false" do
+        proposal_type.update(min_no_of_impossible_dates: 0, min_no_of_preferred_dates: 0)
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is '5-day workshop preferred/Impossible dates'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 8, value: '1') }
+
+      it "returns false and answer is not present" do
         field.update(proposal_form_id: proposal_form.id)
         expect(tab_two(proposal)).to eq false
       end
