@@ -93,4 +93,44 @@ RSpec.describe "/person", type: :request do
       end
     end
   end
+
+  describe "show_person_modal" do
+    let(:proposal) { create(:proposal, :with_organizers) }
+    let(:proposal_role) { create(:proposal_role, proposal: proposal) }
+    before do
+      role_privilege
+      user.roles << role
+      sign_in user
+    end
+
+    it "show_person_modal" do
+      get show_person_modal_path(proposal)
+
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "update_lead_organizer" do
+    let(:proposal) { create(:proposal, :with_organizers) }
+    let(:proposal_role) { create(:proposal_role, proposal: proposal) }
+
+    let(:person_params) do
+      { email: 'test@gmail.com',
+        firstname: 'joe',
+        lastname: 'lee',
+        affiliation: 'University of London' }
+    end
+
+    before do
+      role_privilege
+      user.roles << role
+      sign_in user
+    end
+
+    it "show_person_modal" do
+      patch update_lead_organizer_path(proposal), params: { person_id: person.id, person: person_params }
+
+      expect(response).to have_http_status(302)
+    end
+  end
 end
