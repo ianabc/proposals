@@ -309,7 +309,7 @@ class Proposal < ApplicationRecord
     year_code = []
     codes = Proposal.where.not(code: :nil).pluck(:code)
     codes.each do |code|
-      year_code << code if code[0, 2].to_i == proposal_type.year[-2..].to_i
+      year_code << code[-3..] if code[0, 2].to_i == proposal_type.year[-2..].to_i
     end
     last_code = year_code.reject { |c| c.to_s.empty? }.max
 
@@ -321,7 +321,7 @@ class Proposal < ApplicationRecord
   def create_code
     return if code.present?
 
-    tc = "w5"
+    tc = proposal_form.proposal_type.code
     self.code = proposal_type.year.to_s[-2..] + tc + next_number
   end
 
