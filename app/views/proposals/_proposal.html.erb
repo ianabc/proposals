@@ -12,7 +12,7 @@
         <% end %>
       <h1 class="header-title">
         Proposals
-      </h1>
+      </h1>      
        <nav aria-label="breadcrumb">
          <ol class="breadcrumb" data-turbo="false">
            <li class="breadcrumb-item"> <%= link_to "Dashboard", dashboards_path %> </a></li>
@@ -224,7 +224,6 @@
                                 </div>
                               </div>
                             </div>
-                            <% end %>
                             <div class="mt-4">
                               <div class="mb-3">
                                 <% unless @proposal.get_confirmed_participant(@proposal).blank? %>
@@ -233,6 +232,7 @@
                                 <% end %>
                               </div>
                             </div>
+                            <% end %>
 
                             <% if params[:action] == 'show' %>
                             <div>
@@ -261,7 +261,7 @@
                               </div>
                             </div>
                             <% end %>
-
+                            
                           <div class="mt-4" data-controller="multi-upload">
                               <h3 class="form-section">Supplementary Files:</h3>
                               <p>
