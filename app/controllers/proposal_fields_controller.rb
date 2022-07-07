@@ -75,7 +75,7 @@ class ProposalFieldsController < ApplicationController
   def redirect
     if (@position + 1) == 1
       redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
-                  alert: "Postion should be greater than 0"
+                  alert: t('proposal_fields.redirect.alert')
     else
       redirect_to edit_proposal_type_proposal_form_url(@proposal_form.proposal_type, @proposal_form, cloned: true),
                   alert: "Postion should be greater than 0 and smaller or equal to #{@position + 1}"

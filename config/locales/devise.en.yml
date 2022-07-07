@@ -93,6 +93,8 @@ en:
     destroy:
       success: "AMS Subject was successfully deleted."
   proposal_fields:
+    redirect:
+      alert: 'Postion should be greater than 0'
     valid_position_update_field:
       success: "Field was successfully updated."
     valid_position_create_field:
@@ -127,6 +129,8 @@ en:
     update:
       success: "Subject Category successfully updated."
   invites:
+    show:
+      alert: "Invite code is invalid"
     inviter_response:
       failure: "Invalid answer"
     invite_reminder:
@@ -145,6 +149,8 @@ en:
     destroy:
       success: "Schedule result is deleted successfully"
   proposals:
+    delete_file_message:
+      success: "File has been removed!"
     destroy:
       success: "Proposal was successfully deleted."
   profile:
@@ -155,6 +161,7 @@ en:
   proposal_forms:
     create:
       success: "Proposal form was successfully created!"
+      alert: "Title can't be blank"
     update:
       success: "Proposal form was successfully updated"
       failure: "Unable to update proposal form."
@@ -168,6 +175,10 @@ en:
     page_redirect:
       alert: "Sent email to proposal organizers."
   submitted_proposals:
+    staff_discussion:
+      success: "Your comment was added!"
+    revise_proposal_editflow:
+      alert: "Proposal status should be initial_review or revision_submitted_spc."
     revision_proposal:
       success: "Proposal is successfully sent to EditFlow!"
     check_proposal_editflow_id:

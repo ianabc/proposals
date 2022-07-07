@@ -202,7 +202,7 @@ class ProposalsController < ApplicationController
     file = @proposal.files.where(id: params[:attachment_id])
     file.purge_later
 
-    flash[:notice] = 'File has been removed!'
+    flash[:notice] = t('proposals.delete_file_message.success')
   end
 
   def authorize_user

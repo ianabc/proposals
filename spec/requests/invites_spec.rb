@@ -93,12 +93,18 @@ RSpec.describe "/proposals/:proposal_id/invites", type: :request do
 
   describe "GET /show_invite_modal" do
     it "open a modal and response should be ok" do
+      invite.update(status: 1)
       get show_invite_modal_url(invite.id)
       expect(response).to have_http_status(:ok)
     end
   end
 
   describe "PATCH /update" do
+    let(:proposal) { create(:proposal, :with_organizers) }
+    let(:invite) { create(:invite, proposal: proposal) }
+    let(:person) { create(:person, :with_proposals) }
+    let(:proposal_role) { create(:proposal_role, proposal: proposal, person: person) }
+
     let(:params) do
       {
         invite: {
@@ -111,6 +117,22 @@ RSpec.describe "/proposals/:proposal_id/invites", type: :request do
     it "update invite data from params" do
       patch proposal_invite_url(proposal.id, invite.id), params: params
       expect(response).to have_http_status(302)
+    end
+
+    context 'with wrong params' do
+      let(:params) do
+        {
+          invite: {
+            firstname: nil,
+            lastname: nil,
+            affiliation: "Test Affiliation"
+          }
+        }
+      end
+      it "don't update invite" do
+        patch proposal_invite_url(proposal.id, invite.id), params: params
+        expect(response).to have_http_status(302)
+      end
     end
   end
 

@@ -51,7 +51,7 @@ class SchedulesController < ApplicationController
     @dates = @schedules.first&.dates
   end
 
-  def export_scheduled_proposals
+  def export_scheduled_proposals # rubocop:disable Metrics/MethodLength
     schedules = Schedule.where(schedule_run_id: @schedule_run.id,
                                case_num: params[:case].to_i)
     program_weeks = schedules.first&.dates
@@ -84,7 +84,7 @@ class SchedulesController < ApplicationController
 
   private
 
-  def update_proposal_date(schedule, program_weeks)
+  def update_proposal_date(schedule, program_weeks) # rubocop:disable Metrics/MethodLength
     return [] if schedule.proposal.blank?
 
     date = program_weeks[(schedule.week - 1)]

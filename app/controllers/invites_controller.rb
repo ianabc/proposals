@@ -6,7 +6,7 @@ class InvitesController < ApplicationController
   before_action :set_invite_proposal, only: %i[show]
 
   def show
-    redirect_to root_path, alert: "Invite code is invalid" and return if @invite.nil?
+    redirect_to root_path, alert: t('invites.show.alert') and return if @invite.nil?
     redirect_to root_path and return if @invite.confirmed?
     redirect_to cancelled_path and return if @invite.cancelled?
 
@@ -14,7 +14,7 @@ class InvitesController < ApplicationController
   end
 
   def show_invite_modal
-    @invite = Invite.find(params[:id])
+    @invite = Invite.confirmed.find(params[:id])
 
     render partial: 'submitted_proposals/invite_modal', locals: { invite: @invite }
   end
