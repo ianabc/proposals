@@ -24,5 +24,9 @@ FactoryBot.define do
     trait :multi_choice_field do
       association :fieldable, factory: :proposal_fields_multi_choice
     end
+
+    trait :preferred_impossible_dates_field do
+      association :fieldable, factory: :proposal_fields_preferred_impossible_date
+    end
   end
 end

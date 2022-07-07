@@ -75,4 +75,52 @@ RSpec.describe Proposal, type: :model do
       end
     end
   end
+
+  describe 'impossible_dates' do
+    context "when proposal is present" do
+      let!(:proposal) { create(:proposal, assigned_date: "2023-01-15 - 2023-01-20") }
+      let!(:proposal_field) { create(:proposal_field, :preferred_impossible_dates_field) }
+      let!(:schedule_run) { create(:schedule_run) }
+      let!(:schedule) { create(:schedule, schedule_run_id: schedule_run.id) }
+      let!(:answers) do
+        create(:answer, proposal: proposal, proposal_field: proposal_field,
+                        answer: "[\"01/15/23 to 01/20/2023\",\"01/15/23 to 01/20/2023\",\"01/15/23 to 01/20/2023\",\"01/15/23 to 01/20/2023\",\"01/15/23 to 01/20/2023\",\"01/15/23 to 01/20/2023\"]")
+      end
+
+      it 'returns empty string when proposal preferred_dates are empty' do
+        expect(proposal.impossible_dates).to be_a Array
+      end
+    end
+
+    context "when proposal fields are blank" do
+      let!(:proposal) { create(:proposal, assigned_date: "2023-01-15 - 2023-01-20") }
+      let!(:proposal_field) { create(:proposal_field, nil) }
+      let!(:schedule_run) { create(:schedule_run) }
+      let!(:schedule) { create(:schedule, schedule_run_id: schedule_run.id) }
+      let!(:answers) do
+        create(:answer, proposal: proposal, proposal_field: proposal_field,
+                        answer: "[\"01/15/23 to 01/20/2023\",\"01/15/23 to 01/20/2023\",\"01/15/23 to 01/20/2023\",\"01/15/23 to 01/20/2023\",\"01/15/23 to 01/20/2023\",\"01/15/23 to 01/20/2023\"]")
+      end
+
+      it 'returns empty string when proposal preferred_dates are empty' do
+        expect(proposal.impossible_dates).to be_a Array
+      end
+    end
+
+    describe 'max_supporting_organizers' do 
+      let!(:proposal) { create(:proposal) }
+      it 'proposal type not present' do
+         expect(proposal.max_supporting_organizers).to eq(3)
+      end
+
+      context 'proposal type present present' do
+         let(:location) { create(:location) }
+         let(:proposal_type) { create(:proposal_type, locations: [location]) }
+
+         it 'proposal type present' do
+         expect(proposal.max_supporting_organizers).to eq(3)
+        end
+      end
+    end
+  end
 end
