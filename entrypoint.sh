@@ -69,7 +69,7 @@ echo
 echo "Bundle update..."
 su - app -c "cd /home/app/proposals; /usr/local/rvm/gems/default/bin/bundle update"
 
-root_owned_files=`find /usr/local/rvm/gems -user root -print`
+root_owned_files=$(find /usr/local/rvm/gems -user root -print)
 if [ -z "$root_owned_files" ]; then
   echo
   echo "Changing gems to non-root file permissions..."

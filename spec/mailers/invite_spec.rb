@@ -79,6 +79,17 @@ RSpec.describe InviteMailer, type: :mailer do
     end
   end
 
+  describe 'invite_uncertain' do
+    let(:proposal) { create(:proposal) }
+    let(:invite) { create(:invite, proposal: proposal) }
+    let(:person) { create(:person, invite: invite) }
+    let(:email) { InviteMailer.with(invite: invite).invite_uncertain }
+
+    it "sends an invite uncertain email" do
+      expect(email.subject).to eq("Invite Uncertain")
+    end
+  end
+
   describe 'invite_reminder' do
     let(:proposal) { create(:proposal) }
     let(:invite) { create(:invite, proposal: proposal) }

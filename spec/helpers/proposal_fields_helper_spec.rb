@@ -301,12 +301,186 @@ RSpec.describe ProposalFieldsHelper, type: :helper do
       expect(tab_two(proposal)).to eq false
     end
 
-    context 'when error occurs ' do
+    context "when validation is 'mandatory' and answer is blank" do
       let!(:validations) { create(:validation, proposal_field: field) }
 
-      it 'returns true' do
+      it 'returns true and error added' do
         field.update(proposal_form_id: proposal_form.id)
         expect(tab_two(proposal)).to eq true
+      end
+    end
+
+    context "when validation is 'mandatory' and answer is not blank" do
+      let!(:validations) { create(:validation, proposal_field: field) }
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
+
+      it 'returns false no error added' do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is 'less than (integer matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 1) }
+
+      it "returns true and error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq true
+      end
+    end
+
+    context "when validation is 'less than (integer matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 1, value: '1') }
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
+
+      it "returns false no error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is 'less than (float matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 2) }
+
+      it "returns true and error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq true
+      end
+    end
+
+    context "when validation is 'less than (float matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 2, value: '1') }
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
+
+      it "returns false no error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is 'greater than (integer matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 3) }
+
+      it "returns true and error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq true
+      end
+    end
+
+    context "when validation is 'greater than (integer matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 3, value: '-1') }
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
+
+      it "returns false no error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is 'greater than (float matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 4) }
+
+      it "returns true and error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq true
+      end
+    end
+
+    context "when validation is 'greater than (float matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 4, value: '-1') }
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
+
+      it "returns false no error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is 'equal (string matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 5) }
+
+      it "returns true and error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq true
+      end
+    end
+
+    context "when validation is 'equal (string matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 5, value: "[\"YES\"]") }
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
+
+      it "returns false no error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is 'equal (integer matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 6, value: '1') }
+
+      it "returns true and error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq true
+      end
+    end
+
+    context "when validation is 'equal (integer matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 6, value: '1') }
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: '1') }
+
+      it "returns false no error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is 'equal (float matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 7, value: '1') }
+
+      it "returns true and error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq true
+      end
+    end
+
+    context "when validation is 'equal (float matcher)'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 7, value: '1') }
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: '1') }
+
+      it "returns false no error added" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is '5-day workshop preferred/Impossible dates'" do
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 8, value: '1') }
+
+      it "returns false and answer is present" do
+        proposal_type.update(max_no_of_preferred_dates: 0, max_no_of_impossible_dates: 0)
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is '5-day workshop preferred/Impossible dates'" do
+      let!(:answer) { create(:answer, proposal: proposal, proposal_field: field, answer: "[\"YES\"]") }
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 8, value: '1') }
+
+      it "returns false and answer is present and errors conditions rae false" do
+        proposal_type.update(min_no_of_impossible_dates: 0, min_no_of_preferred_dates: 0)
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
+      end
+    end
+
+    context "when validation is '5-day workshop preferred/Impossible dates'" do
+      let!(:validations) { create(:validation, proposal_field: field, validation_type: 8, value: '1') }
+
+      it "returns false and answer is not present" do
+        field.update(proposal_form_id: proposal_form.id)
+        expect(tab_two(proposal)).to eq false
       end
     end
   end

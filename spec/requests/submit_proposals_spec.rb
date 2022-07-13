@@ -40,11 +40,8 @@ RSpec.describe "/submit_proposals", type: :request do
         location_ids: location.id, no_latex: false }
     end
 
-    before do
-      post submit_proposals_url, params: params, xhr: true
-    end
-
     it "updates the proposal but will not create invite" do
+      post submit_proposals_url, params: params, xhr: true
       expect(proposal.invites.count).to eq(0)
     end
   end
@@ -57,16 +54,25 @@ RSpec.describe "/submit_proposals", type: :request do
       create(:ams_subject, subject_category_ids:
                            subject_category.id, subject_id: subject.id)
     end
+
     let(:ams_subject_code2) do
       create(:ams_subject, subject_category_ids:
                            subject_category.id, subject_id: subject.id)
     end
+
     let(:location) { create(:location) }
     let(:invites_attributes) do
       { '0' => { firstname: 'First', lastname: 'Organizer',
                  email: 'organizer@gmail.com', deadline_date: DateTime.now,
                  invited_as: 'Organizer' } }
     end
+
+    let(:invites_attributes_failure) do
+      { '0' => { firstname: '', lastname: 'Organizer',
+                 email: '', deadline_date: DateTime.now,
+                 invited_as: 'Organizer' } }
+    end
+
     let(:params) do
       { proposal: proposal.id, title: 'Test proposal', year: '2023',
         subject_id: subject.id, ams_subjects: { code1: ams_subject_code1.id, code2: ams_subject_code2.id },
@@ -74,9 +80,33 @@ RSpec.describe "/submit_proposals", type: :request do
         location_ids: location.id, no_latex: false, create_invite: true }
     end
 
+    let(:params1) do
+      { proposal: proposal.id, title: 'Test proposal', year: '2023',
+        subject_id: subject.id, ams_subjects: { code1: ams_subject_code1.id, code2: ams_subject_code2.id },
+        invites_attributes: invites_attributes_failure,
+        location_ids: location.id, no_latex: false, create_invite: true }
+    end
+
+    let(:proposal_type) { create(:proposal_type) }
+    let!(:proposal_form) { create(:proposal_form, proposal_type: proposal_type, status: :active) }
+    let!(:field) { create(:proposal_field, :radio_field, proposal_form: proposal_form) }
+
+    context 'with invalid invite params, as lead organizer and check for errors' do
+      before do
+        @prop = @person.proposals.first
+        field.update(proposal_form_id: @prop.proposal_form.id)
+        expect(@person.user.lead_organizer?(@prop)).to be_truthy
+        @invites_count = @prop.invites.count
+        post submit_proposals_url, params: params1.merge(proposal: @prop.id), xhr: true
+      end
+
+      it { expect(response).to have_http_status(:ok) }
+    end
+
     context 'with valid invite params, as lead organizer' do
       before do
         @prop = @person.proposals.first
+        field.update(proposal_form_id: @prop.proposal_form.id)
         expect(@person.user.lead_organizer?(@prop)).to be_truthy
         @invites_count = @prop.invites.count
         post submit_proposals_url, params: params.merge(proposal: @prop.id), xhr: true

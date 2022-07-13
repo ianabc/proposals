@@ -45,7 +45,7 @@ class SubmittedProposalsController < ApplicationController
     @proposal = Proposal.find_by(id: params[:proposal_id].to_i)
     unless @proposal.may_progress_spc?
       redirect_to versions_proposal_url(@proposal),
-                  alert: "Proposal status should be initial_review or revision_submitted_spc."
+                  alert: t('submitted_proposals.revise_proposal_editflow.alert')
       return
     end
     check_proposal_editflow_id
@@ -58,7 +58,7 @@ class SubmittedProposalsController < ApplicationController
     if @staff_discussion.update(discussion: discussion,
                                 proposal_id: @proposal.id)
       redirect_to submitted_proposal_url(@proposal),
-                  notice: "Your comment was added!"
+                  notice: t('submitted_proposals.staff_discussion.success')
     else
       redirect_to submitted_proposal_url(@proposal),
                   alert: @staff_discussion.errors.full_messages

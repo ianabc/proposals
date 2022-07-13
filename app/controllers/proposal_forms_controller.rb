@@ -51,7 +51,7 @@ class ProposalFormsController < ApplicationController
                   notice: t('proposal_forms.create.success')
     else
       redirect_to new_proposal_type_proposal_form_path,
-                  alert: "Title can't be blank"
+                  alert: t('proposal_forms.create.alert')
     end
   end
 
