@@ -336,7 +336,7 @@ RSpec.describe "/schedules", type: :request do
 
       it "calls hmc job" do
         post run_hmc_program_schedules_url, params: params
-        expect(response).to have_http_status(422)
+        expect(response).to have_http_status(200)
       end
     end
 
