@@ -3,7 +3,7 @@ class SubmittedProposalsController < ApplicationController
   before_action :authorize_user
   before_action :set_proposals, only: %i[index]
   before_action :set_proposal, except: %i[index download_csv import_reviews
-                                          reviews_booklet reviews_excel_booklet]
+                                          reviews_booklet reviews_excel_booklet download_csv_organizers_and_participants]
   before_action :template_params, only: %i[approve_decline_proposals]
   before_action :check_reviews_permissions, only: %i[import_reviews
                                                      reviews_booklet
@@ -18,6 +18,12 @@ class SubmittedProposalsController < ApplicationController
 
   def edit
     @proposal.invites.build
+  end
+
+  def download_csv_organizers_and_participants
+    @export_proposal = Proposal.find_by(id: params[:id])
+    log_activity(@export_proposal)
+    send_data Proposal.export_csv(@export_proposal), filename: "exported_organizers_and_participants.csv"
   end
 
   def download_csv
