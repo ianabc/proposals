@@ -173,11 +173,10 @@ Rails.application.routes.draw do
   mount ActionCable.server => '/cable'
 
   Rails.application.routes.draw do
-  if Rails.env.test?
-    namespace :test do
-      resource :session, only: %i[create]
+    if Rails.env.test?
+      namespace :test do
+        resource :session, only: %i[create]
+      end
     end
   end
-end
-
 end
