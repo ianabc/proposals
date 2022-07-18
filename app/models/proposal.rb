@@ -213,6 +213,33 @@ class Proposal < ApplicationRecord
      supporting_organizer_fullnames(proposal)]
   end
 
+  def self.export_csv(export_proposal)
+    CSV.generate(headers: true) do |csv|
+      csv << EXPORT_HEADERS
+      export_proposal.invites.organizer.find_each do |organizer|
+        csv << organizer_each_row(organizer)
+      end
+      export_proposal.invites.participant.find_each do |participant|
+        csv << organizer_each_row(participant)
+      end
+    end
+  end
+
+  EXPORT_HEADERS = ["First Name", "Last Name", "Email", "Affiliation", "Academic Status",
+                    "Status", "Invitation Date", "Deadline Date", "User Type"].freeze
+
+  def self.organizer_each_row(organizer)
+    [organizer.firstname, organizer.lastname, organizer.email, organizer.person.affiliation,
+     organizer.person.academic_status, organizer.status, organizer.created_at.to_date,
+     organizer.deadline_date.to_date, organizer.invited_as]
+  end
+
+  def self.participant_each_row(participant)
+    [participant.firstname, participant.lastname, participant.email, participant.person.affiliation,
+     participant.person.academic_status, participant.status, participant.created_at.to_date,
+     participant.deadline_date.to_date, participant.invited_as]
+  end
+
   def pdf_file_type(file)
     file.content_type.in?(%w[application/pdf])
   end
