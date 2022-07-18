@@ -3,7 +3,8 @@ class SubmittedProposalsController < ApplicationController
   before_action :authorize_user
   before_action :set_proposals, only: %i[index]
   before_action :set_proposal, except: %i[index download_csv import_reviews
-                                          reviews_booklet reviews_excel_booklet download_csv_organizers_and_participants]
+                                          reviews_booklet reviews_excel_booklet
+                                          download_csv_organizers_and_participants]
   before_action :template_params, only: %i[approve_decline_proposals]
   before_action :check_reviews_permissions, only: %i[import_reviews
                                                      reviews_booklet
