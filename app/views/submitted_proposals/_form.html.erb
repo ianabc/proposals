@@ -3,7 +3,7 @@
     <div class="header">
        <% if params[:action] == 'show'%>  
         <div class="d-flex flex-row-reverse float-end" >
-           <%= link_to "Edit Proposal", edit_submitted_proposal_url(@proposal) ,class:'btn btn-primary' %>
+           <%= link_to "Edit Proposal", edit_submitted_proposal_url(@proposal),class:'btn btn-primary' %>
         </div>
       <% end %>
       <h1 class="header-title">
@@ -246,6 +246,7 @@
                                   <% if @proposal.invites.participant %>
                                     <%= render partial: 'proposals/organizer', locals: { invites: @proposal.invites.participant } %>
                                   <% end %>
+                                    <p><%= link_to 'Download CSV', download_csv_organizers_and_participants_submitted_proposals_path(id: @proposal.id), method: :get, class: 'p-2 btn btn-primary'%></p>
                                 </div>
                               </div>
                               <div class="mt-4">
