@@ -4,6 +4,7 @@ require 'rails/test_help'
 require 'simplecov'
 require 'simplecov-lcov'
 require 'factory_bot_rails'
+require 'webmock/rspec'
 
 SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
 COVERAGE_FORMATTER = SimpleCov::Formatter::MultiFormatter.new([
