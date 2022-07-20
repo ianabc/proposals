@@ -2,7 +2,7 @@ class ImportJob < ApplicationJob
   queue_as :default
 
   def perform(proposal_ids, user, action)
-    @errors = ""
+    @errors = []
     proposal_ids.split(',').each do |id|
       import_proposal_reviews(id)
       log_activity(Proposal.find(id), user, action)
