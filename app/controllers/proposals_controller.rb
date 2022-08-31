@@ -25,8 +25,14 @@ class ProposalsController < ApplicationController
 
   def create
     @proposal = start_new_proposal
-    limit_of_one_per_type and return unless no_proposal?
+    current_proposal_year = @proposal.proposal_type.year
+    @same_type_proposals = current_user.person.proposals.where(proposal_type_id: @proposal.proposal_type_id)
 
+    @same_type_proposals.each do |proposal|
+      if (proposal.year == current_proposal_year || proposal.year.blank?) && !no_proposal?
+        limit_of_one_per_type and return
+      end
+    end
     if @proposal.save
       @proposal.create_organizer_role(current_user.person, organizer)
       redirect_to edit_proposal_path(@proposal), notice: "Started a new
@@ -168,7 +174,7 @@ class ProposalsController < ApplicationController
 
   def limit_of_one_per_type
     redirect_to new_proposal_path, alert: "There is a limit of one
-      #{@proposal.proposal_type.name} proposal per lead organizer.".squish
+      #{@proposal.proposal_type.name} proposal per lead organizer in one year.".squish
   end
 
   def latex_temp_file
