@@ -19,15 +19,16 @@ services:
     container_name: proposals_db
     volumes:
       - ./db/pg-init:/docker-entrypoint-initdb.d
-      - poposals_data:/var/lib/postgresql/data
+      - proposals_data:/var/lib/postgresql/data
+      - ./db/backups:/var/backups
     environment:
-      - POSTGRES_USER=postges
-      - POSTGRES_PASSWORD=
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=zzzzzzzzzzzzzzzz
       - PSQL_TRUST_LOCALNET=true
       - DB_PORT=5433
       - DB_NAME=proposals_production,proposals_development,proposals_test
       - DB_USER=propuser
-      - DB_PASS=
+      - DB_PASS=yyyyyyyyyyyyyyy
 
   redis:
     image: 'redis:6.2.6'
@@ -43,17 +44,21 @@ services:
     ports:
       - '3000:3000'
     volumes:
-      - proposals_cache:/home/app/proposals/vendor/cache
-      - proposals_cache:/home/app/proposals/node_modules
+      - ./:/home/app/proposals
+      - ./entrypoint.sh:/sbin/entrypoint.sh
+      - proposals_vendor_cache:/home/app/proposals/vendor/cache
+      - proposals_node_cache:/home/app/proposals/node_modules
     links:
       - db
       - redis
     environment:
       - DB_USER=propuser
-      - DB_PASS=
+      - DB_PASS=yyyyyyyyyyyyyyy
       - RAILS_ENV=development
       - YARN_ENV=development
       - RAILS_SERVE_STATIC_FILES=true
+      # If you are restoring from a backup these values must match the 
+      # original otherwise password hashes will mismatch and need resets
       - SECRET_KEY_BASE=
       - SECRET_TOKEN=
       - DEVISE_SECRET_KEY=
@@ -76,24 +81,27 @@ services:
       - IASM_EMAIL=iasm@example.com
       - UBCO_COORD='UBCO Program Coordinator'
       - UBCO_EMAIL=ubco@example.com
-      - EDITFLOW_API_TOKEN=
-      - EDITFLOW_API_URL=
+      - EDITFLOW_API_TOKEN=xxxxxxxxxxx
+      - EDITFLOW_API_URL=xxxxxxxxxxx
       - REDIS_URL='redis://localhost:port/0'
       - HMC_ACCESS=123
       - HMC_SERVER=hmc_host
       - HMC_PORT=2000
-      - SCHEDULE_API_KEY=
+      - SCHEDULE_API_KEY=xxxxxxxxxxx
       - WORKSHOPS_API_URL=
       - WORKSHOPS_API_KEY=
 
 
 volumes:
   proposals_data:
-    external:
-      name: "proposals_data"
-  proposals_cache:
-    external:
-      name: "proposals_cache"
+    labels:
+      proposals_data: ""
+  proposals_vendor_cache:
+    labels:
+      proposals_vendor_cache: ""
+  proposals_node_cache:
+    labels:
+      proposals_node_cache: ""
   redis_data:
-    external:
-      name: "redis_data"
+    labels:
+      redis_data: ""

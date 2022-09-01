@@ -45,6 +45,11 @@ echo
 echo "Yarn version:"
 yarn --version
 
+
+echo
+echo "Update permissions on vendor_cache"
+chown -R app:app /home/app/proposals/vendor/cache
+
 echo
 echo "Installing latest bundler..."
 /usr/local/rvm/bin/rvm-exec 2.7.4 gem install bundler
@@ -64,6 +69,7 @@ fi
 # echo
 # echo "Bundle install..."
 # su - app -c "cd /home/app/proposals; /usr/local/rvm/gems/default/bin/bundle install"
+
 
 echo
 echo "Bundle update..."
