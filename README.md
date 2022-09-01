@@ -111,4 +111,17 @@ a database dump.
    ```
 You can now try logging in to the workshops interface on `http://127.0.0.1:3000`.
 
+Depending on your account you may need to adjust your user roles, this should
+probably be done through rails, but in a pinch, you can add e.g. user ID 40 to
+the admin role via
+```bash
+$ docker-compose exec -u proposals db psql
+psql> INSERT INTO user_roles 
+    (role_id, user_id, created_at, updated_at)
+  VALUES 
+    (6, 40, current_timestamp, current_timestamp);
+psql> \q
+```
+
+
 
