@@ -20,7 +20,7 @@ services:
     volumes:
       - ./db/pg-init:/docker-entrypoint-initdb.d
       - proposals_data:/var/lib/postgresql/data
-      - ./db/backups:/var/backups
+      #- ./db/backups:/var/backups
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=zzzzzzzzzzzzzzzz
@@ -62,7 +62,6 @@ services:
       - SECRET_KEY_BASE=
       - SECRET_TOKEN=
       - DEVISE_SECRET_KEY=
-      - DEVISE_JWT_SECRET_KEY=
       - DEVISE_PEPPER=
       - DEVISE_EMAIL=webmaster@example.com
       - APPLICATION_HOST=localhost
