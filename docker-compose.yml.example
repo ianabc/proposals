@@ -19,7 +19,7 @@ services:
     container_name: proposals_db
     volumes:
       - ./db/pg-init:/docker-entrypoint-initdb.d
-      - proposals_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
       #- ./db/backups:/var/backups
     environment:
       - POSTGRES_USER=postgres
@@ -46,8 +46,8 @@ services:
     volumes:
       - ./:/home/app/proposals
       - ./entrypoint.sh:/sbin/entrypoint.sh
-      - proposals_vendor_cache:/home/app/proposals/vendor/cache
-      - proposals_node_cache:/home/app/proposals/node_modules
+      - vendor_cache:/home/app/proposals/vendor/cache
+      - node_cache:/home/app/proposals/node_modules
     links:
       - db
       - redis
