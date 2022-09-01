@@ -92,15 +92,15 @@ services:
 
 
 volumes:
-  proposals_data:
+  pgdata:
     labels:
-      proposals_data: ""
-  proposals_vendor_cache:
+      pgdata: ""
+  vendor_cache:
     labels:
-      proposals_vendor_cache: ""
-  proposals_node_cache:
+      vendor_cache: ""
+  node_cache:
     labels:
-      proposals_node_cache: ""
+      node_cache: ""
   redis_data:
     labels:
       redis_data: ""
