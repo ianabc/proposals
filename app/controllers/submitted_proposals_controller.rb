@@ -279,9 +279,9 @@ class SubmittedProposalsController < ApplicationController
     end
     return if flash[:alert].present?
 
-    response = RestClient.post 'https://ef.msp.org/api/birs/',
+    response = RestClient.post ENV.fetch('EDITFLOW_API_URL', nil),
                                { query: edit_flow_query, fileMain: File.open(@pdf_path) },
-                               { x_editflow_api_token: '4qHHBwqn6YMvHxRrmWFKtcF-h3hi9eyzlTOekEtf80E' }
+                               { x_editflow_api_token: ENV.fetch('EDITFLOW_API_TOKEN', nil) }
 
     query_response_body(response)
     Rails.logger.info { "\n\n*****************************************\n\n" }
