@@ -28,7 +28,7 @@ class ProposalsController < ApplicationController
     @same_type_proposals = current_user.person.proposals.where(proposal_type_id: @proposal.proposal_type_id)
 
     @same_type_proposals.each do |proposal|
-      if proposal.year == (Time.now.year + 2).to_s && !no_proposal?
+      if proposal.year == (Time.now.year + 2).to_s && !no_proposal? && proposal.status != 'draft' 
         limit_of_one_per_type and return
       end
     end
