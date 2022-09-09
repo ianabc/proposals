@@ -120,6 +120,7 @@ class Proposal < ApplicationRecord
     event :decision do
       transitions from: %i[decision_pending shortlisted], to: :decision_email_sent
     end
+
     event :progress_spc do
       transitions from: :revision_submitted_spc, to: :in_progress_spc
     end
@@ -361,6 +362,8 @@ class Proposal < ApplicationRecord
   end
 
   def proposal_type_check
+    return if self.revision_requested_before_review? || self.revision_submitted?
+
     prop = lead_organizer.proposals.where(proposal_type_id: proposal_type_id,
                                           year: year).where.not(status: 'draft')
 
