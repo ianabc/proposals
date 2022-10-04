@@ -235,14 +235,10 @@ class BookletPdfService
   end
 
   def check_no_latex(index = 0, count = 1)
-    if (index == 0) && (count == 1)
-      File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-        io.write(@text)
-      end
-    elsif(count > 0) && index == 0
-      File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
-        io.write(@text)
-      end
+    if index.zero? && (count == 1)
+      write_to_file
+    elsif count.positive? && index.zero?
+      write_to_file
     else
       File.open("#{Rails.root}/tmp/#{temp_file}", "a:UTF-8") do |io|
         io.write(@text)
@@ -256,5 +252,12 @@ class BookletPdfService
     @latex_infile = LatexToPdf.escape_latex(@latex_infile) if @proposal.no_latex
     @latex_text = @text
     @text = ''
+  end
+
+  private
+  def write_to_file
+    File.open("#{Rails.root}/tmp/#{temp_file}", "w:UTF-8") do |io|
+      io.write(@text)
+    end
   end
 end
